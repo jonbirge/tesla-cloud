@@ -5,10 +5,24 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Tesla Browser Links</title>
     <style>
+        :root {
+            --bg-color: #121212;
+            --text-color: #ffffff;
+            --link-bg: #1e1e1e;
+            --link-hover-bg: #333333;
+        }
+        
+        .light-mode {
+            --bg-color: #ffffff;
+            --text-color: #121212;
+            --link-bg: #e0e0e0;
+            --link-hover-bg: #cccccc;
+        }
+
         body {
             font-family: Arial, sans-serif;
-            background-color: #121212;
-            color: #ffffff;
+            background-color: var(--bg-color);
+            color: var(--text-color);
             text-align: center;
             margin: 0;
             padding: 0;
@@ -27,7 +41,7 @@
         }
         .section h2 {
             font-size: 20px;
-            border-bottom: 2px solid #ffffff;
+            border-bottom: 2px solid var(--text-color);
             padding-bottom: 5px;
             margin-bottom: 15px;
         }
@@ -41,18 +55,30 @@
         .link-list a {
             display: block;
             padding: 10px;
-            background-color: #1e1e1e;
-            color: #ffffff;
+            background-color: var(--link-bg);
+            color: var(--text-color);
             text-decoration: none;
             border-radius: 5px;
             transition: background-color 0.3s;
         }
         .link-list a:hover {
-            background-color: #333333;
+            background-color: var(--link-hover-bg);
+        }
+        .toggle-button {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            padding: 5px 10px;
+            background: var(--link-bg);
+            color: var(--text-color);
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
         }
     </style>
 </head>
 <body>
+    <button class="toggle-button" onclick="toggleMode()">Light/Dark</button>
     <div class="container">
         <h1>Tesla Browser Links</h1>
         
@@ -63,7 +89,6 @@
                 <li><a href="https://www.wsj.com" target="_blank">Wall Street Journal</a></li>
                 <li><a href="https://www.bbc.com/news" target="_blank">BBC News</a></li>
                 <li><a href="https://www.reuters.com" target="_blank">Reuters</a></li>
-                <li><a href="https://www.aljazeera.com" target="_blank">Al Jazeera</a></li>
             </ul>
         </div>
         
@@ -73,7 +98,6 @@
                 <li><a href="https://tv.youtube.com" target="_blank">YouTube TV</a></li>
                 <li><a href="https://www.amazon.com/Prime-Video" target="_blank">Amazon Prime Video</a></li>
                 <li><a href="https://www.hulu.com" target="_blank">Hulu</a></li>
-                <li><a href="https://www.crunchyroll.com" target="_blank">Crunchyroll</a></li>
                 <li><a href="https://www.pluto.tv" target="_blank">Pluto TV</a></li>
             </ul>
         </div>
@@ -89,5 +113,10 @@
             </ul>
         </div>
     </div>
+    <script>
+        function toggleMode() {
+            document.body.classList.toggle('light-mode');
+        }
+    </script>
 </body>
 </html>
