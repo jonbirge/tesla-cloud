@@ -9,20 +9,21 @@
         :root {
             --bg-color: #121212;
             --text-color: #ffffff;
-            --link-bg: #1e1e1e;
-            --link-hover-bg: #333333;
+            --link-bg: #181818;
+            --link-hover-bg: #2a2a2a;
+            --separator-color: #666666;
         }
         .light-mode {
             --bg-color: #ffffff;
             --text-color: #121212;
-            --link-bg: #e0e0e0;
-            --link-hover-bg: #cccccc;
+            --link-bg: #f5f5f5;
+            --link-hover-bg: #dcdcdc;
+            --separator-color: #cccccc;
         }
         body {
             font-family: 'Inter', sans-serif;
             background-color: var(--bg-color);
             color: var(--text-color);
-            text-align: center;
             margin: 0;
             padding: 0;
         }
@@ -31,40 +32,47 @@
             margin: 20px auto;
             padding: 20px;
         }
-        h1 {
-            font-size: 24px;
-            margin-bottom: 5px;
+        h1 { font-size: 24px; margin-bottom: 5px; text-align: left;
         }
         .subtitle {
             font-size: 12px;
             color: var(--text-color);
             opacity: 0.7;
             margin-bottom: 20px;
+            text-align: left; padding-left: 0;
         }
         .section {
             margin-bottom: 30px;
+            padding-bottom: 10px;
+        }
+        .section:last-child {
+            border-bottom: none;
         }
         .section h2 {
-            font-size: 20px;
-            border-bottom: 1px solid var(--text-color);
-            padding-bottom: 5px;
-            margin-bottom: 15px;
+            font-size: 16px;
+            font-weight: bold;
+            text-align: left;
+            margin: 20px 0 10px 0;
         }
         .link-list {
             list-style: none;
             padding: 0;
         }
         .link-list li {
-            margin: 10px 0;
+            margin: 8px 0;
         }
         .link-list a {
             display: block;
-            padding: 10px;
+            padding: 8px;
             background-color: var(--link-bg);
             color: var(--text-color);
             text-decoration: none;
             border-radius: 5px;
             transition: background-color 0.3s;
+            width: 60%;
+            margin-left: 0;
+            padding-left: 10px;
+            text-align: left;
         }
         .link-list a:hover {
             background-color: var(--link-hover-bg);
@@ -111,16 +119,7 @@
                 <li><a href="https://www.weather.com" target="_blank">Weather.com</a></li>
             </ul>
         </div>
-        
-        <div class="section">
-            <h2>TV & Movies</h2>
-            <ul class="link-list">
-                <li><a href="https://tv.youtube.com" target="_blank">YouTube TV</a></li>
-                <li><a href="https://www.amazon.com/Prime-Video" target="_blank">Amazon Prime Video</a></li>
-                <li><a href="https://www.pluto.tv" target="_blank">Pluto TV</a></li>
-            </ul>
-        </div>
-        
+
         <div class="section">
             <h2>Learning & Reference</h2>
             <ul class="link-list">
@@ -136,7 +135,7 @@
                 <li><a href="https://neal.fun" target="_blank">Neal.fun (Interactive Experiments)</a></li>
                 <li><a href="https://www.sporcle.com" target="_blank">Sporcle (Trivia Games)</a></li>
                 <li><a href="https://poki.com" target="_blank">Poki (Casual Games)</a></li>
-                <li><a href="https://nyc.birgefuller.com/Test/Mandelbrot/" target="_blank">Mandelbrot Fractal Explorer</a></li>
+                <li><a href="https://nyc.birgefuller.com/Test/Mandelbrot/" target="_blank">Mandelbrot Explorer</a></li>
             </ul>
         </div>
     </div>
