@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Tesla Browser Links</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
     <style>
         :root {
             --bg-color: #121212;
@@ -11,16 +12,14 @@
             --link-bg: #1e1e1e;
             --link-hover-bg: #333333;
         }
-        
         .light-mode {
             --bg-color: #ffffff;
             --text-color: #121212;
             --link-bg: #e0e0e0;
             --link-hover-bg: #cccccc;
         }
-
         body {
-            font-family: Arial, sans-serif;
+            font-family: 'Inter', sans-serif;
             background-color: var(--bg-color);
             color: var(--text-color);
             text-align: center;
@@ -34,6 +33,12 @@
         }
         h1 {
             font-size: 24px;
+            margin-bottom: 5px;
+        }
+        .subtitle {
+            font-size: 12px;
+            color: var(--text-color);
+            opacity: 0.7;
             margin-bottom: 20px;
         }
         .section {
@@ -78,9 +83,10 @@
     </style>
 </head>
 <body>
-    <button class="toggle-button" onclick="toggleMode()">Light/Dark</button>
+    <button class="toggle-button" onclick="toggleMode()">Dark/Light</button>
     <div class="container">
         <h1>Tesla Browser Links</h1>
+        <div class="subtitle">These are links intended to be useful in a Tesla browser to supplement the apps available in the car.</div>
         
         <div class="section">
             <h2>News</h2>
