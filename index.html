@@ -140,11 +140,81 @@
             border-radius: 5px;
             cursor: pointer;
         }
+
+        /* Toggle Button Styles */
+        .toggle-container {
+            position: fixed;
+            top: 10px;
+            right: 10px;
+            display: flex;
+            align-items: center;
+        }
+
+        .toggle-label {
+            margin-right: 10px;
+            color: var(--text-color);
+            font-size: 16px;
+        }
+
+        .toggle-switch {
+            position: relative;
+            display: inline-block;
+            width: 60px;
+            height: 34px;
+        }
+
+        .toggle-switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .toggle-slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #ccc;
+            transition: .4s;
+            border-radius: 34px;
+        }
+
+        .toggle-slider:before {
+            position: absolute;
+            content: "";
+            height: 26px;
+            width: 26px;
+            left: 4px;
+            bottom: 4px;
+            background-color: white;
+            transition: .4s;
+            border-radius: 50%;
+        }
+
+        input:checked + .toggle-slider {
+            background-color: #2196F3;
+        }
+
+        input:focus + .toggle-slider {
+            box-shadow: 0 0 1px #2196F3;
+        }
+
+        input:checked + .toggle-slider:before {
+            transform: translateX(26px);
+        }
     </style>
 </head>
 
 <body>
-    <button class="toggle-button" onclick="toggleMode()">Dark/Light</button>
+    <div class="toggle-container">
+        <label class="toggle-label">Dark Mode</label>
+        <label class="toggle-switch">
+            <input type="checkbox" id="darkModeToggle" onchange="toggleMode()">
+            <span class="toggle-slider"></span>
+        </label>
+    </div>
 
     <div class="container">
         <div class="section-buttons">
@@ -158,7 +228,7 @@
         </div>
 
         <div class="sections">
-            <h1>Teslas.Cloud</h1>
+            <h1>teslas.cloud</h1>
             <p class="subtitle">A collection of useful links for Tesla owners</p>
 
             <div id="news" class="section">
