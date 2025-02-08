@@ -16,6 +16,17 @@
             --separator-color: #666666;
         }
 
+        /* Dark mode styles */
+        body.dark-mode {
+            --bg-color: #121212; /* Dark background */
+            --text-color: #ffffff; /* Light text */
+            --link-bg: #333333; /* Darker link background */
+            --link-hover-bg: #555555;
+            --active-button-bg: #333333;
+            --active-button-text: #ffffff;
+            --separator-color: #999999;
+        }
+
         /* Apply Inter font to all elements */
         * {
             font-family: 'Inter', sans-serif !important;
@@ -138,7 +149,7 @@
 </head>
 <body>
     <button class="toggle-button" onclick="toggleMode()">Dark/Light</button>
-    
+
     <div class="container">
         <div class="section-buttons">
             <button class="section-button active" onclick="showSection('news')">News</button>
@@ -202,7 +213,7 @@
     </div>
     <script>
         function toggleMode() {
-            document.body.classList.toggle('light-mode');
+            document.body.classList.toggle('dark-mode');
         }
 
         function showSection(sectionId) {
