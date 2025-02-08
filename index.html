@@ -97,10 +97,6 @@
             color: var(--active-button-text);
         }
 
-        .section h2 {
-            display: none; /* Hide the section titles */
-        }
-
         .link-list {
             list-style: none;
             padding: 0;
@@ -157,11 +153,13 @@
             <button class="section-button" onclick="showSection('reference')">Reference</button>
             <button class="section-button" onclick="showSection('learning')">Learning</button>
             <button class="section-button" onclick="showSection('toys')">Toys</button>
+            <button class="section-button" onclick="showSection('connectivity')">Connectivity</button>
+            <button class="section-button" onclick="showSection('about')">About</button>
         </div>
 
         <div class="sections">
             <h1>Teslas.Cloud</h1>
-            <p class="subtitle">A collection of useful links for Tesla owners.</p>
+            <p class="subtitle">A collection of useful links for Tesla owners</p>
 
             <div id="news" class="section">
                 <ul class="link-list">
@@ -175,7 +173,6 @@
             </div>
 
             <div id="navigation" class="section">
-                <h2>Navigation</h2>
                 <ul class="link-list">
                     <li><a href="https://www.plugshare.com" target="_blank">PlugShare</a></li>
                     <li><a href="https://earth.google.com" target="_blank">Google Earth</a></li>
@@ -185,7 +182,6 @@
             </div>
 
             <div id="reference" class="section">
-                <h2>Learning & Reference</h2>
                 <ul class="link-list">
                     <li><a href="https://www.wikipedia.org" target="_blank">Wikipedia</a></li>
                     <li><a href="https://www.weather.com" target="_blank">Weather.com</a></li>
@@ -194,7 +190,6 @@
             </div>
 
             <div id="learning" class="section">
-                <h2>Learning</h2>
                 <ul class="link-list">
                     <li><a href="https://www.wikipedia.org" target="_blank">Wikipedia</a></li>
                     <li><a href="https://www.khanacademy.org" target="_blank">Khan Academy</a></li>
@@ -203,7 +198,6 @@
             </div>
 
             <div id="toys" class="section">
-                <h2>Toys</h2>
                 <ul class="link-list">
                     <li><a href="https://neal.fun" target="_blank">Neal.fun (Interactive Experiments)</a></li>
                     <li><a href="https://www.sporcle.com" target="_blank">Sporcle (Trivia Games)</a></li>
@@ -211,8 +205,22 @@
                     <li><a href="https://nyc.birgefuller.com/Test/Mandelbrot/" target="_blank">Mandelbrot Explorer</a></li>
                 </ul>
             </div>
+
+            <div id="connectivity" class="section">
+                <ul class="link-list">
+                    <li><a href="https://www.speedtest.net" target="_blank">SpeedTest</a></li>
+                    <li><a href="https://nyc.birgefuller.com" target="_blank">IP Intel</a></li>
+                    <li><a href="https://www.myip.net" target="_blank">MyIP</a></li>
+                </ul>
+            </div>
+
+            <div id="about" class="section">
+                <p>This service was created by <a href="https://www.mit.edu/~birge" target="_blank">Jonathan Birge</a> as a personal project. It is not affiliated with Tesla, Inc.</p>
+                <p>For questions or feedback, please email <a href="mailto:admin@teslas.cloud">admin@teslas.cloud</a>.
+            </div>
         </div>
     </div>
+
     <script>
         function toggleMode() {
             document.body.classList.toggle('dark-mode');
@@ -248,4 +256,5 @@
         showSection('news');
     </script>
 </body>
+
 </html>
