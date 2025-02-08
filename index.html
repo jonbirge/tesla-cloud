@@ -26,15 +26,20 @@
             color: var(--text-color);
             margin: 0;
             padding: 0;
+            text-align: left; /* Align text to the left */
         }
 
         .container {
-            max-width: 800px; /* Increased width for two-column layout */
-            margin: 20px auto;
+            /* max-width: 800px; Increased width for two-column layout */
+            /* margin: 20px auto; */
+            margin-left: 20px; /* Add a left margin */
             padding: 20px;
             display: grid;
             grid-template-columns: 200px 1fr; /* Two columns: buttons and links */
             gap: 20px;
+            text-align: left; /* Align text to the left */
+            max-width: none; /* Remove max-width to allow full width */
+            width: 95%; /* Set width to 95% to prevent touching the edge */
         }
 
         h1 { font-size: 24px; margin-bottom: 5px; text-align: left; }
@@ -93,7 +98,7 @@
         }
 
         .link-list a {
-            display: block;
+            display: inline-block; /* Ensure width is respected */
             padding: 8px;
             background-color: var(--link-bg);
             color: var(--text-color);
@@ -101,6 +106,7 @@
             border-radius: 5px;
             transition: background-color 0.3s;
             text-align: center;
+            width: 33.33%; /* Make the buttons 1/3 of the width */
         }
 
         .link-list a:hover {
@@ -118,9 +124,9 @@
         }
 
         .toggle-button {
-            position: absolute;
+            position: fixed;
             top: 10px;
-            left: 10px;
+            right: 10px;
             padding: 5px 10px;
             background: var(--link-bg);
             color: var(--text-color);
@@ -132,11 +138,13 @@
 </head>
 <body>
     <button class="toggle-button" onclick="toggleMode()">Dark/Light</button>
+    
     <div class="container">
         <div class="section-buttons">
             <button class="section-button active" onclick="showSection('news')">News</button>
             <button class="section-button" onclick="showSection('navigation')">Navigation</button>
-            <button class="section-button" onclick="showSection('learning')">Learning & Reference</button>
+            <button class="section-button" onclick="showSection('reference')">Reference</button>
+            <button class="section-button" onclick="showSection('learning')">Learning</button>
             <button class="section-button" onclick="showSection('toys')">Toys</button>
         </div>
 
@@ -159,14 +167,21 @@
                     <li><a href="https://www.plugshare.com" target="_blank">PlugShare</a></li>
                     <li><a href="https://earth.google.com" target="_blank">Google Earth</a></li>
                     <li><a href="https://abetterrouteplanner.com" target="_blank">A Better Route Planner</a></li>
-                    <li><a href="https://www.yelp.com" target="_blank">Yelp</a></li>
                     <li><a href="https://www.openstreetmap.org" target="_blank">OpenStreetMap</a></li>
+                </ul>
+            </div>
+
+            <div id="reference" class="section">
+                <h2>Learning & Reference</h2>
+                <ul class="link-list">
+                    <li><a href="https://www.wikipedia.org" target="_blank">Wikipedia</a></li>
                     <li><a href="https://www.weather.com" target="_blank">Weather.com</a></li>
+                    <li><a href="https://www.yelp.com" target="_blank">Yelp</a></li>
                 </ul>
             </div>
 
             <div id="learning" class="section">
-                <h2>Learning & Reference</h2>
+                <h2>Learning</h2>
                 <ul class="link-list">
                     <li><a href="https://www.wikipedia.org" target="_blank">Wikipedia</a></li>
                     <li><a href="https://www.khanacademy.org" target="_blank">Khan Academy</a></li>
