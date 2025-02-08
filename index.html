@@ -16,8 +16,12 @@
             --separator-color: #666666;
         }
 
+        /* Apply Inter font to all elements */
+        * {
+            font-family: 'Inter', sans-serif !important;
+        }
+
         body {
-            font-family: 'Inter', sans-serif;
             background-color: var(--bg-color);
             color: var(--text-color);
             margin: 0;
@@ -47,6 +51,7 @@
         .section-buttons {
             display: flex;
             flex-direction: column;
+            margin-top: 0; /* Align with the top of the section */
         }
 
         .section-button {
@@ -80,6 +85,7 @@
         .link-list {
             list-style: none;
             padding: 0;
+            margin-top: 0; /* remove top margin */
         }
 
         .link-list li {
