@@ -8,27 +8,27 @@
     <style>
         :root {
             --bg-color: #dfdcdc; /* Very light gray */
-            --text-color: #838383; /* Dark gray */
-            --link-bg: #d0cccc; /* Slightly darker gray */
-            --link-hover-bg: #c0c0c0;
-            --active-button-bg: #ffffff;
-            --active-button-text: #000000;
+            --text-color: #a79595; /* Dark gray */
+            --active-section-bg: #ffffff;
+            --active-section-text: #000000;
             --separator-color: #666666;
-            --link-color: #111111;
-            --blue-link: #0077ff;
+            --button-text: #111111;
+            --button-bg: #d0cccc; /* Slightly darker gray */
+            --button-hover-bg: #c0c0c0;
+            --tesla-blue: #0077ff;
         }
 
         /* Dark mode styles */
         body.dark-mode {
             --bg-color: #121212; /* Dark background */
             --text-color: #ffffff; /* Light text */
-            --link-bg: #333333; /* Darker link background */
-            --link-hover-bg: #555555;
-            --active-button-bg: #333333;
-            --active-button-text: #ffffff;
+            --active-section-bg: #333333;
+            --active-section-text: #ffffff;
             --separator-color: #999999;
-            --link-color: #d6d6d6;
-            --blue-link: #0055dd;
+            --button-text: #d6d6d6;
+             --button-bg: #333333; /* Darker link background */
+            --button-hover-bg: #555555;
+            --tesla-blue: #0055dd;
         }
 
         /* Apply Inter font to all elements */
@@ -47,8 +47,16 @@
         }
 
         a {
-            color: var(--blue-link);
+            color: var(--tesla-blue);
             text-decoration: none;
+        }
+
+        h1 {
+            font-size: 22px;
+            margin-bottom: 15px;
+            text-align: left;
+            margin-top: 0px;
+            font-weight: 600;
         }
 
         .container {
@@ -61,15 +69,6 @@
             text-align: left; /* Align text to the left */
             max-width: none; /* Remove max-width to allow full width */
             width: 95%; /* Set width to 95% to prevent touching the edge */
-        }
-
-        h1 {
-            font-size: 24px;
-            margin-bottom: 0px;
-            text-align: left;
-            margin-top: 0px;
-            font-weight: 600;
-            color: var(--active-button-text);
         }
 
         .subtitle {
@@ -89,7 +88,7 @@
         }
 
         .section-button {
-            padding: 10px 15px;
+            padding: 15px 15px;
             background-color: transparent;
             color: var(--text-color);
             border: none;
@@ -98,13 +97,13 @@
             text-align: left;
             margin-bottom: 5px;
             transition: background-color 0.3s, color 0.3s;
-            font-size: 24px; /* Larger font size */
+            font-size: 22px; /* Larger font size */
             font-weight: 600; /* Make the text bold */
         }
 
         .section-button.active {
-            background-color: var(--active-button-bg);
-            color: var(--active-button-text);
+            background-color: var(--active-section-bg);
+            color: var(--active-section-text);
         }
 
         .link-list {
@@ -119,9 +118,9 @@
 
         .link-list a {
             display: inline-block; /* Ensure width is respected */
-            padding: 12px;
-            background-color: var(--link-bg);
-            color: var(--link-color);
+            padding: 18px;
+            background-color: var(--button-bg);
+            color: var(--button-text);
             text-decoration: none;
             border-radius: 5px;
             transition: background-color 0.3s;
@@ -131,7 +130,7 @@
         }
 
         .link-list a:hover {
-            background-color: var(--link-hover-bg);
+            background-color: var(--button-hover-bg);
         }
 
         /* Initially hide all sections */
@@ -144,7 +143,7 @@
             top: 10px;
             right: 10px;
             padding: 5px 10px;
-            background: var(--link-bg);
+            background: var(--button-bg);
             color: var(--text-color);
             border: none;
             border-radius: 5px;
