@@ -12,7 +12,7 @@
             --active-section-bg: #ffffff;
             --active-section-text: #615454;
             --separator-color: #666666;
-            --button-text: #504747;
+            --button-text: #615454;
             --button-bg: #d0cccc; /* Slightly darker gray */
             --button-hover-bg: #c3c0c0;
             --tesla-blue: #0077ff;
@@ -21,14 +21,14 @@
         /* Dark mode styles */
         body.dark-mode {
             --bg-color: #121212; /* Dark background */
-            --text-color: #ffffff; /* Light text */
+            --text-color: #999999; /* Light text */
             --active-section-bg: #333333;
             --active-section-text: #ffffff;
             --separator-color: #999999;
             --button-text: #d6d6d6;
-             --button-bg: #333333; /* Darker link background */
+            --button-bg: #333333; /* Darker link background */
             --button-hover-bg: #555555;
-            --tesla-blue: #0055dd;
+            --tesla-blue: #0077ff;
         }
 
         /* Apply Inter font to all elements */
@@ -153,7 +153,6 @@
             right: 10px;
             padding: 5px 10px;
             background: var(--button-bg);
-            color: var(--text-color);
             border: none;
             border-radius: 5px;
             cursor: pointer;
@@ -170,7 +169,7 @@
 
         .toggle-label {
             margin-right: 10px;
-            color: var(--text-color);
+            color: var(--active-section-text);
             font-size: 16px;
         }
 
@@ -250,48 +249,48 @@
             <div id="news" class="section">
                 <h2>Links</h2>
                 <ul class="link-list">
-                    <li><a href="https://www.nytimes.com" target="_blank">New York Times</a></li>
-                    <li><a href="https://www.wsj.com" target="_blank">Wall Street Journal</a></li>
-                    <li><a href="https://www.bbc.com/news" target="_blank">BBC News</a></li>
-                    <li><a href="https://electrek.co" target="_blank">Electrek (Tesla and EV news)</a></li>
-                    <li><a href="https://insideevs.com" target="_blank">InsideEVs (EV industry news)</a></li>
-                    <li><a href="https://www.notateslaapp.com" target="_blank">Not a Tesla App (Tesla software updates)</a></li>
+                    <li><a href="https://www.nytimes.com">New York Times</a></li>
+                    <li><a href="https://www.wsj.com">Wall Street Journal</a></li>
+                    <li><a href="https://www.bbc.com/news">BBC News</a></li>
+                    <li><a href="https://electrek.co">Electrek (Tesla and EV news)</a></li>
+                    <li><a href="https://insideevs.com">InsideEVs (EV industry news)</a></li>
+                    <li><a href="https://www.notateslaapp.com">Not a Tesla App (Tesla software updates)</a></li>
                 </ul>
             </div>
 
             <div id="navigation" class="section">
                 <h2>Links</h2>
                 <ul class="link-list">
-                    <li><a href="https://www.plugshare.com" target="_blank">PlugShare</a></li>
-                    <li><a href="https://earth.google.com" target="_blank">Google Earth</a></li>
-                    <li><a href="https://abetterrouteplanner.com" target="_blank">A Better Route Planner</a></li>
-                    <li><a href="https://www.openstreetmap.org" target="_blank">OpenStreetMap</a></li>
+                    <li><a href="https://www.plugshare.com">PlugShare</a></li>
+                    <li><a href="https://earth.google.com">Google Earth</a></li>
+                    <li><a href="https://abetterrouteplanner.com">A Better Route Planner</a></li>
+                    <li><a href="https://www.openstreetmap.org">OpenStreetMap</a></li>
                 </ul>
             </div>
 
             <div id="reference" class="section">
                 <h2>Links</h2>
                 <ul class="link-list">
-                    <li><a href="https://www.wikipedia.org" target="_blank">Wikipedia</a></li>
-                    <li><a href="https://www.weather.com" target="_blank">Weather.com</a></li>
-                    <li><a href="https://www.yelp.com" target="_blank">Yelp</a></li>
+                    <li><a href="https://www.wikipedia.org">Wikipedia</a></li>
+                    <li><a href="https://www.weather.com">Weather.com</a></li>
+                    <li><a href="https://www.yelp.com">Yelp</a></li>
                 </ul>
             </div>
 
             <div id="learning" class="section">
                 <h2>Links</h2>
                 <ul class="link-list">
-                    <li><a href="https://www.wikipedia.org" target="_blank">Wikipedia</a></li>
-                    <li><a href="https://www.khanacademy.org" target="_blank">Khan Academy</a></li>
-                    <li><a href="https://www.coursera.org" target="_blank">Coursera</a></li>
+                    <li><a href="https://www.wikipedia.org">Wikipedia</a></li>
+                    <li><a href="https://www.khanacademy.org">Khan Academy</a></li>
+                    <li><a href="https://www.coursera.org">Coursera</a></li>
                 </ul>
             </div>
 
             <div id="toys" class="section">
                 <h2>Links</h2>
                 <ul class="link-list">
-                    <li><a href="https://neal.fun" target="_blank">Neal.fun (Interactive Experiments)</a></li>
-                    <li><a href="https://poki.com" target="_blank">Poki (Casual Games)</a></li>
+                    <li><a href="https://neal.fun">Neal.fun (Interactive Experiments)</a></li>
+                    <li><a href="https://poki.com">Poki (Casual Games)</a></li>
                     <li><a href="https://nyc.birgefuller.com/Mandelbrot/">Mandelbrot Explorer</a></li>
                     <li><a href="https://nyc.birgefuller.com/HP/">RPN Calculator</a></li>
                 </ul>
@@ -300,17 +299,17 @@
             <div id="connectivity" class="section">
                 <h2>Links</h2>
                 <ul class="link-list">
-                    <li><a href="https://www.speedtest.net" target="_blank">SpeedTest</a></li>
-                    <li><a href="https://nyc.birgefuller.com/logs/intel.php" target="_blank">IP Intel</a></li>
-                    <li><a href="https://www.myip.net" target="_blank">MyIP</a></li>
+                    <li><a href="https://www.speedtest.net">SpeedTest</a></li>
+                    <li><a href="https://nyc.birgefuller.com/logs/intel.php">IP Intel</a></li>
+                    <li><a href="https://www.myip.net">MyIP</a></li>
                 </ul>
             </div>
 
             <div id="about" class="section">
                 <h2>About...</h2>
-                <p>This service was created by <a href="https://www.mit.edu/~birge" target="_blank">Jonathan Birge</a> as a personal project. It is not affiliated with Tesla, Inc.</p>
-                <p>For questions or feedback, please email <a href="mailto:admin@teslas.cloud">admin@teslas.cloud</a>.
+                <p>This service was created by <a href="https://www.mit.edu/~birge">Jonathan Birge</a> as a personal project. It is not affiliated with Tesla, Inc.</p>
                 <p>If there turns out to be any interest in this, future versions may include things like inline weather information and maps, local links based on your current location, and customization per user.</p>
+                <p>For questions or feedback, please email <a href="mailto:admin@teslas.cloud">admin@teslas.cloud</a>.
             </div>
         </div>
     </div>
