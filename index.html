@@ -7,14 +7,15 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
         :root {
-            --bg-color: #f0f0f0; /* Very light gray */
+            --bg-color: #dfdcdc; /* Very light gray */
             --text-color: #838383; /* Dark gray */
-            --link-bg: #dddddd; /* Slightly darker gray */
-            --link-hover-bg: #cccccc;
+            --link-bg: #d0cccc; /* Slightly darker gray */
+            --link-hover-bg: #c0c0c0;
             --active-button-bg: #ffffff;
             --active-button-text: #000000;
             --separator-color: #666666;
-            --link-color: #3b3b3b;
+            --link-color: #111111;
+            --blue-link: #0077ff;
         }
 
         /* Dark mode styles */
@@ -27,6 +28,7 @@
             --active-button-text: #ffffff;
             --separator-color: #999999;
             --link-color: #d6d6d6;
+            --blue-link: #0055dd;
         }
 
         /* Apply Inter font to all elements */
@@ -40,6 +42,13 @@
             margin: 0;
             padding: 0;
             text-align: left; /* Align text to the left */
+            font-weight: 600;
+            font-size: 18px;
+        }
+
+        a {
+            color: var(--blue-link);
+            text-decoration: none;
         }
 
         .container {
@@ -47,27 +56,28 @@
             margin-top: 20px; /* Add a top margin */
             padding: 20px;
             display: grid;
-            grid-template-columns: 200px 1fr; /* Two columns: buttons and links */
-            gap: 20px;
+            grid-template-columns: 220px 1fr; /* Two columns: buttons and links */
+            gap: 50px;
             text-align: left; /* Align text to the left */
             max-width: none; /* Remove max-width to allow full width */
             width: 95%; /* Set width to 95% to prevent touching the edge */
         }
 
         h1 {
-            font-size: 28px;
+            font-size: 24px;
             margin-bottom: 0px;
             text-align: left;
             margin-top: 0px;
             font-weight: 600;
+            color: var(--active-button-text);
         }
 
         .subtitle {
-            font-size: 14px;
+            font-size: 16px;
             color: var(--text-color);
             opacity: 0.7;
             margin-bottom: 20px;
-            margin-top: 5px;
+            margin-top: 0px;
             text-align: left;
             padding-left: 0;
         }
@@ -88,7 +98,7 @@
             text-align: left;
             margin-bottom: 5px;
             transition: background-color 0.3s, color 0.3s;
-            font-size: 18px; /* Larger font size */
+            font-size: 24px; /* Larger font size */
             font-weight: 600; /* Make the text bold */
         }
 
@@ -116,8 +126,8 @@
             border-radius: 5px;
             transition: background-color 0.3s;
             text-align: center;
-            width: 33.33%; /* Make the buttons 1/3 of the width */
-            font-weight: 500;
+            width: 33%; /* Make the buttons 1/3 of the width */
+            font-weight: 600;
         }
 
         .link-list a:hover {
