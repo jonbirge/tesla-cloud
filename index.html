@@ -3,27 +3,26 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Teslas.Cloud</title>
+    <title>teslas.cloud</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
         :root {
             --bg-color: #edecec; /* Very light gray */
             --text-color: #a89f9f; /* Dark gray */
             --active-section-bg: #ffffff;
-            --active-section-text: #615454;
             --separator-color: #666666;
             --button-text: #615454;
-            --button-bg: #d0cccc; /* Slightly darker gray */
-            --button-hover-bg: #c3c0c0;
+            --button-bg: #d6d3d3; /* Slightly darker gray */
+            --button-hover-bg: #f3f3f3;
             --tesla-blue: #0077ff;
+            --button-radius: 10px;
         }
 
         /* Dark mode styles */
         body.dark-mode {
             --bg-color: #121212; /* Dark background */
-            --text-color: #999999; /* Light text */
+            --text-color: #686868; /* Light text */
             --active-section-bg: #333333;
-            --active-section-text: #ffffff;
             --separator-color: #999999;
             --button-text: #d6d6d6;
             --button-bg: #333333; /* Darker link background */
@@ -65,7 +64,7 @@
             margin-top: 0px;
             font-weight: 650;
             font-size: 18pt;
-            color: var(--active-section-text);
+            color: var(--button-text);
         }
 
         .container {
@@ -73,21 +72,11 @@
             margin-top: 20px; /* Add a top margin */
             padding: 20px;
             display: grid;
-            grid-template-columns: 220px 1fr; /* Two columns: buttons and links */
-            gap: 50px;
+            grid-template-columns: 240px 1fr; /* Two columns: buttons and links */
+            gap: 60px;
             text-align: left; /* Align text to the left */
             max-width: none; /* Remove max-width to allow full width */
             width: 95%; /* Set width to 95% to prevent touching the edge */
-        }
-
-        .subtitle {
-            font-size: 14pt;
-            color: var(--text-color);
-            opacity: 0.7;
-            margin-bottom: 20px;
-            margin-top: 0px;
-            text-align: left;
-            padding-left: 0;
         }
 
         .section-buttons {
@@ -97,11 +86,11 @@
         }
 
         .section-button {
-            padding: 15px 15px;
+            padding: 16px 30px;
             background-color: transparent;
             color: var(--text-color);
             border: none;
-            border-radius: 5px;
+            border-radius: var(--button-radius);
             cursor: pointer;
             text-align: left;
             margin-bottom: 5px;
@@ -112,7 +101,7 @@
 
         .section-button.active {
             background-color: var(--active-section-bg);
-            color: var(--active-section-text);
+            color: var(--button-text);
         }
 
         .link-list {
@@ -127,11 +116,11 @@
 
         .link-list a {
             display: inline-block; /* Ensure width is respected */
-            padding: 18px;
+            padding: 24px;
             background-color: var(--button-bg);
             color: var(--button-text);
             text-decoration: none;
-            border-radius: 5px;
+            border-radius: var(--button-radius);
             transition: background-color 0.3s;
             text-align: center;
             width: 33%; /* Make the buttons 1/3 of the width */
