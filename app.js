@@ -1,6 +1,6 @@
 let lastUpdate = 0;
-let latitude = null;
-let longitude = null;
+let lat = null;
+let long = null;
 let sunrise = null;
 let sunset = null;
 
@@ -12,23 +12,25 @@ function toggleMode() {
 async function updateLocation() {
     if (navigator.geolocation) {
         navigator.geolocation.getCurrentPosition(async (position) => {
-            latitude = position.coords.latitude;
-            longitude = position.coords.longitude;
-            console.log(`Location updated: ${latitude}, ${longitude}`);
+            lat = position.coords.latitude;
+            long = position.coords.longitude;
+            console.log(`Location updated: ${lat}, ${long}`);
 
             // Update location display
-            document.getElementById('latitude').innerText = latitude.toFixed(2);
-            document.getElementById('longitude').innerText = longitude.toFixed(2);
+            document.getElementById('latitude').innerText = lat.toFixed(4) + '°';
+            document.getElementById('longitude').innerText = long.toFixed(4) + '°';
 
             // Fetch city data
-            fetchCityData(latitude, longitude).then(cityData => {
-                document.getElementById('city').innerText = cityData.city || 'N/A';
+            fetchCityData(lat, long).then(cityData => {
+                document.getElementById('city').innerText =
+                    (cityData.locality || 'N/A') + ', ' +
+                    (cityData.principalSubdivision || 'N/A');
             }).catch(error => {
                 console.error('Error fetching city data:', error);
             });
 
             // Fetch sun data
-            fetchSunData(latitude, longitude).then(sunData => {
+            fetchSunData(lat, long).then(sunData => {
                 sunrise = sunData.results.sunrise;
                 sunset = sunData.results.sunset;
                 document.getElementById('sunrise').innerText = new Date(sunrise).toLocaleTimeString();
@@ -56,7 +58,7 @@ async function fetchSunData(latitude, longitude) {
 }
 
 function applyAutoDarkMode() {
-    if (latitude !== null && longitude !== null) {
+    if (lat !== null && long !== null) {
         const now = new Date();
         const currentTime = now.getTime();
         const sunriseTime = new Date(sunrise).getTime();
