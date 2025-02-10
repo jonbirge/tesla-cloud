@@ -126,7 +126,7 @@ hr {
     border-radius: var(--button-radius);
     transition: background-color 0.3s;
     text-align: center;
-    width: 30%; /* Make the buttons 1/3 of the width */
+    width: 280px; /* Make the buttons 1/3 of the width */
     font-weight: 600;
 }
 
