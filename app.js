@@ -3,6 +3,9 @@ function toggleMode() {
 }
 
 function showSection(sectionId) {
+    // Log the clicked section
+    console.log(`Showing section: ${sectionId}`);
+
     // Hide all sections
     const sections = document.querySelectorAll('.section');
     sections.forEach(section => {
@@ -26,7 +29,27 @@ function showSection(sectionId) {
     if (button) {
         button.classList.add('active');
     }
+
+    // Handle special cases
+    if (sectionId === 'connectivity') {
+        updateConnectivitySection();
+    }
+}
+
+// Dynamically update IP data in 'Connectivity' section from data returned by ipinfo.php
+function updateConnectivitySection() {
+    console.log('Updating connectivity section...');
+    fetch('ipinfo.php')
+        .then(response => response.json())
+        .then(data => {
+            // document.getElementById('ip').innerText = data.ip;
+            document.getElementById('rdns').innerText = data.reverse;
+            document.getElementById('location').innerText = `${data.city}, ${data.region}, ${data.country}`;
+            document.getElementById('isp').innerText = data.isp;
+            
+        });
 }
 
 // Show the first section by default
-showSection('news');
+// showSection('news');
+showSection('about');
