@@ -1,3 +1,5 @@
+let lastUpdate = 0;
+
 function toggleMode() {
     document.body.classList.toggle('dark-mode');
 }
@@ -32,8 +34,14 @@ function showSection(sectionId) {
 
     // Handle special cases
     if (sectionId === 'connectivity') {
-        console.log('Updating connectivity section...');
-        updateConnectionInfo();
+        const now = Date.now();
+        if (now - lastUpdate > 60000) { // 60 seconds
+            console.log('Updating connectivity section...');
+            updateConnectionInfo();
+            lastUpdate = now;
+        } else {
+            console.log('Skipping update, too soon...');
+        }
     }
 }
 
