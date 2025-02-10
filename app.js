@@ -3,6 +3,7 @@ let lat = null;
 let long = null;
 let sunrise = null;
 let sunset = null;
+let moonPhaseData = null;
 
 function toggleMode() {
     document.body.classList.toggle('dark-mode');
@@ -49,20 +50,38 @@ function fetchCityData(lat, long) {
 }
 
 function fetchSunData(lat, long) {
-    fetch(`https://api.sunrise-sunset.org/json?lat=${lat}&lng=${long}&formatted=0`)
-        .then(response => response.json())
-        .then(sunData => {
+    Promise.all([
+        fetch(`https://api.sunrise-sunset.org/json?lat=${lat}&lng=${long}&formatted=0`),
+        fetch(`https://api.farmsense.net/v1/moonphases/?d=${Math.floor(Date.now() / 1000)}`)
+    ])
+        .then(([sunResponse, moonResponse]) => Promise.all([sunResponse.json(), moonResponse.json()]))
+        .then(([sunData, moonData]) => {
             sunrise = sunData.results.sunrise;
             sunset = sunData.results.sunset;
+            moonPhaseData = moonData[0];
+            
             document.getElementById('sunrise').innerText = new Date(sunrise).toLocaleTimeString();
             document.getElementById('sunset').innerText = new Date(sunset).toLocaleTimeString();
+            document.getElementById('moonphase').innerText = getMoonPhaseName(moonPhaseData.Phase);
             
             // Automatically apply dark mode based on the local time
             updateAutoDarkMode();
         })
         .catch(error => {
-            console.error('Error fetching sun data:', error);
+            console.error('Error fetching sun/moon data:', error);
         });
+}
+
+function getMoonPhaseName(phase) {
+    // Convert numerical phase to human-readable name
+    if (phase === 0 || phase === 1) return "New Moon";
+    if (phase < 0.25) return "Waxing Crescent";
+    if (phase === 0.25) return "First Quarter";
+    if (phase < 0.5) return "Waxing Gibbous";
+    if (phase === 0.5) return "Full Moon";
+    if (phase < 0.75) return "Waning Gibbous";
+    if (phase === 0.75) return "Last Quarter";
+    return "Waning Crescent";
 }
 
 function updateAutoDarkMode() {

@@ -23,18 +23,6 @@ function getInfo($ip) {
     return $ipinfo;
 }
 
-function ipRange2cidr($start_ip, $end_ip) {
-    $start = ip2long($start_ip);
-    $end = ip2long($end_ip);
-    $mask = $start ^ $end;
-    $masklen = 32 - log(($mask + 1), 2);
-
-    if (fmod($masklen, 1) < 0.0001) {
-        return long2ip($start) . "/" . round($masklen);
-    }
-    return null;
-}
-
 // Get the IP info from the API
 $intel_data = getInfo($target_ip);
 
