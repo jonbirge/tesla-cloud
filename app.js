@@ -2,6 +2,34 @@ let lastUpdate = 0;
 
 function toggleMode() {
     document.body.classList.toggle('dark-mode');
+    document.getElementById('darkModeToggle').checked = document.body.classList.contains('dark-mode');
+}
+
+async function getSunriseSunset(lat, lon) {
+    const response = await fetch(`https://api.sunrise-sunset.org/json?lat=${lat}&lng=${lon}&formatted=0`);
+    const data = await response.json();
+    return data.results;
+}
+
+async function applyAutoDarkMode() {
+    if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(async (position) => {
+            const { latitude, longitude } = position.coords;
+            const { sunrise, sunset } = await getSunriseSunset(latitude, longitude);
+            const now = new Date();
+            const currentTime = now.getTime();
+            const sunriseTime = new Date(sunrise).getTime();
+            const sunsetTime = new Date(sunset).getTime();
+
+            if (currentTime >= sunsetTime || currentTime < sunriseTime) {
+                console.log('Applying dark mode based on sunset...');
+                document.body.classList.add('dark-mode');
+                document.getElementById('darkModeToggle').checked = true;
+            }
+        });
+    } else {
+        console.log('Geolocation is not supported by this browser.');
+    }
 }
 
 function showSection(sectionId) {
@@ -59,4 +87,6 @@ function updateConnectionInfo() {
 
 // Show the first section by default
 showSection('news');
-// showSection('connectivity');
+
+// Automatically apply dark mode based on the local time
+applyAutoDarkMode();
