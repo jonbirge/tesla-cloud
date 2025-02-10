@@ -2,7 +2,7 @@
     --bg-color: #edecec; /* Very light gray */
     --text-color: #a89f9f; /* Dark gray */
     --active-section-bg: #ffffff;
-    --separator-color: #666666;
+    --separator-color: #dad0d0;
     --button-text: #615454;
     --button-bg: #d6d3d3; /* Slightly darker gray */
     --button-hover-bg: #f3f3f3;
@@ -28,13 +28,12 @@ body.dark-mode {
 }
 
 body {
+    font-size: 16pt;
     background-color: var(--bg-color);
     color: var(--text-color);
-    margin: 0;
     padding: 0;
     text-align: left; /* Align text to the left */
     font-weight: 600;
-    font-size: 16pt;
 }
 
 a {
@@ -43,7 +42,7 @@ a {
 }
 
 h1 {
-    font-size: 20pt;
+    font-size: 18pt;
     margin-bottom: 15px;
     text-align: left;
     margin-top: 0px;
@@ -51,12 +50,24 @@ h1 {
 }
 
 h2 {
-    margin-bottom: 18pt;
+    font-size: 16pt;
+    margin-bottom: 12px;
+    margin-top: 28px;
     text-align: left;
-    margin-top: 0px;
     font-weight: 650;
-    font-size: 18pt;
     color: var(--button-text);
+}
+
+p {
+    margin-top: 18px;
+    margin-bottom: 0px;
+}
+
+hr {
+    border: 0;
+    border-top: 1px solid var(--separator-color);
+    margin-top: 28px;
+    margin-bottom: 28px;
 }
 
 .container {
@@ -68,7 +79,7 @@ h2 {
     gap: 60px;
     text-align: left; /* Align text to the left */
     max-width: none; /* Remove max-width to allow full width */
-    width: 95%; /* Set width to 95% to prevent touching the edge */
+    width: 90%; /* Set width to 95% to prevent touching the edge */
 }
 
 .section-buttons {
@@ -78,6 +89,8 @@ h2 {
 }
 
 .section-button {
+    font-size: 18pt; /* Larger font size */
+    font-weight: 600; /* Make the text bold */
     padding: 16px 30px;
     background-color: transparent;
     color: var(--text-color);
@@ -87,8 +100,6 @@ h2 {
     text-align: left;
     margin-bottom: 5px;
     transition: background-color 0.3s, color 0.3s;
-    font-size: 20pt; /* Larger font size */
-    font-weight: 600; /* Make the text bold */
 }
 
 .section-button.active {

@@ -32,17 +32,16 @@ function showSection(sectionId) {
 
     // Handle special cases
     if (sectionId === 'connectivity') {
-        updateConnectivitySection();
+        console.log('Updating connectivity section...');
+        updateConnectionInfo();
     }
 }
 
 // Dynamically update IP data in 'Connectivity' section from data returned by ipinfo.php
-function updateConnectivitySection() {
-    console.log('Updating connectivity section...');
+function updateConnectionInfo() {
     fetch('ipinfo.php')
         .then(response => response.json())
         .then(data => {
-            // document.getElementById('ip').innerText = data.ip;
             document.getElementById('rdns').innerText = data.reverse;
             document.getElementById('location').innerText = `${data.city}, ${data.region}, ${data.country}`;
             document.getElementById('isp').innerText = data.isp;
@@ -51,5 +50,5 @@ function updateConnectivitySection() {
 }
 
 // Show the first section by default
-// showSection('news');
-showSection('about');
+showSection('news');
+// showSection('connectivity');
