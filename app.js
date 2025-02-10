@@ -105,19 +105,40 @@ function updateAutoDarkMode() {
     }
 }
 
-// Dynamically update IP data in 'Connectivity' section from data returned by ipinfo.php
 function updateConnectionInfo() {
-    fetch('ipinfo.php')
+    // Write diagnostic information to the console
+    console.log('Updating connection info...');
+
+    // Get detailed IP info from ipapi.co
+    fetch('https://ipapi.co/json/')
         .then(response => response.json())
-        .then(data => {
-            // if data.reverse is defined, use it, otherwise use data.ip
-            if (data.reverse) {
-                document.getElementById('rdns').innerText = data.reverse;
-            } else {
-                document.getElementById('rdns').innerText = data.ip;
-            }
-            document.getElementById('location').innerText = `${data.city}, ${data.region}, ${data.country}`;
-            document.getElementById('isp').innerText = data.isp;
+        .then(ipData => {
+            // Get reverse DNS using Google's public DNS API
+            const ip = ipData.ip;
+            // Reverse the IP address and fetch the PTR record
+            const revIp = ip.split('.').reverse().join('.');
+            
+            return Promise.all([
+                Promise.resolve(ipData),
+                fetch(`https://dns.google.com/resolve?name=${revIp}.in-addr.arpa&type=PTR`)
+                    .then(response => response.json())
+            ]);
+        })
+        .then(([ipData, dnsData]) => {
+            // Get the PTR record if it exists
+            const rdnsName = dnsData.Answer ? dnsData.Answer[0].data : ipData.ip;
+
+            // Update the UI with the fetched data
+            document.getElementById('rdns').innerText = rdnsName;
+            document.getElementById('location').innerText = `${ipData.city || 'N/A'}, ${ipData.region || 'N/A'}, ${ipData.country_name || 'N/A'}`;
+            document.getElementById('isp').innerText = ipData.org || 'N/A';
+        })
+        .catch(error => {
+            console.error('Error fetching IP/DNS information: ', error);
+            // Set default values in case of error
+            document.getElementById('rdns').innerText = 'N/A';
+            document.getElementById('location').innerText = 'N/A';
+            document.getElementById('isp').innerText = 'N/A';
         });
 }
 
@@ -153,7 +174,6 @@ function showSection(sectionId) {
     if (sectionId === 'connectivity') {
         const now = Date.now();
         if (now - lastUpdate > 60000) { // 60 seconds
-            console.log('Updating connectivity section...');
             updateConnectionInfo();
             lastUpdate = now;
         } else {
