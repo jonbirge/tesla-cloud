@@ -78,10 +78,14 @@ function updateConnectionInfo() {
     fetch('ipinfo.php')
         .then(response => response.json())
         .then(data => {
-            document.getElementById('rdns').innerText = data.reverse;
+            // if data.reverse is defined, use it, otherwise use data.ip
+            if (data.reverse) {
+                document.getElementById('rdns').innerText = data.reverse;
+            } else {
+                document.getElementById('rdns').innerText = data.ip;
+            }
             document.getElementById('location').innerText = `${data.city}, ${data.region}, ${data.country}`;
             document.getElementById('isp').innerText = data.isp;
-            
         });
 }
 
