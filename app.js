@@ -107,16 +107,31 @@ function updateAutoDarkMode() {
 
 async function updateConnectionInfo() {
     try {
+        // Write diagnostic information to the console
+        console.log('Updating connection info...');
+
         // Get detailed IP info from ipapi.co
-        const response = await fetch('https://ipapi.co/json/');
-        const data = await response.json();
+        const ipResponse = await fetch('https://ipapi.co/json/');
+        const ipData = await ipResponse.json();
+        
+        // Get reverse DNS using Google's public DNS API
+        const ip = ipData.ip;
+
+        // Reverse the IP address and fetch the PTR record
+        const revIp = ip.split('.').reverse().join('.');
+
+        const dnsResponse = await fetch(`https://dns.google.com/resolve?name=${revIp}.in-addr.arpa&type=PTR`);
+        const dnsData = await dnsResponse.json();
+        
+        // Get the PTR record if it exists
+        const rdnsName = dnsData.Answer ? dnsData.Answer[0].data : ip;
 
         // Update the UI with the fetched data
-        document.getElementById('rdns').innerText = data.ip || 'N/A';
-        document.getElementById('location').innerText = `${data.city || 'N/A'}, ${data.region || 'N/A'}, ${data.country_name || 'N/A'}`;
-        document.getElementById('isp').innerText = data.org || 'N/A';
+        document.getElementById('rdns').innerText = rdnsName;
+        document.getElementById('location').innerText = `${ipData.city || 'N/A'}, ${ipData.region || 'N/A'}, ${ipData.country_name || 'N/A'}`;
+        document.getElementById('isp').innerText = ipData.org || 'N/A';
     } catch (error) {
-        console.error('Error fetching IP information: ', error);
+        console.error('Error fetching IP/DNS information: ', error);
         // Set default values in case of error
         document.getElementById('rdns').innerText = 'N/A';
         document.getElementById('location').innerText = 'N/A';
@@ -156,7 +171,6 @@ function showSection(sectionId) {
     if (sectionId === 'connectivity') {
         const now = Date.now();
         if (now - lastUpdate > 60000) { // 60 seconds
-            console.log('Updating connectivity section...');
             updateConnectionInfo();
             lastUpdate = now;
         } else {
