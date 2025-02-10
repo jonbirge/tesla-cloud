@@ -20,6 +20,12 @@ async function updateLocation() {
             document.getElementById('latitude').innerText = lat.toFixed(4) + '°';
             document.getElementById('longitude').innerText = long.toFixed(4) + '°';
 
+            // If the Connectivity section is visible, update the IP data
+            const connectivitySection = document.getElementById('connectivity');
+            if (connectivitySection.style.display === 'block') {
+                updateConnectionInfo();
+            }
+
             // Fire off async API requests for external data
             fetchCityData(lat, long);
             fetchSunData(lat, long);
@@ -52,14 +58,14 @@ function fetchSunData(lat, long) {
             document.getElementById('sunset').innerText = new Date(sunset).toLocaleTimeString();
             
             // Automatically apply dark mode based on the local time
-            applyAutoDarkMode();
+            updateAutoDarkMode();
         })
         .catch(error => {
             console.error('Error fetching sun data:', error);
         });
 }
 
-function applyAutoDarkMode() {
+function updateAutoDarkMode() {
     if (lat !== null && long !== null) {
         const now = new Date();
         const currentTime = now.getTime();
@@ -78,6 +84,22 @@ function applyAutoDarkMode() {
     } else {
         console.log('Location not available for auto dark mode.');
     }
+}
+
+// Dynamically update IP data in 'Connectivity' section from data returned by ipinfo.php
+function updateConnectionInfo() {
+    fetch('ipinfo.php')
+        .then(response => response.json())
+        .then(data => {
+            // if data.reverse is defined, use it, otherwise use data.ip
+            if (data.reverse) {
+                document.getElementById('rdns').innerText = data.reverse;
+            } else {
+                document.getElementById('rdns').innerText = data.ip;
+            }
+            document.getElementById('location').innerText = `${data.city}, ${data.region}, ${data.country}`;
+            document.getElementById('isp').innerText = data.isp;
+        });
 }
 
 function showSection(sectionId) {
@@ -119,22 +141,6 @@ function showSection(sectionId) {
             console.log('Skipping update, too soon...');
         }
     }
-}
-
-// Dynamically update IP data in 'Connectivity' section from data returned by ipinfo.php
-function updateConnectionInfo() {
-    fetch('ipinfo.php')
-        .then(response => response.json())
-        .then(data => {
-            // if data.reverse is defined, use it, otherwise use data.ip
-            if (data.reverse) {
-                document.getElementById('rdns').innerText = data.reverse;
-            } else {
-                document.getElementById('rdns').innerText = data.ip;
-            }
-            document.getElementById('location').innerText = `${data.city}, ${data.region}, ${data.country}`;
-            document.getElementById('isp').innerText = data.isp;
-        });
 }
 
 // Update location on page load and every minute thereafter
