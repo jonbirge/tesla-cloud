@@ -1,4 +1,6 @@
 let lastUpdate = 0;
+let latitude = null;
+let longitude = null;
 
 function toggleMode() {
     document.body.classList.toggle('dark-mode');
@@ -11,24 +13,47 @@ async function getSunriseSunset(lat, lon) {
     return data.results;
 }
 
-async function applyAutoDarkMode() {
+function updateLocation() {
     if (navigator.geolocation) {
         navigator.geolocation.getCurrentPosition(async (position) => {
-            const { latitude, longitude } = position.coords;
-            const { sunrise, sunset } = await getSunriseSunset(latitude, longitude);
-            const now = new Date();
-            const currentTime = now.getTime();
-            const sunriseTime = new Date(sunrise).getTime();
-            const sunsetTime = new Date(sunset).getTime();
+            latitude = position.coords.latitude;
+            longitude = position.coords.longitude;
+            console.log(`Location updated: ${latitude}, ${longitude}`);
 
-            if (currentTime >= sunsetTime || currentTime < sunriseTime) {
-                console.log('Applying dark mode based on sunset...');
-                document.body.classList.add('dark-mode');
-                document.getElementById('darkModeToggle').checked = true;
-            }
+            // Update location display
+            document.getElementById('latitude').innerText = latitude.toFixed(2);
+            document.getElementById('longitude').innerText = longitude.toFixed(2);
+
+            // Fetch city information
+            const cityResponse = await fetch(`https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${latitude}&longitude=${longitude}&localityLanguage=en`);
+            const cityData = await cityResponse.json();
+            document.getElementById('city').innerText = cityData.city || 'N/A';
+
+            // Fetch sunrise and sunset times
+            const { sunrise, sunset } = await getSunriseSunset(latitude, longitude);
+            document.getElementById('sunrise').innerText = new Date(sunrise).toLocaleTimeString();
+            document.getElementById('sunset').innerText = new Date(sunset).toLocaleTimeString();
         });
     } else {
         console.log('Geolocation is not supported by this browser.');
+    }
+}
+
+async function applyAutoDarkMode() {
+    if (latitude !== null && longitude !== null) {
+        const { sunrise, sunset } = await getSunriseSunset(latitude, longitude);
+        const now = new Date();
+        const currentTime = now.getTime();
+        const sunriseTime = new Date(sunrise).getTime();
+        const sunsetTime = new Date(sunset).getTime();
+
+        if (currentTime >= sunsetTime || currentTime < sunriseTime) {
+            console.log('Applying dark mode based on sunset...');
+            document.body.classList.add('dark-mode');
+            document.getElementById('darkModeToggle').checked = true;
+        }
+    } else {
+        console.log('Location not available for auto dark mode.');
     }
 }
 
@@ -89,8 +114,13 @@ function updateConnectionInfo() {
         });
 }
 
+// Update location on page load and every minute thereafter
+updateLocation();
+setInterval(updateLocation, 60000);
+
 // Show the first section by default
 showSection('news');
 
 // Automatically apply dark mode based on the local time
 applyAutoDarkMode();
+setInterval(applyAutoDarkMode, 60000);
