@@ -212,3 +212,21 @@ input:focus + .toggle-slider {
 input:checked + .toggle-slider:before {
     transform: translateX(26px);
 }
+
+.sun-info {
+    display: block;
+    margin-top: 20px;
+}
+
+.sun-item {
+    display: inline-block;
+    margin-right: 50px;
+}
+
+.sun-item:last-child {
+    margin-right: 0;
+}
+
+.sun-item h2 {
+    margin-top: 0;
+}
