@@ -10,7 +10,7 @@ function toggleMode() {
     document.getElementById('darkModeToggle').checked = document.body.classList.contains('dark-mode');
 }
 
-async function updateLocation() {
+function updateLocation() {
     if (navigator.geolocation) {
         navigator.geolocation.getCurrentPosition((position) => {
             lat = position.coords.latitude;
@@ -20,6 +20,12 @@ async function updateLocation() {
             // Update location display
             document.getElementById('latitude').innerText = lat.toFixed(4) + '°';
             document.getElementById('longitude').innerText = long.toFixed(4) + '°';
+            
+            // Update local weather link
+            const weatherLink = document.getElementById('localWeather');
+            if (weatherLink) {
+                weatherLink.href = `https://forecast.weather.gov/MapClick.php?lat=${lat}&lon=${long}`;
+            }
 
             // If the Connectivity section is visible, update the IP data
             const connectivitySection = document.getElementById('connectivity');
