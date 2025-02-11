@@ -4,8 +4,10 @@ let long = null;
 let sunrise = null;
 let sunset = null;
 let moonPhaseData = null;
+let manualDarkMode = false;
 
 function toggleMode() {
+    manualDarkMode = true;
     document.body.classList.toggle('dark-mode');
     document.getElementById('darkModeToggle').checked = document.body.classList.contains('dark-mode');
 }
@@ -91,7 +93,7 @@ function getMoonPhaseName(phase) {
 }
 
 function updateAutoDarkMode() {
-    if (lat !== null && long !== null) {
+    if (!manualDarkMode && lat !== null && long !== null) {
         const now = new Date();
         const currentTime = now.getTime();
         const sunriseTime = new Date(sunrise).getTime();
