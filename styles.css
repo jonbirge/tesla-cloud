@@ -1,5 +1,5 @@
 :root {
-    --bg-color: #efeeee; /* Very light gray */
+    --bg-color: #f0efef; /* Very light gray */
     --text-color: #a89f9f; /* Dark gray */
     --active-section-bg: #ffffff;
     --separator-color: #dad0d0;
@@ -12,7 +12,7 @@
 
 /* Dark mode styles */
 body.dark-mode {
-    --bg-color: #121212; /* Dark background */
+    --bg-color: #262626; /* Dark background */
     --text-color: #686868; /* Light text */
     --active-section-bg: #333333;
     --separator-color: #999999;
@@ -144,9 +144,11 @@ hr {
     font-weight: 600;
 }
 
+/*
 .link-list a:hover {
     background-color: var(--button-hover-bg);
 }
+    */
 
 /* Initially hide all sections */
 .section {
@@ -259,9 +261,11 @@ input:checked + .toggle-slider:before {
     transition: background-color 0.3s;
 }
 
+/*
 .ping-button:hover {
     background-color: var(--button-hover-bg);
 }
+*/
 
 #pingChart {
     margin: 20px 0;

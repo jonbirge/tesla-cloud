@@ -1,4 +1,5 @@
 let lastUpdate = 0;
+let updatedLocation = false;
 let lat = null;
 let long = null;
 let sunrise = null;
@@ -16,31 +17,48 @@ function toggleMode() {
 }
 
 function updateLocation() {
+    if (lat !== null && long !== null) {
+        console.log('Updating location dependent data...');
+        updatedLocation = true;
+
+        // Update local weather link
+        const weatherLink = document.getElementById("localWeather");
+        if (weatherLink) {
+            weatherLink.href = `https://forecast.weather.gov/MapClick.php?lat=${lat}&lon=${long}`;
+        }
+
+        // If the Connectivity section is visible, update the IP data
+        const connectivitySection = document.getElementById("connectivity");
+        if (connectivitySection.style.display === "block") {
+            updateConnectionInfo();
+        }
+
+        // Fire off async API requests for external data
+        fetchCityData(lat, long);
+        fetchSunData(lat, long);
+    } else {
+        console.log('Location not available for dependent data.');
+    }
+}
+
+function updateLatLong() {
     if (navigator.geolocation) {
         navigator.geolocation.getCurrentPosition((position) => {
+            console.log(`Updating location: ${lat}, ${long}`);
             lat = position.coords.latitude;
             long = position.coords.longitude;
-            console.log(`Location updated: ${lat}, ${long}`);
 
             // Update location display
             document.getElementById('latitude').innerText = lat.toFixed(4) + '°';
             document.getElementById('longitude').innerText = long.toFixed(4) + '°';
-            
-            // Update local weather link
-            const weatherLink = document.getElementById('localWeather');
-            if (weatherLink) {
-                weatherLink.href = `https://forecast.weather.gov/MapClick.php?lat=${lat}&lon=${long}`;
-            }
 
-            // If the Connectivity section is visible, update the IP data
-            const connectivitySection = document.getElementById('connectivity');
-            if (connectivitySection.style.display === 'block') {
-                updateConnectionInfo();
-            }
+            // Update time id element
+            document.getElementById('time').innerText = new Date().toLocaleTimeString();
 
-            // Fire off async API requests for external data
-            fetchCityData(lat, long);
-            fetchSunData(lat, long);
+            // Handle first update to ensure timely data
+            if (!updatedLocation) {
+                updateLocation();
+            }
         });
     } else {
         console.log('Geolocation is not supported by this browser.');
@@ -312,8 +330,10 @@ function pingTestServer() {
 }
 
 // Update location on page load and every minute thereafter
+updateLatLong();
 updateLocation();
-setInterval(updateLocation, 60000);
+setInterval(updateLatLong, 5000);
+setInterval(updateLocation, 30000);
 
 // Show the first section by default
 showSection('news');
