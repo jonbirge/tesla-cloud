@@ -1,4 +1,6 @@
 <?php
-header("Access-Control-Allow-Origin: *");
-header("HTTP/1.1 204 No Content");
+
+// return the current server time as a human readable string
+echo( date('Y-m-d H:i:s') );
+
 ?>
