@@ -89,9 +89,19 @@ function fetchSunData(lat, long) {
             sunset = sunData.results.sunset;
             moonPhaseData = moonData[0];
             
-            document.getElementById('sunrise').innerText = new Date(sunrise).toLocaleTimeString();
-            document.getElementById('sunset').innerText = new Date(sunset).toLocaleTimeString();
-            document.getElementById('moonphase').innerText = getMoonPhaseName(moonPhaseData.Phase);
+            const sunriseElements = document.querySelectorAll('[id="sunrise"]');
+            const sunsetElements = document.querySelectorAll('[id="sunset"]');
+            const moonphaseElements = document.querySelectorAll('[id="moonphase"]');
+            
+            sunriseElements.forEach(element => {
+                element.innerText = new Date(sunrise).toLocaleTimeString();
+            });
+            sunsetElements.forEach(element => {
+                element.innerText = new Date(sunset).toLocaleTimeString();
+            });
+            moonphaseElements.forEach(element => {
+                element.innerText = getMoonPhaseName(moonPhaseData.Phase);
+            });
             
             // Automatically apply dark mode based on the local time
             updateAutoDarkMode();
@@ -331,7 +341,6 @@ function pingTestServer() {
 
 // Update location on page load and every minute thereafter
 updateLatLong();
-updateLocation();
 setInterval(updateLatLong, 5000);
 setInterval(updateLocation, 30000);
 
