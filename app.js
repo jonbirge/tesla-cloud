@@ -5,15 +5,17 @@ let long = null;
 let sunrise = null;
 let sunset = null;
 let moonPhaseData = null;
-let manualDarkMode = false;
 let pingChart = null;
 let pingInterval = null;
 let pingData = [];
+let manualDarkMode = false;
+let darkOn = false;
 
 function toggleMode() {
     manualDarkMode = true;
     document.body.classList.toggle('dark-mode');
-    document.getElementById('darkModeToggle').checked = document.body.classList.contains('dark-mode');
+    darkOn = document.body.classList.contains('dark-mode');
+    document.getElementById('darkModeToggle').checked = darkOn;
 }
 
 function updateLocation() {
@@ -133,10 +135,12 @@ function updateAutoDarkMode() {
         if (currentTime >= sunsetTime || currentTime < sunriseTime) {
             console.log('Applying dark mode based on sunset...');
             document.body.classList.add('dark-mode');
+            darkOn = true;
             document.getElementById('darkModeToggle').checked = true;
         } else {
             console.log('Applying light mode based on sunrise...');
             document.body.classList.remove('dark-mode');
+            darkOn = false;
             document.getElementById('darkModeToggle').checked = false;
         }
     } else {
@@ -239,6 +243,9 @@ function startPingTest() {
     // Get the Tesla blue color from CSS
     const teslaBlue = getComputedStyle(document.documentElement).getPropertyValue('--tesla-blue').trim();
     
+    // Set colors based on dark mode
+    const axisColor = darkOn ? '#808080' : 'var(--text-color)';
+    
     // Initialize chart
     const ctx = document.getElementById('pingChart').getContext('2d');
     pingChart = new Chart(ctx, {
@@ -249,7 +256,7 @@ function startPingTest() {
                 label: 'Ping (ms)',
                 data: pingData,
                 borderColor: teslaBlue,
-                borderWidth: 3, // Thicker line
+                borderWidth: 3,
                 fill: false,
                 pointRadius: 0
             }]
@@ -262,10 +269,10 @@ function startPingTest() {
                     type: 'linear',
                     display: true,
                     grid: {
-                        color: 'var(--separator-color)'
+                        color: darkOn ? '#808080' : 'var(--separator-color)'
                     },
                     ticks: {
-                        color: 'var(--text-color)',
+                        color: axisColor,
                         font: {
                             family: 'Inter',
                             size: 14,
@@ -275,7 +282,7 @@ function startPingTest() {
                     title: {
                         display: true,
                         text: 'Time (seconds)',
-                        color: 'var(--text-color)',
+                        color: axisColor,
                         font: {
                             family: 'Inter',
                             size: 16,
@@ -287,10 +294,10 @@ function startPingTest() {
                     display: true,
                     beginAtZero: true,
                     grid: {
-                        color: 'var(--separator-color)'
+                        color: darkOn ? '#808080' : 'var(--separator-color)'
                     },
                     ticks: {
-                        color: 'var(--text-color)',
+                        color: axisColor,
                         font: {
                             family: 'Inter',
                             size: 14,
@@ -300,7 +307,7 @@ function startPingTest() {
                     title: {
                         display: true,
                         text: 'Ping (ms)',
-                        color: 'var(--text-color)',
+                        color: axisColor,
                         font: {
                             family: 'Inter',
                             size: 16,
