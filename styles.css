@@ -270,3 +270,7 @@ input:checked + .toggle-slider:before {
 #pingChart {
     margin: 20px 0;
 }
+
+.hidden {
+    display: none;
+}

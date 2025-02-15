@@ -233,6 +233,9 @@ function startPingTest() {
     // Clear previous data
     pingData = [];
     
+    // Show the canvas
+    document.getElementById('pingChart').style.display = 'block';
+
     // Get the Tesla blue color from CSS
     const teslaBlue = getComputedStyle(document.documentElement).getPropertyValue('--tesla-blue').trim();
     
