@@ -113,22 +113,20 @@ hr {
     margin-top: 0px; /* remove top margin */
 }
 
+.link-list li {
+    margin: 15px 0px;
+}
+
 /* Special styling for media section to show links in two columns */
-#media .link-list,
-#travel .link-list {
+.double-list {
     display: grid;
     grid-template-columns: repeat(2, 1fr);
     gap: 16px;
     max-width: 640px; /* Adjust based on your link width preferences */
 }
 
-#media .link-list li,
-#travel .link-list li {
+.double-list li {
     margin: 0; /* Remove default margins since we're using grid gap */
-}
-
-.link-list li {
-    margin: 15px 0px;
 }
 
 .link-list a {
@@ -148,7 +146,7 @@ hr {
 .link-list a:hover {
     background-color: var(--button-hover-bg);
 }
-    */
+*/
 
 /* Initially hide all sections */
 .section {
