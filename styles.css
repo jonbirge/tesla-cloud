@@ -377,12 +377,3 @@ input:checked + .toggle-slider:before {
     height: 100%;
     border: none;
 }
-
-#backButton {
-    margin-bottom: 20px;
-    background-color: var(--button-bg);
-}
-
-#backButton.hidden {
-    display: none;
-}

@@ -249,7 +249,6 @@ function showSection(sectionId) {
         rightFrame.removeAttribute('data-original-content');
         rightFrame.classList.remove('external');
     }
-    document.getElementById('backButton').classList.add('hidden');
 }
 
 function startPingTest() {
@@ -395,10 +394,9 @@ function switchWeatherImage(type) {
     weatherSwitch.style.setProperty('--slider-position', type === 'latest' ? '0' : '1');
 }
 
-// Add these new functions
+// Modified loadExternalUrl function - removed back button logic
 function loadExternalUrl(url) {
     const rightFrame = document.getElementById('rightFrame');
-    const backButton = document.getElementById('backButton');
     
     // Store current content
     if (!rightFrame.hasAttribute('data-original-content')) {
@@ -412,25 +410,15 @@ function loadExternalUrl(url) {
     iframe.setAttribute('allow', 'geolocation; fullscreen');
     iframe.src = url;
     rightFrame.appendChild(iframe);
-    
-    // Show back button
-    backButton.classList.remove('hidden');
+
+    // Deactivate current section button
+    const activeButton = document.querySelector('.section-button.active');
+    if (activeButton) {
+        activeButton.classList.remove('active');
+    }
 }
 
-function goBack() {
-    const rightFrame = document.getElementById('rightFrame');
-    const backButton = document.getElementById('backButton');
-    
-    // Restore original content
-    if (rightFrame.hasAttribute('data-original-content')) {
-        rightFrame.innerHTML = rightFrame.getAttribute('data-original-content');
-        rightFrame.removeAttribute('data-original-content');
-        rightFrame.classList.remove('external');
-    }
-    
-    // Hide back button
-    backButton.classList.add('hidden');
-}
+// Remove goBack function since we won't be using it anymore
 
 // Add event listener to intercept link clicks
 document.addEventListener('click', function(e) {
