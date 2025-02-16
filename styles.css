@@ -71,18 +71,16 @@ hr {
 }
 
 .container {
-    margin-left: 20px; /* Add a left margin */
-    margin-top: 20px; /* Add a top margin */
-    padding: 20px;
-    display: grid;
-    grid-template-columns: 240px 1fr; /* Two columns: buttons and links */
-    gap: 60px;
-    text-align: left; /* Align text to the left */
-    max-width: none; /* Remove max-width to allow full width */
-    width: 90%; /* Set width to 95% to prevent touching the edge */
+    margin-left: 0;
+    margin-top: 0;
+    display: block;
+    width: 100%;
 }
 
 .section-buttons {
+    position: sticky;
+    top: 0;
+    padding-right: 20px;
     display: flex;
     flex-direction: column;
     margin-top: 0px; /* Align with the top of the section */
@@ -336,4 +334,47 @@ input:checked + .toggle-slider:before {
 .weather-image.active {
     display: block;
     opacity: 1;
+}
+
+.frame-container {
+    display: flex;
+    height: 100vh;
+    width: 100vw;
+    position: fixed;
+    top: 0;
+    left: 0;
+}
+
+.left-frame {
+    width: 240px;
+    height: 100%;
+    overflow-y: auto;
+    background-color: var(--bg-color);
+    padding: 20px;
+}
+
+.right-frame {
+    flex-grow: 1;
+    height: 100%;
+    overflow-y: auto;
+    padding: 20px;
+}
+
+.right-frame.external {
+    padding: 0;
+}
+
+.right-frame iframe {
+    width: 100%;
+    height: 100%;
+    border: none;
+}
+
+#backButton {
+    margin-bottom: 20px;
+    background-color: var(--button-bg);
+}
+
+#backButton.hidden {
+    display: none;
 }

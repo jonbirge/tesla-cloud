@@ -241,6 +241,15 @@ function showSection(sectionId) {
     if (button) {
         button.classList.add('active');
     }
+
+    // Ensure we're showing original content when switching sections
+    const rightFrame = document.getElementById('rightFrame');
+    if (rightFrame.hasAttribute('data-original-content')) {
+        rightFrame.innerHTML = rightFrame.getAttribute('data-original-content');
+        rightFrame.removeAttribute('data-original-content');
+        rightFrame.classList.remove('external');
+    }
+    document.getElementById('backButton').classList.add('hidden');
 }
 
 function startPingTest() {
@@ -385,6 +394,50 @@ function switchWeatherImage(type) {
     // Update slider position with just 0 or 1
     weatherSwitch.style.setProperty('--slider-position', type === 'latest' ? '0' : '1');
 }
+
+// Add these new functions
+function loadExternalUrl(url) {
+    const rightFrame = document.getElementById('rightFrame');
+    const backButton = document.getElementById('backButton');
+    
+    // Store current content
+    if (!rightFrame.hasAttribute('data-original-content')) {
+        rightFrame.setAttribute('data-original-content', rightFrame.innerHTML);
+    }
+    
+    // Create and load iframe
+    rightFrame.innerHTML = '';
+    rightFrame.classList.add('external');
+    const iframe = document.createElement('iframe');
+    iframe.src = url;
+    rightFrame.appendChild(iframe);
+    
+    // Show back button
+    backButton.classList.remove('hidden');
+}
+
+function goBack() {
+    const rightFrame = document.getElementById('rightFrame');
+    const backButton = document.getElementById('backButton');
+    
+    // Restore original content
+    if (rightFrame.hasAttribute('data-original-content')) {
+        rightFrame.innerHTML = rightFrame.getAttribute('data-original-content');
+        rightFrame.removeAttribute('data-original-content');
+        rightFrame.classList.remove('external');
+    }
+    
+    // Hide back button
+    backButton.classList.add('hidden');
+}
+
+// Add event listener to intercept link clicks
+document.addEventListener('click', function(e) {
+    if (e.target.tagName === 'A' && !e.target.closest('.section-buttons')) {
+        e.preventDefault();
+        loadExternalUrl(e.target.href);
+    }
+});
 
 // Update location on page load and every minute thereafter
 updateLatLong();
