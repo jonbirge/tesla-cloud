@@ -272,3 +272,45 @@ input:checked + .toggle-slider:before {
 .hidden {
     display: none;
 }
+
+/* Weather Image Selector Switch */
+.weather-switch-container {
+    display: flex;
+    margin: 20px 0;
+}
+
+.weather-switch {
+    display: flex;
+    background-color: var(--button-bg);
+    border-radius: var(--button-radius);
+    padding: 5px;
+    gap: 5px;
+}
+
+.weather-switch button {
+    padding: 10px 20px;
+    border: none;
+    border-radius: calc(var(--button-radius) - 5px);
+    background: transparent;
+    color: var(--text-color);
+    cursor: pointer;
+    font-family: 'Inter', sans-serif;
+    font-size: 14pt;
+    font-weight: 600;
+    transition: background-color 0.3s, color 0.3s;
+}
+
+.weather-switch button.active {
+    background-color: var(--active-section-bg);
+    color: var(--button-text);
+}
+
+.weather-image {
+    width: 100%;
+    max-width: 1024px;
+    display: none;
+}
+
+.weather-image.active {
+    display: block;
+}

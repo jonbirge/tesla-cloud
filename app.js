@@ -353,6 +353,17 @@ function pingTestServer() {
         });
 }
 
+function switchWeatherImage(type) {
+    // Update images
+    document.getElementById('latest-image').classList.toggle('active', type === 'latest');
+    document.getElementById('loop-image').classList.toggle('active', type === 'loop');
+    
+    // Update buttons
+    const buttons = document.querySelector('.weather-switch').getElementsByTagName('button');
+    buttons[0].classList.toggle('active', type === 'latest');
+    buttons[1].classList.toggle('active', type === 'loop');
+}
+
 // Update location on page load and every minute thereafter
 updateLatLong();
 setInterval(updateLatLong, 5000);
