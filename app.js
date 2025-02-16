@@ -1,3 +1,4 @@
+// Module variables
 let lastUpdate = 0;
 let updatedLocation = false;
 let lat = null;
@@ -55,7 +56,9 @@ function updateLatLong() {
             document.getElementById('longitude').innerText = long.toFixed(4) + '°';
 
             // Update time id element
-            document.getElementById('time').innerText = new Date().toLocaleTimeString();
+            document.getElementById('time').innerText = new Date().toLocaleTimeString('en-US', { 
+                timeZoneName: 'short' // 'PDT', 'EDT', etc.
+            });
 
             // Handle first update to ensure timely data
             if (!updatedLocation) {
@@ -87,6 +90,7 @@ function fetchSunData(lat, long) {
     ])
         .then(([sunResponse, moonResponse]) => Promise.all([sunResponse.json(), moonResponse.json()]))
         .then(([sunData, moonData]) => {
+            // console.log('Sun data:', sunData);
             sunrise = sunData.results.sunrise;
             sunset = sunData.results.sunset;
             moonPhaseData = moonData[0];
@@ -109,7 +113,7 @@ function fetchSunData(lat, long) {
             updateAutoDarkMode();
         })
         .catch(error => {
-            console.error('Error fetching sun/moon data:', error);
+            console.error('Error fetching sun/moon data: ', error);
         });
 }
 
