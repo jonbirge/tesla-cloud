@@ -7,22 +7,17 @@ $url = $_GET['url'];
 // Whitelist of allowed domains for security
 $allowedDomains = [
     'bbc.com',
-    'www.bbc.com',
     'nytimes.com',
-    'www.nytimes.com',
     'electrek.co',
-    'www.electrek.co',
     'insideevs.com',
-    'www.insideevs.com',
     'notateslaapp.com',
-    'www.notateslaapp.com',
     'teslarati.com',
-    'www.teslarati.com'
+    'noaa.gov'
 ];
 
-$parsedUrl = parse_url($url);
-if (!in_array($parsedUrl['host'], $allowedDomains)) {
-    die('Domain not allowed');
+// die if none of the allowed domains are found in the URL string anywhere
+if (!preg_match('/' . implode('|', $allowedDomains) . '/i', $url)) {
+    die('Invalid URL');
 }
 
 // Remove any existing headers that might interfere with framing
