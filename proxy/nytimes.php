@@ -3,10 +3,6 @@
 header_remove('X-Frame-Options');
 header_remove('Content-Security-Policy');
 
-// Set up a cookie jar
-$cookieJar = tempnam('/tmp', 'cookie');
-
-// Use Today's Paper section specifically
 $url = 'https://www.nytimes.com/section/todayspaper';
 
 $ch = curl_init();
@@ -16,8 +12,6 @@ curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
 curl_setopt($ch, CURLOPT_MAXREDIRS, 3);
 curl_setopt($ch, CURLOPT_TIMEOUT, 30);
 curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, true);
-curl_setopt($ch, CURLOPT_COOKIEFILE, $cookieJar);
-curl_setopt($ch, CURLOPT_COOKIEJAR, $cookieJar);
 curl_setopt($ch, CURLOPT_ENCODING, '');
 curl_setopt($ch, CURLOPT_USERAGENT, 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36');
 
@@ -28,22 +22,13 @@ curl_setopt($ch, CURLOPT_HTTPHEADER, [
     'Accept-Encoding: gzip, deflate, br',
     'Connection: keep-alive',
     'DNT: 1',
-    'Upgrade-Insecure-Requests: 1',
-    'Sec-Fetch-Dest: document',
-    'Sec-Fetch-Mode: navigate',
-    'Sec-Fetch-Site: none',
-    'Sec-Fetch-User: ?1',
-    'Cache-Control: no-cache',
-    'Pragma: no-cache'
+    'Upgrade-Insecure-Requests: 1'
 ]);
 
 $content = curl_exec($ch);
 $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
 $finalUrl = curl_getinfo($ch, CURLINFO_EFFECTIVE_URL);
 curl_close($ch);
-
-// Clean up cookie jar
-@unlink($cookieJar);
 
 // Only process and output content if we got a successful response
 if ($httpCode === 200) {
