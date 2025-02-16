@@ -9,7 +9,15 @@ $allowedDomains = [
     'bbc.com',
     'www.bbc.com',
     'nytimes.com',
-    'www.nytimes.com'
+    'www.nytimes.com',
+    'electrek.co',
+    'www.electrek.co',
+    'insideevs.com',
+    'www.insideevs.com',
+    'notateslaapp.com',
+    'www.notateslaapp.com',
+    'teslarati.com',
+    'www.teslarati.com'
 ];
 
 $parsedUrl = parse_url($url);
