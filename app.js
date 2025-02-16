@@ -354,14 +354,31 @@ function pingTestServer() {
 }
 
 function switchWeatherImage(type) {
-    // Update images
-    document.getElementById('latest-image').classList.toggle('active', type === 'latest');
-    document.getElementById('loop-image').classList.toggle('active', type === 'loop');
+    // Update images with fade transition
+    const latestImage = document.getElementById('latest-image');
+    const loopImage = document.getElementById('loop-image');
     
-    // Update buttons
-    const buttons = document.querySelector('.weather-switch').getElementsByTagName('button');
+    if (type === 'latest') {
+        loopImage.style.opacity = '0';
+        latestImage.style.opacity = '1';
+    } else {
+        latestImage.style.opacity = '0';
+        loopImage.style.opacity = '1';
+    }
+    
+    setTimeout(() => {
+        latestImage.classList.toggle('active', type === 'latest');
+        loopImage.classList.toggle('active', type === 'loop');
+    }, 300);
+    
+    // Update buttons and slider position
+    const weatherSwitch = document.querySelector('.weather-switch');
+    const buttons = weatherSwitch.getElementsByTagName('button');
     buttons[0].classList.toggle('active', type === 'latest');
     buttons[1].classList.toggle('active', type === 'loop');
+    
+    // Update slider position with just 0 or 1
+    weatherSwitch.style.setProperty('--slider-position', type === 'latest' ? '0' : '1');
 }
 
 // Update location on page load and every minute thereafter

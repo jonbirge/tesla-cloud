@@ -276,6 +276,7 @@ input:checked + .toggle-slider:before {
 /* Weather Image Selector Switch */
 .weather-switch-container {
     display: flex;
+    justify-content: flex-start;
     margin: 20px 0;
 }
 
@@ -283,34 +284,56 @@ input:checked + .toggle-slider:before {
     display: flex;
     background-color: var(--button-bg);
     border-radius: var(--button-radius);
-    padding: 5px;
-    gap: 5px;
+    padding: 4px;
+    gap: 4px;
+    position: relative;
+    width: 280px;  /* Match the width of other UI elements */
+    --slider-position: 0;
 }
 
 .weather-switch button {
-    padding: 10px 20px;
+    flex: 1;
+    padding: 16px 24px;
     border: none;
-    border-radius: calc(var(--button-radius) - 5px);
+    border-radius: calc(var(--button-radius) - 4px);
     background: transparent;
     color: var(--text-color);
     cursor: pointer;
     font-family: 'Inter', sans-serif;
-    font-size: 14pt;
+    font-size: 16pt;  /* Match other button text sizes */
     font-weight: 600;
-    transition: background-color 0.3s, color 0.3s;
+    position: relative;
+    z-index: 1;
+    transition: color 0.3s ease;
 }
 
 .weather-switch button.active {
-    background-color: var(--active-section-bg);
     color: var(--button-text);
+}
+
+.weather-switch::after {
+    content: '';
+    position: absolute;
+    top: 4px;
+    left: 4px;
+    width: calc(50% - 4px);
+    height: calc(100% - 8px);
+    background-color: var(--active-section-bg);
+    border-radius: calc(var(--button-radius) - 4px);
+    transform: translateX(calc(var(--slider-position, 0) * 100%));
+    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .weather-image {
     width: 100%;
     max-width: 1024px;
+    opacity: 0;
     display: none;
+    border-radius: var(--button-radius);
+    transition: opacity 0.3s ease;
 }
 
 .weather-image.active {
     display: block;
+    opacity: 1;
 }
