@@ -1,4 +1,4 @@
-// Module variables
+// Global variables
 let lastUpdate = 0;
 let updatedLocation = false;
 let lat = null;
@@ -11,6 +11,10 @@ let pingInterval = null;
 let pingData = [];
 let manualDarkMode = false;
 let darkOn = false;
+const WEATHER_IMAGES = {
+    latest: 'https://cdn.star.nesdis.noaa.gov/GOES16/GLM/CONUS/EXTENT3/1250x750.jpg',
+    loop: 'https://cdn.star.nesdis.noaa.gov/GOES16/GLM/CONUS/EXTENT3/GOES16-CONUS-EXTENT3-625x375.gif'
+};
 
 function toggleMode() {
     manualDarkMode = true;
@@ -209,23 +213,33 @@ function showSection(sectionId) {
     const section = document.getElementById(sectionId);
     if (section) {
         section.style.display = 'block';
+        
+        if (sectionId === 'weather') {
+            // Load weather image when weather section is shown
+            const weatherImage = document.getElementById('weather-image');
+            weatherImage.src = WEATHER_IMAGES.latest;
+        } else {
+            // Remove weather img src to force reload when switching back
+            const weatherImage = document.getElementById('weather-image');
+            weatherImage.src = '';
+        }
+
+        // Handle connectivity section separately
+        if (sectionId === 'connectivity') {
+            const now = Date.now();
+            if (now - lastUpdate > 60000) { // 60 seconds
+                updateConnectionInfo();
+                lastUpdate = now;
+            } else {
+                console.log('Skipping update, too soon...');
+            }
+        }
     }
 
     // Activate the clicked button
     const button = document.querySelector(`.section-button[onclick="showSection('${sectionId}')"]`);
     if (button) {
         button.classList.add('active');
-    }
-
-    // Handle special cases
-    if (sectionId === 'connectivity') {
-        const now = Date.now();
-        if (now - lastUpdate > 60000) { // 60 seconds
-            updateConnectionInfo();
-            lastUpdate = now;
-        } else {
-            console.log('Skipping update, too soon...');
-        }
     }
 }
 
@@ -354,21 +368,12 @@ function pingTestServer() {
 }
 
 function switchWeatherImage(type) {
-    // Update images with fade transition
-    const latestImage = document.getElementById('latest-image');
-    const loopImage = document.getElementById('loop-image');
-    
-    if (type === 'latest') {
-        loopImage.style.opacity = '0';
-        latestImage.style.opacity = '1';
-    } else {
-        latestImage.style.opacity = '0';
-        loopImage.style.opacity = '1';
-    }
+    const weatherImage = document.getElementById('weather-image');
+    weatherImage.style.opacity = '0';
     
     setTimeout(() => {
-        latestImage.classList.toggle('active', type === 'latest');
-        loopImage.classList.toggle('active', type === 'loop');
+        weatherImage.src = WEATHER_IMAGES[type];
+        weatherImage.style.opacity = '1';
     }, 300);
     
     // Update buttons and slider position
