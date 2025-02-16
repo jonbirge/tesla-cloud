@@ -409,6 +409,7 @@ function loadExternalUrl(url) {
     rightFrame.innerHTML = '';
     rightFrame.classList.add('external');
     const iframe = document.createElement('iframe');
+    iframe.setAttribute('allow', 'geolocation; fullscreen');
     iframe.src = url;
     rightFrame.appendChild(iframe);
     
