@@ -394,8 +394,13 @@ function switchWeatherImage(type) {
     weatherSwitch.style.setProperty('--slider-position', type === 'latest' ? '0' : '1');
 }
 
-// Modified loadExternalUrl function - removed back button logic
-function loadExternalUrl(url) {
+// Modified loadExternalUrl function
+function loadExternalUrl(url, inFrame = false) {
+    if (!inFrame) {
+        window.open(url, '_blank');
+        return;
+    }
+
     const rightFrame = document.getElementById('rightFrame');
     
     // Store current content
@@ -418,13 +423,12 @@ function loadExternalUrl(url) {
     }
 }
 
-// Remove goBack function since we won't be using it anymore
-
-// Add event listener to intercept link clicks
+// Update click event listener
 document.addEventListener('click', function(e) {
     if (e.target.tagName === 'A' && !e.target.closest('.section-buttons')) {
         e.preventDefault();
-        loadExternalUrl(e.target.href);
+        const inFrame = e.target.hasAttribute('data-frame');
+        loadExternalUrl(e.target.href, inFrame);
     }
 });
 

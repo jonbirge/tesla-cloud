@@ -11,8 +11,7 @@ $allowedDomains = [
     'electrek.co',
     'insideevs.com',
     'notateslaapp.com',
-    'teslarati.com',
-    'noaa.gov'
+    'teslarati.com'
 ];
 
 // die if none of the allowed domains are found in the URL string anywhere
