@@ -197,7 +197,15 @@ function showSection(sectionId) {
     // Log the clicked section
     console.log(`Showing section: ${sectionId}`);
 
-    // Hide all sections
+    // First, restore original content if we're in external mode
+    const rightFrame = document.getElementById('rightFrame');
+    if (rightFrame.classList.contains('external')) {
+        rightFrame.innerHTML = rightFrame.getAttribute('data-original-content');
+        rightFrame.removeAttribute('data-original-content');
+        rightFrame.classList.remove('external');
+    }
+
+    // Then get a fresh reference to sections after DOM is restored
     const sections = document.querySelectorAll('.section');
     sections.forEach(section => {
         section.style.display = 'none';
@@ -221,7 +229,9 @@ function showSection(sectionId) {
         } else {
             // Remove weather img src to force reload when switching back
             const weatherImage = document.getElementById('weather-image');
-            weatherImage.src = '';
+            if (weatherImage) {
+                weatherImage.src = '';
+            }
         }
 
         // Handle connectivity section separately
@@ -240,14 +250,6 @@ function showSection(sectionId) {
     const button = document.querySelector(`.section-button[onclick="showSection('${sectionId}')"]`);
     if (button) {
         button.classList.add('active');
-    }
-
-    // Ensure we're showing original content when switching sections
-    const rightFrame = document.getElementById('rightFrame');
-    if (rightFrame.hasAttribute('data-original-content')) {
-        rightFrame.innerHTML = rightFrame.getAttribute('data-original-content');
-        rightFrame.removeAttribute('data-original-content');
-        rightFrame.classList.remove('external');
     }
 }
 
