@@ -142,12 +142,6 @@ hr {
     font-weight: 600;
 }
 
-/*
-.link-list a:hover {
-    background-color: var(--button-hover-bg);
-}
-*/
-
 /* Initially hide all sections */
 .section {
     display: none;
@@ -168,7 +162,7 @@ hr {
 .toggle-container {
     position: fixed;
     top: 10px;
-    right: 3.5%;
+    right: 20px;
     display: flex;
     align-items: center;
 }
@@ -259,12 +253,6 @@ input:checked + .toggle-slider:before {
     transition: background-color 0.3s;
 }
 
-/*
-.ping-button:hover {
-    background-color: var(--button-hover-bg);
-}
-*/
-
 #pingChart {
     margin: 20px 0;
 }
@@ -273,7 +261,6 @@ input:checked + .toggle-slider:before {
     display: none;
 }
 
-/* Weather Image Selector Switch */
 .weather-switch-container {
     display: flex;
     justify-content: flex-start;

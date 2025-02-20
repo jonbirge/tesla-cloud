@@ -398,11 +398,13 @@ function switchWeatherImage(type) {
 
 // Modified loadExternalUrl function
 function loadExternalUrl(url, inFrame = false) {
+    // Open external links in a new tab
     if (!inFrame) {
         window.open(url, '_blank');
         return;
     }
 
+    // Load external content in the right frame
     const rightFrame = document.getElementById('rightFrame');
     
     // Store current content
@@ -425,7 +427,7 @@ function loadExternalUrl(url, inFrame = false) {
     }
 }
 
-// Update click event listener
+// Update link click event listener
 document.addEventListener('click', function(e) {
     if (e.target.tagName === 'A' && !e.target.closest('.section-buttons')) {
         e.preventDefault();
