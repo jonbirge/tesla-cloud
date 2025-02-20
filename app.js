@@ -197,7 +197,15 @@ function showSection(sectionId) {
     // Log the clicked section
     console.log(`Showing section: ${sectionId}`);
 
-    // Hide all sections
+    // First, restore original content if we're in external mode
+    const rightFrame = document.getElementById('rightFrame');
+    if (rightFrame.classList.contains('external')) {
+        rightFrame.innerHTML = rightFrame.getAttribute('data-original-content');
+        rightFrame.removeAttribute('data-original-content');
+        rightFrame.classList.remove('external');
+    }
+
+    // Then get a fresh reference to sections after DOM is restored
     const sections = document.querySelectorAll('.section');
     sections.forEach(section => {
         section.style.display = 'none';
@@ -221,7 +229,9 @@ function showSection(sectionId) {
         } else {
             // Remove weather img src to force reload when switching back
             const weatherImage = document.getElementById('weather-image');
-            weatherImage.src = '';
+            if (weatherImage) {
+                weatherImage.src = '';
+            }
         }
 
         // Handle connectivity section separately
@@ -385,6 +395,46 @@ function switchWeatherImage(type) {
     // Update slider position with just 0 or 1
     weatherSwitch.style.setProperty('--slider-position', type === 'latest' ? '0' : '1');
 }
+
+// Modified loadExternalUrl function
+function loadExternalUrl(url, inFrame = false) {
+    // Open external links in a new tab
+    if (!inFrame) {
+        window.open(url, '_blank');
+        return;
+    }
+
+    // Load external content in the right frame
+    const rightFrame = document.getElementById('rightFrame');
+    
+    // Store current content
+    if (!rightFrame.hasAttribute('data-original-content')) {
+        rightFrame.setAttribute('data-original-content', rightFrame.innerHTML);
+    }
+    
+    // Create and load iframe
+    rightFrame.innerHTML = '';
+    rightFrame.classList.add('external');
+    const iframe = document.createElement('iframe');
+    iframe.setAttribute('allow', 'geolocation; fullscreen');
+    iframe.src = url;
+    rightFrame.appendChild(iframe);
+
+    // Deactivate current section button
+    const activeButton = document.querySelector('.section-button.active');
+    if (activeButton) {
+        activeButton.classList.remove('active');
+    }
+}
+
+// Update link click event listener
+document.addEventListener('click', function(e) {
+    if (e.target.tagName === 'A' && !e.target.closest('.section-buttons')) {
+        e.preventDefault();
+        const inFrame = e.target.hasAttribute('data-frame');
+        loadExternalUrl(e.target.href, inFrame);
+    }
+});
 
 // Update location on page load and every minute thereafter
 updateLatLong();
