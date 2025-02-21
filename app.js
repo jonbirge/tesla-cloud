@@ -13,7 +13,7 @@ let pingData = [];
 let manualDarkMode = false;
 let darkOn = false;
 let locationTimeZone = null;
-let API_KEY = 'bdc_44aaec1d4e9f4dadaa0fd83afca7c906';  // TODO: Temporary usage
+let API_KEY = 'bdc_44aaec1d4e9f4dadaa0fd83afca7c906';  // TODO: temporary usage
 
 function toggleMode() {
     manualDarkMode = true;
@@ -472,4 +472,4 @@ setInterval(updateLatLong, 5000);
 setInterval(updateLocation, 60000);
 
 // Show the first section by default
-showSection('news');
+showSection('location');
