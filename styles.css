@@ -31,7 +31,7 @@ body {
     color: var(--text-color);
     padding: 0;
     text-align: left; /* Align text to the left */
-    font-weight: 500;
+    font-weight: 580;
 }
 
 a {
@@ -52,7 +52,7 @@ h2 {
     margin-bottom: 12px;
     margin-top: 28px;
     text-align: left;
-    font-weight: 650;
+    font-weight: 640;
     color: var(--button-text);
 }
 
