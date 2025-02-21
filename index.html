@@ -16,7 +16,8 @@
                 <h1>teslas.cloud (beta)</h1>
                 <button class="section-button active" onclick="showSection('news')">News</button>
                 <button class="section-button" onclick="showSection('weather')">Weather</button>
-                <button class="section-button" onclick="showSection('travel')">Navigation</button>
+                <button class="section-button" onclick="showSection('location')">Location</button>
+                <button class="section-button" onclick="showSection('navigation')">Navigation</button>
                 <button class="section-button" onclick="showSection('media')">TV & Movies</button>
                 <button class="section-button" onclick="showSection('reference')">Reference</button>
                 <button class="section-button" onclick="showSection('toys')">Toys</button>
@@ -39,10 +40,12 @@
                     </ul>
                 </div>
 
-                <div id="travel" class="section">
+                <div id="location" class="section">
                     <h2>Location</h2>
-                    <span id="latitude">N/A</span>, <span id="longitude">N/A</span>,
-                    <span id="altitude">N/A</span> (<span id="time">N/A</span>)
+                    <span id="latitude">N/A</span>, <span id="longitude">N/A</span>
+                    (<span id="time">N/A</span>)
+                    <h2>Altitude</h2>
+                    <span id="altitude">N/A</span>
                     <h2>City</h2>
                     <span id="city">N/A</span>
                     <div class="sun-info">
@@ -56,14 +59,25 @@
                         </div>
                     </div>
                     <hr>
+                    <h2>Local Information</h2>
+                    <p>Coming soon...</p>
+                </div>
+
+                <div id="navigation" class="section">
                     <h2>Links</h2>
                     <ul class="link-list double-list">
+                        <li><a href="https://maps.google.com">Google Maps</a></li>
                         <li><a href="https://earth.google.com">Google Earth</a></li>
                         <li><a href="https://abetterrouteplanner.com">A Better Route Planner</a></li>
+                        <li><a href="https://www.openstreetmap.org">OpenStreetMap</a></li>
                         <li><a href="https://teslawaze.azurewebsites.net/" data-frame>TeslaWaze</a></li>
                         <li><a href="https://www.plugshare.com">PlugShare</a></li>
-                        <li><a href="https://www.openstreetmap.org">OpenStreetMap</a></li>
-                        <li><a href="https://maps.google.com">Google Maps</a></li>
+                        <li><a href="https://www.waze.com">Waze</a></li>
+                        <li><a href="https://www.mapquest.com">MapQuest</a></li>
+                        <li><a href="https://www.tomtom.com">TomTom</a></li>
+                        <li><a href="https://www.garmin.com">Garmin</a></li>
+                        <li><a href="https://www.magellangps.com">Magellan</a></li>
+                        <li><a href="https://www.navman.com">Navman
                         <li><a href="https://www.aaa.com">AAA</a></li>
                     </ul>
                 </div>

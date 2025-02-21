@@ -53,13 +53,16 @@ function updateLatLong() {
         navigator.geolocation.getCurrentPosition((position) => {
             lat = position.coords.latitude;
             long = position.coords.longitude;
-            alt = position.coords.altitude || null;
+            alt = position.coords.altitude;  // altitude in meters
             console.log(`Updating location: ${lat}, ${long}, ${alt}`);
 
             // Update location display
             document.getElementById('latitude').innerText = lat.toFixed(4) + '°';
             document.getElementById('longitude').innerText = long.toFixed(4) + '°';
-            document.getElementById('altitude').innerText = alt ? alt.toFixed(0) + ' m' : 'N/A m';
+
+            // Update altitude in meters and feet
+            const altStr = alt ? `${alt.toFixed(0)} m, ${(alt * 3.28084).toFixed(0)} ft` : 'N/A';
+            document.getElementById('altitude').innerText = altStr;
 
             // Update time id element
             document.getElementById('time').innerText = new Date().toLocaleTimeString('en-US', { 
