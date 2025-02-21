@@ -1,8 +1,9 @@
 // Global variables
 let lastUpdate = 0;
-let updatedLocation = false;
+let neverUpdatedLocation = true;
 let lat = null;
 let long = null;
+let alt = null;
 let sunrise = null;
 let sunset = null;
 let moonPhaseData = null;
@@ -11,10 +12,8 @@ let pingInterval = null;
 let pingData = [];
 let manualDarkMode = false;
 let darkOn = false;
-const WEATHER_IMAGES = {
-    latest: 'https://cdn.star.nesdis.noaa.gov/GOES16/GLM/CONUS/EXTENT3/1250x750.jpg',
-    loop: 'https://cdn.star.nesdis.noaa.gov/GOES16/GLM/CONUS/EXTENT3/GOES16-CONUS-EXTENT3-625x375.gif'
-};
+let locationTimeZone = null;
+let API_KEY = 'bdc_44aaec1d4e9f4dadaa0fd83afca7c906';  // TODO: Temporary usage
 
 function toggleMode() {
     manualDarkMode = true;
@@ -26,7 +25,7 @@ function toggleMode() {
 function updateLocation() {
     if (lat !== null && long !== null) {
         console.log('Updating location dependent data...');
-        updatedLocation = true;
+        neverUpdatedLocation = false;
 
         // Update local weather link
         const weatherLink = document.getElementById("localWeather");
@@ -41,6 +40,7 @@ function updateLocation() {
         }
 
         // Fire off async API requests for external data
+        fetchTimeZoneData(lat, long);
         fetchCityData(lat, long);
         fetchSunData(lat, long);
     } else {
@@ -51,21 +51,24 @@ function updateLocation() {
 function updateLatLong() {
     if (navigator.geolocation) {
         navigator.geolocation.getCurrentPosition((position) => {
-            console.log(`Updating location: ${lat}, ${long}`);
             lat = position.coords.latitude;
             long = position.coords.longitude;
+            alt = position.coords.altitude || null;
+            console.log(`Updating location: ${lat}, ${long}, ${alt}`);
 
             // Update location display
             document.getElementById('latitude').innerText = lat.toFixed(4) + '°';
             document.getElementById('longitude').innerText = long.toFixed(4) + '°';
+            document.getElementById('altitude').innerText = alt ? alt.toFixed(0) + ' m' : 'N/A m';
 
             // Update time id element
             document.getElementById('time').innerText = new Date().toLocaleTimeString('en-US', { 
+                timeZone: locationTimeZone || 'UTC',
                 timeZoneName: 'short' // 'PDT', 'EDT', etc.
             });
 
             // Handle first update to ensure timely data
-            if (!updatedLocation) {
+            if (neverUpdatedLocation) {
                 updateLocation();
             }
         });
@@ -75,7 +78,7 @@ function updateLatLong() {
 }
 
 function fetchCityData(lat, long) {
-    fetch(`https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${lat}&longitude=${long}&localityLanguage=en`)
+    fetch(`https://api-bdc.net/data/reverse-geocode-client?latitude=${lat}&longitude=${long}&localityLanguage=en`)
         .then(response => response.json())
         .then(cityData => {
             document.getElementById('city').innerText =
@@ -84,6 +87,19 @@ function fetchCityData(lat, long) {
         })
         .catch(error => {
             console.error('Error fetching city data:', error);
+        });
+}
+
+function fetchTimeZoneData(lat, long) {
+    fetch(`https://api-bdc.net/data/timezone-by-location?latitude=${lat}&longitude=${long}&key=${API_KEY}`)
+        .then(response => response.json())
+        .then(tzData => {
+            locationTimeZone = tzData.effectiveTimeZoneShort || 'UTC';
+            console.log('Time zone:', locationTimeZone);
+        })
+        .catch(error => {
+            console.error('Error fetching time zone:', error);
+            locationTimeZone = 'UTC';
         });
 }
 
@@ -104,10 +120,16 @@ function fetchSunData(lat, long) {
             const moonphaseElements = document.querySelectorAll('[id="moonphase"]');
             
             sunriseElements.forEach(element => {
-                element.innerText = new Date(sunrise).toLocaleTimeString();
+                element.innerText = new Date(sunrise).toLocaleTimeString('en-US', {
+                    timeZone: locationTimeZone || 'UTC',
+                    timeZoneName: 'short'
+                });
             });
             sunsetElements.forEach(element => {
-                element.innerText = new Date(sunset).toLocaleTimeString();
+                element.innerText = new Date(sunset).toLocaleTimeString('en-US', {
+                    timeZone: locationTimeZone || 'UTC',
+                    timeZoneName: 'short'
+                });
             });
             moonphaseElements.forEach(element => {
                 element.innerText = getMoonPhaseName(moonPhaseData.Phase);
@@ -192,6 +214,11 @@ function updateConnectionInfo() {
             document.getElementById('isp').innerText = 'N/A';
         });
 }
+
+const WEATHER_IMAGES = {
+    latest: 'https://cdn.star.nesdis.noaa.gov/GOES16/GLM/CONUS/EXTENT3/1250x750.jpg',
+    loop: 'https://cdn.star.nesdis.noaa.gov/GOES16/GLM/CONUS/EXTENT3/GOES16-CONUS-EXTENT3-625x375.gif'
+};
 
 function showSection(sectionId) {
     // Log the clicked section
@@ -439,7 +466,7 @@ document.addEventListener('click', function(e) {
 // Update location on page load and every minute thereafter
 updateLatLong();
 setInterval(updateLatLong, 5000);
-setInterval(updateLocation, 30000);
+setInterval(updateLocation, 60000);
 
 // Show the first section by default
 showSection('news');
