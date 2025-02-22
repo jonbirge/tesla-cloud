@@ -6,12 +6,8 @@ if (!isset($_GET['url']) || empty($_GET['url'])) {
 $url = $_GET['url'];
 // Whitelist of allowed domains for security
 $allowedDomains = [
-    'bbc.com',
-    'nytimes.com',
-    'electrek.co',
-    'insideevs.com',
     'notateslaapp.com',
-    'teslarati.com'
+    'api.geonames.org' // added to whitelist for Geonames API
 ];
 
 // die if none of the allowed domains are found in the URL string anywhere

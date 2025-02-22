@@ -13,7 +13,6 @@ let pingData = [];
 let manualDarkMode = false;
 let darkOn = false;
 let locationTimeZone = null;
-let API_KEY = 'bdc_44aaec1d4e9f4dadaa0fd83afca7c906';  // TODO: temporary usage
 
 function toggleMode() {
     manualDarkMode = true;
@@ -22,7 +21,7 @@ function toggleMode() {
     document.getElementById('darkModeToggle').checked = darkOn;
 }
 
-function updateLocation() {
+async function updateLocation() {
     if (lat !== null && long !== null) {
         console.log('Updating location dependent data...');
         neverUpdatedLocation = false;
@@ -39,8 +38,9 @@ function updateLocation() {
             updateConnectionInfo();
         }
 
-        // Fire off async API requests for external data
-        fetchTimeZoneData(lat, long);
+        // Fire off API requests for external data
+        locationTimeZone = await fetchTimeZone(lat, long);
+        console.log('Timezone: ', locationTimeZone);
         fetchCityData(lat, long);
         fetchSunData(lat, long);
     } else {
@@ -48,7 +48,7 @@ function updateLocation() {
     }
 }
 
-function updateLatLong() {
+async function updateLatLong() {
     if (navigator.geolocation) {
         navigator.geolocation.getCurrentPosition((position) => {
             lat = position.coords.latitude;
@@ -56,6 +56,11 @@ function updateLatLong() {
             alt = position.coords.altitude;  // altitude in meters
             console.log(`Updating location: ${lat}, ${long}, ${alt}`);
 
+            // Handle first update to ensure timely data
+            if (neverUpdatedLocation) {
+                updateLocation();
+            }
+            
             // Update location display
             document.getElementById('latitude').innerText = lat.toFixed(4) + '°';
             document.getElementById('longitude').innerText = long.toFixed(4) + '°';
@@ -69,11 +74,6 @@ function updateLatLong() {
                 timeZone: locationTimeZone || 'UTC',
                 timeZoneName: 'short' // 'PDT', 'EDT', etc.
             });
-
-            // Handle first update to ensure timely data
-            if (neverUpdatedLocation) {
-                updateLocation();
-            }
         });
     } else {
         console.log('Geolocation is not supported by this browser.');
@@ -81,28 +81,29 @@ function updateLatLong() {
 }
 
 function fetchCityData(lat, long) {
-    fetch(`https://api-bdc.net/data/reverse-geocode-client?latitude=${lat}&longitude=${long}&localityLanguage=en`)
+    // Proxy request to Geonames reverse geocoding API endpoint
+    fetch(`proxy.php?url=${encodeURIComponent("http://api.geonames.org/findNearbyPlaceNameJSON?lat=" + lat + "&lng=" + long + "&username=birgefuller")}`)
         .then(response => response.json())
         .then(cityData => {
+            const place = cityData.geonames && cityData.geonames[0];
             document.getElementById('city').innerText =
-                (cityData.locality || 'N/A') + ', ' +
-                (cityData.principalSubdivision || 'N/A');
+                (place ? (place.name || 'N/A') + ', ' + (place.adminName1 || 'N/A') : 'N/A');
         })
         .catch(error => {
             console.error('Error fetching city data:', error);
         });
 }
 
-function fetchTimeZoneData(lat, long) {
-    fetch(`https://api-bdc.net/data/timezone-by-location?latitude=${lat}&longitude=${long}&key=${API_KEY}`)
+function fetchTimeZone(lat, long) {
+    // Return a Promise that resolves with the timezoneId
+    return fetch(`proxy.php?url=${encodeURIComponent("http://api.geonames.org/timezoneJSON?lat=" + lat + "&lng=" + long + "&username=birgefuller")}`)
         .then(response => response.json())
         .then(tzData => {
-            locationTimeZone = tzData.effectiveTimeZoneShort || 'UTC';
-            console.log('Time zone:', locationTimeZone);
+            return tzData.timezoneId || 'UTC';
         })
         .catch(error => {
             console.error('Error fetching time zone:', error);
-            locationTimeZone = 'UTC';
+            return 'UTC';
         });
 }
 
