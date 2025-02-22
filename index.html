@@ -8,7 +8,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="styles.css?ver=3">
+    <link rel="stylesheet" href="styles.css?ver=5">
 </head>
 
 <body>
@@ -16,10 +16,10 @@
         <div class="left-frame">
             <div class="section-buttons">
                 <h1>teslas.cloud (beta)</h1>
+                <button class="section-button" onclick="showSection('news')">News</button>
                 <button class="section-button" onclick="showSection('location')">Location</button>
                 <button class="section-button" onclick="showSection('weather')">Weather</button>
                 <button class="section-button" onclick="showSection('navigation')">Navigation</button>
-                <button class="section-button" onclick="showSection('news')">News</button>
                 <button class="section-button" onclick="showSection('media')">Media</button>
                 <button class="section-button" onclick="showSection('reference')">Reference</button>
                 <button class="section-button" onclick="showSection('toys')">Toys</button>
@@ -35,7 +35,7 @@
                     <ul class="link-list double-list">
                         <li><a href="https://www.nytimes.com">New York Times</a></li>
                         <li><a href="https://www.wsj.com">Wall Street Journal</a></li>
-                        <li><a href="https://www.bbc.com/news" data-frame>BBC News</a></li>
+                        <li><a href="https://www.bbc.com/news">BBC News</a></li>
                         <li><a href="https://electrek.co" data-frame>Electrek</a></li>
                         <li><a href="https://insideevs.com">InsideEVs</a></li>
                         <li><a href="https://www.notateslaapp.com">Not a Tesla App</a></li>
@@ -50,19 +50,9 @@
                     <span id="altitude">N/A</span>
                     <h2>City</h2>
                     <span id="city">N/A</span>
-                    <div class="sun-info">
-                        <div class="sun-item">
-                            <h2>Sunrise</h2>
-                            <span id="sunrise">N/A</span>
-                        </div>
-                        <div class="sun-item">
-                            <h2>Sunset</h2>
-                            <span id="sunset">N/A</span>
-                        </div>
-                    </div>
                     <hr>
                     <h2>Local Information</h2>
-                    <p><em>Live location information coming soon...</em></p>
+                    <div id="wikipediaInfo"><em>Live location information loading...</em></div>
                 </div>
 
                 <div id="navigation" class="section">
@@ -87,17 +77,35 @@
                             <button onclick="switchWeatherImage('loop')">Loop</button>
                         </div>
                     </div>
-                    <img id="weather-image" class="weather-image active" alt="Weather satellite image">
-                    <div class="sun-info">
-                        <div class="sun-item">
+                    <img id="weather-image" class="weather-image active" alt="Satellite image">
+                    <div class="data-info">
+                        <div class="data-item">
+                            <h2>Temperature</h2>
+                            <span id="temperature">N/A</span>
+                        </div>
+                        <div class="data-item">
+                            <h2>Humidity</h2>
+                            <span id="humidity">N/A</span>
+                        </div>
+                        <div class="data-item">
+                            <h2>Wind</h2>
+                            <span id="wind">N/A</span>
+                        </div>
+                        <div class="data-item">
+                            <h2>Dew Point</h2>
+                            <span id="dewpoint">N/A</span>
+                        </div>
+                    </div>
+                    <div class="data-info">
+                        <div class="data-item">
                             <h2>Sunrise</h2>
                             <span id="sunrise">N/A</span>
                         </div>
-                        <div class="sun-item">
+                        <div class="data-item">
                             <h2>Sunset</h2>
                             <span id="sunset">N/A</span>
                         </div>
-                        <div class="sun-item">
+                        <div class="data-item">
                             <h2>Moon Phase</h2>
                             <span id="moonphase">N/A</span>
                         </div>
@@ -124,7 +132,6 @@
                         <li><a href="https://www.smartertravel.com">SmarterTravel</a></li>
                         <li><a href="https://www.lonelyplanet.com">Lonely Planet</a></li>
                         <li><a href="https://www.fodors.com">Fodor's</a></li>
-                        <li><a href="https://www.frommers.com">Frommer's</a></li>
                         <li><a href="https://www.alltrails.com">AllTrails</a></li>
                         <li><a href="https://www.roadtrippers.com">Roadtrippers</a></li>
                     </ul>
@@ -154,9 +161,9 @@
                         <li><a href="https://neal.fun">Neal.fun</a></li>
                         <li><a href="https://poki.com">Poki (Casual Games)</a></li>
                         <li><a href="https://nyc.birgefuller.com/HP/" data-frame>RPN Calculator</a></li>
-                        <li><a href="https://nyc.birgefuller.com/Mandelbrot/">Mandelbrot Explorer</a></li>
+                        <li><a href="https://nyc.birgefuller.com/Mandelbrot/">Mandelbrot Fractal</a></li>
                         <li><a href="https://lightroom.adobe.com/shares/3e89edbc7e0b4894905df16a85a1e71a">Aerial Tilt-Shift Gallery</a></li>
-                        <li><a href="https://static01.nyt.com/images/2025/02/18/nytfrontpage/scan.pdf" data-frame>NYT Front Page</a></li>
+                        <li><a href="https://www.earthcam.com">EarthCam</a></li>
                     </ul>
                 </div>
 
@@ -180,7 +187,6 @@
                 </div>
 
                 <div id="about" class="section">
-
                     <h2>About</h2>
                     <p>This service was created by <a href="https://www.mit.edu/~birge">Jonathan Birge</a> as a personal project. It is not affiliated with Tesla, Inc.</p>
                     <p>If there turns out to be any interest in this, future versions may include things like better inline weather information and maps, local links based on your current location, and per user customization.</p>
@@ -209,6 +215,6 @@
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script src="app.js?ver=5"></script>
+    <script src="app.js?ver=7"></script>
 </body>
 </html>

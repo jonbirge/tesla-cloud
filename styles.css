@@ -225,21 +225,25 @@ input:checked + .toggle-slider:before {
     transform: translateX(26px);
 }
 
-.sun-info {
-    display: block;
+.data-info {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 20px;
     margin-top: 20px;
+    width: 100%;
+    max-width: 1024px;
 }
 
-.sun-item {
-    display: inline-block;
-    margin-right: 50px;
-}
-
-.sun-item:last-child {
+.data-item {
+    display: block;
     margin-right: 0;
 }
 
-.sun-item h2 {
+.data-item:last-child {
+    margin-right: 0;
+}
+
+.data-item h2 {
     margin-top: 0;
 }
 
@@ -316,7 +320,7 @@ input:checked + .toggle-slider:before {
 }
 
 .weather-image {
-    width: 100%;
+    width: 90%;
     max-width: 1024px;
     opacity: 0;
     display: none;
