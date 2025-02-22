@@ -25,7 +25,7 @@ function toggleMode() {
     document.getElementById('darkModeToggle').checked = darkOn;
 }
 
-async function updateLocation() {
+async function updateLocationData() {
     if (lat !== null && long !== null) {
         console.log('Updating location dependent data...');
         neverUpdatedLocation = false;
@@ -36,23 +36,29 @@ async function updateLocation() {
             weatherLink.href = `https://forecast.weather.gov/MapClick.php?lat=${lat}&lon=${long}`;
         }
 
+        // Fire off API requests for external data
+        locationTimeZone = await fetchTimeZone(lat, long);
+        console.log('Timezone: ', locationTimeZone);
+        fetchCityData(lat, long);
+        fetchSunData(lat, long);
+        
         // If the Connectivity section is visible, update the IP data
         const connectivitySection = document.getElementById("connectivity");
         if (connectivitySection.style.display === "block") {
             updateConnectionInfo();
         }
 
-        // Fire off API requests for external data
-        locationTimeZone = await fetchTimeZone(lat, long);
-        console.log('Timezone: ', locationTimeZone);
-        fetchCityData(lat, long);
-        fetchSunData(lat, long);
+        // Update Wikipedia data if the Location section is visible
+        const locationSection = document.getElementById("location");
+        if (locationSection.style.display === "block") {
+            fetchWikipediaData(lat, long);
+        }
     } else {
         console.log('Location not available for dependent data.');
     }
 }
 
-async function updateLatLong() {
+function updateLatLong() {
     if (navigator.geolocation) {
         navigator.geolocation.getCurrentPosition((position) => {
             lat = position.coords.latitude;
@@ -62,7 +68,7 @@ async function updateLatLong() {
 
             // Handle first update to ensure timely data
             if (neverUpdatedLocation) {
-                updateLocation();
+                updateLocationData();
             }
             
             // Update location display
@@ -504,7 +510,7 @@ document.addEventListener('click', function(e) {
 // Update location on page load and every minute thereafter
 updateLatLong();
 setInterval(updateLatLong, locUpdateInterval * 1000);
-setInterval(updateLocation, locDataUpdateInterval * 1000);
+setInterval(updateLocationData, locDataUpdateInterval * 1000);
 
 // Show the default section
 showSection('news');
