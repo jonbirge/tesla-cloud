@@ -415,3 +415,40 @@ input:checked + .toggle-slider:before {
     font-size: 12pt;  /* Reduced from 14pt */
     color: var(--text-color);
 }
+
+.news-headlines {
+    margin: 20px 0;
+    max-width: 800px;
+}
+
+.news-item {
+    margin-bottom: 15px;
+    padding-bottom: 15px;
+    border-bottom: 1px solid var(--separator-color);
+}
+
+.news-item:last-child {
+    border-bottom: none;
+}
+
+.news-source {
+    color: var(--tesla-blue);
+    font-weight: 600;
+    margin-right: 10px;
+}
+
+.news-date {
+    color: var(--text-color);
+    font-size: 14pt;
+}
+
+.news-title {
+    display: block;
+    margin-top: 5px;
+    color: var(--button-text);
+    text-decoration: none;
+}
+
+.news-title:hover {
+    text-decoration: underline;
+}

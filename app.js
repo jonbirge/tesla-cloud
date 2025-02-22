@@ -19,6 +19,8 @@ let darkOn = false;
 let locationTimeZone = null;
 let weatherData = null;
 let forecastFetched = false;
+let newsUpdateInterval = null;
+const NEWS_REFRESH_INTERVAL = 300000; // 5 minutes
 
 function toggleMode() {
     manualDarkMode = true;
@@ -264,10 +266,21 @@ function showSection(sectionId) {
         button.classList.remove('active');
     });
 
+    // Clear any existing news update interval
+    if (newsUpdateInterval) {
+        clearInterval(newsUpdateInterval);
+        newsUpdateInterval = null;
+    }
+
     // Show the selected section
     const section = document.getElementById(sectionId);
     if (section) {
         section.style.display = 'block';
+        
+        if (sectionId === 'news') {
+            updateNews();
+            newsUpdateInterval = setInterval(updateNews, NEWS_REFRESH_INTERVAL);
+        }
         
         if (sectionId === 'weather') {
             // Load weather image when weather section is shown
@@ -622,3 +635,37 @@ setInterval(updateLocationData, locDataUpdateInterval * 1000);
 
 // Show the default section
 showSection('news');
+
+async function updateNews() {
+    try {
+        const response = await fetch('rss.php');
+        const items = await response.json();
+        
+        const newsContainer = document.getElementById('newsHeadlines');
+        if (!newsContainer) return;
+
+        const html = items.map(item => {
+            const date = new Date(item.date * 1000);
+            const timeString = date.toLocaleTimeString('en-US', { 
+                hour: 'numeric', 
+                minute: '2-digit',
+                timeZoneName: 'short'
+            });
+            
+            return `
+                <div class="news-item">
+                    <div>
+                        <span class="news-source">${item.source.toUpperCase()}</span>
+                        <span class="news-date">${timeString}</span>
+                    </div>
+                    <a href="${item.link}" class="news-title">${item.title}</a>
+                </div>`;
+        }).join('');
+
+        newsContainer.innerHTML = html || '<p><em>No headlines available</em></p>';
+    } catch (error) {
+        console.error('Error fetching news:', error);
+        document.getElementById('newsHeadlines').innerHTML = 
+            '<p><em>Error loading headlines</em></p>';
+    }
+}
