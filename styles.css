@@ -12,13 +12,12 @@
 
 body.dark-mode {
     --bg-color: #262626; /* Dark background */
-    --text-color: #686868; /* Light text */
+    --text-color: #717171; /* Light text */
     --active-section-bg: #333333;
     --separator-color: #999999;
     --button-text: #d6d6d6;
-    --button-bg: #757575; /* Darker link background */
+    --button-bg: #333333; /* Darker link background */
     --button-hover-bg: #555555;
-    /* --tesla-blue: #0077ff; */
 }
 
 * {
