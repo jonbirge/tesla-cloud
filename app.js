@@ -501,16 +501,19 @@ function fetchWeatherData(lat, long) {
 function updateWeatherDisplay() {
     if (!weatherData) return;
 
-    const temp = weatherData.temperature;
+    const tempC = weatherData.temperature;
+    const tempF = (tempC * 9/5 + 32).toFixed(1);
     const humidity = weatherData.humidity;
-    const windSpeed = weatherData.windSpeed;
+    const windSpeedMS = weatherData.windSpeed;
+    const windSpeedMPH = (windSpeedMS * 2.237).toFixed(1); // Convert m/s to mph
     const windDir = weatherData.windDirection;
-    const dewPoint = weatherData.dewPoint;
+    const dewPointC = weatherData.dewPoint;
+    const dewPointF = (dewPointC * 9/5 + 32).toFixed(1);
 
-    document.getElementById('temperature').innerText = `${temp}°C (${(temp * 9/5 + 32).toFixed(1)}°F)`;
+    document.getElementById('temperature').innerText = `${tempF}°F (${tempC}°C)`;
     document.getElementById('humidity').innerText = `${humidity}%`;
-    document.getElementById('wind').innerText = `${windSpeed} m/s at ${windDir}°`;
-    document.getElementById('dewpoint').innerText = `${dewPoint}°C (${(dewPoint * 9/5 + 32).toFixed(1)}°F)`;
+    document.getElementById('wind').innerText = `${windSpeedMPH} mph at ${windDir}°`;
+    document.getElementById('dewpoint').innerText = `${dewPointF}°F (${dewPointC}°C)`;
 }
 
 function loadExternalUrl(url, inFrame = false) {
