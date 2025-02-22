@@ -70,26 +70,6 @@
                 </div>
 
                 <div id="weather" class="section">
-                    <h2>Current Conditions</h2>
-                    <div class="weather-conditions">
-                        <div class="weather-item">
-                            <h3>Temperature</h3>
-                            <span id="temperature">N/A</span>
-                        </div>
-                        <div class="weather-item">
-                            <h3>Humidity</h3>
-                            <span id="humidity">N/A</span>
-                        </div>
-                        <div class="weather-item">
-                            <h3>Wind</h3>
-                            <span id="wind">N/A</span>
-                        </div>
-                        <div class="weather-item">
-                            <h3>Dew Point</h3>
-                            <span id="dewpoint">N/A</span>
-                        </div>
-                    </div>
-                    <hr>
                     <h2>Satellite</h2>
                     <div class="weather-switch-container">
                         <div class="weather-switch">
@@ -97,17 +77,35 @@
                             <button onclick="switchWeatherImage('loop')">Loop</button>
                         </div>
                     </div>
-                    <img id="weather-image" class="weather-image active" alt="Weather satellite image">
-                    <div class="sun-info">
-                        <div class="sun-item">
+                    <img id="weather-image" class="weather-image active" alt="Satellite image">
+                    <div class="data-info">
+                        <div class="data-item">
+                            <h2>Temperature</h2>
+                            <span id="temperature">N/A</span>
+                        </div>
+                        <div class="data-item">
+                            <h2>Humidity</h2>
+                            <span id="humidity">N/A</span>
+                        </div>
+                        <div class="data-item">
+                            <h2>Wind</h2>
+                            <span id="wind">N/A</span>
+                        </div>
+                        <div class="data-item">
+                            <h2>Dew Point</h2>
+                            <span id="dewpoint">N/A</span>
+                        </div>
+                    </div>
+                    <div class="data-info">
+                        <div class="data-item">
                             <h2>Sunrise</h2>
                             <span id="sunrise">N/A</span>
                         </div>
-                        <div class="sun-item">
+                        <div class="data-item">
                             <h2>Sunset</h2>
                             <span id="sunset">N/A</span>
                         </div>
-                        <div class="sun-item">
+                        <div class="data-item">
                             <h2>Moon Phase</h2>
                             <span id="moonphase">N/A</span>
                         </div>
