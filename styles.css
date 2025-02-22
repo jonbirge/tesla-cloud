@@ -355,7 +355,7 @@ input:checked + .toggle-slider:before {
 .right-frame {
     flex-grow: 1;
     height: 100%;
-    overflow-y: scroll;
+    overflow-y: auto;
     padding: 20px 3.5% 20px 15px;
     scrollbar-gutter: stable;
     scrollbar-width: thin;
@@ -364,13 +364,14 @@ input:checked + .toggle-slider:before {
 
 .right-frame.external {
     padding: 0;
-    margin-right: 3.5%;
+    overflow: hidden; /* Hide scrollbars when in external mode */
 }
 
 .right-frame iframe {
     width: 100%;
     height: 100%;
     border: none;
+    display: block; /* Remove potential inline-block gaps */
 }
 
 .forecast-container {
