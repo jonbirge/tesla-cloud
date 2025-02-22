@@ -372,3 +372,45 @@ input:checked + .toggle-slider:before {
     height: 100%;
     border: none;
 }
+
+.forecast-container {
+    display: flex;
+    justify-content: space-between;
+    gap: 15px;  /* Reduced from 20px */
+    margin: 20px 0;
+    max-width: 1024px;
+}
+
+.forecast-day {
+    flex: 1;
+    background-color: var(--active-section-bg);
+    border-radius: var(--button-radius);
+    padding: 15px;  /* Reduced from 20px */
+    text-align: center;
+    min-width: 100px;  /* Reduced from 120px */
+}
+
+.forecast-date {
+    font-size: 14pt;  /* Added explicit font size */
+    font-weight: 600;
+    margin-bottom: 8px;  /* Reduced from 10px */
+    color: var(--button-text);
+}
+
+.forecast-icon {
+    width: 48px;  /* Reduced from 64px */
+    height: 48px;  /* Reduced from 64px */
+    margin: 8px 0;  /* Reduced from 10px */
+}
+
+.forecast-temp {
+    font-size: 14pt;  /* Added explicit font size */
+    font-weight: 600;
+    margin: 8px 0;  /* Reduced from 10px */
+    color: var(--button-text);
+}
+
+.forecast-desc {
+    font-size: 12pt;  /* Reduced from 14pt */
+    color: var(--text-color);
+}

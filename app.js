@@ -18,6 +18,7 @@ let manualDarkMode = false;
 let darkOn = false;
 let locationTimeZone = null;
 let weatherData = null;
+let forecastFetched = false;
 
 function toggleMode() {
     manualDarkMode = true;
@@ -482,20 +483,77 @@ function switchWeatherImage(type) {
 
 function fetchWeatherData(lat, long) {
     console.log('Fetching weather data...');
-    fetch(`https://secure.geonames.org/findNearByWeatherJSON?lat=${lat}&lng=${long}&username=birgefuller`)
-        .then(response => response.json())
-        .then(data => {
-            console.log('Weather data:', data);
-            if (data.weatherObservation) {
-                weatherData = data.weatherObservation;
+    Promise.all([
+        fetch(`https://secure.geonames.org/findNearByWeatherJSON?lat=${lat}&lng=${long}&username=birgefuller`),
+        !forecastFetched ? fetch(`https://api.openweathermap.org/data/2.5/forecast?lat=${lat}&lon=${long}&appid=6a1b1bcb03b5718a9b3a2b108ce3293d&units=imperial`) : Promise.resolve(null)
+    ])
+        .then(([currentResponse, forecastResponse]) => Promise.all([
+            currentResponse.json(),
+            forecastResponse ? forecastResponse.json() : null
+        ]))
+        .then(([currentData, forecastData]) => {
+            if (currentData.weatherObservation) {
+                weatherData = currentData.weatherObservation;
                 updateWeatherDisplay();
-            } else {
-                weatherData = null;
+            }
+            
+            if (forecastData && !forecastFetched) {
+                updateForecastDisplay(forecastData);
+                forecastFetched = true;
             }
         })
         .catch(error => {
             console.error('Error fetching weather data: ', error);
         });
+}
+
+function updateForecastDisplay(data) {
+    const forecastDays = document.querySelectorAll('.forecast-day');
+    const dailyData = extractDailyForecast(data.list);
+    
+    dailyData.forEach((day, index) => {
+        if (index < forecastDays.length) {
+            const date = new Date(day.dt * 1000);
+            const dayElement = forecastDays[index];
+            
+            dayElement.querySelector('.forecast-date').textContent = 
+                date.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
+            
+            dayElement.querySelector('.forecast-icon').src = 
+                `https://openweathermap.org/img/wn/${day.weather[0].icon}@2x.png`;
+            
+            dayElement.querySelector('.forecast-temp').textContent = 
+                `${Math.round(day.temp_min)}°/${Math.round(day.temp_max)}°`;
+            
+            dayElement.querySelector('.forecast-desc').textContent = 
+                day.weather[0].main;
+        }
+    });
+}
+
+function extractDailyForecast(forecastList) {
+    const dailyData = [];
+    const dayMap = new Map();
+    
+    forecastList.forEach(item => {
+        const date = new Date(item.dt * 1000).toDateString();
+        
+        if (!dayMap.has(date)) {
+            dayMap.set(date, {
+                dt: item.dt,
+                temp_min: item.main.temp_min,
+                temp_max: item.main.temp_max,
+                weather: item.weather
+            });
+        } else {
+            const existing = dayMap.get(date);
+            existing.temp_min = Math.min(existing.temp_min, item.main.temp_min);
+            existing.temp_max = Math.max(existing.temp_max, item.main.temp_max);
+        }
+    });
+    
+    dayMap.forEach(day => dailyData.push(day));
+    return dailyData.slice(0, 5);
 }
 
 function updateWeatherDisplay() {
