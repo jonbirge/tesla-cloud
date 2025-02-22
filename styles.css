@@ -226,13 +226,17 @@ input:checked + .toggle-slider:before {
 }
 
 .data-info {
-    display: block;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 20px;
     margin-top: 20px;
+    width: 100%;
+    max-width: 1024px;
 }
 
 .data-item {
-    display: inline-block;
-    margin-right: 50px;
+    display: block;
+    margin-right: 0;
 }
 
 .data-item:last-child {
