@@ -3,7 +3,7 @@ header('Content-Type: application/json');
 
 $feeds = [
     'nyt' => 'https://rss.nytimes.com/services/xml/rss/nyt/HomePage.xml',
-    'wsj' => 'https://feeds.a.dj.com/rss/RSSWorldNews.xml',
+    'wsj' => 'https://feeds.content.dowjones.io/public/rss/RSSWorldNews',
     //'bbc' => 'https://feeds.bbci.co.uk/news/rss.xml',
     'electrek' => 'https://electrek.co/feed/',
     'teslarati' => 'https://www.teslarati.com/feed/',
