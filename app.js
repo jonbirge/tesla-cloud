@@ -653,13 +653,13 @@ async function updateNews() {
             });
             
             return `
-                <div class="news-item">
+                <button class="news-item" onclick="loadExternalUrl('${item.link}')">
                     <div>
                         <span class="news-source">${item.source.toUpperCase()}</span>
                         <span class="news-date">${timeString}</span>
                     </div>
-                    <a href="${item.link}" class="news-title">${item.title}</a>
-                </div>`;
+                    <div class="news-title">${item.title}</div>
+                </button>`;
         }).join('');
 
         newsContainer.innerHTML = html || '<p><em>No headlines available</em></p>';
