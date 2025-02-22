@@ -422,19 +422,20 @@ input:checked + .toggle-slider:before {
 }
 
 .news-item {
-    margin-bottom: 15px;
-    padding-bottom: 15px;
-    border-bottom: 1px solid var(--separator-color);
+    margin-bottom: 12px;
+    padding-bottom: 0;
+    border-bottom: none;
 }
 
 .news-item:last-child {
-    border-bottom: none;
+    margin-bottom: 0;
 }
 
 .news-source {
     color: var(--tesla-blue);
     font-weight: 600;
     margin-right: 10px;
+    font-size: 14pt;
 }
 
 .news-date {
@@ -444,9 +445,10 @@ input:checked + .toggle-slider:before {
 
 .news-title {
     display: block;
-    margin-top: 5px;
+    margin-top: 3px;
     color: var(--button-text);
     text-decoration: none;
+    font-size: 14pt;
 }
 
 .news-title:hover {
