@@ -1,6 +1,6 @@
 // Settings
 const locUpdateInterval = 10; // seconds
-const locDataUpdateInterval = 60; // seconds
+const locDataUpdateInterval = 120; // seconds
 
 // Global variables
 let lastUpdate = 0;
@@ -17,6 +17,7 @@ let pingData = [];
 let manualDarkMode = false;
 let darkOn = false;
 let locationTimeZone = null;
+let weatherData = null;
 
 function toggleMode() {
     manualDarkMode = true;
@@ -42,7 +43,13 @@ async function updateLocationData() {
         fetchCityData(lat, long);
         fetchSunData(lat, long);
         
-        // If the Connectivity section is visible, update the IP data
+        // Update the weather section if it's visible
+        const weatherSection = document.getElementById("weather");
+        if (weatherSection.style.display === "block") {
+            fetchWeatherData(lat, long);
+        }
+
+        // Update connectivity data if the Connectivity section is visible
         const connectivitySection = document.getElementById("connectivity");
         if (connectivitySection.style.display === "block") {
             updateConnectionInfo();
@@ -265,6 +272,12 @@ function showSection(sectionId) {
             // Load weather image when weather section is shown
             const weatherImage = document.getElementById('weather-image');
             weatherImage.src = WEATHER_IMAGES.latest;
+            // Load latest weather data
+            if (lat !== null && long !== null) {
+                fetchWeatherData(lat, long);
+            } else {
+                console.log('Location not available to fetch weather data.');
+            }
         } else {
             // Remove weather img src to force reload when switching back
             const weatherImage = document.getElementById('weather-image');
@@ -283,7 +296,6 @@ function showSection(sectionId) {
             }
         }
 		
-        // NEW: Only call Wikipedia API when the "location" section is selected
         if (sectionId === 'location') {
             if (lat !== null && long !== null) {
                 fetchWikipediaData(lat, long);
@@ -468,6 +480,39 @@ function switchWeatherImage(type) {
     weatherSwitch.style.setProperty('--slider-position', type === 'latest' ? '0' : '1');
 }
 
+function fetchWeatherData(lat, long) {
+    console.log('Fetching weather data...');
+    fetch(`https://secure.geonames.org/findNearByWeatherJSON?lat=${lat}&lng=${long}&username=birgefuller`)
+        .then(response => response.json())
+        .then(data => {
+            console.log('Weather data:', data);
+            if (data.weatherObservation) {
+                weatherData = data.weatherObservation;
+                updateWeatherDisplay();
+            } else {
+                weatherData = null;
+            }
+        })
+        .catch(error => {
+            console.error('Error fetching weather data: ', error);
+        });
+}
+
+function updateWeatherDisplay() {
+    if (!weatherData) return;
+
+    const temp = weatherData.temperature;
+    const humidity = weatherData.humidity;
+    const windSpeed = weatherData.windSpeed;
+    const windDir = weatherData.windDirection;
+    const dewPoint = weatherData.dewPoint;
+
+    document.getElementById('temperature').innerText = `${temp}°C (${(temp * 9/5 + 32).toFixed(1)}°F)`;
+    document.getElementById('humidity').innerText = `${humidity}%`;
+    document.getElementById('wind').innerText = `${windSpeed} m/s at ${windDir}°`;
+    document.getElementById('dewpoint').innerText = `${dewPoint}°C (${(dewPoint * 9/5 + 32).toFixed(1)}°F)`;
+}
+
 function loadExternalUrl(url, inFrame = false) {
     // Open external links in a new tab
     if (!inFrame) {
@@ -506,6 +551,8 @@ document.addEventListener('click', function(e) {
         loadExternalUrl(e.target.href, inFrame);
     }
 });
+
+// ***** Initial code *****
 
 // Update location on page load and every minute thereafter
 updateLatLong();
