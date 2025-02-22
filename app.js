@@ -1,3 +1,7 @@
+// Settings
+const locUpdateInterval = 10; // seconds
+const locDataUpdateInterval = 60; // seconds
+
 // Global variables
 let lastUpdate = 0;
 let neverUpdatedLocation = true;
@@ -263,7 +267,6 @@ function showSection(sectionId) {
             }
         }
 
-        // Handle connectivity section separately
         if (sectionId === 'connectivity') {
             const now = Date.now();
             if (now - lastUpdate > 60000) { // 60 seconds
@@ -273,12 +276,46 @@ function showSection(sectionId) {
                 console.log('Skipping update, too soon...');
             }
         }
+		
+        // NEW: Only call Wikipedia API when the "location" section is selected
+        if (sectionId === 'location') {
+            if (lat !== null && long !== null) {
+                fetchWikipediaData(lat, long);
+            } else {
+                console.log('Location not available to fetch Wikipedia data.');
+            }
+        }
     }
 
     // Activate the clicked button
     const button = document.querySelector(`.section-button[onclick="showSection('${sectionId}')"]`);
     if (button) {
         button.classList.add('active');
+    }
+}
+
+async function fetchWikipediaData(lat, long) {
+    console.log('Fetching Wikipedia data...');
+    const url = `https://secure.geonames.org/findNearbyWikipediaJSON?lat=${lat}&lng=${long}&username=birgefuller`;
+    try {
+        const response = await fetch(url);
+        const data = await response.json();
+        const wikiDiv = document.getElementById('wikipediaInfo');
+        if (data.geonames && data.geonames.length > 0) {
+            let html = '<ul>';
+            data.geonames.forEach(article => {
+                // Ensure URL starts with http:// for proper linking
+                const pageUrl = article.wikipediaUrl.startsWith('http') ? article.wikipediaUrl : 'http://' + article.wikipediaUrl;
+                html += `<li><a href="${pageUrl}" target="_blank">${article.title}</a>: ${article.summary}</li>`;
+            });
+            html += '</ul>';
+            wikiDiv.innerHTML = html;
+        } else {
+            wikiDiv.innerHTML = '<p><em>No nearby Wikipedia articles found.</em></p>';
+        }
+    } catch (error) {
+        console.error('Error fetching Wikipedia data:', error);
+        document.getElementById('wikipediaInfo').innerHTML = '<p><em>Error loading Wikipedia data.</em></p>';
     }
 }
 
@@ -425,7 +462,6 @@ function switchWeatherImage(type) {
     weatherSwitch.style.setProperty('--slider-position', type === 'latest' ? '0' : '1');
 }
 
-// Modified loadExternalUrl function
 function loadExternalUrl(url, inFrame = false) {
     // Open external links in a new tab
     if (!inFrame) {
@@ -467,8 +503,8 @@ document.addEventListener('click', function(e) {
 
 // Update location on page load and every minute thereafter
 updateLatLong();
-setInterval(updateLatLong, 5000);
-setInterval(updateLocation, 60000);
+setInterval(updateLatLong, locUpdateInterval * 1000);
+setInterval(updateLocation, locDataUpdateInterval * 1000);
 
-// Show the first section by default
-showSection('location');
+// Show the default section
+showSection('news');

@@ -16,10 +16,10 @@
         <div class="left-frame">
             <div class="section-buttons">
                 <h1>teslas.cloud (beta)</h1>
+                <button class="section-button" onclick="showSection('news')">News</button>
                 <button class="section-button" onclick="showSection('location')">Location</button>
                 <button class="section-button" onclick="showSection('weather')">Weather</button>
                 <button class="section-button" onclick="showSection('navigation')">Navigation</button>
-                <button class="section-button" onclick="showSection('news')">News</button>
                 <button class="section-button" onclick="showSection('media')">Media</button>
                 <button class="section-button" onclick="showSection('reference')">Reference</button>
                 <button class="section-button" onclick="showSection('toys')">Toys</button>
@@ -50,19 +50,9 @@
                     <span id="altitude">N/A</span>
                     <h2>City</h2>
                     <span id="city">N/A</span>
-                    <div class="sun-info">
-                        <div class="sun-item">
-                            <h2>Sunrise</h2>
-                            <span id="sunrise">N/A</span>
-                        </div>
-                        <div class="sun-item">
-                            <h2>Sunset</h2>
-                            <span id="sunset">N/A</span>
-                        </div>
-                    </div>
                     <hr>
                     <h2>Local Information</h2>
-                    <p><em>Live location information coming soon...</em></p>
+                    <div id="wikipediaInfo"><em>Live location information loading...</em></div>
                 </div>
 
                 <div id="navigation" class="section">
