@@ -1,23 +1,23 @@
 :root {
-    --bg-color: #efecec; /* Very light gray */
-    --text-color: #9f9f9f; /* Dark gray */
+    --bg-color: #efefef;
+    --text-color: #9f9f9f;
     --active-section-bg: #ffffff;
     --separator-color: #d0d0d0;
     --button-text: #545454;
-    --button-bg: #d0d0d0; /* Slightly darker gray */
-    --button-hover-bg: #f3f3f3;
+    --button-bg: #dcdcdc;
+    /* --button-hover-bg: #f3f3f3; */
     --tesla-blue: #0077ff;
     --button-radius: 10px;
 }
 
 body.dark-mode {
-    --bg-color: #262626; /* Dark background */
-    --text-color: #717171; /* Light text */
+    --bg-color: #262626;
+    --text-color: #717171;
     --active-section-bg: #333333;
     --separator-color: #999999;
     --button-text: #d6d6d6;
-    --button-bg: #333333; /* Darker link background */
-    --button-hover-bg: #555555;
+    --button-bg: #333333;
+    /* --button-hover-bg: #555555; */
 }
 
 * {
