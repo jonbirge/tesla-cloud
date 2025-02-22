@@ -417,12 +417,12 @@ input:checked + .toggle-slider:before {
 
 .news-headlines {
     margin: 20px 0;
-    max-width: 800px;
+    max-width: 900px;
 }
 
 .news-item {
-    margin-bottom: 8px;
-    padding: 12px;
+    margin-bottom: 9px;
+    padding: 9px;
     background-color: var(--button-bg);
     border-radius: var(--button-radius);
     transition: background-color 0.3s;
@@ -444,12 +444,12 @@ input:checked + .toggle-slider:before {
     color: var(--tesla-blue);
     font-weight: 600;
     margin-right: 10px;
-    font-size: 14pt;
+    font-size: 12pt;
 }
 
 .news-date {
     color: var(--text-color);
-    font-size: 14pt;
+    font-size: 12pt;
 }
 
 .news-title {
