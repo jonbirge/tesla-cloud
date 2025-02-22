@@ -4,7 +4,14 @@ header('Content-Type: application/json');
 $feeds = [
     'nyt' => 'https://rss.nytimes.com/services/xml/rss/nyt/HomePage.xml',
     'wsj' => 'https://feeds.a.dj.com/rss/RSSWorldNews.xml',
-    'bbc' => 'https://feeds.bbci.co.uk/news/rss.xml'
+    //'bbc' => 'https://feeds.bbci.co.uk/news/rss.xml',
+    'electrek' => 'https://electrek.co/feed/',
+    'teslarati' => 'https://www.teslarati.com/feed/',
+    'insideevs' => 'https://insideevs.com/rss/articles/all/',
+    'tesla' => 'https://www.tesla.com/rss/blog',
+    'teslamotorsclub' => 'https://teslamotorsclub.com/feed/',
+    'teslarumors' => 'https://teslarumors.com/feed/',
+    'notatesla' => 'https://notateslaapp.com/feed/',
 ];
 
 function fetchRSS($url) {
@@ -46,5 +53,8 @@ foreach ($feeds as $source => $url) {
 usort($allItems, function($a, $b) {
     return $b['date'] - $a['date'];
 });
+
+// Keep only the 10 most recent items
+$allItems = array_slice($allItems, 0, 15);
 
 echo json_encode($allItems);
