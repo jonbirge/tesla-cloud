@@ -5,7 +5,7 @@
     --separator-color: #d0d0d0;
     --button-text: #545454;
     --button-bg: #dcdcdc;
-    /* --button-hover-bg: #f3f3f3; */
+    --button-hover-bg: #f3f3f3;
     --tesla-blue: #0077ff;
     --button-radius: 10px;
 }
@@ -17,7 +17,7 @@ body.dark-mode {
     --separator-color: #999999;
     --button-text: #d6d6d6;
     --button-bg: #333333;
-    /* --button-hover-bg: #555555; */
+    --button-hover-bg: #555555;
 }
 
 * {

@@ -578,13 +578,10 @@ function updateWeatherDisplay() {
     const windSpeedMS = weatherData.windSpeed;
     const windSpeedMPH = (windSpeedMS * 2.237).toFixed(1); // Convert m/s to mph
     const windDir = weatherData.windDirection;
-    const dewPointC = weatherData.dewPoint;
-    const dewPointF = (dewPointC * 9/5 + 32).toFixed(1);
 
     document.getElementById('temperature').innerText = `${tempF}°F (${tempC}°C)`;
     document.getElementById('humidity').innerText = `${humidity}%`;
     document.getElementById('wind').innerText = `${windSpeedMPH} mph at ${windDir}°`;
-    document.getElementById('dewpoint').innerText = `${dewPointF}°F (${dewPointC}°C)`;
 }
 
 function loadExternalUrl(url, inFrame = false) {
