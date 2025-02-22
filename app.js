@@ -21,6 +21,7 @@ let weatherData = null;
 let forecastFetched = false;
 let newsUpdateInterval = null;
 const NEWS_REFRESH_INTERVAL = 300000; // 5 minutes
+let forecastData = null; // Add this with other global variables at the top
 
 function toggleMode() {
     manualDarkMode = true;
@@ -545,6 +546,7 @@ function updateForecastDisplay(data) {
 }
 
 function extractDailyForecast(forecastList) {
+    forecastData = forecastList; // Store the full forecast data
     const dailyData = [];
     const dayMap = new Map();
     
@@ -568,6 +570,56 @@ function extractDailyForecast(forecastList) {
     dayMap.forEach(day => dailyData.push(day));
     return dailyData.slice(0, 5);
 }
+
+function showHourlyForecast(dayIndex) {
+    if (!forecastData) return;
+
+    const startDate = new Date(forecastData[0].dt * 1000).setHours(0, 0, 0, 0);
+    const targetDate = new Date(startDate + dayIndex * 24 * 60 * 60 * 1000);
+    const endDate = new Date(targetDate).setHours(23, 59, 59, 999);
+
+    // Filter forecast data for the selected day
+    const hourlyData = forecastData.filter(item => {
+        const itemDate = new Date(item.dt * 1000);
+        return itemDate >= targetDate && itemDate <= endDate;
+    });
+
+    // Create the popup content
+    const popupDate = document.getElementById('popup-date');
+    popupDate.textContent = targetDate.toLocaleDateString('en-US', {
+        weekday: 'long',
+        month: 'long',
+        day: 'numeric'
+    });
+
+    const hourlyContainer = document.querySelector('.hourly-forecast');
+    hourlyContainer.innerHTML = hourlyData.map(item => {
+        const time = new Date(item.dt * 1000).toLocaleTimeString('en-US', {
+            hour: 'numeric',
+            minute: '2-digit'
+        });
+        return `
+            <div class="hourly-item">
+                <div class="hourly-time">${time}</div>
+                <img src="https://openweathermap.org/img/wn/${item.weather[0].icon}@2x.png" alt="${item.weather[0].description}" style="width: 50px; height: 50px;">
+                <div class="hourly-temp">${Math.round(item.main.temp)}°F</div>
+                <div class="hourly-desc">${item.weather[0].main}</div>
+            </div>
+        `;
+    }).join('');
+
+    // Show the popup and overlay
+    document.querySelector('.overlay').classList.add('show');
+    document.querySelector('.forecast-popup').classList.add('show');
+}
+
+function closeHourlyForecast() {
+    document.querySelector('.overlay').classList.remove('show');
+    document.querySelector('.forecast-popup').classList.remove('show');
+}
+
+// Add click handler to close popup when clicking overlay
+document.querySelector('.overlay').addEventListener('click', closeHourlyForecast);
 
 function updateWeatherDisplay() {
     if (!weatherData) return;

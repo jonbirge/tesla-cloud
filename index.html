@@ -114,36 +114,44 @@
                     <hr>
                     <h2>Forecast</h2>
                     <div class="forecast-container">
-                        <div class="forecast-day">
+                        <div class="forecast-day" onclick="showHourlyForecast(0)">
                             <div class="forecast-date">Loading...</div>
                             <img class="forecast-icon" src="" alt="">
                             <div class="forecast-temp">--°/--°</div>
                             <div class="forecast-desc">...</div>
                         </div>
-                        <div class="forecast-day">
+                        <div class="forecast-day" onclick="showHourlyForecast(1)">
                             <div class="forecast-date">Loading...</div>
                             <img class="forecast-icon" src="" alt="">
                             <div class="forecast-temp">--°/--°</div>
                             <div class="forecast-desc">...</div>
                         </div>
-                        <div class="forecast-day">
+                        <div class="forecast-day" onclick="showHourlyForecast(2)">
                             <div class="forecast-date">Loading...</div>
                             <img class="forecast-icon" src="" alt="">
                             <div class="forecast-temp">--°/--°</div>
                             <div class="forecast-desc">...</div>
                         </div>
-                        <div class="forecast-day">
+                        <div class="forecast-day" onclick="showHourlyForecast(3)">
                             <div class="forecast-date">Loading...</div>
                             <img class="forecast-icon" src="" alt="">
                             <div class="forecast-temp">--°/--°</div>
                             <div class="forecast-desc">...</div>
                         </div>
-                        <div class="forecast-day">
+                        <div class="forecast-day" onclick="showHourlyForecast(4)">
                             <div class="forecast-date">Loading...</div>
                             <img class="forecast-icon" src="" alt="">
                             <div class="forecast-temp">--°/--°</div>
                             <div class="forecast-desc">...</div>
                         </div>
+                    </div>
+
+                    <!-- Add popup elements -->
+                    <div class="overlay"></div>
+                    <div class="forecast-popup">
+                        <button class="forecast-popup-close" onclick="closeHourlyForecast()">&times;</button>
+                        <h2 id="popup-date">Hourly Forecast</h2>
+                        <div class="hourly-forecast"></div>
                     </div>
                     <hr>
                     <h2>Links</h2>
