@@ -82,7 +82,7 @@ async function updateLatLong() {
 
 function fetchCityData(lat, long) {
     // Proxy request to Geonames reverse geocoding API endpoint
-    fetch(`proxy.php?url=${encodeURIComponent("http://api.geonames.org/findNearbyPlaceNameJSON?lat=" + lat + "&lng=" + long + "&username=birgefuller")}`)
+    fetch(`https://secure.geonames.org/findNearbyPlaceNameJSON?lat=${lat}&lng=${long}&username=birgefuller`)
         .then(response => response.json())
         .then(cityData => {
             const place = cityData.geonames && cityData.geonames[0];
@@ -96,7 +96,7 @@ function fetchCityData(lat, long) {
 
 function fetchTimeZone(lat, long) {
     // Return a Promise that resolves with the timezoneId
-    return fetch(`proxy.php?url=${encodeURIComponent("http://api.geonames.org/timezoneJSON?lat=" + lat + "&lng=" + long + "&username=birgefuller")}`)
+    return fetch(`https://secure.geonames.org/timezoneJSON?lat=${lat}&lng=${long}&username=birgefuller`)
         .then(response => response.json())
         .then(tzData => {
             return tzData.timezoneId || 'UTC';
