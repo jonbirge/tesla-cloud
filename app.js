@@ -223,7 +223,7 @@ function updateConnectionInfo() {
 
             // Update the UI with the fetched data
             document.getElementById('rdns').innerText = rdnsName;
-            document.getElementById('location').innerText = `${ipData.city || 'N/A'}, ${ipData.region || 'N/A'}, ${ipData.country_name || 'N/A'}`;
+            document.getElementById('exitLocation').innerText = `${ipData.city || 'N/A'}, ${ipData.region || 'N/A'}, ${ipData.country_name || 'N/A'}`;
             document.getElementById('isp').innerText = ipData.org || 'N/A';
         })
         .catch(error => {
