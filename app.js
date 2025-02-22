@@ -94,17 +94,15 @@ function fetchCityData(lat, long) {
         });
 }
 
-function fetchTimeZone(lat, long) {
-    // Return a Promise that resolves with the timezoneId
-    return fetch(`https://secure.geonames.org/timezoneJSON?lat=${lat}&lng=${long}&username=birgefuller`)
-        .then(response => response.json())
-        .then(tzData => {
-            return tzData.timezoneId || 'UTC';
-        })
-        .catch(error => {
-            console.error('Error fetching time zone:', error);
-            return 'UTC';
-        });
+async function fetchTimeZone(lat, long) {
+    try {
+        const response = await fetch(`https://secure.geonames.org/timezoneJSON?lat=${lat}&lng=${long}&username=birgefuller`);
+        const tzData = await response.json();
+        return tzData.timezoneId || 'UTC';
+    } catch (error) {
+        console.error('Error fetching time zone:', error);
+        return 'UTC';
+    }
 }
 
 function fetchSunData(lat, long) {
