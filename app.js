@@ -70,6 +70,31 @@ function estimateSpeed(p1, p2) {
     return speedMS * 2.237; // 2.237 is the conversion factor from m/s to mph
 }
 
+function calculateHeading(p1, p2) {
+    // Convert coordinates to radians
+    const lat1 = p1.lat * Math.PI / 180;
+    const lat2 = p2.lat * Math.PI / 180;
+    const dLon = (p2.long - p1.long) * Math.PI / 180;
+
+    // Calculate heading using great circle formula
+    const y = Math.sin(dLon) * Math.cos(lat2);
+    const x = Math.cos(lat1) * Math.sin(lat2) -
+            Math.sin(lat1) * Math.cos(lat2) * Math.cos(dLon);
+    let heading = Math.atan2(y, x) * 180 / Math.PI;
+    
+    // Normalize to 0-360°
+    heading = (heading + 360) % 360;
+    
+    return heading;
+}
+
+function getCardinalDirection(heading) {
+    const directions = ['N', 'NNE', 'NE', 'ENE', 'E', 'ESE', 'SE', 'SSE',
+                       'S', 'SSW', 'SW', 'WSW', 'W', 'WNW', 'NW', 'NNW'];
+    const index = Math.round(heading * 16 / 360) % 16;
+    return directions[index];
+}
+
 function toggleMode() {
     manualDarkMode = true;
     document.body.classList.toggle('dark-mode');
@@ -130,11 +155,15 @@ function updateLatLong() {
                 locationBuffer.shift(); // Remove oldest point
             }
             
-            // Calculate speed if we have enough points
+            // Calculate speed and heading if we have enough points
             if (locationBuffer.length >= 2) {
                 const oldestPoint = locationBuffer[0];
                 const speed = estimateSpeed(oldestPoint, newPoint);
+                const heading = calculateHeading(oldestPoint, newPoint);
+                const cardinal = getCardinalDirection(heading);
+                
                 document.getElementById('speed').innerText = `${speed.toFixed(1)} mph`;
+                document.getElementById('heading').innerText = `${heading.toFixed(0)}° (${cardinal})`;
             }
 
             // ...rest of existing updateLatLong code...
