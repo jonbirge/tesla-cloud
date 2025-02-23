@@ -541,3 +541,38 @@ input:checked + .toggle-slider:before {
 .overlay.show {
     display: block;
 }
+
+.location-stats {
+    display: flex;
+    gap: 30px;
+    margin: 20px 0 30px 0;  /* Added top margin */
+    padding: 15px 0;
+    justify-content: space-between;  /* Better spacing between stats */
+    max-width: 800px;  /* Prevent stats from spreading too wide */
+}
+
+.stat-box {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-width: 200px;  /* Ensure enough space for large numbers */
+}
+
+.stat-value {
+    font-size: 48pt;  /* Increased from 36pt */
+    font-weight: 800;  /* Made slightly bolder */
+    color: var(--button-text);
+    line-height: 1.1;
+}
+
+.stat-label {
+    font-size: 16pt;  /* Increased from 14pt */
+    color: var(--text-color);
+    font-weight: 600;
+    margin-top: 5px;
+}
+
+.metric {
+    font-size: 14pt;  /* Increased from 12pt */
+    opacity: 0.7;
+}

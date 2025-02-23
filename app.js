@@ -162,11 +162,10 @@ function updateLatLong() {
                 const heading = calculateHeading(oldestPoint, newPoint);
                 const cardinal = getCardinalDirection(heading);
                 
-                document.getElementById('speed').innerText = `${speed.toFixed(1)} mph`;
-                document.getElementById('heading').innerText = `${heading.toFixed(0)}° (${cardinal})`;
+                document.getElementById('speed').innerText = `${speed.toFixed(0)}`;
+                document.getElementById('heading').innerText = `${heading.toFixed(0)}°`;
             }
 
-            // ...rest of existing updateLatLong code...
             console.log(`Updating location: ${lat}, ${long}, ${alt}`);
 
             if (neverUpdatedLocation) {
@@ -176,8 +175,16 @@ function updateLatLong() {
             document.getElementById('latitude').innerText = lat.toFixed(4) + '°';
             document.getElementById('longitude').innerText = long.toFixed(4) + '°';
 
-            const altStr = alt ? `${alt.toFixed(0)} m, ${(alt * 3.28084).toFixed(0)} ft` : 'N/A';
-            document.getElementById('altitude').innerText = altStr;
+            // Update altitude in both units
+            if (alt) {
+                const altFt = (alt * 3.28084).toFixed(0);
+                const altM = alt.toFixed(0);
+                document.getElementById('altitude-imperial').innerText = altFt;
+                document.getElementById('altitude-metric').innerText = `(${altM} m)`;
+            } else {
+                document.getElementById('altitude-imperial').innerText = 'N/A';
+                document.getElementById('altitude-metric').innerText = '(N/A m)';
+            }
 
             document.getElementById('time').innerText = new Date().toLocaleTimeString('en-US', { 
                 timeZone: locationTimeZone || 'UTC',

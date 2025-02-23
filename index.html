@@ -48,17 +48,30 @@
                 </div>
 
                 <div id="location" class="section">
-                    <h2>Location</h2>
-                    <span id="latitude">N/A</span>, <span id="longitude">N/A</span>
-                    (<span id="time">N/A</span>)
-                    <h2>Altitude</h2>
-                    <span id="altitude">N/A</span>
-                    <h2>Speed</h2>
-                    <span id="speed">N/A</span>
-                    <h2>Heading</h2>
-                    <span id="heading">N/A</span>
-                    <h2>City</h2>
-                    <span id="city">N/A</span>
+                    <div class="location-stats">
+                        <div class="stat-box">
+                            <div class="stat-value" id="speed">N/A</div>
+                            <div class="stat-label">MPH</div>
+                        </div>
+                        <div class="stat-box">
+                            <div class="stat-value" id="heading">N/A</div>
+                            <div class="stat-label">HDG</div>
+                        </div>
+                        <div class="stat-box">
+                            <div class="stat-value" id="altitude-imperial">N/A</div>
+                            <div class="stat-label">FT <span class="metric" id="altitude-metric">(N/A m)</span></div>
+                        </div>
+                    </div>
+                    <div class="data-info">
+                        <div class="data-item">
+                            <h2>Location</h2>
+                            <span id="latitude">N/A</span>, <span id="longitude">N/A</span>
+                        </div>
+                        <div class="data-item">
+                            <h2>City</h2>
+                            <span id="city">N/A</span>
+                        </div>
+                    </div>
                     <hr>
                     <h2>Local Landmarks</h2>
                     <div id="wikipediaInfo"><em>Landmark information loading...</em></div>
