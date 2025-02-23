@@ -1,6 +1,7 @@
 // Settings
-const locUpdateInterval = 10; // seconds
-const locDataUpdateInterval = 120; // seconds
+const latlonUpdateInterval = 2; // seconds
+const locDataUpdateInterval = 60; // seconds
+const NEWS_REFRESH_INTERVAL = 5; // minutes
 
 // Global variables
 let lastUpdate = 0;
@@ -20,8 +21,54 @@ let locationTimeZone = null;
 let weatherData = null;
 let forecastFetched = false;
 let newsUpdateInterval = null;
-const NEWS_REFRESH_INTERVAL = 300000; // 5 minutes
+
 let forecastData = null; // Add this with other global variables at the top
+
+class LocationPoint {
+    constructor(lat, long, alt, timestamp) {
+        this.lat = lat;
+        this.long = long;
+        this.alt = alt;
+        this.timestamp = timestamp;
+    }
+}
+
+const locationBuffer = [];
+const MAX_BUFFER_SIZE = 5;
+
+function estimateSpeed(p1, p2) {
+    const R = 6371e3; // Earth's radius in meters
+    const φ1 = p1.lat * Math.PI/180;
+    const φ2 = p2.lat * Math.PI/180;
+    const Δφ = (p2.lat - p1.lat) * Math.PI/180;
+    const Δλ = (p2.long - p1.long) * Math.PI/180;
+
+    // Haversine formula for distance
+    const a = Math.sin(Δφ/2) * Math.sin(Δφ/2) +
+            Math.cos(φ1) * Math.cos(φ2) *
+            Math.sin(Δλ/2) * Math.sin(Δλ/2);
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+    const horizontalDist = R * c;
+
+    // Add vertical component if altitude is available
+    let verticalDist = 0;
+    if (p1.alt != null && p2.alt != null) {
+        verticalDist = p2.alt - p1.alt;
+    }
+
+    // Total 3D distance
+    const distance = Math.sqrt(horizontalDist * horizontalDist + verticalDist * verticalDist);
+    
+    // Time difference in seconds
+    const timeDiff = (p2.timestamp - p1.timestamp) / 1000;
+    
+    if (timeDiff === 0) return 0;
+    
+    // Speed in meters per second
+    const speedMS = distance / timeDiff;
+    // Convert to miles per hour
+    return speedMS * 2.237; // 2.237 is the conversion factor from m/s to mph
+}
 
 function toggleMode() {
     manualDarkMode = true;
@@ -75,25 +122,37 @@ function updateLatLong() {
             lat = position.coords.latitude;
             long = position.coords.longitude;
             alt = position.coords.altitude;  // altitude in meters
+            
+            // Add new location point to buffer
+            const newPoint = new LocationPoint(lat, long, alt, Date.now());
+            locationBuffer.push(newPoint);
+            if (locationBuffer.length > MAX_BUFFER_SIZE) {
+                locationBuffer.shift(); // Remove oldest point
+            }
+            
+            // Calculate speed if we have enough points
+            if (locationBuffer.length >= 2) {
+                const oldestPoint = locationBuffer[0];
+                const speed = estimateSpeed(oldestPoint, newPoint);
+                document.getElementById('speed').innerText = `${speed.toFixed(1)} mph`;
+            }
+
+            // ...rest of existing updateLatLong code...
             console.log(`Updating location: ${lat}, ${long}, ${alt}`);
 
-            // Handle first update to ensure timely data
             if (neverUpdatedLocation) {
                 updateLocationData();
             }
             
-            // Update location display
             document.getElementById('latitude').innerText = lat.toFixed(4) + '°';
             document.getElementById('longitude').innerText = long.toFixed(4) + '°';
 
-            // Update altitude in meters and feet
             const altStr = alt ? `${alt.toFixed(0)} m, ${(alt * 3.28084).toFixed(0)} ft` : 'N/A';
             document.getElementById('altitude').innerText = altStr;
 
-            // Update time id element
             document.getElementById('time').innerText = new Date().toLocaleTimeString('en-US', { 
                 timeZone: locationTimeZone || 'UTC',
-                timeZoneName: 'short' // 'PDT', 'EDT', etc.
+                timeZoneName: 'short'
             });
         });
     } else {
@@ -280,7 +339,7 @@ function showSection(sectionId) {
         
         if (sectionId === 'news') {
             updateNews();
-            newsUpdateInterval = setInterval(updateNews, NEWS_REFRESH_INTERVAL);
+            newsUpdateInterval = setInterval(updateNews, 60000*NEWS_REFRESH_INTERVAL);
         }
         
         if (sectionId === 'weather') {
@@ -679,8 +738,8 @@ document.addEventListener('click', function(e) {
 
 // Update location on page load and every minute thereafter
 updateLatLong();
-setInterval(updateLatLong, locUpdateInterval * 1000);
-setInterval(updateLocationData, locDataUpdateInterval * 1000);
+setInterval(updateLatLong, 1000*latlonUpdateInterval);
+setInterval(updateLocationData, 1000*locDataUpdateInterval);
 
 // Show the default section
 showSection('news');

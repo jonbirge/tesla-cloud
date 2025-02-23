@@ -9,9 +9,12 @@ $feeds = [
     'teslarati' => 'https://www.teslarati.com/feed/',
     'insideevs' => 'https://insideevs.com/rss/articles/all/',
     'tesla' => 'https://www.tesla.com/rss/blog',
-    'teslamotorsclub' => 'https://teslamotorsclub.com/feed/',
+    'tmc' => 'https://teslamotorsclub.com/feed/',
     'teslarumors' => 'https://teslarumors.com/feed/',
     'notatesla' => 'https://notateslaapp.com/feed/',
+    'cleantechnica' => 'https://cleantechnica.com/feed/',
+    'evannex' => 'https://evannex.com/blogs/news.atom',
+    'teslamag' => 'https://teslamag.de/feed',
 ];
 
 function fetchRSS($url) {
