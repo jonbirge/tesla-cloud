@@ -32,7 +32,7 @@ body {
     color: var(--text-color);
     padding: 0;
     text-align: left; /* Align text to the left */
-    font-weight: 580;
+    font-weight: 560;
 }
 
 a {
@@ -50,11 +50,11 @@ h1 {
 
 h2 {
     font-size: 16pt;
+    font-weight: 680;
     letter-spacing: 0.01em;
     margin-bottom: 12px;
     margin-top: 28px;
     text-align: left;
-    font-weight: 640;
     color: var(--button-text);
 }
 
