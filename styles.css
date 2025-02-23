@@ -106,14 +106,36 @@ hr {
     color: var(--button-text);
 }
 
-.link-list {
-    list-style: none;
-    padding: 0;
-    margin-top: 0px; /* remove top margin */
+.link-list, .double-list {
+    display: none !important;
 }
 
-.link-list li {
-    margin: 15px 0px;
+.button-list {
+    list-style: none;
+    padding: 0;
+    margin-top: 0;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, 280px);
+    gap: 16px;
+    justify-content: start;
+    max-width: 1200px;
+}
+
+.button-list li {
+    margin: 0;
+}
+
+.button-list a {
+    display: block;
+    padding: 24px;
+    background-color: var(--button-bg);
+    color: var(--button-text);
+    text-decoration: none;
+    border-radius: var(--button-radius);
+    transition: background-color 0.3s;
+    text-align: center;
+    width: auto;
+    font-weight: 600;
 }
 
 li {
@@ -125,10 +147,7 @@ li {
 
 /* Special styling for media section to show links in two columns */
 .double-list {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 16px;
-    max-width: 640px;
+    display: none !important;
 }
 
 .double-list li {
