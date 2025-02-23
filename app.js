@@ -1,6 +1,7 @@
 // Settings
 const LATLON_UPDATE_INTERVAL = 1; // seconds
-const LOC_DATA_UPDATE_INTERVAL = 60; // seconds
+const UPDATE_DISTANCE_THRESHOLD = 1000; // meters
+const UPDATE_TIME_THRESHOLD = 60; // minutes
 const NEWS_REFRESH_INTERVAL = 5; // minutes
 const MAX_BUFFER_SIZE = 5;
 const WEATHER_IMAGES = {
@@ -14,6 +15,8 @@ let neverUpdatedLocation = true;
 let lat = null;
 let long = null;
 let alt = null;
+let lastUpdateLat = null;
+let lastUpdateLong = null;
 let sunrise = null;
 let sunset = null;
 let moonPhaseData = null;
@@ -143,6 +146,32 @@ async function updateLocationData() {
     }
 }
 
+function calculateDistance(lat1, lon1, lat2, lon2) {
+    const R = 6371e3; // Earth's radius in meters
+    const φ1 = lat1 * Math.PI/180;
+    const φ2 = lat2 * Math.PI/180;
+    const Δφ = (lat2 - lat1) * Math.PI/180;
+    const Δλ = (lon2 - lon1) * Math.PI/180;
+
+    const a = Math.sin(Δφ/2) * Math.sin(Δφ/2) +
+            Math.cos(φ1) * Math.cos(φ2) *
+            Math.sin(Δλ/2) * Math.sin(Δλ/2);
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+    return R * c; // returns distance in meters
+}
+
+function shouldUpdateLocationData() {
+    if (neverUpdatedLocation || !lastUpdateLat || !lastUpdateLong) {
+        return true;
+    }
+
+    const now = Date.now();
+    const timeSinceLastUpdate = (now - lastUpdate) / (1000 * 60); // Convert to minutes
+    const distance = calculateDistance(lat, long, lastUpdateLat, lastUpdateLong);
+    
+    return distance >= UPDATE_DISTANCE_THRESHOLD || timeSinceLastUpdate >= UPDATE_TIME_THRESHOLD;
+}
+
 function updateLatLong() {
     if (navigator.geolocation) {
         navigator.geolocation.getCurrentPosition((position) => {
@@ -168,10 +197,13 @@ function updateLatLong() {
                 document.getElementById('heading').innerText = `${heading.toFixed(0)}°`;
             }
 
-            console.log(`Updating location: ${lat}, ${long}, ${alt}`);
-
-            if (neverUpdatedLocation) {
+            // Check if we should update location-dependent data
+            if (shouldUpdateLocationData()) {
+                console.log('Location changed significantly or time threshold reached, updating dependent data...');
                 updateLocationData();
+                lastUpdateLat = lat;
+                lastUpdateLong = long;
+                lastUpdate = Date.now();
             }
             
             document.getElementById('latitude').innerText = lat.toFixed(4) + '°';
@@ -182,7 +214,7 @@ function updateLatLong() {
                 const altFt = (alt * 3.28084).toFixed(0);
                 document.getElementById('altitude-imperial').innerText = altFt;
             } else {
-                document.getElementById('altitude-imperial').innerText = 'N/A';
+                document.getElementById('altitude-imperial').innerText = '--';
             }
         });
     } else {
@@ -782,10 +814,9 @@ document.addEventListener('click', function(e) {
 
 // ***** Initial code *****
 
-// Update location on page load and every minute thereafter
+// Update location frequently but only trigger dependent updates when moved significantly
 updateLatLong();
 setInterval(updateLatLong, 1000*LATLON_UPDATE_INTERVAL);
-setInterval(updateLocationData, 1000*LOC_DATA_UPDATE_INTERVAL);
 
 // Show the default section
 showSection('news');
