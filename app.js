@@ -605,6 +605,16 @@ function fetchWeatherData(lat, long) {
         });
 }
 
+function hasHazards(forecastData) {
+    // Weather conditions that warrant an alert
+    const hazardConditions = ['Rain', 'Snow', 'Sleet', 'Hail', 'Thunderstorm', 'Storm', 'Drizzle'];
+    return forecastData.weather.some(w => 
+        hazardConditions.some(condition => 
+            w.main.includes(condition) || w.description.includes(condition.toLowerCase())
+        )
+    );
+}
+
 function updateForecastDisplay(data) {
     const forecastDays = document.querySelectorAll('.forecast-day');
     const dailyData = extractDailyForecast(data.list);
@@ -614,23 +624,30 @@ function updateForecastDisplay(data) {
             const date = new Date(day.dt * 1000);
             const dayElement = forecastDays[index];
             
-            dayElement.querySelector('.forecast-date').textContent = 
-                date.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
+            // Clear previous content
+            dayElement.innerHTML = '';
             
-            dayElement.querySelector('.forecast-icon').src = 
-                `https://openweathermap.org/img/wn/${day.weather[0].icon}@2x.png`;
+            // Add alert symbol if hazards detected
+            if (hasHazards(day)) {
+                const alert = document.createElement('div');
+                alert.className = 'forecast-alert';
+                alert.innerHTML = '⚠️';
+                dayElement.appendChild(alert);
+            }
             
-            dayElement.querySelector('.forecast-temp').textContent = 
-                `${Math.round(day.temp_min)}°/${Math.round(day.temp_max)}°`;
-            
-            dayElement.querySelector('.forecast-desc').textContent = 
-                day.weather[0].main;
+            // Add the rest of the forecast content
+            dayElement.innerHTML += `
+                <div class="forecast-date">${date.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })}</div>
+                <img class="forecast-icon" src="https://openweathermap.org/img/wn/${day.weather[0].icon}@2x.png" alt="${day.weather[0].description}">
+                <div class="forecast-temp">${Math.round(day.temp_min)}°/${Math.round(day.temp_max)}°</div>
+                <div class="forecast-desc">${day.weather[0].main}</div>
+            `;
         }
     });
 }
 
 function extractDailyForecast(forecastList) {
-    forecastData = forecastList; // Store the full forecast data
+    forecastData = forecastList;
     const dailyData = [];
     const dayMap = new Map();
     
@@ -642,12 +659,16 @@ function extractDailyForecast(forecastList) {
                 dt: item.dt,
                 temp_min: item.main.temp_min,
                 temp_max: item.main.temp_max,
-                weather: item.weather
+                weather: [item.weather[0]]  // Initialize weather array
             });
         } else {
             const existing = dayMap.get(date);
             existing.temp_min = Math.min(existing.temp_min, item.main.temp_min);
             existing.temp_max = Math.max(existing.temp_max, item.main.temp_max);
+            // Add weather condition if it's not already included
+            if (!existing.weather.some(w => w.main === item.weather[0].main)) {
+                existing.weather.push(item.weather[0]);
+            }
         }
     });
     

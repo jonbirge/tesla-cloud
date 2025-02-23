@@ -411,6 +411,15 @@ input:checked + .toggle-slider:before {
     padding: 15px;  /* Reduced from 20px */
     text-align: center;
     min-width: 100px;  /* Reduced from 120px */
+    position: relative;
+}
+
+.forecast-alert {
+    position: absolute;
+    top: 8px;
+    left: 8px;
+    color: #ff8800;
+    font-size: 16px;
 }
 
 .forecast-date {
