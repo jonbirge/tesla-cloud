@@ -2,6 +2,11 @@
 const latlonUpdateInterval = 2; // seconds
 const locDataUpdateInterval = 60; // seconds
 const NEWS_REFRESH_INTERVAL = 5; // minutes
+const MAX_BUFFER_SIZE = 5;
+const WEATHER_IMAGES = {
+    latest: 'https://cdn.star.nesdis.noaa.gov/GOES16/GLM/CONUS/EXTENT3/1250x750.jpg',
+    loop: 'https://cdn.star.nesdis.noaa.gov/GOES16/GLM/CONUS/EXTENT3/GOES16-CONUS-EXTENT3-625x375.gif'
+};
 
 // Global variables
 let lastUpdate = 0;
@@ -21,8 +26,8 @@ let locationTimeZone = null;
 let weatherData = null;
 let forecastFetched = false;
 let newsUpdateInterval = null;
-
 let forecastData = null; // Add this with other global variables at the top
+const locationBuffer = [];
 
 class LocationPoint {
     constructor(lat, long, alt, timestamp) {
@@ -32,9 +37,6 @@ class LocationPoint {
         this.timestamp = timestamp;
     }
 }
-
-const locationBuffer = [];
-const MAX_BUFFER_SIZE = 5;
 
 function estimateSpeed(p1, p2) {
     const R = 6371e3; // Earth's radius in meters
@@ -175,21 +177,13 @@ function updateLatLong() {
             document.getElementById('latitude').innerText = lat.toFixed(4) + '°';
             document.getElementById('longitude').innerText = long.toFixed(4) + '°';
 
-            // Update altitude in both units
+            // Update altitude in feet
             if (alt) {
                 const altFt = (alt * 3.28084).toFixed(0);
-                const altM = alt.toFixed(0);
                 document.getElementById('altitude-imperial').innerText = altFt;
-                document.getElementById('altitude-metric').innerText = `(${altM} m)`;
             } else {
                 document.getElementById('altitude-imperial').innerText = 'N/A';
-                document.getElementById('altitude-metric').innerText = '(N/A m)';
             }
-
-            document.getElementById('time').innerText = new Date().toLocaleTimeString('en-US', { 
-                timeZone: locationTimeZone || 'UTC',
-                timeZoneName: 'short'
-            });
         });
     } else {
         console.log('Geolocation is not supported by this browser.');
@@ -332,11 +326,6 @@ function updateConnectionInfo() {
             document.getElementById('isp').innerText = 'N/A';
         });
 }
-
-const WEATHER_IMAGES = {
-    latest: 'https://cdn.star.nesdis.noaa.gov/GOES16/GLM/CONUS/EXTENT3/1250x750.jpg',
-    loop: 'https://cdn.star.nesdis.noaa.gov/GOES16/GLM/CONUS/EXTENT3/GOES16-CONUS-EXTENT3-625x375.gif'
-};
 
 function showSection(sectionId) {
     // Log the clicked section
