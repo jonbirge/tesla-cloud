@@ -8,6 +8,7 @@
     --button-hover-bg: #f3f3f3;
     --tesla-blue: #0077ff;
     --button-radius: 10px;
+    --weather-switch-slider: #ffffff;
 }
 
 body.dark-mode {
@@ -18,6 +19,7 @@ body.dark-mode {
     --button-text: #d6d6d6;
     --button-bg: #333333;
     --button-hover-bg: #555555;
+    --weather-switch-slider: #222222;
 }
 
 * {
@@ -62,7 +64,7 @@ p {
 
 hr {
     border: 0;
-    border-top: 2px solid var(--separator-color);
+    border-top: 1px solid var(--separator-color);
     margin-top: 28px;
     margin-bottom: 28px;
 }
@@ -312,7 +314,7 @@ input:checked + .toggle-slider:before {
     left: 4px;
     width: calc(50% - 4px);
     height: calc(100% - 8px);
-    background-color: var(--active-section-bg);
+    background-color: var(--weather-switch-slider);
     border-radius: calc(var(--button-radius) - 4px);
     transform: translateX(calc(var(--slider-position, 0) * 100%));
     transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
