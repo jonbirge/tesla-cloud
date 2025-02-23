@@ -1,6 +1,6 @@
 // Settings
-const latlonUpdateInterval = 2; // seconds
-const locDataUpdateInterval = 60; // seconds
+const LATLON_UPDATE_INTERVAL = 1; // seconds
+const LOC_DATA_UPDATE_INTERVAL = 60; // seconds
 const NEWS_REFRESH_INTERVAL = 5; // minutes
 const MAX_BUFFER_SIZE = 5;
 const WEATHER_IMAGES = {
@@ -763,8 +763,8 @@ document.addEventListener('click', function(e) {
 
 // Update location on page load and every minute thereafter
 updateLatLong();
-setInterval(updateLatLong, 1000*latlonUpdateInterval);
-setInterval(updateLocationData, 1000*locDataUpdateInterval);
+setInterval(updateLatLong, 1000*LATLON_UPDATE_INTERVAL);
+setInterval(updateLocationData, 1000*LOC_DATA_UPDATE_INTERVAL);
 
 // Show the default section
 showSection('news');

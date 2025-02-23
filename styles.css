@@ -581,20 +581,20 @@ input:checked + .toggle-slider:before {
 }
 
 .stat-value {
-    font-size: 48pt;  /* Increased from 36pt */
-    font-weight: 800;  /* Made slightly bolder */
+    font-size: 48pt;
+    font-weight: 750;
     color: var(--button-text);
     line-height: 1.1;
 }
 
 .stat-label {
-    font-size: 16pt;  /* Increased from 14pt */
+    font-size: 16pt;
     color: var(--text-color);
     font-weight: 600;
     margin-top: 5px;
 }
 
 .metric {
-    font-size: 14pt;  /* Increased from 12pt */
+    font-size: 14pt;
     opacity: 0.7;
 }
