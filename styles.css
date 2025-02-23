@@ -50,6 +50,7 @@ h1 {
 
 h2 {
     font-size: 16pt;
+    letter-spacing: 0.01em;
     margin-bottom: 12px;
     margin-top: 28px;
     text-align: left;
@@ -90,6 +91,7 @@ hr {
 .section-button {
     font-size: 18pt; /* Larger font size */
     font-weight: 700; /* Make the text bold */
+    letter-spacing: 0.02em;
     padding: 16px 30px;
     background-color: transparent;
     color: var(--text-color);
@@ -478,6 +480,7 @@ input:checked + .toggle-slider:before {
     margin-top: 3px;
     color: var(--button-text);
     font-size: 14pt;
+    font-weight: 640;
 }
 
 .forecast-popup {
