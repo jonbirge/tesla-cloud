@@ -1,3 +1,4 @@
+/* Root Variables */
 :root {
     --bg-color: #efefef;
     --text-color: #9f9f9f;
@@ -22,6 +23,7 @@ body.dark-mode {
     --weather-switch-slider: #222222;
 }
 
+/* Basic HTML Elements */
 * {
     font-family: 'Inter', sans-serif !important;
 }
@@ -31,7 +33,7 @@ body {
     background-color: var(--bg-color);
     color: var(--text-color);
     padding: 0;
-    text-align: left; /* Align text to the left */
+    text-align: left;
     font-weight: 560;
 }
 
@@ -70,13 +72,56 @@ hr {
     margin-bottom: 28px;
 }
 
-.container {
-    margin-left: 0;
-    margin-top: 0;
-    display: block;
-    width: 100%;
+li {
+    margin: 18px 0;
+    line-height: 1.4;
+    padding-left: 0px;
+    margin-left: -18px;
 }
 
+/* Layout */
+.frame-container {
+    display: flex;
+    height: 100vh;
+    width: 100vw;
+    position: fixed;
+    top: 0;
+    left: 0;
+}
+
+.left-frame {
+    width: 290px;
+    min-width: 290px;
+    flex-shrink: 0;
+    height: 100%;
+    overflow-y: auto;
+    background-color: var(--bg-color);
+    padding: 20px 15px 20px 20px;
+}
+
+.right-frame {
+    flex-grow: 1;
+    height: 100%;
+    overflow-y: auto;
+    padding: 20px 3.5% 20px 15px;
+    scrollbar-gutter: stable;
+    scrollbar-width: thin;
+    -ms-overflow-style: -ms-autohiding-scrollbar;
+}
+
+.right-frame.external {
+    padding: 0;
+    overflow: hidden;
+}
+
+.right-frame iframe {
+    width: 100%;
+    height: 100%;
+    border: none;
+    display: block;
+}
+
+/* Navigation */
 .section-buttons {
     position: sticky;
     top: 0;
@@ -89,8 +134,8 @@ hr {
 }
 
 .section-button {
-    font-size: 18pt; /* Larger font size */
-    font-weight: 700; /* Make the text bold */
+    font-size: 18pt;
+    font-weight: 700;
     letter-spacing: 0.02em;
     padding: 16px 30px;
     background-color: transparent;
@@ -108,10 +153,7 @@ hr {
     color: var(--button-text);
 }
 
-.link-list, .double-list {
-    display: none !important;
-}
-
+/* Button Lists */
 .button-list {
     list-style: none;
     padding: 0;
@@ -140,51 +182,21 @@ hr {
     font-weight: 600;
 }
 
-li {
-    margin: 18px 0;
-    line-height: 1.4;
-    padding-left: 0px;
-    margin-left: -18px;
-}
-
-/* Special styling for media section to show links in two columns */
-.double-list {
-    display: none !important;
-}
-
-.double-list li {
-    margin: 0;
-}
-
-.link-list a {
-    display: inline-block;
+.ping-button {
+    font-size: 16pt;
+    font-weight: 600;
     padding: 24px;
+    width: 280px;
     background-color: var(--button-bg);
     color: var(--button-text);
-    text-decoration: none;
-    border-radius: var(--button-radius);
-    transition: background-color 0.3s;
-    text-align: center;
-    width: 280px;
-    font-weight: 600;
-}
-
-/* Initially hide all sections */
-.section {
-    display: none;
-}
-
-.toggle-button {
-    position: fixed;
-    top: 10px;
-    right: 10px;
-    padding: 5px 10px;
-    background: var(--button-bg);
     border: none;
-    border-radius: 5px;
+    border-radius: var(--button-radius);
     cursor: pointer;
+    margin-bottom: 20px;
+    transition: background-color 0.3s;
 }
 
+/* Dark Mode Toggle */
 .toggle-container {
     position: fixed;
     top: 10px;
@@ -247,6 +259,7 @@ input:checked + .toggle-slider:before {
     transform: translateX(26px);
 }
 
+/* Data Display */
 .data-info {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
@@ -269,28 +282,7 @@ input:checked + .toggle-slider:before {
     margin-top: 0;
 }
 
-.ping-button {
-    font-size: 16pt;
-    font-weight: 600;
-    padding: 24px;
-    width: 280px;
-    background-color: var(--button-bg);
-    color: var(--button-text);
-    border: none;
-    border-radius: var(--button-radius);
-    cursor: pointer;
-    margin-bottom: 20px;
-    transition: background-color 0.3s;
-}
-
-#pingChart {
-    margin: 20px 0;
-}
-
-.hidden {
-    display: none;
-}
-
+/* Weather Elements */
 .weather-switch-container {
     display: flex;
     justify-content: flex-start;
@@ -304,7 +296,7 @@ input:checked + .toggle-slider:before {
     padding: 4px;
     gap: 4px;
     position: relative;
-    width: 280px;  /* Match the width of other UI elements */
+    width: 280px;
     --slider-position: 0;
 }
 
@@ -317,7 +309,7 @@ input:checked + .toggle-slider:before {
     color: var(--text-color);
     cursor: pointer;
     font-family: 'Inter', sans-serif;
-    font-size: 16pt;  /* Match other button text sizes */
+    font-size: 16pt;
     font-weight: 600;
     position: relative;
     z-index: 1;
@@ -355,51 +347,10 @@ input:checked + .toggle-slider:before {
     opacity: 1;
 }
 
-.frame-container {
-    display: flex;
-    height: 100vh;
-    width: 100vw;
-    position: fixed;
-    top: 0;
-    left: 0;
-}
-
-.left-frame {
-    width: 290px;
-    min-width: 290px; /* Add this to prevent shrinking */
-    flex-shrink: 0; /* Prevent shrinking in flex layout */
-    height: 100%;
-    overflow-y: auto;
-    background-color: var(--bg-color);
-    padding: 20px 15px 20px 20px;
-}
-
-.right-frame {
-    flex-grow: 1;
-    height: 100%;
-    overflow-y: auto;
-    padding: 20px 3.5% 20px 15px;
-    scrollbar-gutter: stable;
-    scrollbar-width: thin;
-    -ms-overflow-style: -ms-autohiding-scrollbar;
-}
-
-.right-frame.external {
-    padding: 0;
-    overflow: hidden; /* Hide scrollbars when in external mode */
-}
-
-.right-frame iframe {
-    width: 100%;
-    height: 100%;
-    border: none;
-    display: block; /* Remove potential inline-block gaps */
-}
-
 .forecast-container {
     display: flex;
     justify-content: space-between;
-    gap: 15px;  /* Reduced from 20px */
+    gap: 15px;
     margin: 20px 0;
     max-width: 1024px;
 }
@@ -408,9 +359,9 @@ input:checked + .toggle-slider:before {
     flex: 1;
     background-color: var(--active-section-bg);
     border-radius: var(--button-radius);
-    padding: 15px;  /* Reduced from 20px */
+    padding: 15px;
     text-align: center;
-    min-width: 100px;  /* Reduced from 120px */
+    min-width: 100px;
     position: relative;
 }
 
@@ -423,73 +374,28 @@ input:checked + .toggle-slider:before {
 }
 
 .forecast-date {
-    font-size: 14pt;  /* Added explicit font size */
+    font-size: 14pt;
     font-weight: 600;
-    margin-bottom: 8px;  /* Reduced from 10px */
+    margin-bottom: 8px;
     color: var(--button-text);
 }
 
 .forecast-icon {
-    width: 48px;  /* Reduced from 64px */
-    height: 48px;  /* Reduced from 64px */
-    margin: 8px 0;  /* Reduced from 10px */
+    width: 48px;
+    height: 48px;
+    margin: 8px 0;
 }
 
 .forecast-temp {
-    font-size: 14pt;  /* Added explicit font size */
+    font-size: 14pt;
     font-weight: 600;
-    margin: 8px 0;  /* Reduced from 10px */
+    margin: 8px 0;
     color: var(--button-text);
 }
 
 .forecast-desc {
-    font-size: 12pt;  /* Reduced from 14pt */
-    color: var(--text-color);
-}
-
-.news-headlines {
-    margin: 20px 0;
-    max-width: 900px;
-}
-
-.news-item {
-    margin-bottom: 9px;
-    padding: 9px;
-    background-color: var(--button-bg);
-    border-radius: var(--button-radius);
-    transition: background-color 0.3s;
-    border: none;
-    width: 100%;
-    text-align: left;
-    cursor: pointer;
-}
-
-.news-item:hover {
-    background-color: var(--button-hover-bg);
-}
-
-.news-item:last-child {
-    margin-bottom: 0;
-}
-
-.news-source {
-    color: var(--tesla-blue);
-    font-weight: 600;
-    margin-right: 10px;
     font-size: 12pt;
-}
-
-.news-date {
     color: var(--text-color);
-    font-size: 12pt;
-}
-
-.news-title {
-    display: block;
-    margin-top: 3px;
-    color: var(--button-text);
-    font-size: 14pt;
-    font-weight: 640;
 }
 
 .forecast-popup {
@@ -558,35 +464,67 @@ input:checked + .toggle-slider:before {
     font-size: 12pt;
 }
 
-.overlay {
-    display: none;
-    position: fixed;
-    top: 0;
-    left: 0;
+/* News Elements */
+.news-headlines {
+    margin: 20px 0;
+    max-width: 900px;
+}
+
+.news-item {
+    margin-bottom: 9px;
+    padding: 9px;
+    background-color: var(--button-bg);
+    border-radius: var(--button-radius);
+    transition: background-color 0.3s;
+    border: none;
     width: 100%;
-    height: 100%;
-    background: rgba(0, 0, 0, 0.5);
-    z-index: 999;
+    text-align: left;
+    cursor: pointer;
 }
 
-.overlay.show {
+.news-item:hover {
+    background-color: var(--button-hover-bg);
+}
+
+.news-item:last-child {
+    margin-bottom: 0;
+}
+
+.news-source {
+    color: var(--tesla-blue);
+    font-weight: 600;
+    margin-right: 10px;
+    font-size: 12pt;
+}
+
+.news-date {
+    color: var(--text-color);
+    font-size: 12pt;
+}
+
+.news-title {
     display: block;
+    margin-top: 3px;
+    color: var(--button-text);
+    font-size: 14pt;
+    font-weight: 640;
 }
 
+/* Stats Display */
 .location-stats {
     display: flex;
     gap: 30px;
-    margin: 20px 0 30px 0;  /* Added top margin */
+    margin: 20px 0 30px 0;
     padding: 15px 0;
-    justify-content: space-between;  /* Better spacing between stats */
-    max-width: 800px;  /* Prevent stats from spreading too wide */
+    justify-content: space-between;
+    max-width: 800px;
 }
 
 .stat-box {
     display: flex;
     flex-direction: column;
     align-items: center;
-    min-width: 200px;  /* Ensure enough space for large numbers */
+    min-width: 200px;
 }
 
 .stat-value {
@@ -606,4 +544,13 @@ input:checked + .toggle-slider:before {
 .metric {
     font-size: 14pt;
     opacity: 0.7;
+}
+
+/* Utility Classes */
+.section {
+    display: none;
+}
+
+.hidden {
+    display: none;
 }
