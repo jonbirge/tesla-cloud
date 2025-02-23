@@ -8,7 +8,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="styles.css?ver=5">
+    <link rel="stylesheet" href="styles.css?ver=9">
 </head>
 
 <body>
@@ -17,13 +17,13 @@
             <div class="section-buttons">
                 <h1>teslas.cloud (beta)</h1>
                 <button class="section-button" onclick="showSection('news')">News</button>
-                <button class="section-button" onclick="showSection('location')">Location</button>
+                <button class="section-button" onclick="showSection('location')">Navigation</button>
                 <button class="section-button" onclick="showSection('weather')">Weather</button>
-                <button class="section-button" onclick="showSection('navigation')">Navigation</button>
+                <button class="section-button" onclick="showSection('navigation')">Travel</button>
                 <button class="section-button" onclick="showSection('media')">Media</button>
                 <button class="section-button" onclick="showSection('reference')">Reference</button>
                 <button class="section-button" onclick="showSection('toys')">Toys</button>
-                <button class="section-button" onclick="showSection('connectivity')">Connectivity</button>
+                <button class="section-button" onclick="showSection('connectivity')">Network</button>
                 <button class="section-button" onclick="showSection('about')">About</button>
             </div>
         </div>
@@ -37,7 +37,7 @@
                     </div>
                     <hr>
                     <h2>Links</h2>
-                    <ul class="link-list double-list">
+                    <ul class="button-list">
                         <li><a href="https://www.nytimes.com">New York Times</a></li>
                         <li><a href="https://www.wsj.com">Wall Street Journal</a></li>
                         <li><a href="https://www.bbc.com/news">BBC News</a></li>
@@ -48,21 +48,38 @@
                 </div>
 
                 <div id="location" class="section">
-                    <h2>Location</h2>
-                    <span id="latitude">N/A</span>, <span id="longitude">N/A</span>
-                    (<span id="time">N/A</span>)
-                    <h2>Altitude</h2>
-                    <span id="altitude">N/A</span>
-                    <h2>City</h2>
-                    <span id="city">N/A</span>
+                    <div class="location-stats">
+                        <div class="stat-box">
+                            <div class="stat-value" id="speed">N/A</div>
+                            <div class="stat-label">MPH</div>
+                        </div>
+                        <div class="stat-box">
+                            <div class="stat-value" id="heading">N/A</div>
+                            <div class="stat-label">HDG</div>
+                        </div>
+                        <div class="stat-box">
+                            <div class="stat-value" id="altitude-imperial">N/A</div>
+                            <div class="stat-label">FT ALT</div>
+                        </div>
+                    </div>
+                    <div class="data-info">
+                        <div class="data-item">
+                            <h2>Location</h2>
+                            <span id="latitude">N/A</span>, <span id="longitude">N/A</span>
+                        </div>
+                        <div class="data-item">
+                            <h2>City</h2>
+                            <span id="city">N/A</span>
+                        </div>
+                    </div>
                     <hr>
-                    <h2>Local Information</h2>
-                    <div id="wikipediaInfo"><em>Live location information loading...</em></div>
+                    <h2>Local Landmarks</h2>
+                    <div id="wikipediaInfo"><em>Landmark information loading...</em></div>
                 </div>
 
                 <div id="navigation" class="section">
                     <h2>Links</h2>
-                    <ul class="link-list double-list">
+                    <ul class="button-list">
                         <li><a href="https://maps.google.com">Google Maps</a></li>
                         <li><a href="https://earth.google.com">Google Earth</a></li>
                         <li><a href="https://abetterrouteplanner.com">A Better Route Planner</a></li>
@@ -75,7 +92,7 @@
                 </div>
 
                 <div id="weather" class="section">
-                    <h2>Current</h2>
+                    <h2>Current Conditions</h2>
                     <div class="weather-switch-container">
                         <div class="weather-switch">
                             <button onclick="switchWeatherImage('latest')" class="active">Latest</button>
@@ -112,11 +129,11 @@
                         </div>
                     </div>
                     <hr>
-                    <h2>Forecast</h2>
+                    <h2>5-day Forecast</h2>
                     <div class="forecast-container">
                         <div class="forecast-day" onclick="showHourlyForecast(0)">
                             <div class="forecast-date">Loading...</div>
-                            <img class="forecast-icon" src="" alt="">
+                            <img class="forecast-icon" src="" alt="Icon">
                             <div class="forecast-temp">--°/--°</div>
                             <div class="forecast-desc">...</div>
                         </div>
@@ -155,7 +172,7 @@
                     </div>
                     <hr>
                     <h2>Links</h2>
-                    <ul class="link-list double-list">
+                    <ul class="button-list">
                         <li><a href="#" id="localWeather" data-frame>Local NWS Forecast</a></li>
                         <li><a href="https://radar.weather.gov/" data-frame>NOAA Radar</a></li>
                         <li><a href="https://www.star.nesdis.noaa.gov/GOES/index.php">NOAA Satellite</a></li>
@@ -164,7 +181,7 @@
 
                 <div id="reference" class="section">
                     <h2>Links</h2>
-                    <ul class="link-list double-list">
+                    <ul class="button-list">
                         <li><a href="https://www.wikipedia.org" data-frame>Wikipedia</a></li>
                         <li><a href="https://www.dictionary.com" data-frame>Dictionary</a></li>
                         <li><a href="https://www.rottentomatoes.com" data-frame>Rotten Tomatoes</a></li>
@@ -182,7 +199,7 @@
 
                 <div id="media" class="section">
                     <h2>Links</h2>
-                    <ul class="link-list double-list">
+                    <ul class="button-list">
                         <li><a href="https://tv.youtube.com">YouTube TV</a></li>
                         <li><a href="https://www.amazon.com/Amazon-Video">Amazon Video</a></li>
                         <li><a href="https://www.fubo.tv">Fubo TV</a></li>
@@ -200,7 +217,7 @@
 
                 <div id="toys" class="section">
                     <h2>Links</h2>
-                    <ul class="link-list double-list">
+                    <ul class="button-list">
                         <li><a href="https://neal.fun">Neal.fun</a></li>
                         <li><a href="https://poki.com">Poki (Casual Games)</a></li>
                         <li><a href="https://nyc.birgefuller.com/HP/" data-frame>RPN Calculator</a></li>
@@ -223,7 +240,7 @@
                     <canvas id="pingChart" class="hidden"  width="600" height="200"></canvas>
                     <hr>
                     <h2>Links</h2>
-                    <ul class="link-list double-list">
+                    <ul class="button-list">
                         <li><a href="https://www.speedtest.net">SpeedTest</a></li>
                         <li><a href="https://www.myip.com" data-frame>MyIP</a></li>
                     </ul>
@@ -232,16 +249,16 @@
                 <div id="about" class="section">
                     <h2>About</h2>
                     <p>This service was created by <a href="https://www.mit.edu/~birge">Jonathan Birge</a> as a personal project. It is not affiliated with Tesla, Inc.</p>
-                    <p>If there turns out to be any interest in this, future versions may include things like better inline weather information and maps, local links based on your current location, and per user customization.</p>
+                    <p>If there turns out to be any interest in this, future versions may include things like better inline weather information and maps, local links based on your current location, and persistent user customization.</p>
                     <p>Apologies to those outside of the US; right now some functionality is limited to CONUS. If you're using this from another region, please let me know (see below) where you are and, if possible, recommend a source for weather maps and data for your region.</p>
-                    <p>For questions or feedback, please email <a href="mailto:admin@teslas.cloud">admin@teslas.cloud</a> or submit an issue to the <a href="https://github.com/jonbirge/Tesla">GitHub repository</a>. Even a quick note letting me know you're using this would be motivation to keep improving it!</p>
+                    <p>For questions or feedback, please email <a href="mailto:admin@teslas.cloud">admin@teslas.cloud</a> or submit an issue to the <a href="https://github.com/jonbirge/Tesla/issues">GitHub repository</a>. Even a quick note letting me know you're using this would be motivation to keep improving it.</p>
                     
                     <h2>Tips</h2>
                     <ul>
                         <li>Bookmark this page using the star in the browser menu.</li>
                         <li>You can make the browser always easily available by dragging it to the left-hand side of the dock at the bottom of the screen.</li>
-                        <li>Dark mode is currently set automatically based on sunset at your current location. If you toggle it manually (via the button in the upper right) it will disable automatic dark mode.</li>
-                        <li>Some links will open inside this frame for convenience (not all websites support this). To return to the list of links, just click on one of the sections on the left.</li>
+                        <li>Dark mode is currently set automatically based on sunset at your current location. However, you can also toggle it manually via the button in the upper right.</li>
+                        <li>Some links will may inside the frame for convenience (not all websites support this). To return to the list of links, just click on one of the sections on the left.</li>
                     </ul>                    
                 </div>
 
@@ -258,6 +275,7 @@
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script src="app.js?ver=7"></script>
+    <script src="app.js?ver=11"></script>
 </body>
+
 </html>

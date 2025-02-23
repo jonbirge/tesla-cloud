@@ -1,6 +1,13 @@
 // Settings
-const locUpdateInterval = 10; // seconds
-const locDataUpdateInterval = 120; // seconds
+const LATLON_UPDATE_INTERVAL = 1; // seconds
+const UPDATE_DISTANCE_THRESHOLD = 1000; // meters
+const UPDATE_TIME_THRESHOLD = 60; // minutes
+const NEWS_REFRESH_INTERVAL = 5; // minutes
+const MAX_BUFFER_SIZE = 5;
+const WEATHER_IMAGES = {
+    latest: 'https://cdn.star.nesdis.noaa.gov/GOES16/GLM/CONUS/EXTENT3/1250x750.jpg',
+    loop: 'https://cdn.star.nesdis.noaa.gov/GOES16/GLM/CONUS/EXTENT3/GOES16-CONUS-EXTENT3-625x375.gif'
+};
 
 // Global variables
 let lastUpdate = 0;
@@ -8,6 +15,8 @@ let neverUpdatedLocation = true;
 let lat = null;
 let long = null;
 let alt = null;
+let lastUpdateLat = null;
+let lastUpdateLong = null;
 let sunrise = null;
 let sunset = null;
 let moonPhaseData = null;
@@ -20,8 +29,76 @@ let locationTimeZone = null;
 let weatherData = null;
 let forecastFetched = false;
 let newsUpdateInterval = null;
-const NEWS_REFRESH_INTERVAL = 300000; // 5 minutes
 let forecastData = null; // Add this with other global variables at the top
+const locationBuffer = [];
+
+class LocationPoint {
+    constructor(lat, long, alt, timestamp) {
+        this.lat = lat;
+        this.long = long;
+        this.alt = alt;
+        this.timestamp = timestamp;
+    }
+}
+
+function estimateSpeed(p1, p2) {
+    const R = 6371e3; // Earth's radius in meters
+    const φ1 = p1.lat * Math.PI/180;
+    const φ2 = p2.lat * Math.PI/180;
+    const Δφ = (p2.lat - p1.lat) * Math.PI/180;
+    const Δλ = (p2.long - p1.long) * Math.PI/180;
+
+    // Haversine formula for distance
+    const a = Math.sin(Δφ/2) * Math.sin(Δφ/2) +
+            Math.cos(φ1) * Math.cos(φ2) *
+            Math.sin(Δλ/2) * Math.sin(Δλ/2);
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+    const horizontalDist = R * c;
+
+    // Add vertical component if altitude is available
+    let verticalDist = 0;
+    if (p1.alt != null && p2.alt != null) {
+        verticalDist = p2.alt - p1.alt;
+    }
+
+    // Total 3D distance
+    const distance = Math.sqrt(horizontalDist * horizontalDist + verticalDist * verticalDist);
+    
+    // Time difference in seconds
+    const timeDiff = (p2.timestamp - p1.timestamp) / 1000;
+    
+    if (timeDiff === 0) return 0;
+    
+    // Speed in meters per second
+    const speedMS = distance / timeDiff;
+    // Convert to miles per hour
+    return speedMS * 2.237; // 2.237 is the conversion factor from m/s to mph
+}
+
+function calculateHeading(p1, p2) {
+    // Convert coordinates to radians
+    const lat1 = p1.lat * Math.PI / 180;
+    const lat2 = p2.lat * Math.PI / 180;
+    const dLon = (p2.long - p1.long) * Math.PI / 180;
+
+    // Calculate heading using great circle formula
+    const y = Math.sin(dLon) * Math.cos(lat2);
+    const x = Math.cos(lat1) * Math.sin(lat2) -
+            Math.sin(lat1) * Math.cos(lat2) * Math.cos(dLon);
+    let heading = Math.atan2(y, x) * 180 / Math.PI;
+    
+    // Normalize to 0-360°
+    heading = (heading + 360) % 360;
+    
+    return heading;
+}
+
+function getCardinalDirection(heading) {
+    const directions = ['N', 'NNE', 'NE', 'ENE', 'E', 'ESE', 'SE', 'SSE',
+                       'S', 'SSW', 'SW', 'WSW', 'W', 'WNW', 'NW', 'NNW'];
+    const index = Math.round(heading * 16 / 360) % 16;
+    return directions[index];
+}
 
 function toggleMode() {
     manualDarkMode = true;
@@ -69,32 +146,76 @@ async function updateLocationData() {
     }
 }
 
+function calculateDistance(lat1, lon1, lat2, lon2) {
+    const R = 6371e3; // Earth's radius in meters
+    const φ1 = lat1 * Math.PI/180;
+    const φ2 = lat2 * Math.PI/180;
+    const Δφ = (lat2 - lat1) * Math.PI/180;
+    const Δλ = (lon2 - lon1) * Math.PI/180;
+
+    const a = Math.sin(Δφ/2) * Math.sin(Δφ/2) +
+            Math.cos(φ1) * Math.cos(φ2) *
+            Math.sin(Δλ/2) * Math.sin(Δλ/2);
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+    return R * c; // returns distance in meters
+}
+
+function shouldUpdateLocationData() {
+    if (neverUpdatedLocation || !lastUpdateLat || !lastUpdateLong) {
+        return true;
+    }
+
+    const now = Date.now();
+    const timeSinceLastUpdate = (now - lastUpdate) / (1000 * 60); // Convert to minutes
+    const distance = calculateDistance(lat, long, lastUpdateLat, lastUpdateLong);
+    
+    return distance >= UPDATE_DISTANCE_THRESHOLD || timeSinceLastUpdate >= UPDATE_TIME_THRESHOLD;
+}
+
 function updateLatLong() {
     if (navigator.geolocation) {
         navigator.geolocation.getCurrentPosition((position) => {
             lat = position.coords.latitude;
             long = position.coords.longitude;
             alt = position.coords.altitude;  // altitude in meters
-            console.log(`Updating location: ${lat}, ${long}, ${alt}`);
-
-            // Handle first update to ensure timely data
-            if (neverUpdatedLocation) {
-                updateLocationData();
+            
+            // Add new location point to buffer
+            const newPoint = new LocationPoint(lat, long, alt, Date.now());
+            locationBuffer.push(newPoint);
+            if (locationBuffer.length > MAX_BUFFER_SIZE) {
+                locationBuffer.shift(); // Remove oldest point
             }
             
-            // Update location display
+            // Calculate speed and heading if we have enough points
+            if (locationBuffer.length >= 2) {
+                const oldestPoint = locationBuffer[0];
+                const speed = estimateSpeed(oldestPoint, newPoint);
+                const heading = calculateHeading(oldestPoint, newPoint);
+                const cardinal = getCardinalDirection(heading);
+                
+                document.getElementById('speed').innerText = `${speed.toFixed(0)}`;
+                document.getElementById('heading').innerText = `${heading.toFixed(0)}°`;
+            }
+
+            // Check if we should update location-dependent data
+            if (shouldUpdateLocationData()) {
+                console.log('Location changed significantly or time threshold reached, updating dependent data...');
+                updateLocationData();
+                lastUpdateLat = lat;
+                lastUpdateLong = long;
+                lastUpdate = Date.now();
+            }
+            
             document.getElementById('latitude').innerText = lat.toFixed(4) + '°';
             document.getElementById('longitude').innerText = long.toFixed(4) + '°';
 
-            // Update altitude in meters and feet
-            const altStr = alt ? `${alt.toFixed(0)} m, ${(alt * 3.28084).toFixed(0)} ft` : 'N/A';
-            document.getElementById('altitude').innerText = altStr;
-
-            // Update time id element
-            document.getElementById('time').innerText = new Date().toLocaleTimeString('en-US', { 
-                timeZone: locationTimeZone || 'UTC',
-                timeZoneName: 'short' // 'PDT', 'EDT', etc.
-            });
+            // Update altitude in feet
+            if (alt) {
+                const altFt = (alt * 3.28084).toFixed(0);
+                document.getElementById('altitude-imperial').innerText = altFt;
+            } else {
+                document.getElementById('altitude-imperial').innerText = '--';
+            }
         });
     } else {
         console.log('Geolocation is not supported by this browser.');
@@ -238,11 +359,6 @@ function updateConnectionInfo() {
         });
 }
 
-const WEATHER_IMAGES = {
-    latest: 'https://cdn.star.nesdis.noaa.gov/GOES16/GLM/CONUS/EXTENT3/1250x750.jpg',
-    loop: 'https://cdn.star.nesdis.noaa.gov/GOES16/GLM/CONUS/EXTENT3/GOES16-CONUS-EXTENT3-625x375.gif'
-};
-
 function showSection(sectionId) {
     // Log the clicked section
     console.log(`Showing section: ${sectionId}`);
@@ -280,7 +396,7 @@ function showSection(sectionId) {
         
         if (sectionId === 'news') {
             updateNews();
-            newsUpdateInterval = setInterval(updateNews, NEWS_REFRESH_INTERVAL);
+            newsUpdateInterval = setInterval(updateNews, 60000*NEWS_REFRESH_INTERVAL);
         }
         
         if (sectionId === 'weather') {
@@ -521,6 +637,16 @@ function fetchWeatherData(lat, long) {
         });
 }
 
+function hasHazards(forecastData) {
+    // Weather conditions that warrant an alert
+    const hazardConditions = ['Rain', 'Snow', 'Sleet', 'Hail', 'Thunderstorm', 'Storm', 'Drizzle'];
+    return forecastData.weather.some(w => 
+        hazardConditions.some(condition => 
+            w.main.includes(condition) || w.description.includes(condition.toLowerCase())
+        )
+    );
+}
+
 function updateForecastDisplay(data) {
     const forecastDays = document.querySelectorAll('.forecast-day');
     const dailyData = extractDailyForecast(data.list);
@@ -530,23 +656,30 @@ function updateForecastDisplay(data) {
             const date = new Date(day.dt * 1000);
             const dayElement = forecastDays[index];
             
-            dayElement.querySelector('.forecast-date').textContent = 
-                date.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
+            // Clear previous content
+            dayElement.innerHTML = '';
             
-            dayElement.querySelector('.forecast-icon').src = 
-                `https://openweathermap.org/img/wn/${day.weather[0].icon}@2x.png`;
+            // Add alert symbol if hazards detected
+            if (hasHazards(day)) {
+                const alert = document.createElement('div');
+                alert.className = 'forecast-alert';
+                alert.innerHTML = '⚠️';
+                dayElement.appendChild(alert);
+            }
             
-            dayElement.querySelector('.forecast-temp').textContent = 
-                `${Math.round(day.temp_min)}°/${Math.round(day.temp_max)}°`;
-            
-            dayElement.querySelector('.forecast-desc').textContent = 
-                day.weather[0].main;
+            // Add the rest of the forecast content
+            dayElement.innerHTML += `
+                <div class="forecast-date">${date.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })}</div>
+                <img class="forecast-icon" src="https://openweathermap.org/img/wn/${day.weather[0].icon}@2x.png" alt="${day.weather[0].description}">
+                <div class="forecast-temp">${Math.round(day.temp_min)}°/${Math.round(day.temp_max)}°</div>
+                <div class="forecast-desc">${day.weather[0].main}</div>
+            `;
         }
     });
 }
 
 function extractDailyForecast(forecastList) {
-    forecastData = forecastList; // Store the full forecast data
+    forecastData = forecastList;
     const dailyData = [];
     const dayMap = new Map();
     
@@ -558,12 +691,16 @@ function extractDailyForecast(forecastList) {
                 dt: item.dt,
                 temp_min: item.main.temp_min,
                 temp_max: item.main.temp_max,
-                weather: item.weather
+                weather: [item.weather[0]]  // Initialize weather array
             });
         } else {
             const existing = dayMap.get(date);
             existing.temp_min = Math.min(existing.temp_min, item.main.temp_min);
             existing.temp_max = Math.max(existing.temp_max, item.main.temp_max);
+            // Add weather condition if it's not already included
+            if (!existing.weather.some(w => w.main === item.weather[0].main)) {
+                existing.weather.push(item.weather[0]);
+            }
         }
     });
     
@@ -677,10 +814,9 @@ document.addEventListener('click', function(e) {
 
 // ***** Initial code *****
 
-// Update location on page load and every minute thereafter
+// Update location frequently but only trigger dependent updates when moved significantly
 updateLatLong();
-setInterval(updateLatLong, locUpdateInterval * 1000);
-setInterval(updateLocationData, locDataUpdateInterval * 1000);
+setInterval(updateLatLong, 1000*LATLON_UPDATE_INTERVAL);
 
 // Show the default section
 showSection('news');
