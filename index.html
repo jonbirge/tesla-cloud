@@ -8,7 +8,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="styles.css?ver=9">
+    <link rel="stylesheet" href="styles.css?ver=15">
 </head>
 
 <body>
@@ -17,13 +17,15 @@
             <div class="section-buttons">
                 <h1>teslas.cloud (beta)</h1>
                 <button class="section-button" onclick="showSection('news')">News</button>
-                <button class="section-button" onclick="showSection('location')">Navigation</button>
+                <button class="section-button" onclick="showSection('navigation')">Navigation</button>
                 <button class="section-button" onclick="showSection('weather')">Weather</button>
-                <button class="section-button" onclick="showSection('navigation')">Travel</button>
+                <button class="section-button" onclick="showSection('satellite')">Satellite</button>
+                <button class="section-button" onclick="showSection('waze')">Waze</button>
+                <button class="section-button" onclick="showSection('travel')">Travel</button>
                 <button class="section-button" onclick="showSection('media')">Media</button>
                 <button class="section-button" onclick="showSection('reference')">Reference</button>
                 <button class="section-button" onclick="showSection('toys')">Toys</button>
-                <button class="section-button" onclick="showSection('connectivity')">Network</button>
+                <button class="section-button" onclick="showSection('network')">Network</button>
                 <button class="section-button" onclick="showSection('about')">About</button>
             </div>
         </div>
@@ -47,7 +49,7 @@
                     </ul>
                 </div>
 
-                <div id="location" class="section">
+                <div id="navigation" class="section">
                     <div class="location-stats">
                         <div class="stat-box">
                             <div class="stat-value" id="speed">N/A</div>
@@ -64,8 +66,17 @@
                     </div>
                     <div class="data-info">
                         <div class="data-item">
+                            <h2>Wind</h2>
+                            <span id="wind">N/A</span>
+                        </div>
+                        <div class="data-item">
+                            <h2>Humidity</h2>
+                            <span id="humidity">N/A</span>
+                        </div>
+                        <br>
+                        <div class="data-item">
                             <h2>Location</h2>
-                            <span id="latitude">N/A</span>, <span id="longitude">N/A</span>
+                            <span id="latitude">--</span>, <span id="longitude">--</span>
                         </div>
                         <div class="data-item">
                             <h2>City</h2>
@@ -77,59 +88,8 @@
                     <div id="wikipediaInfo"><em>Landmark information loading...</em></div>
                 </div>
 
-                <div id="navigation" class="section">
-                    <h2>Links</h2>
-                    <ul class="button-list">
-                        <li><a href="https://maps.google.com">Google Maps</a></li>
-                        <li><a href="https://earth.google.com">Google Earth</a></li>
-                        <li><a href="https://abetterrouteplanner.com">A Better Route Planner</a></li>
-                        <li><a href="https://www.openstreetmap.org">OpenStreetMap</a></li>
-                        <li><a href="https://teslawaze.azurewebsites.net/" data-frame>TeslaWaze</a></li>
-                        <li><a href="https://www.plugshare.com">PlugShare</a></li>
-                        <li><a href="https://www.waze.com">Waze</a></li>
-                        <li><a href="https://www.aaa.com">AAA</a></li>
-                    </ul>
-                </div>
-
                 <div id="weather" class="section">
-                    <h2>Current Conditions</h2>
-                    <div class="weather-switch-container">
-                        <div class="weather-switch">
-                            <button onclick="switchWeatherImage('latest')" class="active">Latest</button>
-                            <button onclick="switchWeatherImage('loop')">Loop</button>
-                        </div>
-                    </div>
-                    <img id="weather-image" class="weather-image active" alt="Satellite image">
-                    <div class="data-info">
-                        <div class="data-item">
-                            <h2>Temperature</h2>
-                            <span id="temperature">N/A</span>
-                        </div>
-                        <div class="data-item">
-                            <h2>Humidity</h2>
-                            <span id="humidity">N/A</span>
-                        </div>
-                        <div class="data-item">
-                            <h2>Wind</h2>
-                            <span id="wind">N/A</span>
-                        </div>
-                    </div>
-                    <div class="data-info">
-                        <div class="data-item">
-                            <h2>Sunrise</h2>
-                            <span id="sunrise">N/A</span>
-                        </div>
-                        <div class="data-item">
-                            <h2>Sunset</h2>
-                            <span id="sunset">N/A</span>
-                        </div>
-                        <div class="data-item">
-                            <h2>Moon Phase</h2>
-                            <span id="moonphase">N/A</span>
-                        </div>
-                    </div>
-                    <hr>
-                    <h2>5-day Forecast</h2>
+                    <h2>Forecast</h2>
                     <div class="forecast-container">
                         <div class="forecast-day" onclick="showHourlyForecast(0)">
                             <div class="forecast-date">Loading...</div>
@@ -162,7 +122,6 @@
                             <div class="forecast-desc">...</div>
                         </div>
                     </div>
-
                     <!-- Add popup elements -->
                     <div class="overlay"></div>
                     <div class="forecast-popup">
@@ -170,12 +129,60 @@
                         <h2 id="popup-date">Hourly Forecast</h2>
                         <div class="hourly-forecast"></div>
                     </div>
+
                     <hr>
+                    
+                    <div class="data-info">
+                        <div class="data-item">
+                            <h2>Sunrise</h2>
+                            <span id="sunrise">N/A</span>
+                        </div>
+                        <div class="data-item">
+                            <h2>Sunset</h2>
+                            <span id="sunset">N/A</span>
+                        </div>
+                        <div class="data-item">
+                            <h2>Moon Phase</h2>
+                            <span id="moonphase">N/A</span>
+                        </div>
+                    </div>
+                    
+                    <hr>
+                    
                     <h2>Links</h2>
                     <ul class="button-list">
-                        <li><a href="#" id="localWeather" data-frame>Local NWS Forecast</a></li>
+                        <li><a href="https://www.weather.gov/forecastmaps" data-frame>NOAA Forecasts</a></li>
                         <li><a href="https://radar.weather.gov/" data-frame>NOAA Radar</a></li>
-                        <li><a href="https://www.star.nesdis.noaa.gov/GOES/index.php">NOAA Satellite</a></li>
+                        <li><a href="https://www.weather.gov" data-frame>NOAA Weather</a></li>
+                        <li><a href="https://www.weather.com" data-frame>Weather.com</a></li>
+                        <li><a href="https://www.accuweather.com" data-frame>AccuWeather</a></li>
+                        <li><a href="https://www.wunderground.com" data-frame>Wunderground</a></li>
+                        <li><a href="https://www.weatherbug.com" data-frame>WeatherBug</a></li>
+                    </ul>
+                </div>
+
+                <div id="satellite" class="section">
+                    <div class="weather-switch-container">
+                        <div class="weather-switch">
+                            <button onclick="switchWeatherImage('latest')" class="active">Visible</button>
+                            <button onclick="switchWeatherImage('loop')">Loop</button>
+                            <button onclick="switchWeatherImage('latest_ir')">IR</button>
+                        </div>
+                    </div>
+                    <img id="weather-image" class="weather-image active" alt="Satellite image">
+                </div>
+
+                <div id="travel" class="section">
+                    <h2>Links</h2>
+                    <ul class="button-list">
+                        <li><a href="https://maps.google.com">Google Maps</a></li>
+                        <li><a href="https://earth.google.com">Google Earth</a></li>
+                        <li><a href="https://teslawaze.azurewebsites.net/" data-frame>TeslaWaze</a></li>
+                        <li><a href="https://www.waze.com">Waze</a></li>
+                        <li><a href="https://abetterrouteplanner.com">A Better Route Planner</a></li>
+                        <li><a href="https://www.openstreetmap.org">OpenStreetMap</a></li>
+                        <li><a href="https://www.plugshare.com">PlugShare</a></li>
+                        <li><a href="https://www.aaa.com">AAA</a></li>
                     </ul>
                 </div>
 
@@ -183,17 +190,17 @@
                     <h2>Links</h2>
                     <ul class="button-list">
                         <li><a href="https://www.wikipedia.org" data-frame>Wikipedia</a></li>
-                        <li><a href="https://www.dictionary.com" data-frame>Dictionary</a></li>
-                        <li><a href="https://www.rottentomatoes.com" data-frame>Rotten Tomatoes</a></li>
-                        <li><a href="https://www.audible.com" data-frame>Audible</a></li>
-                        <li><a href="https://www.cdc.gov" data-frame>CDC</a></li>
                         <li><a href="https://www.yelp.com" data-frame>Yelp</a></li>
+                        <li><a href="https://www.cdc.gov" data-frame>CDC</a></li>
                         <li><a href="https://www.tripadvisor.com" data-frame>TripAdvisor</a></li>
                         <li><a href="https://www.smartertravel.com">SmarterTravel</a></li>
                         <li><a href="https://www.lonelyplanet.com">Lonely Planet</a></li>
                         <li><a href="https://www.fodors.com">Fodor's</a></li>
                         <li><a href="https://www.alltrails.com">AllTrails</a></li>
                         <li><a href="https://www.roadtrippers.com">Roadtrippers</a></li>
+                        <li><a href="https://www.rottentomatoes.com">Rotten Tomatoes</a></li>
+                        <li><a href="https://www.metacritic.com">Metacritic</a></li>
+                        <li><a href="https://www.imdb.com">IMDb</a></li>
                     </ul>
                 </div>
 
@@ -208,7 +215,7 @@
                         <li><a href="https://www.espn.com">ESPN</a></li>
                         <li><a href="https://www.disneyplus.com">Disney+</a></li>
                         <li><a href="https://www.mlb.com/live-stream-games">MLB.tv</a></li>
-                        <li><a href="https://www.audible.com" data-frame>Audible</a></li>
+                        <li><a href="https://www.audible.com">Audible</a></li>
                         <li><a href="https://www.bloomberg.com/live">Bloomberg</a></li>
                         <li><a href="https://www.coursera.org">Coursera</a></li>
                         <li><a href="https://members.abettertheater.com/">A Better Theater</a></li>
@@ -224,10 +231,11 @@
                         <li><a href="https://nyc.birgefuller.com/Mandelbrot/">Mandelbrot Fractal</a></li>
                         <li><a href="https://lightroom.adobe.com/shares/3e89edbc7e0b4894905df16a85a1e71a">Aerial Tilt-Shift Gallery</a></li>
                         <li><a href="https://www.earthcam.com">EarthCam</a></li>
+                        <li><a href="https://embed.waze.com/iframe?zoom=14&lat=42.413033&lon=-71.192865&ct=livemap" data-frame>Waze Embed (Test)</a></li>
                     </ul>
                 </div>
 
-                <div id="connectivity" class="section">
+                <div id="network" class="section">
                     <h2>Internet Address</h2>
                     <span id="rdns">N/A</span>
                     <h2>Exit Location</h2>
@@ -246,6 +254,10 @@
                     </ul>
                 </div>
 
+                <div id="waze" class="section">
+                    <h2>Waze</h2>
+                </div>
+
                 <div id="about" class="section">
                     <h2>About</h2>
                     <p>This service was created by <a href="https://www.mit.edu/~birge">Jonathan Birge</a> as a personal project. It is not affiliated with Tesla, Inc.</p>
@@ -262,7 +274,7 @@
                     </ul>
 
                     <h2>Version</h2>
-                    <p>0.11</p>
+                    <p>0.15d</p>
                 </div>
 
             </div>
@@ -278,7 +290,7 @@
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script src="app.js?ver=11"></script>
+    <script src="app.js?ver=15"></script>
 </body>
 
 </html>

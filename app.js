@@ -4,9 +4,12 @@ const UPDATE_DISTANCE_THRESHOLD = 1000; // meters
 const UPDATE_TIME_THRESHOLD = 60; // minutes
 const NEWS_REFRESH_INTERVAL = 5; // minutes
 const MAX_BUFFER_SIZE = 5;
-const WEATHER_IMAGES = {
+const OPENWX_API_KEY = '6a1b1bcb03b5718a9b3a2b108ce3293d';
+const GEONAMES_USERNAME = 'birgefuller';
+const SAT_URLS = {
     latest: 'https://cdn.star.nesdis.noaa.gov/GOES16/GLM/CONUS/EXTENT3/1250x750.jpg',
-    loop: 'https://cdn.star.nesdis.noaa.gov/GOES16/GLM/CONUS/EXTENT3/GOES16-CONUS-EXTENT3-625x375.gif'
+    loop: 'https://cdn.star.nesdis.noaa.gov/GOES16/GLM/CONUS/EXTENT3/GOES16-CONUS-EXTENT3-625x375.gif',
+    latest_ir: 'https://cdn.star.nesdis.noaa.gov/GOES16/ABI/CONUS/11/1250x750.jpg',
 };
 
 // Global variables
@@ -107,45 +110,6 @@ function toggleMode() {
     document.getElementById('darkModeToggle').checked = darkOn;
 }
 
-async function updateLocationData() {
-    if (lat !== null && long !== null) {
-        console.log('Updating location dependent data...');
-        neverUpdatedLocation = false;
-
-        // Update local weather link
-        const weatherLink = document.getElementById("localWeather");
-        if (weatherLink) {
-            weatherLink.href = `https://forecast.weather.gov/MapClick.php?lat=${lat}&lon=${long}`;
-        }
-
-        // Fire off API requests for external data
-        locationTimeZone = await fetchTimeZone(lat, long);
-        console.log('Timezone: ', locationTimeZone);
-        fetchCityData(lat, long);
-        fetchSunData(lat, long);
-        
-        // Update the weather section if it's visible
-        const weatherSection = document.getElementById("weather");
-        if (weatherSection.style.display === "block") {
-            fetchWeatherData(lat, long);
-        }
-
-        // Update connectivity data if the Connectivity section is visible
-        const connectivitySection = document.getElementById("connectivity");
-        if (connectivitySection.style.display === "block") {
-            updateConnectionInfo();
-        }
-
-        // Update Wikipedia data if the Location section is visible
-        const locationSection = document.getElementById("location");
-        if (locationSection.style.display === "block") {
-            fetchWikipediaData(lat, long);
-        }
-    } else {
-        console.log('Location not available for dependent data.');
-    }
-}
-
 function calculateDistance(lat1, lon1, lat2, lon2) {
     const R = 6371e3; // Earth's radius in meters
     const φ1 = lat1 * Math.PI/180;
@@ -172,59 +136,9 @@ function shouldUpdateLocationData() {
     return distance >= UPDATE_DISTANCE_THRESHOLD || timeSinceLastUpdate >= UPDATE_TIME_THRESHOLD;
 }
 
-function updateLatLong() {
-    if (navigator.geolocation) {
-        navigator.geolocation.getCurrentPosition((position) => {
-            lat = position.coords.latitude;
-            long = position.coords.longitude;
-            alt = position.coords.altitude;  // altitude in meters
-            
-            // Add new location point to buffer
-            const newPoint = new LocationPoint(lat, long, alt, Date.now());
-            locationBuffer.push(newPoint);
-            if (locationBuffer.length > MAX_BUFFER_SIZE) {
-                locationBuffer.shift(); // Remove oldest point
-            }
-            
-            // Calculate speed and heading if we have enough points
-            if (locationBuffer.length >= 2) {
-                const oldestPoint = locationBuffer[0];
-                const speed = estimateSpeed(oldestPoint, newPoint);
-                const heading = calculateHeading(oldestPoint, newPoint);
-                const cardinal = getCardinalDirection(heading);
-                
-                document.getElementById('speed').innerText = `${speed.toFixed(0)}`;
-                document.getElementById('heading').innerText = `${heading.toFixed(0)}°`;
-            }
-
-            // Check if we should update location-dependent data
-            if (shouldUpdateLocationData()) {
-                console.log('Location changed significantly or time threshold reached, updating dependent data...');
-                updateLocationData();
-                lastUpdateLat = lat;
-                lastUpdateLong = long;
-                lastUpdate = Date.now();
-            }
-            
-            document.getElementById('latitude').innerText = lat.toFixed(4) + '°';
-            document.getElementById('longitude').innerText = long.toFixed(4) + '°';
-
-            // Update altitude in feet
-            if (alt) {
-                const altFt = (alt * 3.28084).toFixed(0);
-                document.getElementById('altitude-imperial').innerText = altFt;
-            } else {
-                document.getElementById('altitude-imperial').innerText = '--';
-            }
-        });
-    } else {
-        console.log('Geolocation is not supported by this browser.');
-    }
-}
-
 function fetchCityData(lat, long) {
     // Proxy request to Geonames reverse geocoding API endpoint
-    fetch(`https://secure.geonames.org/findNearbyPlaceNameJSON?lat=${lat}&lng=${long}&username=birgefuller`)
+    fetch(`https://secure.geonames.org/findNearbyPlaceNameJSON?lat=${lat}&lng=${long}&username=${GEONAMES_USERNAME}`)
         .then(response => response.json())
         .then(cityData => {
             const place = cityData.geonames && cityData.geonames[0];
@@ -238,7 +152,7 @@ function fetchCityData(lat, long) {
 
 async function fetchTimeZone(lat, long) {
     try {
-        const response = await fetch(`https://secure.geonames.org/timezoneJSON?lat=${lat}&lng=${long}&username=birgefuller`);
+        const response = await fetch(`https://secure.geonames.org/timezoneJSON?lat=${lat}&lng=${long}&username=${GEONAMES_USERNAME}`);
         const tzData = await response.json();
         return tzData.timezoneId || 'UTC';
     } catch (error) {
@@ -322,7 +236,7 @@ function updateAutoDarkMode() {
     }
 }
 
-function updateConnectionInfo() {
+function updateNetworkInfo() {
     // Write diagnostic information to the console
     console.log('Updating connection info...');
 
@@ -357,85 +271,6 @@ function updateConnectionInfo() {
             document.getElementById('exitLocation').innerText = 'N/A';
             document.getElementById('isp').innerText = 'N/A';
         });
-}
-
-function showSection(sectionId) {
-    // Log the clicked section
-    console.log(`Showing section: ${sectionId}`);
-
-    // First, restore original content if we're in external mode
-    const rightFrame = document.getElementById('rightFrame');
-    if (rightFrame.classList.contains('external')) {
-        rightFrame.innerHTML = rightFrame.getAttribute('data-original-content');
-        rightFrame.removeAttribute('data-original-content');
-        rightFrame.classList.remove('external');
-    }
-
-    // Then get a fresh reference to sections after DOM is restored
-    const sections = document.querySelectorAll('.section');
-    sections.forEach(section => {
-        section.style.display = 'none';
-    });
-
-    // Deactivate all buttons
-    const buttons = document.querySelectorAll('.section-button');
-    buttons.forEach(button => {
-        button.classList.remove('active');
-    });
-
-    // Clear any existing news update interval
-    if (newsUpdateInterval) {
-        clearInterval(newsUpdateInterval);
-        newsUpdateInterval = null;
-    }
-
-    // Show the selected section
-    const section = document.getElementById(sectionId);
-    if (section) {
-        section.style.display = 'block';
-        
-        if (sectionId === 'news') {
-            updateNews();
-            newsUpdateInterval = setInterval(updateNews, 60000*NEWS_REFRESH_INTERVAL);
-        }
-        
-        if (sectionId === 'weather') {
-            // Load weather image when weather section is shown
-            const weatherImage = document.getElementById('weather-image');
-            weatherImage.src = WEATHER_IMAGES.latest;
-            // Load latest weather data
-            if (lat !== null && long !== null) {
-                fetchWeatherData(lat, long);
-            } else {
-                console.log('Location not available to fetch weather data.');
-            }
-        } else {
-            // Remove weather img src to force reload when switching back
-            const weatherImage = document.getElementById('weather-image');
-            if (weatherImage) {
-                weatherImage.src = '';
-            }
-        }
-
-        if (sectionId === 'connectivity') {
-            updateConnectionInfo();
-            lastUpdate = Date.now();
-        }
-		
-        if (sectionId === 'location') {
-            if (lat !== null && long !== null) {
-                fetchWikipediaData(lat, long);
-            } else {
-                console.log('Location not available to fetch Wikipedia data.');
-            }
-        }
-    }
-
-    // Activate the clicked button
-    const button = document.querySelector(`.section-button[onclick="showSection('${sectionId}')"]`);
-    if (button) {
-        button.classList.add('active');
-    }
 }
 
 async function fetchWikipediaData(lat, long) {
@@ -603,7 +438,7 @@ function switchWeatherImage(type) {
     weatherImage.style.opacity = '0';
     
     setTimeout(() => {
-        weatherImage.src = WEATHER_IMAGES[type];
+        weatherImage.src = SAT_URLS[type];
         weatherImage.style.opacity = '1';
     }, 300);
     
@@ -612,16 +447,18 @@ function switchWeatherImage(type) {
     const buttons = weatherSwitch.getElementsByTagName('button');
     buttons[0].classList.toggle('active', type === 'latest');
     buttons[1].classList.toggle('active', type === 'loop');
+    buttons[2].classList.toggle('active', type === 'latest_ir');
     
-    // Update slider position with just 0 or 1
-    weatherSwitch.style.setProperty('--slider-position', type === 'latest' ? '0' : '1');
+    // Update slider position for three states
+    const positions = { 'latest': 0, 'loop': 1, 'latest_ir': 2 };
+    weatherSwitch.style.setProperty('--slider-position', positions[type]);
 }
 
 function fetchWeatherData(lat, long) {
     console.log('Fetching weather data...');
     Promise.all([
         fetch(`https://secure.geonames.org/findNearByWeatherJSON?lat=${lat}&lng=${long}&username=birgefuller`),
-        !forecastFetched ? fetch(`https://api.openweathermap.org/data/2.5/forecast?lat=${lat}&lon=${long}&appid=6a1b1bcb03b5718a9b3a2b108ce3293d&units=imperial`) : Promise.resolve(null)
+        !forecastFetched ? fetch(`https://api.openweathermap.org/data/2.5/forecast?lat=${lat}&lon=${long}&appid=${OPENWX_API_KEY}&units=imperial`) : Promise.resolve(null)
     ])
         .then(([currentResponse, forecastResponse]) => Promise.all([
             currentResponse.json(),
@@ -761,20 +598,14 @@ function closeHourlyForecast() {
     document.querySelector('.forecast-popup').classList.remove('show');
 }
 
-// Add click handler to close popup when clicking overlay
-document.querySelector('.overlay').addEventListener('click', closeHourlyForecast);
-
 function updateWeatherDisplay() {
     if (!weatherData) return;
 
-    const tempC = weatherData.temperature;
-    const tempF = (tempC * 9/5 + 32).toFixed(1);
-    const humidity = weatherData.humidity;
     const windSpeedMS = weatherData.windSpeed;
     const windSpeedMPH = (windSpeedMS * 2.237).toFixed(1); // Convert m/s to mph
     const windDir = weatherData.windDirection;
+    const humidity = weatherData.humidity;
 
-    document.getElementById('temperature').innerText = `${tempF}°F (${tempC}°C)`;
     document.getElementById('humidity').innerText = `${humidity}%`;
     document.getElementById('wind').innerText = `${windSpeedMPH} mph at ${windDir}°`;
 }
@@ -809,15 +640,6 @@ function loadExternalUrl(url, inFrame = false) {
     }
 }
 
-// Update link click event listener
-document.addEventListener('click', function(e) {
-    if (e.target.tagName === 'A' && !e.target.closest('.section-buttons')) {
-        e.preventDefault();
-        const inFrame = e.target.hasAttribute('data-frame');
-        loadExternalUrl(e.target.href, inFrame);
-    }
-});
-
 async function updateNews() {
     try {
         const response = await fetch('rss.php');
@@ -825,6 +647,8 @@ async function updateNews() {
         
         const newsContainer = document.getElementById('newsHeadlines');
         if (!newsContainer) return;
+
+        console.log('Updating news headlines...');
 
         const html = items.map(item => {
             const date = new Date(item.date * 1000);
@@ -852,11 +676,205 @@ async function updateNews() {
     }
 }
 
+async function updateLocationData() {
+    if (lat !== null && long !== null) {
+        console.log('Updating location dependent data...');
+        neverUpdatedLocation = false;
+
+        // Fire off API requests for external data
+        locationTimeZone = await fetchTimeZone(lat, long);
+        console.log('Timezone: ', locationTimeZone);
+        fetchCityData(lat, long);
+        fetchSunData(lat, long);
+        fetchWeatherData(lat, long);
+
+        // Update connectivity data if the Network section is visible
+        const networkSection = document.getElementById("network");
+        if (networkSection.style.display === "block") {
+            console.log('Updating connectivity data...');
+            updateNetworkInfo();
+        }
+
+        // Update Wikipedia data if the Location section is visible
+        const locationSection = document.getElementById("navigation");
+        if (locationSection.style.display === "block") {
+            console.log('Updating Wikipedia data...');
+            fetchWikipediaData(lat, long);
+        }
+    } else {
+        console.log('Location not available for dependent data.');
+    }
+}
+
+function updateLatLong() {
+    if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition((position) => {
+            lat = position.coords.latitude;
+            long = position.coords.longitude;
+            alt = position.coords.altitude;  // altitude in meters
+            
+            // Add new location point to buffer
+            const newPoint = new LocationPoint(lat, long, alt, Date.now());
+            locationBuffer.push(newPoint);
+            if (locationBuffer.length > MAX_BUFFER_SIZE) {
+                locationBuffer.shift(); // Remove oldest point
+            }
+            
+            // Calculate speed and heading if we have enough points
+            if (locationBuffer.length >= 2) {
+                const oldestPoint = locationBuffer[0];
+                const speed = estimateSpeed(oldestPoint, newPoint);
+                const heading = calculateHeading(oldestPoint, newPoint);
+                const cardinal = getCardinalDirection(heading);
+                
+                document.getElementById('speed').innerText = `${speed.toFixed(0)}`;
+                document.getElementById('heading').innerText = `${heading.toFixed(0)}°`;
+            }
+
+            // Check if we should update location-dependent data
+            if (shouldUpdateLocationData()) {
+                console.log('Location changed significantly or time threshold reached, updating dependent data...');
+                updateLocationData();
+                lastUpdateLat = lat;
+                lastUpdateLong = long;
+                lastUpdate = Date.now();
+            }
+            
+            document.getElementById('latitude').innerText = lat.toFixed(4) + '°';
+            document.getElementById('longitude').innerText = long.toFixed(4) + '°';
+
+            // Update altitude in feet
+            if (alt) {
+                const altFt = (alt * 3.28084).toFixed(0);
+                document.getElementById('altitude-imperial').innerText = altFt;
+            } else {
+                document.getElementById('altitude-imperial').innerText = '--';
+            }
+        });
+    } else {
+        console.log('Geolocation is not supported by this browser.');
+    }
+}
+
+// Get initial section from URL parameter
+function getInitialSection() {
+    const params = new URLSearchParams(window.location.search);
+    return params.get('section') || 'news';  // default to navigation if no parameter
+}
+
+function showSection(sectionId) {
+    // Log the clicked section
+    console.log(`Showing section: ${sectionId}`);
+
+    // Update URL without page reload 
+    const url = new URL(window.location);
+    url.searchParams.set('section', sectionId);
+    window.history.pushState({}, '', url);
+
+    // First, restore original content if we're in external mode
+    const rightFrame = document.getElementById('rightFrame');
+    if (rightFrame.classList.contains('external')) {
+        rightFrame.innerHTML = rightFrame.getAttribute('data-original-content');
+        rightFrame.removeAttribute('data-original-content');
+        rightFrame.classList.remove('external');
+    }
+
+    // Then get a fresh reference to sections after DOM is restored
+    const sections = document.querySelectorAll('.section');
+    sections.forEach(section => {
+        section.style.display = 'none';
+    });
+
+    // Deactivate all buttons
+    const buttons = document.querySelectorAll('.section-button');
+    buttons.forEach(button => {
+        button.classList.remove('active');
+    });
+
+    // Show the selected section
+    const section = document.getElementById(sectionId);
+    if (section) {
+        section.style.display = 'block';
+
+        if (sectionId === 'waze') {
+            loadExternalUrl('https://teslawaze.azurewebsites.net/', true);
+        }
+
+        // Original section-specific logic
+        if (sectionId === 'news') {
+            // Only update news if interval is not set (first visit)
+            if (!newsUpdateInterval) {
+                updateNews();
+                newsUpdateInterval = setInterval(updateNews, 60000 * NEWS_REFRESH_INTERVAL);
+            }
+        }
+        
+        // Load weather data for both weather and navigation sections
+        if (sectionId === 'weather' || sectionId === 'navigation') {
+            // Load latest weather data
+            if (lat !== null && long !== null) {
+                fetchWeatherData(lat, long);
+            } else {
+                console.log('Location not available to fetch weather data.');
+            }
+        }
+
+        if (sectionId === 'satellite') {
+            // Load weather image when satellite section is shown
+            const weatherImage = document.getElementById('weather-image');
+            weatherImage.src = SAT_URLS.latest;
+        } else {
+            // Remove weather img src to force reload when switching back
+            const weatherImage = document.getElementById('weather-image');
+            if (weatherImage) {
+                weatherImage.src = '';
+            }
+        }
+
+        if (sectionId === 'network') {
+            updateNetworkInfo();
+        }
+        
+        if (sectionId === 'navigation') {
+            if (lat !== null && long !== null) {
+                fetchWikipediaData(lat, long);
+            } else {
+                console.log('Location not available to fetch Wikipedia data.');
+            }
+        }
+    }
+
+    // Activate the clicked button
+    const button = document.querySelector(`.section-button[onclick="showSection('${sectionId}')"]`);
+    if (button) {
+        button.classList.add('active');
+    }
+}
+
 // ***** Main code *****
+
+// Set up event listeners
+
+// Update link click event listener
+document.addEventListener('click', function(e) {
+    if (e.target.tagName === 'A' && !e.target.closest('.section-buttons')) {
+        e.preventDefault();
+        const inFrame = e.target.hasAttribute('data-frame');
+        loadExternalUrl(e.target.href, inFrame);
+    }
+});
+
+// Add click handler to close popup when clicking overlay
+document.querySelector('.overlay').addEventListener('click', closeHourlyForecast);
 
 // Update location frequently but only trigger dependent updates when moved significantly
 updateLatLong();
 setInterval(updateLatLong, 1000*LATLON_UPDATE_INTERVAL);
 
-// Show the default section
-showSection('news');
+// Show the initial section from URL parameter
+showSection(getInitialSection());
+
+// Handle browser back/forward buttons
+window.addEventListener('popstate', () => {
+    showSection(getInitialSection());
+});
