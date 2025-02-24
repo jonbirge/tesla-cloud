@@ -121,6 +121,15 @@ li {
     display: block;
 }
 
+.sections {
+    padding-bottom: 30px; /* Add padding to the bottom of all sections */
+}
+
+.section {
+    display: none;
+    padding-bottom: 30px; /* Add padding to the bottom of each section */
+}
+
 /* Navigation */
 .section-buttons {
     position: sticky;
@@ -549,6 +558,7 @@ input:checked + .toggle-slider:before {
 /* Utility Classes */
 .section {
     display: none;
+    padding-bottom: 30px; /* Add padding to the bottom of each section */
 }
 
 .hidden {
