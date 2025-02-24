@@ -523,7 +523,7 @@ input:checked + .toggle-slider:before {
 .stat-box {
     display: flex;
     flex-direction: column;
-    align-items: center;
+    align-items: left;
     min-width: 200px;
 }
 
