@@ -8,6 +8,8 @@ const WEATHER_IMAGES = {
     latest: 'https://cdn.star.nesdis.noaa.gov/GOES16/GLM/CONUS/EXTENT3/1250x750.jpg',
     loop: 'https://cdn.star.nesdis.noaa.gov/GOES16/GLM/CONUS/EXTENT3/GOES16-CONUS-EXTENT3-625x375.gif'
 };
+const OPENWX_API_KEY = '6a1b1bcb03b5718a9b3a2b108ce3293d';
+const GEONAMES_USERNAME = 'birgefuller';
 
 // Global variables
 let lastUpdate = 0;
@@ -135,7 +137,7 @@ function shouldUpdateLocationData() {
 
 function fetchCityData(lat, long) {
     // Proxy request to Geonames reverse geocoding API endpoint
-    fetch(`https://secure.geonames.org/findNearbyPlaceNameJSON?lat=${lat}&lng=${long}&username=birgefuller`)
+    fetch(`https://secure.geonames.org/findNearbyPlaceNameJSON?lat=${lat}&lng=${long}&username=${GEONAMES_USERNAME}`)
         .then(response => response.json())
         .then(cityData => {
             const place = cityData.geonames && cityData.geonames[0];
@@ -149,7 +151,7 @@ function fetchCityData(lat, long) {
 
 async function fetchTimeZone(lat, long) {
     try {
-        const response = await fetch(`https://secure.geonames.org/timezoneJSON?lat=${lat}&lng=${long}&username=birgefuller`);
+        const response = await fetch(`https://secure.geonames.org/timezoneJSON?lat=${lat}&lng=${long}&username=${GEONAMES_USERNAME}`);
         const tzData = await response.json();
         return tzData.timezoneId || 'UTC';
     } catch (error) {
@@ -453,7 +455,7 @@ function fetchWeatherData(lat, long) {
     console.log('Fetching weather data...');
     Promise.all([
         fetch(`https://secure.geonames.org/findNearByWeatherJSON?lat=${lat}&lng=${long}&username=birgefuller`),
-        !forecastFetched ? fetch(`https://api.openweathermap.org/data/2.5/forecast?lat=${lat}&lon=${long}&appid=6a1b1bcb03b5718a9b3a2b108ce3293d&units=imperial`) : Promise.resolve(null)
+        !forecastFetched ? fetch(`https://api.openweathermap.org/data/2.5/forecast?lat=${lat}&lon=${long}&appid=${OPENWX_API_KEY}&units=imperial`) : Promise.resolve(null)
     ])
         .then(([currentResponse, forecastResponse]) => Promise.all([
             currentResponse.json(),
