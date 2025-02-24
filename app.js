@@ -818,6 +818,15 @@ function handlePositionUpdate(position) {
         } else {
             drawRadar(speed, heading, 0, 0);
         }
+    } else {
+        // Just show wind if we don't have movement data
+        if (weatherData) {
+            const windSpeedMPH = Math.min((weatherData.windSpeed * 2.237), MAX_SPEED);
+            const windDir = weatherData.windDirection;
+            drawRadar(0, 0, windSpeedMPH, windDir);
+        } else {
+            drawRadar(0, 0, 0, 0);
+        }
     }
 
     // Check if we should update location-dependent data
@@ -828,8 +837,10 @@ function handlePositionUpdate(position) {
         lastUpdate = Date.now();
     }
     
+    // Update display values
     document.getElementById('latitude').innerText = lat.toFixed(4) + '°';
     document.getElementById('longitude').innerText = long.toFixed(4) + '°';
+    document.getElementById('altitude').innerText = alt ? Math.round(alt * 3.28084) : '--'; // Convert meters to feet
 }
 
 function updateLatLong() {

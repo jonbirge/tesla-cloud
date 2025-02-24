@@ -50,22 +50,30 @@
                 </div>
 
                 <div id="navigation" class="section">
-                    <div class="radar-container">
-                        <canvas id="radarDisplay" width="300" height="300"></canvas>
-                        <div class="radar-labels">
-                            <div class="label-n">N</div>
-                            <div class="label-s">S</div>
-                            <div class="label-e">E</div>
-                            <div class="label-w">W</div>
-                        </div>
-                        <div class="radar-legend">
-                            <div class="legend-item">
-                                <div class="legend-color vehicle"></div>
-                                <span>Vehicle</span>
+                    <div class="nav-container">
+                        <div class="radar-container">
+                            <canvas id="radarDisplay" width="300" height="300"></canvas>
+                            <div class="radar-labels">
+                                <div class="label-n">N</div>
+                                <div class="label-s">S</div>
+                                <div class="label-e">E</div>
+                                <div class="label-w">W</div>
                             </div>
-                            <div class="legend-item">
-                                <div class="legend-color wind"></div>
-                                <span>Wind</span>
+                            <div class="radar-legend">
+                                <div class="legend-item">
+                                    <div class="legend-color vehicle"></div>
+                                    <span>Vehicle</span>
+                                </div>
+                                <div class="legend-item">
+                                    <div class="legend-color wind"></div>
+                                    <span>Wind</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="altitude-display">
+                            <div class="stat-box">
+                                <div class="stat-value" id="altitude">--</div>
+                                <div class="stat-label">FT ALT</div>
                             </div>
                         </div>
                     </div>

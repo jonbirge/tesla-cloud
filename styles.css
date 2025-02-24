@@ -569,12 +569,12 @@ input:checked + .toggle-slider:before {
 /* Radar Display */
 .radar-container {
     position: relative;
+    display: flex;
+    gap: 20px;
+    align-items: flex-start;
     width: 300px;
     height: 300px;
     margin: 20px;
-    display: flex;
-    align-items: center;
-    gap: 20px;
 }
 
 #radarDisplay {
@@ -633,4 +633,15 @@ input:checked + .toggle-slider:before {
 
 .dark-mode #radarDisplay {
     background-color: rgba(255, 255, 255, 0.1);
+}
+
+.nav-container {
+    display: flex;
+    align-items: flex-start;
+    gap: 320px;  /* Increased from 240px to 320px */
+    margin: 20px 0;
+}
+
+.altitude-display {
+    padding-top: 20px;
 }
