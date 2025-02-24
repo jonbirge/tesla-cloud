@@ -2,19 +2,19 @@
 header('Content-Type: application/json');
 
 $feeds = [
-    'nyt' => 'https://rss.nytimes.com/services/xml/rss/nyt/HomePage.xml',
     'wsj' => 'https://feeds.content.dowjones.io/public/rss/RSSWorldNews',
-    'bbc' => 'https://feeds.bbci.co.uk/news/rss.xml',
+    'nyt' => 'https://rss.nytimes.com/services/xml/rss/nyt/HomePage.xml',
+    //'bbc' => 'https://feeds.bbci.co.uk/news/rss.xml',
     'electrek' => 'https://electrek.co/feed/',
     'teslarati' => 'https://www.teslarati.com/feed/',
     'insideevs' => 'https://insideevs.com/rss/articles/all/',
     'tesla' => 'https://www.tesla.com/rss/blog',
-    'tmc' => 'https://teslamotorsclub.com/feed/',
     'teslarumors' => 'https://teslarumors.com/feed/',
     'notatesla' => 'https://notateslaapp.com/feed/',
     'cleantechnica' => 'https://cleantechnica.com/feed/',
-    'evannex' => 'https://evannex.com/blogs/news.atom',
     'teslamag' => 'https://teslamag.de/feed',
+    'r/teslamotors' => 'https://www.reddit.com/r/teslamotors/.rss',
+    'tmc' => 'https://teslamotorsclub.com/feed/',
 ];
 
 function fetchRSS($url) {

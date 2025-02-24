@@ -818,15 +818,6 @@ document.addEventListener('click', function(e) {
     }
 });
 
-// ***** Initial code *****
-
-// Update location frequently but only trigger dependent updates when moved significantly
-updateLatLong();
-setInterval(updateLatLong, 1000*LATLON_UPDATE_INTERVAL);
-
-// Show the default section
-showSection('news');
-
 async function updateNews() {
     try {
         const response = await fetch('rss.php');
@@ -860,3 +851,12 @@ async function updateNews() {
             '<p><em>Error loading headlines</em></p>';
     }
 }
+
+// ***** Main code *****
+
+// Update location frequently but only trigger dependent updates when moved significantly
+updateLatLong();
+setInterval(updateLatLong, 1000*LATLON_UPDATE_INTERVAL);
+
+// Show the default section
+showSection('news');
