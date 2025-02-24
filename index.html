@@ -151,15 +151,21 @@
                     <h2>Links</h2>
                     <ul class="button-list">
                         <li><a href="https://radar.weather.gov/" data-frame>NOAA Radar</a></li>
-                        <li><a href="https://www.star.nesdis.noaa.gov/GOES/index.php">NOAA Satellite</a></li>
+                        <li><a href="https://www.weather.gov" data-frame>NOAA Weather</a></li>
+                        <li><a href="https://www.weather.com" data-frame>Weather.com</a></li>
+                        <li><a href="https://www.accuweather.com" data-frame>AccuWeather</a></li>
+                        <li><a href="https://www.wunderground.com" data-frame>Wunderground</a></li>
+                        <li><a href="https://www.weatherbug.com" data-frame>WeatherBug</a></li>
+                        <li><a href="https://www.weather.gov/forecastmaps" data-frame>Forecast Maps</a></li>
                     </ul>
                 </div>
 
                 <div id="satellite" class="section">
                     <div class="weather-switch-container">
                         <div class="weather-switch">
-                            <button onclick="switchWeatherImage('latest')" class="active">Latest</button>
+                            <button onclick="switchWeatherImage('latest')" class="active">Visible</button>
                             <button onclick="switchWeatherImage('loop')">Loop</button>
+                            <button onclick="switchWeatherImage('latest_ir')">IR</button>
                         </div>
                     </div>
                     <img id="weather-image" class="weather-image active" alt="Satellite image">
@@ -183,17 +189,15 @@
                     <h2>Links</h2>
                     <ul class="button-list">
                         <li><a href="https://www.wikipedia.org" data-frame>Wikipedia</a></li>
-                        <li><a href="https://www.dictionary.com" data-frame>Dictionary</a></li>
-                        <li><a href="https://www.rottentomatoes.com" data-frame>Rotten Tomatoes</a></li>
-                        <li><a href="https://www.audible.com" data-frame>Audible</a></li>
-                        <li><a href="https://www.cdc.gov" data-frame>CDC</a></li>
                         <li><a href="https://www.yelp.com" data-frame>Yelp</a></li>
+                        <li><a href="https://www.cdc.gov" data-frame>CDC</a></li>
                         <li><a href="https://www.tripadvisor.com" data-frame>TripAdvisor</a></li>
                         <li><a href="https://www.smartertravel.com">SmarterTravel</a></li>
                         <li><a href="https://www.lonelyplanet.com">Lonely Planet</a></li>
                         <li><a href="https://www.fodors.com">Fodor's</a></li>
                         <li><a href="https://www.alltrails.com">AllTrails</a></li>
                         <li><a href="https://www.roadtrippers.com">Roadtrippers</a></li>
+                        <li><a href="https://www.rottentomatoes.com">Rotten Tomatoes</a></li>
                     </ul>
                 </div>
 
@@ -208,7 +212,7 @@
                         <li><a href="https://www.espn.com">ESPN</a></li>
                         <li><a href="https://www.disneyplus.com">Disney+</a></li>
                         <li><a href="https://www.mlb.com/live-stream-games">MLB.tv</a></li>
-                        <li><a href="https://www.audible.com" data-frame>Audible</a></li>
+                        <li><a href="https://www.audible.com">Audible</a></li>
                         <li><a href="https://www.bloomberg.com/live">Bloomberg</a></li>
                         <li><a href="https://www.coursera.org">Coursera</a></li>
                         <li><a href="https://members.abettertheater.com/">A Better Theater</a></li>
@@ -262,7 +266,7 @@
                     </ul>
 
                     <h2>Version</h2>
-                    <p>0.11d</p>
+                    <p>0.12d</p>
                 </div>
 
             </div>

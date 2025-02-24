@@ -4,12 +4,13 @@ const UPDATE_DISTANCE_THRESHOLD = 1000; // meters
 const UPDATE_TIME_THRESHOLD = 60; // minutes
 const NEWS_REFRESH_INTERVAL = 5; // minutes
 const MAX_BUFFER_SIZE = 5;
-const WEATHER_IMAGES = {
-    latest: 'https://cdn.star.nesdis.noaa.gov/GOES16/GLM/CONUS/EXTENT3/1250x750.jpg',
-    loop: 'https://cdn.star.nesdis.noaa.gov/GOES16/GLM/CONUS/EXTENT3/GOES16-CONUS-EXTENT3-625x375.gif'
-};
 const OPENWX_API_KEY = '6a1b1bcb03b5718a9b3a2b108ce3293d';
 const GEONAMES_USERNAME = 'birgefuller';
+const SAT_URLS = {
+    latest: 'https://cdn.star.nesdis.noaa.gov/GOES16/GLM/CONUS/EXTENT3/1250x750.jpg',
+    loop: 'https://cdn.star.nesdis.noaa.gov/GOES16/GLM/CONUS/EXTENT3/GOES16-CONUS-EXTENT3-625x375.gif',
+    latest_ir: 'https://cdn.star.nesdis.noaa.gov/GOES16/ABI/CONUS/11/1250x750.jpg',
+};
 
 // Global variables
 let lastUpdate = 0;
@@ -437,7 +438,7 @@ function switchWeatherImage(type) {
     weatherImage.style.opacity = '0';
     
     setTimeout(() => {
-        weatherImage.src = WEATHER_IMAGES[type];
+        weatherImage.src = SAT_URLS[type];
         weatherImage.style.opacity = '1';
     }, 300);
     
@@ -446,9 +447,11 @@ function switchWeatherImage(type) {
     const buttons = weatherSwitch.getElementsByTagName('button');
     buttons[0].classList.toggle('active', type === 'latest');
     buttons[1].classList.toggle('active', type === 'loop');
+    buttons[2].classList.toggle('active', type === 'latest_ir');
     
-    // Update slider position with just 0 or 1
-    weatherSwitch.style.setProperty('--slider-position', type === 'latest' ? '0' : '1');
+    // Update slider position for three states
+    const positions = { 'latest': 0, 'loop': 1, 'latest_ir': 2 };
+    weatherSwitch.style.setProperty('--slider-position', positions[type]);
 }
 
 function fetchWeatherData(lat, long) {
@@ -756,7 +759,7 @@ function updateLatLong() {
 // Get initial section from URL parameter
 function getInitialSection() {
     const params = new URLSearchParams(window.location.search);
-    return params.get('section') || 'navigation';  // default to navigation if no parameter
+    return params.get('section') || 'news';  // default to navigation if no parameter
 }
 
 function showSection(sectionId) {
@@ -814,7 +817,7 @@ function showSection(sectionId) {
         if (sectionId === 'satellite') {
             // Load weather image when satellite section is shown
             const weatherImage = document.getElementById('weather-image');
-            weatherImage.src = WEATHER_IMAGES.latest;
+            weatherImage.src = SAT_URLS.latest;
         } else {
             // Remove weather img src to force reload when switching back
             const weatherImage = document.getElementById('weather-image');
