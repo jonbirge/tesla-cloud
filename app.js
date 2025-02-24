@@ -766,7 +766,7 @@ function showSection(sectionId) {
     // Log the clicked section
     console.log(`Showing section: ${sectionId}`);
 
-    // Update URL without page reload
+    // Update URL without page reload 
     const url = new URL(window.location);
     url.searchParams.set('section', sectionId);
     window.history.pushState({}, '', url);
@@ -795,7 +795,12 @@ function showSection(sectionId) {
     const section = document.getElementById(sectionId);
     if (section) {
         section.style.display = 'block';
-        
+
+        if (sectionId === 'waze') {
+            loadExternalUrl('https://teslawaze.azurewebsites.net/', true);
+        }
+
+        // Original section-specific logic
         if (sectionId === 'news') {
             // Only update news if interval is not set (first visit)
             if (!newsUpdateInterval) {
