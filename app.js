@@ -107,36 +107,6 @@ function toggleMode() {
     document.getElementById('darkModeToggle').checked = darkOn;
 }
 
-async function updateLocationData() {
-    if (lat !== null && long !== null) {
-        console.log('Updating location dependent data...');
-        neverUpdatedLocation = false;
-
-        // Fire off API requests for external data
-        locationTimeZone = await fetchTimeZone(lat, long);
-        console.log('Timezone: ', locationTimeZone);
-        fetchCityData(lat, long);
-        fetchSunData(lat, long);
-        fetchWeatherData(lat, long);
-
-        // Update connectivity data if the Connectivity section is visible
-        const connectivitySection = document.getElementById("connectivity");
-        if (connectivitySection.style.display === "block") {
-            console.log('Updating connectivity data...');
-            updateConnectionInfo();
-        }
-
-        // Update Wikipedia data if the Location section is visible
-        const locationSection = document.getElementById("location");
-        if (locationSection.style.display === "block") {
-            console.log('Updating Wikipedia data...');
-            fetchWikipediaData(lat, long);
-        }
-    } else {
-        console.log('Location not available for dependent data.');
-    }
-}
-
 function calculateDistance(lat1, lon1, lat2, lon2) {
     const R = 6371e3; // Earth's radius in meters
     const φ1 = lat1 * Math.PI/180;
@@ -161,56 +131,6 @@ function shouldUpdateLocationData() {
     const distance = calculateDistance(lat, long, lastUpdateLat, lastUpdateLong);
     
     return distance >= UPDATE_DISTANCE_THRESHOLD || timeSinceLastUpdate >= UPDATE_TIME_THRESHOLD;
-}
-
-function updateLatLong() {
-    if (navigator.geolocation) {
-        navigator.geolocation.getCurrentPosition((position) => {
-            lat = position.coords.latitude;
-            long = position.coords.longitude;
-            alt = position.coords.altitude;  // altitude in meters
-            
-            // Add new location point to buffer
-            const newPoint = new LocationPoint(lat, long, alt, Date.now());
-            locationBuffer.push(newPoint);
-            if (locationBuffer.length > MAX_BUFFER_SIZE) {
-                locationBuffer.shift(); // Remove oldest point
-            }
-            
-            // Calculate speed and heading if we have enough points
-            if (locationBuffer.length >= 2) {
-                const oldestPoint = locationBuffer[0];
-                const speed = estimateSpeed(oldestPoint, newPoint);
-                const heading = calculateHeading(oldestPoint, newPoint);
-                const cardinal = getCardinalDirection(heading);
-                
-                document.getElementById('speed').innerText = `${speed.toFixed(0)}`;
-                document.getElementById('heading').innerText = `${heading.toFixed(0)}°`;
-            }
-
-            // Check if we should update location-dependent data
-            if (shouldUpdateLocationData()) {
-                console.log('Location changed significantly or time threshold reached, updating dependent data...');
-                updateLocationData();
-                lastUpdateLat = lat;
-                lastUpdateLong = long;
-                lastUpdate = Date.now();
-            }
-            
-            document.getElementById('latitude').innerText = lat.toFixed(4) + '°';
-            document.getElementById('longitude').innerText = long.toFixed(4) + '°';
-
-            // Update altitude in feet
-            if (alt) {
-                const altFt = (alt * 3.28084).toFixed(0);
-                document.getElementById('altitude-imperial').innerText = altFt;
-            } else {
-                document.getElementById('altitude-imperial').innerText = '--';
-            }
-        });
-    } else {
-        console.log('Geolocation is not supported by this browser.');
-    }
 }
 
 function fetchCityData(lat, long) {
@@ -313,7 +233,7 @@ function updateAutoDarkMode() {
     }
 }
 
-function updateConnectionInfo() {
+function updateNetworkInfo() {
     // Write diagnostic information to the console
     console.log('Updating connection info...');
 
@@ -348,86 +268,6 @@ function updateConnectionInfo() {
             document.getElementById('exitLocation').innerText = 'N/A';
             document.getElementById('isp').innerText = 'N/A';
         });
-}
-
-function showSection(sectionId) {
-    // Log the clicked section
-    console.log(`Showing section: ${sectionId}`);
-
-    // First, restore original content if we're in external mode
-    const rightFrame = document.getElementById('rightFrame');
-    if (rightFrame.classList.contains('external')) {
-        rightFrame.innerHTML = rightFrame.getAttribute('data-original-content');
-        rightFrame.removeAttribute('data-original-content');
-        rightFrame.classList.remove('external');
-    }
-
-    // Then get a fresh reference to sections after DOM is restored
-    const sections = document.querySelectorAll('.section');
-    sections.forEach(section => {
-        section.style.display = 'none';
-    });
-
-    // Deactivate all buttons
-    const buttons = document.querySelectorAll('.section-button');
-    buttons.forEach(button => {
-        button.classList.remove('active');
-    });
-
-    // Show the selected section
-    const section = document.getElementById(sectionId);
-    if (section) {
-        section.style.display = 'block';
-        
-        if (sectionId === 'news') {
-            if (newsUpdateInterval) {
-                clearInterval(newsUpdateInterval);
-                newsUpdateInterval = null;
-            }
-            updateNews();
-            newsUpdateInterval = setInterval(updateNews, 60000 * NEWS_REFRESH_INTERVAL);
-        }
-        
-        // Load weather data for both weather and location sections
-        if (sectionId === 'weather' || sectionId === 'location') {
-            // Load latest weather data
-            if (lat !== null && long !== null) {
-                fetchWeatherData(lat, long);
-            } else {
-                console.log('Location not available to fetch weather data.');
-            }
-        }
-
-        if (sectionId === 'satellite') {
-            // Load weather image when satellite section is shown
-            const weatherImage = document.getElementById('weather-image');
-            weatherImage.src = WEATHER_IMAGES.latest;
-        } else {
-            // Remove weather img src to force reload when switching back
-            const weatherImage = document.getElementById('weather-image');
-            if (weatherImage) {
-                weatherImage.src = '';
-            }
-        }
-
-        if (sectionId === 'connectivity') {
-            updateConnectionInfo();
-        }
-		
-        if (sectionId === 'location') {
-            if (lat !== null && long !== null) {
-                fetchWikipediaData(lat, long);
-            } else {
-                console.log('Location not available to fetch Wikipedia data.');
-            }
-        }
-    }
-
-    // Activate the clicked button
-    const button = document.querySelector(`.section-button[onclick="showSection('${sectionId}')"]`);
-    if (button) {
-        button.classList.add('active');
-    }
 }
 
 async function fetchWikipediaData(lat, long) {
@@ -753,9 +593,6 @@ function closeHourlyForecast() {
     document.querySelector('.forecast-popup').classList.remove('show');
 }
 
-// Add click handler to close popup when clicking overlay
-document.querySelector('.overlay').addEventListener('click', closeHourlyForecast);
-
 function updateWeatherDisplay() {
     if (!weatherData) return;
 
@@ -798,15 +635,6 @@ function loadExternalUrl(url, inFrame = false) {
     }
 }
 
-// Update link click event listener
-document.addEventListener('click', function(e) {
-    if (e.target.tagName === 'A' && !e.target.closest('.section-buttons')) {
-        e.preventDefault();
-        const inFrame = e.target.hasAttribute('data-frame');
-        loadExternalUrl(e.target.href, inFrame);
-    }
-});
-
 async function updateNews() {
     try {
         const response = await fetch('rss.php');
@@ -814,6 +642,8 @@ async function updateNews() {
         
         const newsContainer = document.getElementById('newsHeadlines');
         if (!newsContainer) return;
+
+        console.log('Updating news headlines...');
 
         const html = items.map(item => {
             const date = new Date(item.date * 1000);
@@ -841,11 +671,184 @@ async function updateNews() {
     }
 }
 
+async function updateLocationData() {
+    if (lat !== null && long !== null) {
+        console.log('Updating location dependent data...');
+        neverUpdatedLocation = false;
+
+        // Fire off API requests for external data
+        locationTimeZone = await fetchTimeZone(lat, long);
+        console.log('Timezone: ', locationTimeZone);
+        fetchCityData(lat, long);
+        fetchSunData(lat, long);
+        fetchWeatherData(lat, long);
+
+        // Update connectivity data if the Network section is visible
+        const networkSection = document.getElementById("network");
+        if (networkSection.style.display === "block") {
+            console.log('Updating connectivity data...');
+            updateNetworkInfo();
+        }
+
+        // Update Wikipedia data if the Location section is visible
+        const locationSection = document.getElementById("navigation");
+        if (locationSection.style.display === "block") {
+            console.log('Updating Wikipedia data...');
+            fetchWikipediaData(lat, long);
+        }
+    } else {
+        console.log('Location not available for dependent data.');
+    }
+}
+
+function updateLatLong() {
+    if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition((position) => {
+            lat = position.coords.latitude;
+            long = position.coords.longitude;
+            alt = position.coords.altitude;  // altitude in meters
+            
+            // Add new location point to buffer
+            const newPoint = new LocationPoint(lat, long, alt, Date.now());
+            locationBuffer.push(newPoint);
+            if (locationBuffer.length > MAX_BUFFER_SIZE) {
+                locationBuffer.shift(); // Remove oldest point
+            }
+            
+            // Calculate speed and heading if we have enough points
+            if (locationBuffer.length >= 2) {
+                const oldestPoint = locationBuffer[0];
+                const speed = estimateSpeed(oldestPoint, newPoint);
+                const heading = calculateHeading(oldestPoint, newPoint);
+                const cardinal = getCardinalDirection(heading);
+                
+                document.getElementById('speed').innerText = `${speed.toFixed(0)}`;
+                document.getElementById('heading').innerText = `${heading.toFixed(0)}°`;
+            }
+
+            // Check if we should update location-dependent data
+            if (shouldUpdateLocationData()) {
+                console.log('Location changed significantly or time threshold reached, updating dependent data...');
+                updateLocationData();
+                lastUpdateLat = lat;
+                lastUpdateLong = long;
+                lastUpdate = Date.now();
+            }
+            
+            document.getElementById('latitude').innerText = lat.toFixed(4) + '°';
+            document.getElementById('longitude').innerText = long.toFixed(4) + '°';
+
+            // Update altitude in feet
+            if (alt) {
+                const altFt = (alt * 3.28084).toFixed(0);
+                document.getElementById('altitude-imperial').innerText = altFt;
+            } else {
+                document.getElementById('altitude-imperial').innerText = '--';
+            }
+        });
+    } else {
+        console.log('Geolocation is not supported by this browser.');
+    }
+}
+
+function showSection(sectionId) {
+    // Log the clicked section
+    console.log(`Showing section: ${sectionId}`);
+
+    // First, restore original content if we're in external mode
+    const rightFrame = document.getElementById('rightFrame');
+    if (rightFrame.classList.contains('external')) {
+        rightFrame.innerHTML = rightFrame.getAttribute('data-original-content');
+        rightFrame.removeAttribute('data-original-content');
+        rightFrame.classList.remove('external');
+    }
+
+    // Then get a fresh reference to sections after DOM is restored
+    const sections = document.querySelectorAll('.section');
+    sections.forEach(section => {
+        section.style.display = 'none';
+    });
+
+    // Deactivate all buttons
+    const buttons = document.querySelectorAll('.section-button');
+    buttons.forEach(button => {
+        button.classList.remove('active');
+    });
+
+    // Show the selected section
+    const section = document.getElementById(sectionId);
+    if (section) {
+        section.style.display = 'block';
+        
+        if (sectionId === 'news') {
+            // Only update news if interval is not set (first visit)
+            if (!newsUpdateInterval) {
+                updateNews();
+                newsUpdateInterval = setInterval(updateNews, 60000 * NEWS_REFRESH_INTERVAL);
+            }
+        }
+        
+        // Load weather data for both weather and navigation sections
+        if (sectionId === 'weather' || sectionId === 'navigation') {
+            // Load latest weather data
+            if (lat !== null && long !== null) {
+                fetchWeatherData(lat, long);
+            } else {
+                console.log('Location not available to fetch weather data.');
+            }
+        }
+
+        if (sectionId === 'satellite') {
+            // Load weather image when satellite section is shown
+            const weatherImage = document.getElementById('weather-image');
+            weatherImage.src = WEATHER_IMAGES.latest;
+        } else {
+            // Remove weather img src to force reload when switching back
+            const weatherImage = document.getElementById('weather-image');
+            if (weatherImage) {
+                weatherImage.src = '';
+            }
+        }
+
+        if (sectionId === 'network') {
+            updateNetworkInfo();
+        }
+        
+        if (sectionId === 'navigation') {
+            if (lat !== null && long !== null) {
+                fetchWikipediaData(lat, long);
+            } else {
+                console.log('Location not available to fetch Wikipedia data.');
+            }
+        }
+    }
+
+    // Activate the clicked button
+    const button = document.querySelector(`.section-button[onclick="showSection('${sectionId}')"]`);
+    if (button) {
+        button.classList.add('active');
+    }
+}
+
 // ***** Main code *****
+
+// Set up event listeners
+
+// Update link click event listener
+document.addEventListener('click', function(e) {
+    if (e.target.tagName === 'A' && !e.target.closest('.section-buttons')) {
+        e.preventDefault();
+        const inFrame = e.target.hasAttribute('data-frame');
+        loadExternalUrl(e.target.href, inFrame);
+    }
+});
+
+// Add click handler to close popup when clicking overlay
+document.querySelector('.overlay').addEventListener('click', closeHourlyForecast);
 
 // Update location frequently but only trigger dependent updates when moved significantly
 updateLatLong();
 setInterval(updateLatLong, 1000*LATLON_UPDATE_INTERVAL);
 
 // Show the default section
-showSection('location');
+showSection('navigation');

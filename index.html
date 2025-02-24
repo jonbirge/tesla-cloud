@@ -17,14 +17,14 @@
             <div class="section-buttons">
                 <h1>teslas.cloud (beta)</h1>
                 <button class="section-button" onclick="showSection('news')">News</button>
-                <button class="section-button" onclick="showSection('location')">Navigation</button>
+                <button class="section-button" onclick="showSection('navigation')">Navigation</button>
                 <button class="section-button" onclick="showSection('weather')">Weather</button>
                 <button class="section-button" onclick="showSection('satellite')">Satellite</button>
-                <button class="section-button" onclick="showSection('navigation')">Travel</button>
+                <button class="section-button" onclick="showSection('travel')">Travel</button>
                 <button class="section-button" onclick="showSection('media')">Media</button>
                 <button class="section-button" onclick="showSection('reference')">Reference</button>
                 <button class="section-button" onclick="showSection('toys')">Toys</button>
-                <button class="section-button" onclick="showSection('connectivity')">Network</button>
+                <button class="section-button" onclick="showSection('network')">Network</button>
                 <button class="section-button" onclick="showSection('about')">About</button>
             </div>
         </div>
@@ -48,7 +48,7 @@
                     </ul>
                 </div>
 
-                <div id="location" class="section">
+                <div id="navigation" class="section">
                     <div class="location-stats">
                         <div class="stat-box">
                             <div class="stat-value" id="speed">N/A</div>
@@ -85,20 +85,6 @@
                     <hr>
                     <h2>Local Landmarks</h2>
                     <div id="wikipediaInfo"><em>Landmark information loading...</em></div>
-                </div>
-
-                <div id="navigation" class="section">
-                    <h2>Links</h2>
-                    <ul class="button-list">
-                        <li><a href="https://maps.google.com">Google Maps</a></li>
-                        <li><a href="https://earth.google.com">Google Earth</a></li>
-                        <li><a href="https://abetterrouteplanner.com">A Better Route Planner</a></li>
-                        <li><a href="https://www.openstreetmap.org">OpenStreetMap</a></li>
-                        <li><a href="https://teslawaze.azurewebsites.net/" data-frame>TeslaWaze</a></li>
-                        <li><a href="https://www.plugshare.com">PlugShare</a></li>
-                        <li><a href="https://www.waze.com">Waze</a></li>
-                        <li><a href="https://www.aaa.com">AAA</a></li>
-                    </ul>
                 </div>
 
                 <div id="weather" class="section">
@@ -179,6 +165,20 @@
                     <img id="weather-image" class="weather-image active" alt="Satellite image">
                 </div>
 
+                <div id="travel" class="section">
+                    <h2>Links</h2>
+                    <ul class="button-list">
+                        <li><a href="https://maps.google.com">Google Maps</a></li>
+                        <li><a href="https://earth.google.com">Google Earth</a></li>
+                        <li><a href="https://abetterrouteplanner.com">A Better Route Planner</a></li>
+                        <li><a href="https://www.openstreetmap.org">OpenStreetMap</a></li>
+                        <li><a href="https://teslawaze.azurewebsites.net/" data-frame>TeslaWaze</a></li>
+                        <li><a href="https://www.plugshare.com">PlugShare</a></li>
+                        <li><a href="https://www.waze.com">Waze</a></li>
+                        <li><a href="https://www.aaa.com">AAA</a></li>
+                    </ul>
+                </div>
+
                 <div id="reference" class="section">
                     <h2>Links</h2>
                     <ul class="button-list">
@@ -227,7 +227,7 @@
                     </ul>
                 </div>
 
-                <div id="connectivity" class="section">
+                <div id="network" class="section">
                     <h2>Internet Address</h2>
                     <span id="rdns">N/A</span>
                     <h2>Exit Location</h2>
