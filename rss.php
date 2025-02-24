@@ -1,5 +1,21 @@
 <?php
+
+// Cache duration in seconds (10 minutes)
+$cacheDuration = 600;
+$cacheFile = '/tmp/rss_cache.json';
+$cacheTimestampFile = '/tmp/rss_cache_timestamp';
+
 header('Content-Type: application/json');
+
+// Check if cache exists and is fresh
+if (file_exists($cacheFile) && file_exists($cacheTimestampFile)) {
+    $timestamp = file_get_contents($cacheTimestampFile);
+    if ((time() - $timestamp) < $cacheDuration) {
+        // Cache is still fresh, return cached content
+        echo file_get_contents($cacheFile);
+        exit;
+    }
+}
 
 $feeds = [
     'wsj' => 'https://feeds.content.dowjones.io/public/rss/RSSWorldNews',
@@ -59,5 +75,9 @@ usort($allItems, function($a, $b) {
 
 // Keep only the most recent items
 $allItems = array_slice($allItems, 0, 15);
+
+// Cache the results
+file_put_contents($cacheFile, json_encode($allItems));
+file_put_contents($cacheTimestampFile, time());
 
 echo json_encode($allItems);
