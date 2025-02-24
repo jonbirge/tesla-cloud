@@ -751,9 +751,20 @@ function updateLatLong() {
     }
 }
 
+// Get initial section from URL parameter
+function getInitialSection() {
+    const params = new URLSearchParams(window.location.search);
+    return params.get('section') || 'navigation';  // default to navigation if no parameter
+}
+
 function showSection(sectionId) {
     // Log the clicked section
     console.log(`Showing section: ${sectionId}`);
+
+    // Update URL without page reload
+    const url = new URL(window.location);
+    url.searchParams.set('section', sectionId);
+    window.history.pushState({}, '', url);
 
     // First, restore original content if we're in external mode
     const rightFrame = document.getElementById('rightFrame');
@@ -850,5 +861,10 @@ document.querySelector('.overlay').addEventListener('click', closeHourlyForecast
 updateLatLong();
 setInterval(updateLatLong, 1000*LATLON_UPDATE_INTERVAL);
 
-// Show the default section
-showSection('navigation');
+// Show the initial section from URL parameter
+showSection(getInitialSection());
+
+// Handle browser back/forward buttons
+window.addEventListener('popstate', () => {
+    showSection(getInitialSection());
+});
