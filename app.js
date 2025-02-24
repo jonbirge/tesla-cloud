@@ -400,15 +400,18 @@ function showSection(sectionId) {
         }
         
         if (sectionId === 'weather') {
-            // Load weather image when weather section is shown
-            const weatherImage = document.getElementById('weather-image');
-            weatherImage.src = WEATHER_IMAGES.latest;
             // Load latest weather data
             if (lat !== null && long !== null) {
                 fetchWeatherData(lat, long);
             } else {
                 console.log('Location not available to fetch weather data.');
             }
+        }
+
+        if (sectionId === 'satellite') {
+            // Load weather image when satellite section is shown
+            const weatherImage = document.getElementById('weather-image');
+            weatherImage.src = WEATHER_IMAGES.latest;
         } else {
             // Remove weather img src to force reload when switching back
             const weatherImage = document.getElementById('weather-image');

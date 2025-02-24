@@ -19,6 +19,7 @@
                 <button class="section-button" onclick="showSection('news')">News</button>
                 <button class="section-button" onclick="showSection('location')">Navigation</button>
                 <button class="section-button" onclick="showSection('weather')">Weather</button>
+                <button class="section-button" onclick="showSection('satellite')">Satellite</button>
                 <button class="section-button" onclick="showSection('navigation')">Travel</button>
                 <button class="section-button" onclick="showSection('media')">Media</button>
                 <button class="section-button" onclick="showSection('reference')">Reference</button>
@@ -92,14 +93,6 @@
                 </div>
 
                 <div id="weather" class="section">
-                    <h2>Current Conditions</h2>
-                    <div class="weather-switch-container">
-                        <div class="weather-switch">
-                            <button onclick="switchWeatherImage('latest')" class="active">Latest</button>
-                            <button onclick="switchWeatherImage('loop')">Loop</button>
-                        </div>
-                    </div>
-                    <img id="weather-image" class="weather-image active" alt="Satellite image">
                     <div class="data-info">
                         <div class="data-item">
                             <h2>Temperature</h2>
@@ -177,6 +170,16 @@
                         <li><a href="https://radar.weather.gov/" data-frame>NOAA Radar</a></li>
                         <li><a href="https://www.star.nesdis.noaa.gov/GOES/index.php">NOAA Satellite</a></li>
                     </ul>
+                </div>
+
+                <div id="satellite" class="section">
+                    <div class="weather-switch-container">
+                        <div class="weather-switch">
+                            <button onclick="switchWeatherImage('latest')" class="active">Latest</button>
+                            <button onclick="switchWeatherImage('loop')">Loop</button>
+                        </div>
+                    </div>
+                    <img id="weather-image" class="weather-image active" alt="Satellite image">
                 </div>
 
                 <div id="reference" class="section">
