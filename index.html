@@ -65,20 +65,21 @@
                     </div>
                     <div class="data-info">
                         <div class="data-item">
-                            <h2>Location</h2>
-                            <span id="latitude">N/A</span>, <span id="longitude">N/A</span>
-                        </div>
-                        <div class="data-item">
-                            <h2>City</h2>
-                            <span id="city">N/A</span>
-                        </div>
-                        <div class="data-item">
                             <h2>Wind</h2>
                             <span id="wind">N/A</span>
                         </div>
                         <div class="data-item">
                             <h2>Humidity</h2>
                             <span id="humidity">N/A</span>
+                        </div>
+                        <br>
+                        <div class="data-item">
+                            <h2>Location</h2>
+                            <span id="latitude">--</span>, <span id="longitude">--</span>
+                        </div>
+                        <div class="data-item">
+                            <h2>City</h2>
+                            <span id="city">N/A</span>
                         </div>
                     </div>
                     <hr>
@@ -101,22 +102,7 @@
                 </div>
 
                 <div id="weather" class="section">
-                    <div class="data-info">
-                        <div class="data-item">
-                            <h2>Sunrise</h2>
-                            <span id="sunrise">N/A</span>
-                        </div>
-                        <div class="data-item">
-                            <h2>Sunset</h2>
-                            <span id="sunset">N/A</span>
-                        </div>
-                        <div class="data-item">
-                            <h2>Moon Phase</h2>
-                            <span id="moonphase">N/A</span>
-                        </div>
-                    </div>
-                    <hr>
-                    <h2>5-day Forecast</h2>
+                    <h2>Forecast</h2>
                     <div class="forecast-container">
                         <div class="forecast-day" onclick="showHourlyForecast(0)">
                             <div class="forecast-date">Loading...</div>
@@ -149,7 +135,6 @@
                             <div class="forecast-desc">...</div>
                         </div>
                     </div>
-
                     <!-- Add popup elements -->
                     <div class="overlay"></div>
                     <div class="forecast-popup">
@@ -157,10 +142,28 @@
                         <h2 id="popup-date">Hourly Forecast</h2>
                         <div class="hourly-forecast"></div>
                     </div>
+
                     <hr>
+                    
+                    <div class="data-info">
+                        <div class="data-item">
+                            <h2>Sunrise</h2>
+                            <span id="sunrise">N/A</span>
+                        </div>
+                        <div class="data-item">
+                            <h2>Sunset</h2>
+                            <span id="sunset">N/A</span>
+                        </div>
+                        <div class="data-item">
+                            <h2>Moon Phase</h2>
+                            <span id="moonphase">N/A</span>
+                        </div>
+                    </div>
+                    
+                    <hr>
+                    
                     <h2>Links</h2>
                     <ul class="button-list">
-                        <li><a href="#" id="localWeather" data-frame>Local NWS Forecast</a></li>
                         <li><a href="https://radar.weather.gov/" data-frame>NOAA Radar</a></li>
                         <li><a href="https://www.star.nesdis.noaa.gov/GOES/index.php">NOAA Satellite</a></li>
                     </ul>
@@ -259,7 +262,7 @@
                     </ul>
 
                     <h2>Version</h2>
-                    <p>0.11</p>
+                    <p>0.11d</p>
                 </div>
 
             </div>

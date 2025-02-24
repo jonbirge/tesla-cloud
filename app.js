@@ -112,33 +112,24 @@ async function updateLocationData() {
         console.log('Updating location dependent data...');
         neverUpdatedLocation = false;
 
-        // Update local weather link
-        const weatherLink = document.getElementById("localWeather");
-        if (weatherLink) {
-            weatherLink.href = `https://forecast.weather.gov/MapClick.php?lat=${lat}&lon=${long}`;
-        }
-
         // Fire off API requests for external data
         locationTimeZone = await fetchTimeZone(lat, long);
         console.log('Timezone: ', locationTimeZone);
         fetchCityData(lat, long);
         fetchSunData(lat, long);
-        
-        // Update the weather section if it's visible
-        const weatherSection = document.getElementById("weather");
-        if (weatherSection.style.display === "block") {
-            fetchWeatherData(lat, long);
-        }
+        fetchWeatherData(lat, long);
 
         // Update connectivity data if the Connectivity section is visible
         const connectivitySection = document.getElementById("connectivity");
         if (connectivitySection.style.display === "block") {
+            console.log('Updating connectivity data...');
             updateConnectionInfo();
         }
 
         // Update Wikipedia data if the Location section is visible
         const locationSection = document.getElementById("location");
         if (locationSection.style.display === "block") {
+            console.log('Updating Wikipedia data...');
             fetchWikipediaData(lat, long);
         }
     } else {
@@ -383,20 +374,18 @@ function showSection(sectionId) {
         button.classList.remove('active');
     });
 
-    // Clear any existing news update interval
-    if (newsUpdateInterval) {
-        clearInterval(newsUpdateInterval);
-        newsUpdateInterval = null;
-    }
-
     // Show the selected section
     const section = document.getElementById(sectionId);
     if (section) {
         section.style.display = 'block';
         
         if (sectionId === 'news') {
+            if (newsUpdateInterval) {
+                clearInterval(newsUpdateInterval);
+                newsUpdateInterval = null;
+            }
             updateNews();
-            newsUpdateInterval = setInterval(updateNews, 60000*NEWS_REFRESH_INTERVAL);
+            newsUpdateInterval = setInterval(updateNews, 60000 * NEWS_REFRESH_INTERVAL);
         }
         
         // Load weather data for both weather and location sections
@@ -423,7 +412,6 @@ function showSection(sectionId) {
 
         if (sectionId === 'connectivity') {
             updateConnectionInfo();
-            lastUpdate = Date.now();
         }
 		
         if (sectionId === 'location') {
@@ -860,4 +848,4 @@ updateLatLong();
 setInterval(updateLatLong, 1000*LATLON_UPDATE_INTERVAL);
 
 // Show the default section
-showSection('news');
+showSection('location');
