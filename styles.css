@@ -8,6 +8,7 @@
     --button-bg: #dcdcdc;
     --button-hover-bg: #f3f3f3;
     --tesla-blue: #0077ff;
+    --tesla-red: #ff0000;
     --button-radius: 10px;
     --weather-switch-slider: #ffffff;
 }
@@ -563,4 +564,73 @@ input:checked + .toggle-slider:before {
 
 .hidden {
     display: none;
+}
+
+/* Radar Display */
+.radar-container {
+    position: relative;
+    width: 300px;
+    height: 300px;
+    margin: 20px;
+    display: flex;
+    align-items: center;
+    gap: 20px;
+}
+
+#radarDisplay {
+    border-radius: 50%;
+    background-color: rgba(0, 0, 0, 0.1);
+}
+
+.radar-labels {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+}
+
+.radar-labels div {
+    position: absolute;
+    font-weight: bold;
+    font-size: 14px;
+}
+
+.label-n { top: 5px; left: 50%; transform: translateX(-50%); }
+.label-s { bottom: 5px; left: 50%; transform: translateX(-50%); }
+.label-e { right: 5px; top: 50%; transform: translateY(-50%); }
+.label-w { left: 5px; top: 50%; transform: translateY(-50%); }
+
+.radar-legend {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.legend-item {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.legend-color {
+    width: 20px;
+    height: 3px;
+}
+
+.legend-color.vehicle {
+    background-color: var(--tesla-blue);
+}
+
+.legend-color.wind {
+    background-color: #666;
+}
+
+.dark-mode .radar-legend {
+    color: var(--text-color-dark);
+}
+
+.dark-mode #radarDisplay {
+    background-color: rgba(255, 255, 255, 0.1);
 }

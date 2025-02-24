@@ -50,30 +50,26 @@
                 </div>
 
                 <div id="navigation" class="section">
-                    <div class="location-stats">
-                        <div class="stat-box">
-                            <div class="stat-value" id="speed">N/A</div>
-                            <div class="stat-label">MPH</div>
+                    <div class="radar-container">
+                        <canvas id="radarDisplay" width="300" height="300"></canvas>
+                        <div class="radar-labels">
+                            <div class="label-n">N</div>
+                            <div class="label-s">S</div>
+                            <div class="label-e">E</div>
+                            <div class="label-w">W</div>
                         </div>
-                        <div class="stat-box">
-                            <div class="stat-value" id="heading">N/A</div>
-                            <div class="stat-label">HDG</div>
-                        </div>
-                        <div class="stat-box">
-                            <div class="stat-value" id="altitude-imperial">N/A</div>
-                            <div class="stat-label">FT ALT</div>
+                        <div class="radar-legend">
+                            <div class="legend-item">
+                                <div class="legend-color vehicle"></div>
+                                <span>Vehicle</span>
+                            </div>
+                            <div class="legend-item">
+                                <div class="legend-color wind"></div>
+                                <span>Wind</span>
+                            </div>
                         </div>
                     </div>
                     <div class="data-info">
-                        <div class="data-item">
-                            <h2>Wind</h2>
-                            <span id="wind">N/A</span>
-                        </div>
-                        <div class="data-item">
-                            <h2>Humidity</h2>
-                            <span id="humidity">N/A</span>
-                        </div>
-                        <br>
                         <div class="data-item">
                             <h2>Location</h2>
                             <span id="latitude">--</span>, <span id="longitude">--</span>
@@ -144,6 +140,10 @@
                         <div class="data-item">
                             <h2>Moon Phase</h2>
                             <span id="moonphase">N/A</span>
+                        </div>
+                        <div class="data-item">
+                            <h2>Humidity</h2>
+                            <span id="humidity">N/A</span>
                         </div>
                     </div>
                     

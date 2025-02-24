@@ -11,6 +11,14 @@ const SAT_URLS = {
     loop: 'https://cdn.star.nesdis.noaa.gov/GOES16/GLM/CONUS/EXTENT3/GOES16-CONUS-EXTENT3-625x375.gif',
     latest_ir: 'https://cdn.star.nesdis.noaa.gov/GOES16/ABI/CONUS/11/1250x750.jpg',
 };
+const DRIVING_TEST_MODE = true; // Set to true to enable test mode
+const TEST_CENTER_LAT = 39.7392; // Denver
+const TEST_CENTER_LONG = -104.9903; // Denver
+const TEST_CIRCLE_RADIUS = 1; // miles - reduced from 10 to 1
+const TEST_MIN_SPEED = 50; // mph - increased from 30 to 50
+const TEST_MAX_SPEED = 60; // mph - increased from 50 to 60
+const TEST_MIN_ALT = 100;
+const TEST_MAX_ALT = 200;
 
 // Global variables
 let lastUpdate = 0;
@@ -34,6 +42,14 @@ let forecastFetched = false;
 let newsUpdateInterval = null;
 let forecastData = null; // Add this with other global variables at the top
 const locationBuffer = [];
+let testModeAngle = 0;
+let testModeSpeed = TEST_MIN_SPEED;
+let testModeAlt = TEST_MIN_ALT;
+let testModeSpeedIncreasing = true;
+let testModeAltIncreasing = true;
+
+let radarContext = null;
+const MAX_SPEED = 80; // Maximum speed for radar display (mph)
 
 class LocationPoint {
     constructor(lat, long, alt, timestamp) {
@@ -602,12 +618,23 @@ function updateWeatherDisplay() {
     if (!weatherData) return;
 
     const windSpeedMS = weatherData.windSpeed;
-    const windSpeedMPH = (windSpeedMS * 2.237).toFixed(1); // Convert m/s to mph
+    const windSpeedMPH = Math.min((windSpeedMS * 2.237), MAX_SPEED); // Convert m/s to mph and clip
     const windDir = weatherData.windDirection;
     const humidity = weatherData.humidity;
 
     document.getElementById('humidity').innerText = `${humidity}%`;
-    document.getElementById('wind').innerText = `${windSpeedMPH} mph at ${windDir}°`;
+    
+    // Update radar display if we have vehicle data
+    if (locationBuffer.length >= 2) {
+        const latestPoint = locationBuffer[locationBuffer.length - 1];
+        const prevPoint = locationBuffer[locationBuffer.length - 2];
+        const speed = Math.min(estimateSpeed(prevPoint, latestPoint), MAX_SPEED);
+        const heading = calculateHeading(prevPoint, latestPoint);
+        drawRadar(speed, heading, windSpeedMPH, windDir);
+    } else {
+        // Just show wind if we don't have vehicle data
+        drawRadar(0, 0, windSpeedMPH, windDir);
+    }
 }
 
 function loadExternalUrl(url, inFrame = false) {
@@ -706,53 +733,152 @@ async function updateLocationData() {
     }
 }
 
-function updateLatLong() {
-    if (navigator.geolocation) {
-        navigator.geolocation.getCurrentPosition((position) => {
-            lat = position.coords.latitude;
-            long = position.coords.longitude;
-            alt = position.coords.altitude;  // altitude in meters
-            
-            // Add new location point to buffer
-            const newPoint = new LocationPoint(lat, long, alt, Date.now());
-            locationBuffer.push(newPoint);
-            if (locationBuffer.length > MAX_BUFFER_SIZE) {
-                locationBuffer.shift(); // Remove oldest point
-            }
-            
-            // Calculate speed and heading if we have enough points
-            if (locationBuffer.length >= 2) {
-                const oldestPoint = locationBuffer[0];
-                const speed = estimateSpeed(oldestPoint, newPoint);
-                const heading = calculateHeading(oldestPoint, newPoint);
-                const cardinal = getCardinalDirection(heading);
-                
-                document.getElementById('speed').innerText = `${speed.toFixed(0)}`;
-                document.getElementById('heading').innerText = `${heading.toFixed(0)}°`;
-            }
-
-            // Check if we should update location-dependent data
-            if (shouldUpdateLocationData()) {
-                console.log('Location changed significantly or time threshold reached, updating dependent data...');
-                updateLocationData();
-                lastUpdateLat = lat;
-                lastUpdateLong = long;
-                lastUpdate = Date.now();
-            }
-            
-            document.getElementById('latitude').innerText = lat.toFixed(4) + '°';
-            document.getElementById('longitude').innerText = long.toFixed(4) + '°';
-
-            // Update altitude in feet
-            if (alt) {
-                const altFt = (alt * 3.28084).toFixed(0);
-                document.getElementById('altitude-imperial').innerText = altFt;
-            } else {
-                document.getElementById('altitude-imperial').innerText = '--';
-            }
-        });
+function getTestModePosition() {
+    // Calculate new position based on angle
+    const radiusInDegrees = TEST_CIRCLE_RADIUS / 69; // Rough conversion from miles to degrees
+    const testLat = TEST_CENTER_LAT + radiusInDegrees * Math.cos(testModeAngle);
+    const testLong = TEST_CENTER_LONG + radiusInDegrees * Math.sin(testModeAngle);
+    
+    // Update angle for next time (move about 1 degree per second at 40mph)
+    const angleIncrement = (testModeSpeed / (2 * Math.PI * TEST_CIRCLE_RADIUS)) * (2 * Math.PI) / (60 * 60);
+    testModeAngle = (testModeAngle + angleIncrement) % (2 * Math.PI);
+    
+    // Update speed (oscillate between min and max)
+    if (testModeSpeedIncreasing) {
+        testModeSpeed += 0.1;
+        if (testModeSpeed >= TEST_MAX_SPEED) {
+            testModeSpeedIncreasing = false;
+        }
     } else {
-        console.log('Geolocation is not supported by this browser.');
+        testModeSpeed -= 0.1;
+        if (testModeSpeed <= TEST_MIN_SPEED) {
+            testModeSpeedIncreasing = true;
+        }
+    }
+    
+    // Update altitude (oscillate between min and max)
+    if (testModeAltIncreasing) {
+        testModeAlt += 0.5;
+        if (testModeAlt >= TEST_MAX_ALT) {
+            testModeAltIncreasing = false;
+        }
+    } else {
+        testModeAlt -= 0.5;
+        if (testModeAlt <= TEST_MIN_ALT) {
+            testModeAltIncreasing = true;
+        }
+    }
+
+    // Calculate the heading based on movement direction
+    const heading = (testModeAngle * 180 / Math.PI + 90) % 360;
+    
+    // Update the radar display with current speed and heading
+    if (weatherData) {
+        const windSpeedMPH = Math.min((weatherData.windSpeed * 2.237), MAX_SPEED);
+        const windDir = weatherData.windDirection;
+        drawRadar(testModeSpeed, heading, windSpeedMPH, windDir);
+    } else {
+        drawRadar(testModeSpeed, heading, 0, 0);
+    }
+    
+    return {
+        coords: {
+            latitude: testLat,
+            longitude: testLong,
+            altitude: testModeAlt * 0.3048 // Convert feet to meters
+        },
+        timestamp: Date.now()
+    };
+}
+
+function updateLatLong() {
+    if (DRIVING_TEST_MODE) {
+        const position = getTestModePosition();
+        lat = position.coords.latitude;
+        long = position.coords.longitude;
+        alt = position.coords.altitude;
+            
+        // Add new location point to buffer
+        const newPoint = new LocationPoint(lat, long, alt, position.timestamp);
+        locationBuffer.push(newPoint);
+        if (locationBuffer.length > MAX_BUFFER_SIZE) {
+            locationBuffer.shift(); // Remove oldest point
+        }
+            
+        // Calculate speed and heading if we have enough points
+        if (locationBuffer.length >= 2) {
+            const oldestPoint = locationBuffer[0];
+            const speed = estimateSpeed(oldestPoint, newPoint);
+            const heading = calculateHeading(oldestPoint, newPoint);
+            const cardinal = getCardinalDirection(heading);
+        }
+
+        // Check if we should update location-dependent data
+        if (shouldUpdateLocationData()) {
+            updateLocationData();
+            lastUpdateLat = lat;
+            lastUpdateLong = long;
+            lastUpdate = Date.now();
+        }
+            
+        document.getElementById('latitude').innerText = lat.toFixed(4) + '°';
+        document.getElementById('longitude').innerText = long.toFixed(4) + '°';
+
+        // Update altitude in feet
+        // if (alt) {
+        //     const altFt = (alt * 3.28084).toFixed(0);
+        //     document.getElementById('altitude-imperial').innerText = altFt;
+        // } else {
+        //     document.getElementById('altitude-imperial').innerText = '--';
+        // }
+    } else {
+        if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition((position) => {
+                lat = position.coords.latitude;
+                long = position.coords.longitude;
+                alt = position.coords.altitude;  // altitude in meters
+                
+                // Add new location point to buffer
+                const newPoint = new LocationPoint(lat, long, alt, Date.now());
+                locationBuffer.push(newPoint);
+                if (locationBuffer.length > MAX_BUFFER_SIZE) {
+                    locationBuffer.shift(); // Remove oldest point
+                }
+                
+                // Calculate speed and heading if we have enough points
+                if (locationBuffer.length >= 2) {
+                    const oldestPoint = locationBuffer[0];
+                    const speed = estimateSpeed(oldestPoint, newPoint);
+                    const heading = calculateHeading(oldestPoint, newPoint);
+                    const cardinal = getCardinalDirection(heading);
+                    
+                    document.getElementById('speed').innerText = `${speed.toFixed(0)}`;
+                    document.getElementById('heading').innerText = `${heading.toFixed(0)}°`;
+                }
+    
+                // Check if we should update location-dependent data
+                if (shouldUpdateLocationData()) {
+                    console.log('Location changed significantly or time threshold reached, updating dependent data...');
+                    updateLocationData();
+                    lastUpdateLat = lat;
+                    lastUpdateLong = long;
+                    lastUpdate = Date.now();
+                }
+                
+                document.getElementById('latitude').innerText = lat.toFixed(4) + '°';
+                document.getElementById('longitude').innerText = long.toFixed(4) + '°';
+    
+                // Update altitude in feet
+                if (alt) {
+                    const altFt = (alt * 3.28084).toFixed(0);
+                    document.getElementById('altitude-imperial').innerText = altFt;
+                } else {
+                    document.getElementById('altitude-imperial').innerText = '--';
+                }
+            });
+        } else {
+            console.log('Geolocation is not supported by this browser.');
+        }
     }
 }
 
@@ -878,3 +1004,117 @@ showSection(getInitialSection());
 window.addEventListener('popstate', () => {
     showSection(getInitialSection());
 });
+
+function initializeRadar() {
+    const canvas = document.getElementById('radarDisplay');
+    if (canvas) {
+        radarContext = canvas.getContext('2d');
+        // Initial draw
+        drawRadar(0, 0, 0, 0);
+    }
+}
+
+function drawRadar(vehicleSpeed, vehicleHeading, windSpeed, windDirection) {
+    if (!radarContext) return;
+    
+    const canvas = radarContext.canvas;
+    const centerX = canvas.width / 2;
+    const centerY = canvas.height / 2;
+    const radius = Math.min(centerX, centerY) - 10;
+    
+    // Clear canvas with transparent background
+    radarContext.clearRect(0, 0, canvas.width, canvas.height);
+    
+    // Draw circular background with speed labels
+    radarContext.beginPath();
+    radarContext.arc(centerX, centerY, radius, 0, 2 * Math.PI);
+    radarContext.strokeStyle = '#666';
+    radarContext.lineWidth = 1;
+    radarContext.stroke();
+    
+    // Draw concentric circles with speed labels
+    for (let i = 1; i <= 4; i++) {
+        const currentRadius = (radius * i) / 4;
+        radarContext.beginPath();
+        radarContext.arc(centerX, centerY, currentRadius, 0, 2 * Math.PI);
+        radarContext.strokeStyle = '#666';
+        radarContext.setLineDash([2, 2]);
+        radarContext.stroke();
+        radarContext.setLineDash([]);
+
+        // Add speed label - just the number now
+        const speed = Math.round((MAX_SPEED * i) / 4);
+        radarContext.fillStyle = '#666';
+        radarContext.font = '12px Inter';
+        radarContext.textAlign = 'right';
+        radarContext.fillText(speed, centerX - 5, centerY - currentRadius + 14);
+    }
+    
+    // Draw cardinal direction lines with adjusted label positions (moved out by 15px)
+    radarContext.beginPath();
+    radarContext.moveTo(centerX, centerY - radius);
+    radarContext.lineTo(centerX, centerY + radius);
+    radarContext.moveTo(centerX - radius, centerY);
+    radarContext.lineTo(centerX + radius, centerY);
+    radarContext.strokeStyle = '#666';
+    radarContext.stroke();
+
+    // Add cardinal direction labels with increased distance from center (moved further out)
+    radarContext.fillStyle = '#666';
+    radarContext.font = '12px Inter';
+    radarContext.textAlign = 'center';
+    radarContext.fillText('N', centerX, centerY - radius - 25);
+    radarContext.fillText('S', centerX, centerY + radius + 25);
+    radarContext.textAlign = 'left';
+    radarContext.fillText('E', centerX + radius + 25, centerY + 4);
+    radarContext.textAlign = 'right';
+    radarContext.fillText('W', centerX - radius - 25, centerY + 4);
+
+    // Convert angles to radians (compass to cartesian)
+    const vehicleAngle = (90 - vehicleHeading) * Math.PI / 180;
+    const windAngle = (90 - windDirection) * Math.PI / 180;
+    
+    // Scale vectors to radar size
+    const vehicleLength = (vehicleSpeed / MAX_SPEED) * radius;
+    const windLength = (windSpeed / MAX_SPEED) * radius;
+    
+    // Get the Tesla blue color from CSS
+    const teslaBlue = getComputedStyle(document.documentElement).getPropertyValue('--tesla-blue').trim();
+
+    // Helper function to draw arrow
+    function drawArrow(fromX, fromY, toX, toY, color, headLength = 10) {
+        const angle = Math.atan2(toY - fromY, toX - fromX);
+        const headAngle = Math.PI / 6; // 30 degrees
+
+        radarContext.beginPath();
+        radarContext.moveTo(fromX, fromY);
+        radarContext.lineTo(toX, toY);
+        
+        // Draw the arrow head
+        radarContext.lineTo(
+            toX - headLength * Math.cos(angle - headAngle),
+            toY - headLength * Math.sin(angle - headAngle)
+        );
+        radarContext.moveTo(toX, toY);
+        radarContext.lineTo(
+            toX - headLength * Math.cos(angle + headAngle),
+            toY - headLength * Math.sin(angle + headAngle)
+        );
+        
+        radarContext.strokeStyle = color;
+        radarContext.lineWidth = 3;
+        radarContext.stroke();
+    }
+    
+    // Draw vehicle vector with arrow
+    const vehicleEndX = centerX + vehicleLength * Math.cos(vehicleAngle);
+    const vehicleEndY = centerY - vehicleLength * Math.sin(vehicleAngle);
+    drawArrow(centerX, centerY, vehicleEndX, vehicleEndY, teslaBlue);
+    
+    // Draw wind vector with arrow
+    const windEndX = centerX + windLength * Math.cos(windAngle);
+    const windEndY = centerY - windLength * Math.sin(windAngle);
+    drawArrow(centerX, centerY, windEndX, windEndY, '#666');
+}
+
+initializeRadar();
