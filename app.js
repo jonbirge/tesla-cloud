@@ -399,7 +399,8 @@ function showSection(sectionId) {
             newsUpdateInterval = setInterval(updateNews, 60000*NEWS_REFRESH_INTERVAL);
         }
         
-        if (sectionId === 'weather') {
+        // Load weather data for both weather and location sections
+        if (sectionId === 'weather' || sectionId === 'location') {
             // Load latest weather data
             if (lat !== null && long !== null) {
                 fetchWeatherData(lat, long);
@@ -770,14 +771,11 @@ document.querySelector('.overlay').addEventListener('click', closeHourlyForecast
 function updateWeatherDisplay() {
     if (!weatherData) return;
 
-    const tempC = weatherData.temperature;
-    const tempF = (tempC * 9/5 + 32).toFixed(1);
-    const humidity = weatherData.humidity;
     const windSpeedMS = weatherData.windSpeed;
     const windSpeedMPH = (windSpeedMS * 2.237).toFixed(1); // Convert m/s to mph
     const windDir = weatherData.windDirection;
+    const humidity = weatherData.humidity;
 
-    document.getElementById('temperature').innerText = `${tempF}°F (${tempC}°C)`;
     document.getElementById('humidity').innerText = `${humidity}%`;
     document.getElementById('wind').innerText = `${windSpeedMPH} mph at ${windDir}°`;
 }
