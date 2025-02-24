@@ -354,7 +354,7 @@ function updateConnectionInfo() {
             console.error('Error fetching IP/DNS information: ', error);
             // Set default values in case of error
             document.getElementById('rdns').innerText = 'N/A';
-            document.getElementById('location').innerText = 'N/A';
+            document.getElementById('exitLocation').innerText = 'N/A';
             document.getElementById('isp').innerText = 'N/A';
         });
 }
@@ -418,13 +418,8 @@ function showSection(sectionId) {
         }
 
         if (sectionId === 'connectivity') {
-            const now = Date.now();
-            if (now - lastUpdate > 60000) { // 60 seconds
-                updateConnectionInfo();
-                lastUpdate = now;
-            } else {
-                console.log('Skipping update, too soon...');
-            }
+            updateConnectionInfo();
+            lastUpdate = Date.now();
         }
 		
         if (sectionId === 'location') {
