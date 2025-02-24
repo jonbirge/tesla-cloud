@@ -791,91 +791,53 @@ function getTestModePosition() {
     };
 }
 
+function handlePositionUpdate(position) {
+    lat = position.coords.latitude;
+    long = position.coords.longitude;
+    alt = position.coords.altitude;
+    
+    // Add new location point to buffer
+    const newPoint = new LocationPoint(lat, long, alt, position.timestamp || Date.now());
+    locationBuffer.push(newPoint);
+    if (locationBuffer.length > MAX_BUFFER_SIZE) {
+        locationBuffer.shift(); // Remove oldest point
+    }
+    
+    // Calculate speed and heading if we have enough points
+    if (locationBuffer.length >= 2) {
+        const oldestPoint = locationBuffer[0];
+        const speed = estimateSpeed(oldestPoint, newPoint);
+        const heading = calculateHeading(oldestPoint, newPoint);
+        const cardinal = getCardinalDirection(heading);
+        
+        // Update radar display with current speed and heading
+        if (weatherData) {
+            const windSpeedMPH = Math.min((weatherData.windSpeed * 2.237), MAX_SPEED);
+            const windDir = weatherData.windDirection;
+            drawRadar(speed, heading, windSpeedMPH, windDir);
+        } else {
+            drawRadar(speed, heading, 0, 0);
+        }
+    }
+
+    // Check if we should update location-dependent data
+    if (shouldUpdateLocationData()) {
+        updateLocationData();
+        lastUpdateLat = lat;
+        lastUpdateLong = long;
+        lastUpdate = Date.now();
+    }
+    
+    document.getElementById('latitude').innerText = lat.toFixed(4) + '°';
+    document.getElementById('longitude').innerText = long.toFixed(4) + '°';
+}
+
 function updateLatLong() {
     if (DRIVING_TEST_MODE) {
-        const position = getTestModePosition();
-        lat = position.coords.latitude;
-        long = position.coords.longitude;
-        alt = position.coords.altitude;
-            
-        // Add new location point to buffer
-        const newPoint = new LocationPoint(lat, long, alt, position.timestamp);
-        locationBuffer.push(newPoint);
-        if (locationBuffer.length > MAX_BUFFER_SIZE) {
-            locationBuffer.shift(); // Remove oldest point
-        }
-            
-        // Calculate speed and heading if we have enough points
-        if (locationBuffer.length >= 2) {
-            const oldestPoint = locationBuffer[0];
-            const speed = estimateSpeed(oldestPoint, newPoint);
-            const heading = calculateHeading(oldestPoint, newPoint);
-            const cardinal = getCardinalDirection(heading);
-        }
-
-        // Check if we should update location-dependent data
-        if (shouldUpdateLocationData()) {
-            updateLocationData();
-            lastUpdateLat = lat;
-            lastUpdateLong = long;
-            lastUpdate = Date.now();
-        }
-            
-        document.getElementById('latitude').innerText = lat.toFixed(4) + '°';
-        document.getElementById('longitude').innerText = long.toFixed(4) + '°';
-
-        // Update altitude in feet
-        // if (alt) {
-        //     const altFt = (alt * 3.28084).toFixed(0);
-        //     document.getElementById('altitude-imperial').innerText = altFt;
-        // } else {
-        //     document.getElementById('altitude-imperial').innerText = '--';
-        // }
+        handlePositionUpdate(getTestModePosition());
     } else {
         if (navigator.geolocation) {
-            navigator.geolocation.getCurrentPosition((position) => {
-                lat = position.coords.latitude;
-                long = position.coords.longitude;
-                alt = position.coords.altitude;  // altitude in meters
-                
-                // Add new location point to buffer
-                const newPoint = new LocationPoint(lat, long, alt, Date.now());
-                locationBuffer.push(newPoint);
-                if (locationBuffer.length > MAX_BUFFER_SIZE) {
-                    locationBuffer.shift(); // Remove oldest point
-                }
-                
-                // Calculate speed and heading if we have enough points
-                if (locationBuffer.length >= 2) {
-                    const oldestPoint = locationBuffer[0];
-                    const speed = estimateSpeed(oldestPoint, newPoint);
-                    const heading = calculateHeading(oldestPoint, newPoint);
-                    const cardinal = getCardinalDirection(heading);
-                    
-                    document.getElementById('speed').innerText = `${speed.toFixed(0)}`;
-                    document.getElementById('heading').innerText = `${heading.toFixed(0)}°`;
-                }
-    
-                // Check if we should update location-dependent data
-                if (shouldUpdateLocationData()) {
-                    console.log('Location changed significantly or time threshold reached, updating dependent data...');
-                    updateLocationData();
-                    lastUpdateLat = lat;
-                    lastUpdateLong = long;
-                    lastUpdate = Date.now();
-                }
-                
-                document.getElementById('latitude').innerText = lat.toFixed(4) + '°';
-                document.getElementById('longitude').innerText = long.toFixed(4) + '°';
-    
-                // Update altitude in feet
-                if (alt) {
-                    const altFt = (alt * 3.28084).toFixed(0);
-                    document.getElementById('altitude-imperial').innerText = altFt;
-                } else {
-                    document.getElementById('altitude-imperial').innerText = '--';
-                }
-            });
+            navigator.geolocation.getCurrentPosition(handlePositionUpdate);
         } else {
             console.log('Geolocation is not supported by this browser.');
         }
