@@ -623,6 +623,7 @@ function updateWeatherDisplay() {
     const humidity = weatherData.humidity;
 
     document.getElementById('humidity').innerText = `${humidity}%`;
+    document.getElementById('wind').innerText = `${Math.round(windSpeedMPH)} mph at ${Math.round(windDir)}°`;
     
     // Update radar display if we have vehicle data
     if (locationBuffer.length >= 2) {
