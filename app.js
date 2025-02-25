@@ -630,10 +630,10 @@ function updateWeatherDisplay() {
         const prevPoint = locationBuffer[locationBuffer.length - 2];
         const speed = Math.min(estimateSpeed(prevPoint, latestPoint), MAX_SPEED);
         const heading = calculateHeading(prevPoint, latestPoint);
-        drawRadar(speed, heading, windSpeedMPH, windDir);
+        updateWindage(speed, heading, windSpeedMPH, windDir);
     } else {
         // Just show wind if we don't have vehicle data
-        drawRadar(0, 0, windSpeedMPH, windDir);
+        updateWindage(0, 0, windSpeedMPH, windDir);
     }
 }
 
@@ -703,6 +703,158 @@ async function updateNews() {
     }
 }
 
+function initializeRadar() {
+    const canvas = document.getElementById('radarDisplay');
+    if (canvas) {
+        radarContext = canvas.getContext('2d');
+        // Initial draw
+        updateWindage(0, 0, 0, 0);
+    }
+}
+
+function updateWindage(vehicleSpeed, vehicleHeading, windSpeed, windDirection) {
+    if (!radarContext) return;
+
+    const canvas = radarContext.canvas;
+    const centerX = canvas.width / 2;
+    const centerY = canvas.height / 2;
+    const radius = Math.min(centerX, centerY) - 8;
+    
+    // Clear canvas with transparent background
+    radarContext.clearRect(0, 0, canvas.width, canvas.height);
+    
+    // Draw circular background
+    radarContext.beginPath();
+    radarContext.arc(centerX, centerY, radius, 0, 2 * Math.PI);
+    radarContext.strokeStyle = '#666';
+    radarContext.lineWidth = 1;
+    radarContext.stroke();
+    
+    // Draw concentric circles with speed labels
+    for (let i = 1; i <= 4; i++) {
+        const currentRadius = (radius * i) / 4;
+        radarContext.beginPath();
+        radarContext.arc(centerX, centerY, currentRadius, 0, 2 * Math.PI);
+        radarContext.strokeStyle = '#666';
+        radarContext.setLineDash([2, 2]);
+        radarContext.stroke();
+        radarContext.setLineDash([]);
+        
+        // Add speed label
+        const speed = Math.round((MAX_SPEED * i) / 4);
+        radarContext.fillStyle = '#666';
+        radarContext.font = '10px Inter';
+        radarContext.textAlign = 'right';
+        radarContext.fillText(speed, centerX - 5, centerY - currentRadius + 12);
+    }
+    
+    // Draw cardinal direction lines
+    radarContext.beginPath();
+    radarContext.moveTo(centerX, centerY - radius);
+    radarContext.lineTo(centerX, centerY + radius);
+    radarContext.moveTo(centerX - radius, centerY);
+    radarContext.lineTo(centerX + radius, centerY);
+    radarContext.strokeStyle = '#666';
+    radarContext.stroke();
+    
+    // Draw direction labels with dark gray background for visibility
+    radarContext.fillStyle = '#666';
+    radarContext.font = '12px Inter';
+    radarContext.textAlign = 'center';
+    radarContext.textBaseline = 'middle';
+    
+    // Position labels with proper spacing and background
+    const labelOffset = radius - 5;
+    function drawLabel(text, x, y) {
+        const padding = 4;
+        const metrics = radarContext.measureText(text);
+        const width = metrics.width + padding * 2;
+        const height = 16;
+        
+        radarContext.fillStyle = '#666';
+        radarContext.fillText(text, x, y);
+    }
+    
+    drawLabel('FWD', centerX, centerY - labelOffset);
+    drawLabel('AFT', centerX, centerY + labelOffset);
+    drawLabel('RT', centerX + labelOffset, centerY);
+    drawLabel('LT', centerX - labelOffset, centerY);
+    
+    const windAngle = windDirection - vehicleHeading; // car frame
+    const windAngleRad = (90 - windAngle) * Math.PI / 180;
+
+    // Wind vector components in global frame
+    const windX = windSpeed * Math.cos(windAngleRad);
+    const windY = windSpeed * Math.sin(windAngleRad);
+    
+    // Sum the vectors to get relative wind (for radar plot)
+    const relativeWindX = windX;
+    const relativeWindY = windY - vehicleSpeed;
+    
+    // Calculate headwind and crosswind components
+    let headWind = null;
+    let crossWind = null;
+    if (vehicleSpeed > 2) {  // Threshold for meaningful motion
+        headWind = -windY;  // Negative when wind is coming from ahead
+        crossWind = windX;  // Positive when wind is coming from left
+    }
+    
+    // Update the wind component displays
+    if (headWind !== null) {
+        document.getElementById('headwind').innerText = Math.abs(Math.round(headWind))
+            + (headWind >= 0 ? ' ▼' : ' ▲');
+    } else {
+        document.getElementById('headwind').innerText = '--';
+    }
+    if (crossWind !== null) {
+        document.getElementById('crosswind').innerText = Math.abs(Math.round(crossWind))
+            + (crossWind >= 0 ? ' ►' : ' ◄');
+    } else {
+        document.getElementById('crosswind').innerText = '--';
+    }
+
+    // Update the heading display
+    if (vehicleHeading !== null) {
+        document.getElementById('heading').innerText = Math.round(vehicleHeading) + '°';
+    } else {
+        document.getElementById('heading').innerText = '--';
+    }
+    
+    // Get the Tesla blue color from CSS
+    const teslaBlue = getComputedStyle(document.documentElement).getPropertyValue('--tesla-blue').trim();
+    
+    // Helper function to draw arrow
+    function drawArrow(fromX, fromY, toX, toY, color, headLength = 8) {
+        const angle = Math.atan2(toY - fromY, toX - fromX);
+        const headAngle = Math.PI / 6; // 30 degrees
+        
+        radarContext.beginPath();
+        radarContext.moveTo(fromX, fromY);
+        radarContext.lineTo(toX, toY);
+        
+        // Draw the arrow head
+        radarContext.lineTo(
+            toX - headLength * Math.cos(angle - headAngle),
+            toY - headLength * Math.sin(angle - headAngle)
+        );
+        radarContext.moveTo(toX, toY);
+        radarContext.lineTo(
+            toX - headLength * Math.cos(angle + headAngle),
+            toY - headLength * Math.sin(angle + headAngle)
+        );
+        
+        radarContext.strokeStyle = color;
+        radarContext.lineWidth = 2;
+        radarContext.stroke();
+    }
+    
+    // Draw relative wind vector with arrow
+    const windScale = Math.min(1, radius / MAX_SPEED);
+    const relativeWindXPlot = centerX + relativeWindX * windScale;
+    const relativeWindYPlot = centerY - relativeWindY * windScale;
+    drawArrow(centerX, centerY, relativeWindXPlot, relativeWindYPlot, teslaBlue);
+}
+
 async function updateLocationData() {
     if (lat !== null && long !== null) {
         console.log('Updating location dependent data...');
@@ -769,18 +921,6 @@ function getTestModePosition() {
         }
     }
 
-    // Calculate the heading based on movement direction
-    const heading = (testModeAngle * 180 / Math.PI + 90) % 360;
-    
-    // Update the radar display with current speed and heading
-    if (weatherData) {
-        const windSpeedMPH = Math.min((weatherData.windSpeed * 2.237), MAX_SPEED);
-        const windDir = weatherData.windDirection;
-        drawRadar(testModeSpeed, heading, windSpeedMPH, windDir);
-    } else {
-        drawRadar(testModeSpeed, heading, 0, 0);
-    }
-    
     return {
         coords: {
             latitude: testLat,
@@ -808,25 +948,19 @@ function handlePositionUpdate(position) {
         const oldestPoint = locationBuffer[0];
         const speed = estimateSpeed(oldestPoint, newPoint);
         const heading = calculateHeading(oldestPoint, newPoint);
-        const cardinal = getCardinalDirection(heading);
+        // const cardinal = getCardinalDirection(heading);
         
         // Update radar display with current speed and heading
         if (weatherData) {
             const windSpeedMPH = Math.min((weatherData.windSpeed * 2.237), MAX_SPEED);
             const windDir = weatherData.windDirection;
-            drawRadar(speed, heading, windSpeedMPH, windDir);
+            updateWindage(speed, heading, windSpeedMPH, windDir);
         } else {
-            drawRadar(speed, heading, 0, 0);
+            updateWindage(speed, heading, 0, 0);
         }
     } else {
-        // Just show wind if we don't have movement data
-        if (weatherData) {
-            const windSpeedMPH = Math.min((weatherData.windSpeed * 2.237), MAX_SPEED);
-            const windDir = weatherData.windDirection;
-            drawRadar(0, 0, windSpeedMPH, windDir);
-        } else {
-            drawRadar(0, 0, 0, 0);
-        }
+        // Just show nothing if we don't have movement data
+        updateWindage(0, 0, 0, 0);
     }
 
     // Check if we should update location-dependent data
@@ -843,6 +977,7 @@ function handlePositionUpdate(position) {
     document.getElementById('altitude').innerText = alt ? Math.round(alt * 3.28084) : '--'; // Convert meters to feet
 }
 
+// Get the current position
 function updateLatLong() {
     if (DRIVING_TEST_MODE) {
         handlePositionUpdate(getTestModePosition());
@@ -861,6 +996,7 @@ function getInitialSection() {
     return params.get('section') || 'news';  // default to navigation if no parameter
 }
 
+// Show a specific section and update URL
 function showSection(sectionId) {
     // Log the clicked section
     console.log(`Showing section: ${sectionId}`);
@@ -952,8 +1088,6 @@ function showSection(sectionId) {
 
 // ***** Main code *****
 
-// Set up event listeners
-
 // Update link click event listener
 document.addEventListener('click', function(e) {
     if (e.target.tagName === 'A' && !e.target.closest('.section-buttons')) {
@@ -977,172 +1111,5 @@ showSection(getInitialSection());
 window.addEventListener('popstate', () => {
     showSection(getInitialSection());
 });
-
-function initializeRadar() {
-    const canvas = document.getElementById('radarDisplay');
-    if (canvas) {
-        radarContext = canvas.getContext('2d');
-        // Initial draw
-        drawRadar(0, 0, 0, 0);
-    }
-}
-
-function drawRadar(vehicleSpeed, vehicleHeading, windSpeed, windDirection) {
-    if (!radarContext) return;
-    
-    const canvas = radarContext.canvas;
-    const centerX = canvas.width / 2;
-    const centerY = canvas.height / 2;
-    const radius = Math.min(centerX, centerY) - 8;
-    
-    // Clear canvas with transparent background
-    radarContext.clearRect(0, 0, canvas.width, canvas.height);
-    
-    // Draw circular background
-    radarContext.beginPath();
-    radarContext.arc(centerX, centerY, radius, 0, 2 * Math.PI);
-    radarContext.strokeStyle = '#666';
-    radarContext.lineWidth = 1;
-    radarContext.stroke();
-    
-    // Draw concentric circles with speed labels
-    for (let i = 1; i <= 4; i++) {
-        const currentRadius = (radius * i) / 4;
-        radarContext.beginPath();
-        radarContext.arc(centerX, centerY, currentRadius, 0, 2 * Math.PI);
-        radarContext.strokeStyle = '#666';
-        radarContext.setLineDash([2, 2]);
-        radarContext.stroke();
-        radarContext.setLineDash([]);
-        
-        // Add speed label
-        const speed = Math.round((MAX_SPEED * i) / 4);
-        radarContext.fillStyle = '#666';
-        radarContext.font = '10px Inter';
-        radarContext.textAlign = 'right';
-        radarContext.fillText(speed, centerX - 5, centerY - currentRadius + 12);
-    }
-    
-    // Draw cardinal direction lines
-    radarContext.beginPath();
-    radarContext.moveTo(centerX, centerY - radius);
-    radarContext.lineTo(centerX, centerY + radius);
-    radarContext.moveTo(centerX - radius, centerY);
-    radarContext.lineTo(centerX + radius, centerY);
-    radarContext.strokeStyle = '#666';
-    radarContext.stroke();
-    
-    // Draw direction labels with dark gray background for visibility
-    radarContext.fillStyle = '#666';
-    radarContext.font = '12px Inter';
-    radarContext.textAlign = 'center';
-    radarContext.textBaseline = 'middle';
-    
-    // Position labels with proper spacing and background
-    const labelOffset = radius + 15;
-    function drawLabel(text, x, y) {
-        const padding = 4;
-        const metrics = radarContext.measureText(text);
-        const width = metrics.width + padding * 2;
-        const height = 16;
-        
-        radarContext.fillStyle = '#666';
-        radarContext.fillText(text, x, y);
-    }
-    
-    drawLabel('FWD', centerX, centerY - labelOffset);
-    drawLabel('AFT', centerX, centerY + labelOffset);
-    drawLabel('RIGHT', centerX + labelOffset, centerY);
-    drawLabel('LEFT', centerX - labelOffset, centerY);
-    
-    // Calculate relative wind - corrected version
-    // First convert everything to radians and normalize to mathematical angles
-    const windAngleRad = (90 - windDirection) * Math.PI / 180;
-    const vehicleAngleRad = (90 - vehicleHeading) * Math.PI / 180;
-    
-    // Wind vector components in global frame
-    const windX = windSpeed * Math.cos(windAngleRad);
-    const windY = windSpeed * Math.sin(windAngleRad);
-    
-    // For relative wind calculation (we'll keep this as is for now)
-    // Vehicle motion creates apparent wind in opposite direction of travel
-    const vehicleInducedX = -vehicleSpeed * Math.cos(vehicleAngleRad);
-    const vehicleInducedY = -vehicleSpeed * Math.sin(vehicleAngleRad);
-    
-    // Sum the vectors to get relative wind (for radar plot)
-    const relativeWindX = windX + vehicleInducedX;
-    const relativeWindY = windY + vehicleInducedY;
-    
-    // Calculate magnitude and direction of relative wind
-    const relativeWindSpeed = Math.sqrt(relativeWindX * relativeWindX + relativeWindY * relativeWindY);
-    const relativeWindAngle = Math.atan2(relativeWindY, relativeWindX);
-    
-    // Calculate headwind and crosswind components
-    // These are projections of the ACTUAL wind (not the relative wind) onto the vehicle's direction
-    let headWind = null;
-    let crossWind = null;
-    
-    // Only calculate wind components if the vehicle is moving at a meaningful speed
-    if (vehicleSpeed > 1) {  // Threshold for meaningful motion
-        // Calculate the angle between wind and vehicle
-        const windToVehicleAngle = windAngleRad - vehicleAngleRad;
-        
-        // Project wind onto vehicle's heading and perpendicular axis
-        headWind = -windSpeed * Math.cos(windToVehicleAngle);  // Negative when wind is coming from ahead
-        crossWind = windSpeed * Math.sin(windToVehicleAngle);  // Positive when wind is coming from left
-    }
-    
-    // Update the wind component displays
-    if (headWind !== null) {
-        document.getElementById('headwind').innerText = Math.abs(Math.round(headWind)) + (headWind >= 0 ? ' ▼' : ' ▲');
-    } else {
-        document.getElementById('headwind').innerText = 'N/A';
-    }
-    
-    if (crossWind !== null) {
-        document.getElementById('crosswind').innerText = Math.abs(Math.round(crossWind)) + (crossWind >= 0 ? ' ►' : ' ◄');
-    } else {
-        document.getElementById('crosswind').innerText = 'N/A';
-    }
-    
-    // Scale relative wind to radar size - keeping this for radar plot
-    const scaledWindLength = (relativeWindSpeed / MAX_SPEED) * radius;
-    
-    // Get the Tesla blue color from CSS
-    const teslaBlue = getComputedStyle(document.documentElement).getPropertyValue('--tesla-blue').trim();
-    
-    // Helper function to draw arrow
-    function drawArrow(fromX, fromY, toX, toY, color, headLength = 8) {
-        const angle = Math.atan2(toY - fromY, toX - fromX);
-        const headAngle = Math.PI / 6; // 30 degrees
-        
-        radarContext.beginPath();
-        radarContext.moveTo(fromX, fromY);
-        radarContext.lineTo(toX, toY);
-        
-        // Draw the arrow head
-        radarContext.lineTo(
-            toX - headLength * Math.cos(angle - headAngle),
-            toY - headLength * Math.sin(angle - headAngle)
-        );
-        radarContext.moveTo(toX, toY);
-        radarContext.lineTo(
-            toX - headLength * Math.cos(angle + headAngle),
-            toY - headLength * Math.sin(angle + headAngle)
-        );
-        
-        radarContext.strokeStyle = color;
-        radarContext.lineWidth = 2;
-        radarContext.stroke();
-    }
-    
-    // Draw relative wind vector with arrow
-    const windEndX = centerX + scaledWindLength * Math.cos(relativeWindAngle);
-    const windEndY = centerY + scaledWindLength * Math.sin(relativeWindAngle);
-    drawArrow(centerX, centerY, windEndX, windEndY, teslaBlue);
-    
-    // Update the heading display
-    document.getElementById('heading').innerText = Math.round(vehicleHeading) + '°';
-}
 
 initializeRadar();
