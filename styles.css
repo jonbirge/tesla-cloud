@@ -569,12 +569,16 @@ input:checked + .toggle-slider:before {
 /* Radar Display */
 .radar-container {
     position: relative;
-    display: flex;
-    gap: 20px;
-    align-items: flex-start;
-    width: 300px;
-    height: 300px;
-    margin: 20px;
+    width: 240px;
+    height: 240px;
+}
+
+.radar-title {
+    position: absolute;
+    top: -30px;
+    left: 0;
+    text-align: left;
+    margin: 0;
 }
 
 #radarDisplay {
@@ -597,10 +601,10 @@ input:checked + .toggle-slider:before {
     font-size: 14px;
 }
 
-.label-n { top: 5px; left: 50%; transform: translateX(-50%); }
-.label-s { bottom: 5px; left: 50%; transform: translateX(-50%); }
-.label-e { right: 5px; top: 50%; transform: translateY(-50%); }
-.label-w { left: 5px; top: 50%; transform: translateY(-50%); }
+.label-n { top: -25px; left: 50%; transform: translateX(-50%); }
+.label-s { bottom: -25px; left: 50%; transform: translateX(-50%); }
+.label-e { right: -35px; top: 50%; transform: translateY(-50%); }
+.label-w { left: -35px; top: 50%; transform: translateY(-50%); }
 
 .radar-legend {
     display: flex;
@@ -637,11 +641,17 @@ input:checked + .toggle-slider:before {
 
 .nav-container {
     display: flex;
+    gap: 60px;
+    margin: 40px 0 20px;
     align-items: flex-start;
-    gap: 320px;  /* Increased from 240px to 320px */
-    margin: 20px 0;
+}
+
+.nav-stats {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
 }
 
 .altitude-display {
-    padding-top: 20px;
+    padding-top: 40px;
 }

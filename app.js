@@ -6,19 +6,19 @@ const NEWS_REFRESH_INTERVAL = 5; // minutes
 const MAX_BUFFER_SIZE = 5;
 const OPENWX_API_KEY = '6a1b1bcb03b5718a9b3a2b108ce3293d';
 const GEONAMES_USERNAME = 'birgefuller';
+const DRIVING_TEST_MODE = true; // Set to true to enable test mode
+const TEST_CENTER_LAT = 39.7392; // Denver
+const TEST_CENTER_LONG = -104.9903; // Denver
+const TEST_CIRCLE_RADIUS = 1; // miles
+const TEST_MIN_SPEED = 55; // mph - increased from 30 to 50
+const TEST_MAX_SPEED = 75; // mph - increased from 50 to 60
+const TEST_MIN_ALT = 100;
+const TEST_MAX_ALT = 200;
 const SAT_URLS = {
     latest: 'https://cdn.star.nesdis.noaa.gov/GOES16/GLM/CONUS/EXTENT3/1250x750.jpg',
     loop: 'https://cdn.star.nesdis.noaa.gov/GOES16/GLM/CONUS/EXTENT3/GOES16-CONUS-EXTENT3-625x375.gif',
     latest_ir: 'https://cdn.star.nesdis.noaa.gov/GOES16/ABI/CONUS/11/1250x750.jpg',
 };
-const DRIVING_TEST_MODE = true; // Set to true to enable test mode
-const TEST_CENTER_LAT = 39.7392; // Denver
-const TEST_CENTER_LONG = -104.9903; // Denver
-const TEST_CIRCLE_RADIUS = 1; // miles - reduced from 10 to 1
-const TEST_MIN_SPEED = 50; // mph - increased from 30 to 50
-const TEST_MAX_SPEED = 60; // mph - increased from 50 to 60
-const TEST_MIN_ALT = 100;
-const TEST_MAX_ALT = 200;
 
 // Global variables
 let lastUpdate = 0;
@@ -994,12 +994,12 @@ function drawRadar(vehicleSpeed, vehicleHeading, windSpeed, windDirection) {
     const canvas = radarContext.canvas;
     const centerX = canvas.width / 2;
     const centerY = canvas.height / 2;
-    const radius = Math.min(centerX, centerY) - 10;
+    const radius = Math.min(centerX, centerY) - 8;
     
     // Clear canvas with transparent background
     radarContext.clearRect(0, 0, canvas.width, canvas.height);
     
-    // Draw circular background with speed labels
+    // Draw circular background
     radarContext.beginPath();
     radarContext.arc(centerX, centerY, radius, 0, 2 * Math.PI);
     radarContext.strokeStyle = '#666';
@@ -1015,16 +1015,16 @@ function drawRadar(vehicleSpeed, vehicleHeading, windSpeed, windDirection) {
         radarContext.setLineDash([2, 2]);
         radarContext.stroke();
         radarContext.setLineDash([]);
-
-        // Add speed label - just the number now
+        
+        // Add speed label
         const speed = Math.round((MAX_SPEED * i) / 4);
         radarContext.fillStyle = '#666';
-        radarContext.font = '12px Inter';
+        radarContext.font = '10px Inter';
         radarContext.textAlign = 'right';
-        radarContext.fillText(speed, centerX - 5, centerY - currentRadius + 14);
+        radarContext.fillText(speed, centerX - 5, centerY - currentRadius + 12);
     }
     
-    // Draw cardinal direction lines with adjusted label positions (moved out by 15px)
+    // Draw cardinal direction lines
     radarContext.beginPath();
     radarContext.moveTo(centerX, centerY - radius);
     radarContext.lineTo(centerX, centerY + radius);
@@ -1032,34 +1032,65 @@ function drawRadar(vehicleSpeed, vehicleHeading, windSpeed, windDirection) {
     radarContext.lineTo(centerX + radius, centerY);
     radarContext.strokeStyle = '#666';
     radarContext.stroke();
-
-    // Add cardinal direction labels with increased distance from center (moved further out)
+    
+    // Draw direction labels with dark gray background for visibility
     radarContext.fillStyle = '#666';
     radarContext.font = '12px Inter';
     radarContext.textAlign = 'center';
-    radarContext.fillText('N', centerX, centerY - radius - 25);
-    radarContext.fillText('S', centerX, centerY + radius + 25);
-    radarContext.textAlign = 'left';
-    radarContext.fillText('E', centerX + radius + 25, centerY + 4);
-    radarContext.textAlign = 'right';
-    radarContext.fillText('W', centerX - radius - 25, centerY + 4);
-
-    // Convert angles to radians (compass to cartesian)
-    const vehicleAngle = (90 - vehicleHeading) * Math.PI / 180;
-    const windAngle = (90 - windDirection) * Math.PI / 180;
+    radarContext.textBaseline = 'middle';
     
-    // Scale vectors to radar size
-    const vehicleLength = (vehicleSpeed / MAX_SPEED) * radius;
-    const windLength = (windSpeed / MAX_SPEED) * radius;
+    // Position labels with proper spacing and background
+    const labelOffset = radius + 15;
+    function drawLabel(text, x, y) {
+        const padding = 4;
+        const metrics = radarContext.measureText(text);
+        const width = metrics.width + padding * 2;
+        const height = 16;
+        
+        radarContext.fillStyle = 'rgba(255, 255, 255, 0.8)';
+        radarContext.fillRect(x - width/2, y - height/2, width, height);
+        
+        radarContext.fillStyle = '#666';
+        radarContext.fillText(text, x, y);
+    }
+    
+    drawLabel('FWD', centerX, centerY - labelOffset);
+    drawLabel('AFT', centerX, centerY + labelOffset);
+    drawLabel('RIGHT', centerX + labelOffset, centerY);
+    drawLabel('LEFT', centerX - labelOffset, centerY);
+    
+    // Calculate relative wind - corrected version
+    // First convert everything to radians and normalize to mathematical angles
+    const windAngleRad = (90 - windDirection) * Math.PI / 180;  // Convert from compass to math angles
+    const vehicleAngleRad = (90 - vehicleHeading) * Math.PI / 180;
+    
+    // Wind vector components in global frame
+    const windX = windSpeed * Math.cos(windAngleRad);
+    const windY = -windSpeed * Math.sin(windAngleRad);
+    
+    // Vehicle motion creates apparent wind in opposite direction of travel
+    const vehicleInducedX = -vehicleSpeed * Math.cos(vehicleAngleRad);
+    const vehicleInducedY = vehicleSpeed * Math.sin(vehicleAngleRad);
+    
+    // Sum the vectors to get relative wind
+    const relativeWindX = windX + vehicleInducedX;
+    const relativeWindY = windY + vehicleInducedY;
+    
+    // Calculate magnitude and direction of relative wind
+    const relativeWindSpeed = Math.sqrt(relativeWindX * relativeWindX + relativeWindY * relativeWindY);
+    const relativeWindAngle = Math.atan2(-relativeWindY, relativeWindX);
+    
+    // Scale relative wind to radar size
+    const scaledWindLength = (relativeWindSpeed / MAX_SPEED) * radius;
     
     // Get the Tesla blue color from CSS
     const teslaBlue = getComputedStyle(document.documentElement).getPropertyValue('--tesla-blue').trim();
-
+    
     // Helper function to draw arrow
-    function drawArrow(fromX, fromY, toX, toY, color, headLength = 10) {
+    function drawArrow(fromX, fromY, toX, toY, color, headLength = 8) {
         const angle = Math.atan2(toY - fromY, toX - fromX);
         const headAngle = Math.PI / 6; // 30 degrees
-
+        
         radarContext.beginPath();
         radarContext.moveTo(fromX, fromY);
         radarContext.lineTo(toX, toY);
@@ -1076,19 +1107,17 @@ function drawRadar(vehicleSpeed, vehicleHeading, windSpeed, windDirection) {
         );
         
         radarContext.strokeStyle = color;
-        radarContext.lineWidth = 3;
+        radarContext.lineWidth = 2;
         radarContext.stroke();
     }
     
-    // Draw vehicle vector with arrow
-    const vehicleEndX = centerX + vehicleLength * Math.cos(vehicleAngle);
-    const vehicleEndY = centerY - vehicleLength * Math.sin(vehicleAngle);
-    drawArrow(centerX, centerY, vehicleEndX, vehicleEndY, teslaBlue);
+    // Draw relative wind vector with arrow
+    const windEndX = centerX + scaledWindLength * Math.cos(relativeWindAngle);
+    const windEndY = centerY + scaledWindLength * Math.sin(relativeWindAngle);
+    drawArrow(centerX, centerY, windEndX, windEndY, teslaBlue);
     
-    // Draw wind vector with arrow
-    const windEndX = centerX + windLength * Math.cos(windAngle);
-    const windEndY = centerY - windLength * Math.sin(windAngle);
-    drawArrow(centerX, centerY, windEndX, windEndY, '#666');
+    // Update the heading display
+    document.getElementById('heading').innerText = Math.round(vehicleHeading) + '°';
 }
 
 initializeRadar();

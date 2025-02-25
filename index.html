@@ -52,25 +52,14 @@
                 <div id="navigation" class="section">
                     <div class="nav-container">
                         <div class="radar-container">
-                            <canvas id="radarDisplay" width="300" height="300"></canvas>
-                            <div class="radar-labels">
-                                <div class="label-n">N</div>
-                                <div class="label-s">S</div>
-                                <div class="label-e">E</div>
-                                <div class="label-w">W</div>
-                            </div>
-                            <div class="radar-legend">
-                                <div class="legend-item">
-                                    <div class="legend-color vehicle"></div>
-                                    <span>Vehicle</span>
-                                </div>
-                                <div class="legend-item">
-                                    <div class="legend-color wind"></div>
-                                    <span>Wind</span>
-                                </div>
-                            </div>
+                            <h2 class="radar-title">Relative Wind</h2>
+                            <canvas id="radarDisplay" width="240" height="240"></canvas>
                         </div>
-                        <div class="altitude-display">
+                        <div class="nav-stats">
+                            <div class="stat-box">
+                                <div class="stat-value" id="heading">--°</div>
+                                <div class="stat-label">HDG</div>
+                            </div>
                             <div class="stat-box">
                                 <div class="stat-value" id="altitude">--</div>
                                 <div class="stat-label">FT ALT</div>
@@ -286,7 +275,7 @@
                     </ul>
 
                     <h2>Version</h2>
-                    <p>0.15d</p>
+                    <p>0.17d</p>
                 </div>
 
             </div>
@@ -302,7 +291,7 @@
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script src="app.js?ver=15"></script>
+    <script src="app.js?ver=17"></script>
 </body>
 
 </html>
