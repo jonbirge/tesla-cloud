@@ -7,7 +7,7 @@ const MAX_BUFFER_SIZE = 5;
 const OPENWX_API_KEY = '6a1b1bcb03b5718a9b3a2b108ce3293d';
 const GEONAMES_USERNAME = 'birgefuller';
 const MAX_SPEED = 80; // Maximum speed for radar display (mph)
-const DRIVING_TEST_MODE = true; // Set to true to enable test mode
+const DRIVING_TEST_MODE = false; // Set to true to enable test mode
 const TEST_CENTER_LAT = 39.7392; // Denver
 const TEST_CENTER_LONG = -104.9903; // Denver
 const TEST_CIRCLE_RADIUS = 1; // miles
@@ -874,8 +874,8 @@ async function updateLocationData() {
             updateNetworkInfo();
         }
 
-        // Update Wikipedia data if the Location section is visible
-        const locationSection = document.getElementById("navigation");
+        // Update Wikipedia data if the Landmarks section is visible
+        const locationSection = document.getElementById("landmarks");
         if (locationSection.style.display === "block") {
             console.log('Updating Wikipedia data...');
             fetchWikipediaData(lat, long);
@@ -1070,7 +1070,7 @@ function showSection(sectionId) {
             updateNetworkInfo();
         }
         
-        if (sectionId === 'navigation') {
+        if (sectionId === 'landmarks') {
             if (lat !== null && long !== null) {
                 fetchWikipediaData(lat, long);
             } else {

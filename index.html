@@ -17,10 +17,10 @@
             <div class="section-buttons">
                 <h1>teslas.cloud (beta)</h1>
                 <button class="section-button" onclick="showSection('news')">News</button>
-                <button class="section-button" onclick="showSection('navigation')">Navigation</button>
+                <button class="section-button" onclick="showSection('navigation')">Dashboard</button>
                 <button class="section-button" onclick="showSection('weather')">Weather</button>
                 <button class="section-button" onclick="showSection('satellite')">Satellite</button>
-                <button class="section-button" onclick="showSection('waze')">Waze</button>
+                <button class="section-button" onclick="showSection('landmarks')">Landmarks</button>
                 <button class="section-button" onclick="showSection('travel')">Travel</button>
                 <button class="section-button" onclick="showSection('media')">Media</button>
                 <button class="section-button" onclick="showSection('reference')">Reference</button>
@@ -85,8 +85,10 @@
                         </div>
                     </div>
                     <hr>
-                    <h2>Local Landmarks</h2>
-                    <div id="wikipediaInfo"><em>Landmark information loading...</em></div>
+                    <!-- TeslaWaze container -->
+                    <div class="teslawaze-container">
+                        <iframe id="teslawaze" src="https://teslawaze.azurewebsites.net/" allow="geolocation"></iframe>
+                    </div>
                 </div>
 
                 <div id="weather" class="section">
@@ -179,6 +181,11 @@
                         </div>
                     </div>
                     <img id="weather-image" class="weather-image active" alt="Satellite image">
+                </div>
+
+                <div id="landmarks" class="section">
+                    <h2>Local Landmarks</h2>
+                    <div id="wikipediaInfo"><em>Landmark information loading...</em></div>
                 </div>
 
                 <div id="travel" class="section">
