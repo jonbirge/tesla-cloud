@@ -53,7 +53,7 @@
                     <div class="nav-container">
                         <div class="radar-container">
                             <h2 class="radar-title">Relative Wind</h2>
-                            <canvas id="radarDisplay" width="240" height="240"></canvas>
+                            <canvas id="radarDisplay" width="220" height="220"></canvas>
                         </div>
                         <div class="nav-stats">
                             <div class="stat-box">
@@ -61,16 +61,16 @@
                                 <div class="stat-label">HDG</div>
                             </div>
                             <div class="stat-box">
+                                <div class="stat-value" id="altitude">--</div>
+                                <div class="stat-label">FEET ALT</div>
+                            </div>
+                            <div class="stat-box">
                                 <div class="stat-value" id="headwind">--</div>
-                                <div class="stat-label">HEAD WIND</div>
+                                <div class="stat-label">MPH HEADWIND</div>
                             </div>
                             <div class="stat-box">
                                 <div class="stat-value" id="crosswind">--</div>
-                                <div class="stat-label">CROSS WIND</div>
-                            </div>
-                            <div class="stat-box">
-                                <div class="stat-value" id="altitude">--</div>
-                                <div class="stat-label">FT ALT</div>
+                                <div class="stat-label">MPH CROSSWIND</div>
                             </div>
                         </div>
                     </div>
@@ -80,7 +80,7 @@
                             <span id="latitude">--</span>, <span id="longitude">--</span>
                         </div>
                         <div class="data-item">
-                            <h2>City</h2>
+                            <h2>Nearest City</h2>
                             <span id="city">N/A</span>
                         </div>
                     </div>

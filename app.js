@@ -6,6 +6,7 @@ const NEWS_REFRESH_INTERVAL = 5; // minutes
 const MAX_BUFFER_SIZE = 5;
 const OPENWX_API_KEY = '6a1b1bcb03b5718a9b3a2b108ce3293d';
 const GEONAMES_USERNAME = 'birgefuller';
+const MAX_SPEED = 80; // Maximum speed for radar display (mph)
 const DRIVING_TEST_MODE = true; // Set to true to enable test mode
 const TEST_CENTER_LAT = 39.7392; // Denver
 const TEST_CENTER_LONG = -104.9903; // Denver
@@ -47,9 +48,7 @@ let testModeSpeed = TEST_MIN_SPEED;
 let testModeAlt = TEST_MIN_ALT;
 let testModeSpeedIncreasing = true;
 let testModeAltIncreasing = true;
-
 let radarContext = null;
-const MAX_SPEED = 80; // Maximum speed for radar display (mph)
 
 class LocationPoint {
     constructor(lat, long, alt, timestamp) {
