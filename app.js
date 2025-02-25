@@ -1047,9 +1047,6 @@ function drawRadar(vehicleSpeed, vehicleHeading, windSpeed, windDirection) {
         const width = metrics.width + padding * 2;
         const height = 16;
         
-        radarContext.fillStyle = 'rgba(255, 255, 255, 0.8)';
-        radarContext.fillRect(x - width/2, y - height/2, width, height);
-        
         radarContext.fillStyle = '#666';
         radarContext.fillText(text, x, y);
     }
@@ -1061,26 +1058,55 @@ function drawRadar(vehicleSpeed, vehicleHeading, windSpeed, windDirection) {
     
     // Calculate relative wind - corrected version
     // First convert everything to radians and normalize to mathematical angles
-    const windAngleRad = (90 - windDirection) * Math.PI / 180;  // Convert from compass to math angles
+    const windAngleRad = (90 - windDirection) * Math.PI / 180;
     const vehicleAngleRad = (90 - vehicleHeading) * Math.PI / 180;
     
     // Wind vector components in global frame
     const windX = windSpeed * Math.cos(windAngleRad);
-    const windY = -windSpeed * Math.sin(windAngleRad);
+    const windY = windSpeed * Math.sin(windAngleRad);
     
+    // For relative wind calculation (we'll keep this as is for now)
     // Vehicle motion creates apparent wind in opposite direction of travel
     const vehicleInducedX = -vehicleSpeed * Math.cos(vehicleAngleRad);
-    const vehicleInducedY = vehicleSpeed * Math.sin(vehicleAngleRad);
+    const vehicleInducedY = -vehicleSpeed * Math.sin(vehicleAngleRad);
     
-    // Sum the vectors to get relative wind
+    // Sum the vectors to get relative wind (for radar plot)
     const relativeWindX = windX + vehicleInducedX;
     const relativeWindY = windY + vehicleInducedY;
     
     // Calculate magnitude and direction of relative wind
     const relativeWindSpeed = Math.sqrt(relativeWindX * relativeWindX + relativeWindY * relativeWindY);
-    const relativeWindAngle = Math.atan2(-relativeWindY, relativeWindX);
+    const relativeWindAngle = Math.atan2(relativeWindY, relativeWindX);
     
-    // Scale relative wind to radar size
+    // Calculate headwind and crosswind components
+    // These are projections of the ACTUAL wind (not the relative wind) onto the vehicle's direction
+    let headWind = null;
+    let crossWind = null;
+    
+    // Only calculate wind components if the vehicle is moving at a meaningful speed
+    if (vehicleSpeed > 1) {  // Threshold for meaningful motion
+        // Calculate the angle between wind and vehicle
+        const windToVehicleAngle = windAngleRad - vehicleAngleRad;
+        
+        // Project wind onto vehicle's heading and perpendicular axis
+        headWind = -windSpeed * Math.cos(windToVehicleAngle);  // Negative when wind is coming from ahead
+        crossWind = windSpeed * Math.sin(windToVehicleAngle);  // Positive when wind is coming from left
+    }
+    
+    // Update the wind component displays
+    if (headWind !== null) {
+        document.getElementById('headwind').innerText = Math.abs(Math.round(headWind)) + (headWind >= 0 ? ' ▼' : ' ▲');
+    } else {
+        document.getElementById('headwind').innerText = 'N/A';
+    }
+    
+    if (crossWind !== null) {
+        document.getElementById('crosswind').innerText = Math.abs(Math.round(crossWind)) + (crossWind >= 0 ? ' ►' : ' ◄');
+    } else {
+        document.getElementById('crosswind').innerText = 'N/A';
+    }
+    
+    // Scale relative wind to radar size - keeping this for radar plot
     const scaledWindLength = (relativeWindSpeed / MAX_SPEED) * radius;
     
     // Get the Tesla blue color from CSS
