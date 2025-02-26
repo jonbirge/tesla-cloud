@@ -30,7 +30,7 @@ body.dark-mode {
 }
 
 body {
-    font-size: 16pt;
+    font-size: 17pt;
     background-color: var(--bg-color);
     color: var(--text-color);
     padding: 0;
@@ -44,15 +44,15 @@ a {
 }
 
 h1 {
-    font-size: 18pt;
+    font-size: 19pt;
     margin-bottom: 15px;
     text-align: left;
     margin-top: 0px;
-    font-weight: 600;
+    font-weight: 300;
 }
 
 h2 {
-    font-size: 16pt;
+    font-size: 17pt;
     font-weight: 680;
     letter-spacing: 0.01em;
     margin-bottom: 12px;
@@ -80,6 +80,47 @@ li {
     margin-left: -18px;
 }
 
+.sections {
+    padding-bottom: 30px; /* Add padding to the bottom of all sections */
+}
+
+.section {
+    display: none;
+    /* padding-bottom: 30px; /* Add padding to the bottom of each section */
+}
+
+/* Navigation */
+.section-buttons {
+    position: sticky;
+    top: 0;
+    padding-right: 20px;
+    display: flex;
+    flex-direction: column;
+    margin-top: 0px;
+    width: 250px;
+    min-width: 250px;
+}
+
+.section-button {
+    font-size: 19pt;
+    font-weight: 700;
+    letter-spacing: 0.02em;
+    padding: 16px 30px;
+    background-color: transparent;
+    color: var(--text-color);
+    border: none;
+    border-radius: var(--button-radius);
+    cursor: pointer;
+    text-align: left;
+    margin-bottom: 5px;
+    transition: background-color 0.3s, color 0.3s;
+}
+
+.section-button.active {
+    background-color: var(--active-section-bg);
+    color: var(--button-text);
+}
+
 /* Layout */
 .frame-container {
     display: flex;
@@ -97,7 +138,7 @@ li {
     height: 100%;
     overflow-y: auto;
     background-color: var(--bg-color);
-    padding: 20px 15px 20px 20px;
+    padding: 15px 15px 20px 20px;
 }
 
 .right-frame {
@@ -120,47 +161,6 @@ li {
     height: 100%;
     border: none;
     display: block;
-}
-
-.sections {
-    padding-bottom: 30px; /* Add padding to the bottom of all sections */
-}
-
-.section {
-    display: none;
-    padding-bottom: 30px; /* Add padding to the bottom of each section */
-}
-
-/* Navigation */
-.section-buttons {
-    position: sticky;
-    top: 0;
-    padding-right: 20px;
-    display: flex;
-    flex-direction: column;
-    margin-top: 0px;
-    width: 250px;
-    min-width: 250px;
-}
-
-.section-button {
-    font-size: 18pt;
-    font-weight: 700;
-    letter-spacing: 0.02em;
-    padding: 16px 30px;
-    background-color: transparent;
-    color: var(--text-color);
-    border: none;
-    border-radius: var(--button-radius);
-    cursor: pointer;
-    text-align: left;
-    margin-bottom: 5px;
-    transition: background-color 0.3s, color 0.3s;
-}
-
-.section-button.active {
-    background-color: var(--active-section-bg);
-    color: var(--button-text);
 }
 
 /* Button Lists */
@@ -358,123 +358,6 @@ input:checked + .toggle-slider:before {
     opacity: 1;
 }
 
-.forecast-container {
-    display: flex;
-    justify-content: space-between;
-    gap: 15px;
-    margin: 20px 0;
-    max-width: 1024px;
-}
-
-.forecast-day {
-    flex: 1;
-    background-color: var(--active-section-bg);
-    border-radius: var(--button-radius);
-    padding: 15px;
-    text-align: center;
-    min-width: 100px;
-    position: relative;
-}
-
-.forecast-alert {
-    position: absolute;
-    top: 8px;
-    left: 8px;
-    color: #ff8800;
-    font-size: 16px;
-}
-
-.forecast-date {
-    font-size: 14pt;
-    font-weight: 600;
-    margin-bottom: 8px;
-    color: var(--button-text);
-}
-
-.forecast-icon {
-    width: 48px;
-    height: 48px;
-    margin: 8px 0;
-}
-
-.forecast-temp {
-    font-size: 14pt;
-    font-weight: 600;
-    margin: 8px 0;
-    color: var(--button-text);
-}
-
-.forecast-desc {
-    font-size: 12pt;
-    color: var(--text-color);
-}
-
-.forecast-popup {
-    display: none;
-    position: fixed;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    background-color: var(--active-section-bg);
-    border-radius: var(--button-radius);
-    padding: 20px;
-    z-index: 1000;
-    max-width: 90%;
-    width: 600px;
-    max-height: 80vh;
-    overflow-y: auto;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
-}
-
-.forecast-popup.show {
-    display: block;
-}
-
-.forecast-popup-close {
-    position: absolute;
-    top: 10px;
-    right: 10px;
-    background: var(--button-bg);
-    border: none;
-    border-radius: 50%;
-    width: 30px;
-    height: 30px;
-    cursor: pointer;
-    color: var(--button-text);
-    font-weight: bold;
-}
-
-.hourly-forecast {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
-    gap: 15px;
-    margin-top: 15px;
-}
-
-.hourly-item {
-    background: var(--button-bg);
-    padding: 15px;
-    border-radius: var(--button-radius);
-    text-align: center;
-}
-
-.hourly-time {
-    font-weight: 600;
-    color: var(--button-text);
-    margin-bottom: 5px;
-}
-
-.hourly-temp {
-    color: var(--button-text);
-    font-size: 14pt;
-    margin: 5px 0;
-}
-
-.hourly-desc {
-    color: var(--text-color);
-    font-size: 12pt;
-}
-
 /* News Elements */
 .news-headlines {
     margin: 20px 0;
@@ -517,8 +400,8 @@ input:checked + .toggle-slider:before {
     display: block;
     margin-top: 3px;
     color: var(--button-text);
-    font-size: 14pt;
-    font-weight: 640;
+    font-size: 15pt;
+    font-weight: 625;
 }
 
 /* Stats Display */
@@ -540,7 +423,7 @@ input:checked + .toggle-slider:before {
 
 .stat-value {
     font-size: 46pt;
-    font-weight: 700;
+    font-weight: 675;
     color: var(--button-text);
 }
 
@@ -584,55 +467,6 @@ input:checked + .toggle-slider:before {
 #radarDisplay {
     border-radius: 50%;
     background-color: rgba(0, 0, 0, 0.1);
-}
-
-.radar-labels {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    pointer-events: none;
-}
-
-.radar-labels div {
-    position: absolute;
-    font-weight: bold;
-    font-size: 14px;
-}
-
-.label-n { top: -25px; left: 50%; transform: translateX(-50%); }
-.label-s { bottom: -25px; left: 50%; transform: translateX(-50%); }
-.label-e { right: -35px; top: 50%; transform: translateY(-50%); }
-.label-w { left: -35px; top: 50%; transform: translateY(-50%); }
-
-.radar-legend {
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-}
-
-.legend-item {
-    display: flex;
-    align-items: center;
-    gap: 5px;
-}
-
-.legend-color {
-    width: 20px;
-    height: 3px;
-}
-
-.legend-color.vehicle {
-    background-color: var(--tesla-blue);
-}
-
-.legend-color.wind {
-    background-color: #666;
-}
-
-.dark-mode .radar-legend {
-    color: var(--text-color-dark);
 }
 
 .dark-mode #radarDisplay {

@@ -13,9 +13,14 @@ const TEST_MIN_SPEED = 55; // mph
 const TEST_MAX_SPEED = 75; // mph
 const TEST_MIN_ALT = 100;
 const TEST_MAX_ALT = 200;
+const SAT_URLS = {
+    latest: 'https://cdn.star.nesdis.noaa.gov/GOES16/GLM/CONUS/EXTENT3/1250x750.jpg',
+    loop: 'https://cdn.star.nesdis.noaa.gov/GOES16/GLM/CONUS/EXTENT3/GOES16-CONUS-EXTENT3-625x375.gif',
+    latest_ir: 'https://cdn.star.nesdis.noaa.gov/GOES16/ABI/CONUS/11/1250x750.jpg',
+};
 
 // Global variables
-let driving_test_mode = true; // Set to true to enable test mode
+let driving_test_mode = false; // Set to true to enable test mode
 let lastUpdate = 0;
 let neverUpdatedLocation = true;
 let lat = null;
