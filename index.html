@@ -13,52 +13,57 @@
 </head>
 
 <body>
+    <!-- Include SVG sprite inline at the beginning of body for better browser compatibility -->
+    <div style="display: none;">
+        <!-- SVG sprite will be loaded via JavaScript -->
+    </div>
+    
     <div class="frame-container">
         <div class="left-frame">
             <div class="section-buttons">
                 <h1>teslas.cloud (beta)</h1>
                 <button class="section-button" onclick="showSection('news')">
-                    <svg class="button-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 20H5a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v1M15 13h5M15 17h5M15 9h5"></path><path d="M8 13h.01M8 17h.01M8 9h.01"></path></svg>
+                    <svg class="button-icon"><use href="#icon-news"></use></svg>
                     News
                 </button>
                 <button class="section-button" onclick="showSection('navigation')">
-                    <svg class="button-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"></polygon></svg>
+                    <svg class="button-icon"><use href="#icon-dashboard"></use></svg>
                     Dashboard
                 </button>
                 <button class="section-button" onclick="showSection('weather')">
-                    <svg class="button-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 18a5 5 0 0 0-10 0"></path><line x1="12" y1="9" x2="12" y2="2"></line><line x1="4.22" y1="10.22" x2="5.64" y2="11.64"></line><line x1="1" y1="18" x2="3" y2="18"></line><line x1="21" y1="18" x2="23" y2="18"></line><line x1="18.36" y1="11.64" x2="19.78" y2="10.22"></line><line x1="23" y1="22" x2="1" y2="22"></line><polyline points="8 6 12 2 16 6"></polyline></svg>
+                    <svg class="button-icon"><use href="#icon-weather"></use></svg>
                     Weather
                 </button>
                 <button class="section-button" onclick="showSection('satellite')">
-                    <svg class="button-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path><circle cx="12" cy="12" r="4"></circle></svg>
+                    <svg class="button-icon"><use href="#icon-satellite"></use></svg>
                     Satellite
                 </button>
                 <button class="section-button" onclick="showSection('landmarks')">
-                    <svg class="button-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"></rect><path d="M9 3v18"></path><path d="M3 9h18"></path></svg>
+                    <svg class="button-icon"><use href="#icon-landmarks"></use></svg>
                     Landmarks
                 </button>
                 <button class="section-button" onclick="showSection('travel')">
-                    <svg class="button-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8h1a4 4 0 0 1 0 8h-1"></path><path d="M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z"></path><line x1="6" y1="1" x2="6" y2="4"></line><line x1="10" y1="1" x2="10" y2="4"></line><line x1="14" y1="1" x2="14" y2="4"></line></svg>
+                    <svg class="button-icon"><use href="#icon-travel"></use></svg>
                     Travel
                 </button>
                 <button class="section-button" onclick="showSection('media')">
-                    <svg class="button-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="20" rx="2" ry="2"></rect><polygon points="14 8 14 16 8 12 14 8"></polygon></svg>
+                    <svg class="button-icon"><use href="#icon-media"></use></svg>
                     Media
                 </button>
                 <button class="section-button" onclick="showSection('reference')">
-                    <svg class="button-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"></path><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"></path></svg>
+                    <svg class="button-icon"><use href="#icon-reference"></use></svg>
                     Reference
                 </button>
                 <button class="section-button" onclick="showSection('toys')">
-                    <svg class="button-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="20" height="14" rx="2" ry="2"></rect><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"></path><path d="M6 12h4"></path><path d="M14 12h4"></path></svg>
+                    <svg class="button-icon"><use href="#icon-toys"></use></svg>
                     Toys
                 </button>
                 <button class="section-button" onclick="showSection('network')">
-                    <svg class="button-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5H1v8h8V5z"></path><path d="M22 5h-8v8h8V5z"></path><path d="M9 19H1v-2h8v2z"></path><path d="M22 19h-8v-2h8v2z"></path><path d="M5 13v2"></path><path d="M18 13v2"></path><path d="M19 9h1"></path><path d="M3 9h1"></path></svg>
+                    <svg class="button-icon"><use href="#icon-network"></use></svg>
                     Network
                 </button>
                 <button class="section-button" onclick="showSection('about')">
-                    <svg class="button-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12" y2="8"></line></svg>
+                    <svg class="button-icon"><use href="#icon-about"></use></svg>
                     About
                 </button>
             </div>
@@ -354,6 +359,14 @@
 
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="wx.js?ver=1"></script>
+    <script>
+        // Load SVG sprite file and inject it into the page
+        fetch('icons.svg')
+          .then(response => response.text())
+          .then(data => {
+            document.querySelector('div[style="display: none;"]').innerHTML = data;
+          });
+    </script>
     <script src="app.js?ver=19"></script>
 </body>
 
