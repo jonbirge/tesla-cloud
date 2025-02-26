@@ -10,6 +10,11 @@ header('Content-Type: application/json');
 // Check if reload parameter is set to bypass cache
 $forceReload = isset($_GET['reload']);
 
+// Get number of stories to return (default: 15)
+$numStories = isset($_GET['n']) ? intval($_GET['n']) : 25;
+// Ensure reasonable limits
+$numStories = max(1, min(50, $numStories));
+
 // Check if cache exists and is fresh (unless forced reload is requested)
 if (!$forceReload && file_exists($cacheFile) && file_exists($cacheTimestampFile)) {
     $timestamp = file_get_contents($cacheTimestampFile);
@@ -24,7 +29,6 @@ $feeds = [
     'wsj' => 'https://feeds.content.dowjones.io/public/rss/RSSWorldNews',
     'nyt' => 'https://rss.nytimes.com/services/xml/rss/nyt/HomePage.xml',
     'cnn' => 'http://rss.cnn.com/rss/cnn_topstories.rss',
-    //'bbc' => 'https://feeds.bbci.co.uk/news/rss.xml',
     'electrek' => 'https://electrek.co/feed/',
     'teslarati' => 'https://www.teslarati.com/feed/',
     'insideevs' => 'https://insideevs.com/rss/articles/all/',
@@ -75,7 +79,7 @@ usort($allItems, function($a, $b) {
 });
 
 // Keep only the most recent items
-$allItems = array_slice($allItems, 0, 15);
+$allItems = array_slice($allItems, 0, $numStories);
 
 // Cache the results
 file_put_contents($cacheFile, json_encode($allItems));
