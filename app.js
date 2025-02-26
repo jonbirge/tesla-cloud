@@ -607,13 +607,6 @@ function updateWindage(vehicleSpeed, vehicleHeading, windSpeed, windDirection) {
     } else {
         document.getElementById('crosswind').innerText = '--';
     }
-
-    // // Update the heading display
-    // if (vehicleHeading !== null) {
-    //     document.getElementById('heading').innerText = Math.round(vehicleHeading) + '°';
-    // } else {
-    //     document.getElementById('heading').innerText = '--';
-    // }
     
     // Get the Tesla blue color from CSS
     const teslaBlue = getComputedStyle(document.documentElement).getPropertyValue('--tesla-blue').trim();
@@ -644,10 +637,12 @@ function updateWindage(vehicleSpeed, vehicleHeading, windSpeed, windDirection) {
     }
     
     // Draw relative wind vector with arrow
-    const windScale = Math.min(1, radius / MAX_SPEED);
-    const relativeWindXPlot = centerX + relativeWindX * windScale;
-    const relativeWindYPlot = centerY - relativeWindY * windScale;
-    drawArrow(centerX, centerY, relativeWindXPlot, relativeWindYPlot, teslaBlue);
+    if (vehicleHeading) {
+        const windScale = Math.min(1, radius / MAX_SPEED);
+        const relativeWindXPlot = centerX + relativeWindX * windScale;
+        const relativeWindYPlot = centerY - relativeWindY * windScale;
+        drawArrow(centerX, centerY, relativeWindXPlot, relativeWindYPlot, teslaBlue);
+    }
 }
 
 async function updateLocationData() {
@@ -760,9 +755,6 @@ function handlePositionUpdate(position) {
         } else {
             updateWindage(speed, lastKnownHeading, 0, 0);
         }
-    } else {
-        // Use last known heading but with zero speed if we don't have enough points
-        updateWindage(0, 0, 0, 0);
     }
     
     // Update heading display with last known heading
@@ -792,7 +784,7 @@ function handlePositionUpdate(position) {
     }
 }
 
-// Get the current position
+// Pull location data from browser or test mode
 function updateLatLong() {
     if (driving_test_mode) {
         handlePositionUpdate(getTestModePosition());
