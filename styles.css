@@ -105,7 +105,7 @@ li {
     font-size: 19pt;
     font-weight: 675;
     letter-spacing: 0.02em;
-    padding: 16px 30px;
+    padding: 16px 20px;
     background-color: transparent;
     color: var(--text-color);
     border: none;
@@ -114,11 +114,25 @@ li {
     text-align: left;
     margin-bottom: 5px;
     transition: background-color 0.3s, color 0.3s;
+    display: flex;
+    align-items: center;
+}
+
+.button-icon {
+    width: 20px;
+    height: 20px;
+    margin-right: 12px;
+    stroke: currentColor;
+    flex-shrink: 0;
 }
 
 .section-button.active {
     background-color: var(--active-section-bg);
     color: var(--button-text);
+}
+
+.section-button:hover {
+    background-color: var(--button-hover-bg);
 }
 
 /* Layout */
