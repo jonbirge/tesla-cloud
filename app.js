@@ -42,6 +42,7 @@ let testModeSpeed = TEST_MIN_SPEED;
 let testModeAlt = TEST_MIN_ALT;
 let testModeSpeedIncreasing = true;
 let testModeAltIncreasing = true;
+let lastKnownHeading = null;
 let radarContext = null;
 const locationBuffer = [];
 
@@ -588,7 +589,7 @@ function updateWindage(vehicleSpeed, vehicleHeading, windSpeed, windDirection) {
     // Calculate headwind and crosswind components
     let headWind = null;
     let crossWind = null;
-    if (vehicleSpeed > 2) {  // Threshold for meaningful motion
+    if (vehicleSpeed > 1) {  // Threshold for meaningful motion
         headWind = -windY;  // Negative when wind is coming from ahead
         crossWind = windX;  // Positive when wind is coming from left
     }
@@ -607,12 +608,12 @@ function updateWindage(vehicleSpeed, vehicleHeading, windSpeed, windDirection) {
         document.getElementById('crosswind').innerText = '--';
     }
 
-    // Update the heading display
-    if (vehicleHeading !== null) {
-        document.getElementById('heading').innerText = Math.round(vehicleHeading) + '°';
-    } else {
-        document.getElementById('heading').innerText = '--';
-    }
+    // // Update the heading display
+    // if (vehicleHeading !== null) {
+    //     document.getElementById('heading').innerText = Math.round(vehicleHeading) + '°';
+    // } else {
+    //     document.getElementById('heading').innerText = '--';
+    // }
     
     // Get the Tesla blue color from CSS
     const teslaBlue = getComputedStyle(document.documentElement).getPropertyValue('--tesla-blue').trim();
@@ -729,6 +730,9 @@ function handlePositionUpdate(position) {
     lat = position.coords.latitude;
     long = position.coords.longitude;
     alt = position.coords.altitude;
+    acc = position.coords.accuracy;
+    gpsvel = position.coords.speed;
+    gpshead = position.coords.heading;
     
     // Add new location point to buffer
     const newPoint = new LocationPoint(lat, long, alt, position.timestamp || Date.now());
@@ -738,24 +742,46 @@ function handlePositionUpdate(position) {
     }
     
     // Calculate speed and heading if we have enough points
+    let speed = 0;
     if (locationBuffer.length >= 2) {
         const oldestPoint = locationBuffer[0];
-        const speed = estimateSpeed(oldestPoint, newPoint);
-        const heading = calculateHeading(oldestPoint, newPoint);
-        // const cardinal = getCardinalDirection(heading);
+        speed = estimateSpeed(oldestPoint, newPoint);
+        
+        // Small threshold (e.g.determine if movement is significant
+        if (speed >= 1) {
+            lastKnownHeading = calculateHeading(oldestPoint, newPoint); // Store the new heading
+        }
         
         // Update radar display with current speed and heading
         if (weatherData) {
             const windSpeedMPH = Math.min((weatherData.windSpeed * 2.237), MAX_SPEED);
             const windDir = weatherData.windDirection;
-            updateWindage(speed, heading, windSpeedMPH, windDir);
+            updateWindage(speed, lastKnownHeading, windSpeedMPH, windDir);
         } else {
-            updateWindage(speed, heading, 0, 0);
+            updateWindage(speed, lastKnownHeading, 0, 0);
         }
     } else {
-        // Just show nothing if we don't have movement data
+        // Use last known heading but with zero speed if we don't have enough points
         updateWindage(0, 0, 0, 0);
     }
+    
+    // Update heading display with last known heading
+    if (lastKnownHeading !== null) {
+        document.getElementById('heading').innerText = Math.round(lastKnownHeading) + '°';
+    } else {
+        document.getElementById('heading').innerText = '--';
+    }
+    
+    // Update display values
+    document.getElementById('latitude').innerText = lat.toFixed(4) + '°';
+    document.getElementById('longitude').innerText = long.toFixed(4) + '°';
+    document.getElementById('altitude').innerText = alt ? Math.round(alt * 3.28084) : '--'; // Convert meters to feet
+
+    // Update new data display values
+    document.getElementById('speed').innerText = speed > 1 ? Math.round(speed) + ' mph' : '--';
+    document.getElementById('accuracy').innerText = acc ? Math.round(acc) + ' m' : '--';
+    document.getElementById('gpsvel').innerText = gpsvel ? Math.round(gpsvel * 2.237) + ' mph' : '--'; // Convert m/s to mph
+    document.getElementById('gpshead').innerText = gpshead ? Math.round(gpshead) + '°' : '--';
 
     // Check if we should update location-dependent data
     if (shouldUpdateLocationData()) {
@@ -764,11 +790,6 @@ function handlePositionUpdate(position) {
         lastUpdateLong = long;
         lastUpdate = Date.now();
     }
-    
-    // Update display values
-    document.getElementById('latitude').innerText = lat.toFixed(4) + '°';
-    document.getElementById('longitude').innerText = long.toFixed(4) + '°';
-    document.getElementById('altitude').innerText = alt ? Math.round(alt * 3.28084) : '--'; // Convert meters to feet
 }
 
 // Get the current position
