@@ -519,3 +519,120 @@ input:checked + .toggle-slider:before {
     border: none;
     border-radius: var(--button-radius);
 }
+
+.forecast-container {
+    display: flex;
+    justify-content: space-between;
+    gap: 15px;
+    margin: 20px 0;
+    max-width: 1024px;
+}
+
+.forecast-day {
+    flex: 1;
+    background-color: var(--active-section-bg);
+    border-radius: var(--button-radius);
+    padding: 15px;
+    text-align: center;
+    min-width: 100px;
+    position: relative;
+}
+
+.forecast-alert {
+    position: absolute;
+    top: 8px;
+    left: 8px;
+    color: #ff8800;
+    font-size: 16px;
+}
+
+.forecast-date {
+    font-size: 14pt;
+    font-weight: 600;
+    margin-bottom: 8px;
+    color: var(--button-text);
+}
+
+.forecast-icon {
+    width: 48px;
+    height: 48px;
+    margin: 8px 0;
+}
+
+.forecast-temp {
+    font-size: 14pt;
+    font-weight: 600;
+    margin: 8px 0;
+    color: var(--button-text);
+}
+
+.forecast-desc {
+    font-size: 12pt;
+    color: var(--text-color);
+}
+
+.forecast-popup {
+    display: none;
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background-color: var(--active-section-bg);
+    border-radius: var(--button-radius);
+    padding: 20px;
+    z-index: 1000;
+    max-width: 90%;
+    width: 600px;
+    max-height: 80vh;
+    overflow-y: auto;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+.forecast-popup.show {
+    display: block;
+}
+
+.forecast-popup-close {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background: var(--button-bg);
+    border: none;
+    border-radius: 50%;
+    width: 30px;
+    height: 30px;
+    cursor: pointer;
+    color: var(--button-text);
+    font-weight: bold;
+}
+
+.hourly-forecast {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+    gap: 15px;
+    margin-top: 15px;
+}
+
+.hourly-item {
+    background: var(--button-bg);
+    padding: 15px;
+    border-radius: var(--button-radius);
+    text-align: center;
+}
+
+.hourly-time {
+    font-weight: 600;
+    color: var(--button-text);
+    margin-bottom: 5px;
+}
+
+.hourly-temp {
+    color: var(--button-text);
+    font-size: 14pt;
+    margin: 5px 0;
+}
+
+.hourly-desc {
+    color: var(--text-color);
+    font-size: 12pt;
+}
