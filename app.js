@@ -45,10 +45,10 @@ let testModeSpeedIncreasing = true;
 let testModeAltIncreasing = true;
 let lastKnownHeading = null;
 let radarContext = null;
-const locationBuffer = [];
 let weatherData = null;
 let forecastFetched = false;
 let forecastData = null;
+const locationBuffer = [];
 
 class LocationPoint {
     constructor(lat, long, alt, timestamp) {
@@ -734,13 +734,13 @@ function updateWindage(vehicleSpeed, vehicleHeading, windSpeed, windDirection) {
     // Update the wind component displays
     if (headWind !== null) {
         document.getElementById('headwind').innerText = Math.abs(Math.round(headWind))
-            + (headWind >= 0 ? ' ▼' : ' ▲');
+            + (headWind < 0 ? '▼' : '▲');
     } else {
         document.getElementById('headwind').innerText = '--';
     }
     if (crossWind !== null) {
         document.getElementById('crosswind').innerText = Math.abs(Math.round(crossWind))
-            + (crossWind >= 0 ? ' ►' : ' ◄');
+            + (crossWind >= 0 ? '►' : '◄');
     } else {
         document.getElementById('crosswind').innerText = '--';
     }
@@ -870,7 +870,7 @@ function handlePositionUpdate(position) {
     long = position.coords.longitude;
     alt = position.coords.altitude;
     acc = position.coords.accuracy;
-    speed = position.coords.speed;
+    speed = position.coords.speed / 0.44704; // Convert m/s to mph
     lastKnownHeading = position.coords.heading;
     
     // Add new location point to buffer
@@ -898,9 +898,6 @@ function handlePositionUpdate(position) {
     document.getElementById('latitude').innerText = lat.toFixed(4) + '°';
     document.getElementById('longitude').innerText = long.toFixed(4) + '°';
     document.getElementById('altitude').innerText = alt ? Math.round(alt * 3.28084) : '--'; // Convert meters to feet
-
-    // Update new data display values
-    document.getElementById('speed').innerText = speed > 1 ? Math.round(speed) + ' mph' : '--';
     document.getElementById('accuracy').innerText = acc ? Math.round(acc) + ' m' : '--';
     
     // Check if we should update location-dependent data
