@@ -711,11 +711,18 @@ function getTestModePosition() {
         }
     }
 
+    // Calculate heading based on movement around the circle
+    // We add 90 degrees because moving east is 90° and we start heading east when angle is 0
+    const heading = (((testModeAngle * 180 / Math.PI) + 90) % 360);
+
     return {
         coords: {
             latitude: testLat,
             longitude: testLong,
-            altitude: testModeAlt * 0.3048 // Convert feet to meters
+            altitude: testModeAlt * 0.3048, // Convert feet to meters
+            speed: testModeSpeed * 0.44704, // Convert mph to m/s
+            heading: heading,
+            accuracy: 5 // Simulate a good GPS signal with 5m accuracy
         },
         timestamp: Date.now()
     };
