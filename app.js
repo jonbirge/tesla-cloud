@@ -13,6 +13,7 @@ const TEST_MIN_SPEED = 55; // mph
 const TEST_MAX_SPEED = 75; // mph
 const TEST_MIN_ALT = 100;
 const TEST_MAX_ALT = 200;
+const OPENWX_API_KEY = '6a1b1bcb03b5718a9b3a2b108ce3293d';
 const SAT_URLS = {
     latest: 'https://cdn.star.nesdis.noaa.gov/GOES16/GLM/CONUS/EXTENT3/1250x750.jpg',
     loop: 'https://cdn.star.nesdis.noaa.gov/GOES16/GLM/CONUS/EXTENT3/GOES16-CONUS-EXTENT3-625x375.gif',
@@ -45,6 +46,9 @@ let testModeAltIncreasing = true;
 let lastKnownHeading = null;
 let radarContext = null;
 const locationBuffer = [];
+let weatherData = null;
+let forecastFetched = false;
+let forecastData = null;
 
 class LocationPoint {
     constructor(lat, long, alt, timestamp) {
@@ -55,56 +59,189 @@ class LocationPoint {
     }
 }
 
-function estimateSpeed(p1, p2) {
-    const R = 6371e3; // Earth's radius in meters
-    const φ1 = p1.lat * Math.PI/180;
-    const φ2 = p2.lat * Math.PI/180;
-    const Δφ = (p2.lat - p1.lat) * Math.PI/180;
-    const Δλ = (p2.long - p1.long) * Math.PI/180;
-
-    // Haversine formula for distance
-    const a = Math.sin(Δφ/2) * Math.sin(Δφ/2) +
-            Math.cos(φ1) * Math.cos(φ2) *
-            Math.sin(Δλ/2) * Math.sin(Δλ/2);
-    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
-    const horizontalDist = R * c;
-
-    // Add vertical component if altitude is available
-    let verticalDist = 0;
-    if (p1.alt != null && p2.alt != null) {
-        verticalDist = p2.alt - p1.alt;
-    }
-
-    // Total 3D distance
-    const distance = Math.sqrt(horizontalDist * horizontalDist + verticalDist * verticalDist);
-    
-    // Time difference in seconds
-    const timeDiff = (p2.timestamp - p1.timestamp) / 1000;
-    
-    if (timeDiff === 0) return 0;
-    
-    // Speed in meters per second
-    const speedMS = distance / timeDiff;
-    // Convert to miles per hour
-    return speedMS * 2.237; // 2.237 is the conversion factor from m/s to mph
+function getMoonPhaseName(phase) {
+    // Convert numerical phase to human-readable name
+    if (phase === 0 || phase === 1) return "New Moon";
+    if (phase < 0.25) return "Waxing Crescent";
+    if (phase === 0.25) return "First Quarter";
+    if (phase < 0.5) return "Waxing Gibbous";
+    if (phase === 0.5) return "Full Moon";
+    if (phase < 0.75) return "Waning Gibbous";
+    if (phase === 0.75) return "Last Quarter";
+    return "Waning Crescent";
 }
 
-function calculateHeading(p1, p2) {
-    // Convert coordinates to radians
-    const lat1 = p1.lat * Math.PI / 180;
-    const lat2 = p2.lat * Math.PI / 180;
-    const dLon = (p2.long - p1.long) * Math.PI / 180;
+function switchWeatherImage(type) {
+    const weatherImage = document.getElementById('weather-image');
+    weatherImage.style.opacity = '0';
+    
+    setTimeout(() => {
+        weatherImage.src = SAT_URLS[type];
+        weatherImage.style.opacity = '1';
+    }, 300);
+    
+    // Update buttons and slider position
+    const weatherSwitch = document.querySelector('.weather-switch');
+    const buttons = weatherSwitch.getElementsByTagName('button');
+    buttons[0].classList.toggle('active', type === 'latest');
+    buttons[1].classList.toggle('active', type === 'loop');
+    buttons[2].classList.toggle('active', type === 'latest_ir');
+    
+    // Update slider position for three states
+    const positions = { 'latest': 0, 'loop': 1, 'latest_ir': 2 };
+    weatherSwitch.style.setProperty('--slider-position', positions[type]);
+}
 
-    // Calculate heading using great circle formula
-    const y = Math.sin(dLon) * Math.cos(lat2);
-    const x = Math.cos(lat1) * Math.sin(lat2) -
-            Math.sin(lat1) * Math.cos(lat2) * Math.cos(dLon);
-    let heading = Math.atan2(y, x) * 180 / Math.PI;
+function fetchWeatherData(lat, long) {
+    console.log('Fetching weather data...');
+    Promise.all([
+        fetch(`https://secure.geonames.org/findNearByWeatherJSON?lat=${lat}&lng=${long}&username=birgefuller`),
+        !forecastFetched ? fetch(`https://api.openweathermap.org/data/2.5/forecast?lat=${lat}&lon=${long}&appid=${OPENWX_API_KEY}&units=imperial`) : Promise.resolve(null)
+    ])
+        .then(([currentResponse, forecastResponse]) => Promise.all([
+            currentResponse.json(),
+            forecastResponse ? forecastResponse.json() : null
+        ]))
+        .then(([currentData, forecastDataResponse]) => {
+            if (currentData.weatherObservation) {
+                weatherData = currentData.weatherObservation;
+                window.weatherData = weatherData; // Expose weatherData globally for app.js compatibility
+                updateWeatherDisplay();
+            }
+            
+            if (forecastDataResponse && !forecastFetched) {
+                updateForecastDisplay(forecastDataResponse);
+                forecastFetched = true;
+            }
+        })
+        .catch(error => {
+            console.error('Error fetching weather data: ', error);
+        });
+}
+
+function hasHazards(forecastData) {
+    const hazardConditions = ['Rain', 'Snow', 'Sleet', 'Hail', 'Thunderstorm', 'Storm', 'Drizzle'];
+    return forecastData.weather.some(w => 
+        hazardConditions.some(condition => 
+            w.main.includes(condition) || w.description.includes(condition.toLowerCase())
+        )
+    );
+}
+
+function updateForecastDisplay(data) {
+    const forecastDays = document.querySelectorAll('.forecast-day');
+    const dailyData = extractDailyForecast(data.list);
     
-    // Normalize to 0-360°
-    heading = (heading + 360) % 360;
+    dailyData.forEach((day, index) => {
+        if (index < forecastDays.length) {
+            const date = new Date(day.dt * 1000);
+            const dayElement = forecastDays[index];
+            
+            // Clear previous content
+            dayElement.innerHTML = '';
+            
+            // Add alert symbol if hazards detected
+            if (hasHazards(day)) {
+                const alert = document.createElement('div');
+                alert.className = 'forecast-alert';
+                alert.innerHTML = '⚠️';
+                dayElement.appendChild(alert);
+            }
+            
+            // Add the rest of the forecast content
+            dayElement.innerHTML += `
+            <div class="forecast-date">${date.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })}</div>
+            <img class="forecast-icon" src="https://openweathermap.org/img/wn/${day.weather[0].icon}@2x.png" alt="${day.weather[0].description}">
+            <div class="forecast-temp">${Math.round(day.temp_min)}°/${Math.round(day.temp_max)}°</div>
+            <div class="forecast-desc">${day.weather[0].main}</div>
+            `;
+        }
+    });
+}
+
+function extractDailyForecast(forecastList) {
+    forecastData = forecastList;
+    const dailyData = [];
+    const dayMap = new Map();
     
-    return heading;
+    forecastList.forEach(item => {
+        const date = new Date(item.dt * 1000).toDateString();
+        
+        if (!dayMap.has(date)) {
+            dayMap.set(date, {
+                dt: item.dt,
+                temp_min: item.main.temp_min,
+                temp_max: item.main.temp_max,
+                weather: [item.weather[0]]
+            });
+        } else {
+            const existing = dayMap.get(date);
+            existing.temp_min = Math.min(existing.temp_min, item.main.temp_min);
+            existing.temp_max = Math.max(existing.temp_max, item.main.temp_max);
+            if (!existing.weather.some(w => w.main === item.weather[0].main)) {
+                existing.weather.push(item.weather[0]);
+            }
+        }
+    });
+    
+    dayMap.forEach(day => dailyData.push(day));
+    return dailyData.slice(0, 5);
+}
+
+function showHourlyForecast(dayIndex) {
+    if (!forecastData) return;
+
+    const startDate = new Date(forecastData[0].dt * 1000).setHours(0, 0, 0, 0);
+    const targetDate = new Date(startDate + dayIndex * 24 * 60 * 60 * 1000);
+    const endDate = new Date(targetDate).setHours(23, 59, 59, 999);
+
+    const hourlyData = forecastData.filter(item => {
+        const itemDate = new Date(item.dt * 1000);
+        return itemDate >= targetDate && itemDate <= endDate;
+    });
+
+    const popupDate = document.getElementById('popup-date');
+    popupDate.textContent = targetDate.toLocaleDateString('en-US', {
+        weekday: 'long',
+        month: 'long',
+        day: 'numeric'
+    });
+
+    const hourlyContainer = document.querySelector('.hourly-forecast');
+    hourlyContainer.innerHTML = hourlyData.map(item => {
+        const time = new Date(item.dt * 1000).toLocaleTimeString('en-US', {
+            hour: 'numeric',
+            minute: '2-digit'
+        });
+        return `
+            <div class="hourly-item">
+                <div class="hourly-time">${time}</div>
+                <img src="https://openweathermap.org/img/wn/${item.weather[0].icon}@2x.png" alt="${item.weather[0].description}" style="width: 50px; height: 50px;">
+                <div class="hourly-temp">${Math.round(item.main.temp)}°F</div>
+                <div class="hourly-desc">${item.weather[0].main}</div>
+            </div>
+        `;
+    }).join('');
+
+    document.querySelector('.overlay').classList.add('show');
+    document.querySelector('.forecast-popup').classList.add('show');
+}
+
+function closeHourlyForecast() {
+    document.querySelector('.overlay').classList.remove('show');
+    document.querySelector('.forecast-popup').classList.remove('show');
+}
+
+function updateWeatherDisplay() {
+    if (!weatherData) return;
+
+    const windSpeedMS = weatherData.windSpeed;
+    const windSpeedMPH = Math.min((windSpeedMS * 2.237), MAX_SPEED);
+    const windDir = weatherData.windDirection;
+    const humidity = weatherData.humidity;
+
+    document.getElementById('humidity').innerText = `${humidity}%`;
+    document.getElementById('wind').innerText = `${Math.round(windSpeedMPH)} mph at ${Math.round(windDir)}°`;
 }
 
 function getCardinalDirection(heading) {
@@ -733,8 +870,8 @@ function handlePositionUpdate(position) {
     long = position.coords.longitude;
     alt = position.coords.altitude;
     acc = position.coords.accuracy;
-    gpsvel = position.coords.speed;
-    gpshead = position.coords.heading;
+    speed = position.coords.speed;
+    lastKnownHeading = position.coords.heading;
     
     // Add new location point to buffer
     const newPoint = new LocationPoint(lat, long, alt, position.timestamp || Date.now());
@@ -743,18 +880,9 @@ function handlePositionUpdate(position) {
         locationBuffer.shift(); // Remove oldest point
     }
     
-    // Calculate speed and heading if we have enough points
-    let speed = 0;
-    if (locationBuffer.length >= 2) {
-        const oldestPoint = locationBuffer[0];
-        speed = estimateSpeed(oldestPoint, newPoint);
-        
-        // Small threshold (e.g.determine if movement is significant
-        if (speed >= 1) {
-            lastKnownHeading = calculateHeading(oldestPoint, newPoint); // Store the new heading
-        }
-        
-        // Update radar display with current speed and heading
+    // Update radar display with current speed and heading
+    if (lastKnownHeading) {
+        document.getElementById('heading').innerText = Math.round(lastKnownHeading) + '°';
         if (weatherData) {
             const windSpeedMPH = Math.min((weatherData.windSpeed * 2.237), MAX_SPEED);
             const windDir = weatherData.windDirection;
@@ -762,11 +890,6 @@ function handlePositionUpdate(position) {
         } else {
             updateWindage(speed, lastKnownHeading, 0, 0);
         }
-    }
-    
-    // Update heading display with last known heading
-    if (lastKnownHeading !== null) {
-        document.getElementById('heading').innerText = Math.round(lastKnownHeading) + '°';
     } else {
         document.getElementById('heading').innerText = '--';
     }
@@ -779,9 +902,7 @@ function handlePositionUpdate(position) {
     // Update new data display values
     document.getElementById('speed').innerText = speed > 1 ? Math.round(speed) + ' mph' : '--';
     document.getElementById('accuracy').innerText = acc ? Math.round(acc) + ' m' : '--';
-    document.getElementById('gpsvel').innerText = gpsvel ? Math.round(gpsvel * 2.237) + ' mph' : '--'; // Convert m/s to mph
-    document.getElementById('gpshead').innerText = gpshead ? Math.round(gpshead) + '°' : '--';
-
+    
     // Check if we should update location-dependent data
     if (shouldUpdateLocationData()) {
         updateLocationData();
@@ -792,14 +913,14 @@ function handlePositionUpdate(position) {
 }
 
 function updateGPS() {
-    if (driving_test_mode) {
-        handlePositionUpdate(getTestModePosition());
-    } else {
+    if (!driving_test_mode) {
         if (navigator.geolocation) {
             navigator.geolocation.getCurrentPosition(handlePositionUpdate);
         } else {
             console.log('Geolocation is not supported by this browser.');
         }
+    } else { // testing
+        handlePositionUpdate(getTestModePosition());
     }
 }
 
