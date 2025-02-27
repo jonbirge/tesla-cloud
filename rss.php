@@ -28,13 +28,11 @@ if (!$forceReload && file_exists($cacheFile) && file_exists($cacheTimestampFile)
 $feeds = [
     'wsj' => 'https://feeds.content.dowjones.io/public/rss/RSSWorldNews',
     'nyt' => 'https://rss.nytimes.com/services/xml/rss/nyt/HomePage.xml',
-    'cnn' => 'http://rss.cnn.com/rss/cnn_topstories.rss',
     'electrek' => 'https://electrek.co/feed/',
     'teslarati' => 'https://www.teslarati.com/feed/',
     'insideevs' => 'https://insideevs.com/rss/articles/all/',
     'teslarumors' => 'https://teslarumors.com/feed/',
     'notatesla' => 'https://notateslaapp.com/feed/',
-    'cleantechnica' => 'https://cleantechnica.com/feed/',
     'tesla' => 'https://www.tesla.com/rss/blog',
 ];
 
