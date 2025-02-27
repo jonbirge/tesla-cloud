@@ -20,7 +20,7 @@ const SAT_URLS = {
 };
 
 // Global variables
-let driving_test_mode = false; // Set to true to enable test mode
+let driving_test_mode = false; // Set to true if test parameter exists
 let lastUpdate = 0;
 let neverUpdatedLocation = true;
 let lat = null;
@@ -784,8 +784,7 @@ function handlePositionUpdate(position) {
     }
 }
 
-// Pull location data from browser or test mode
-function updateLatLong() {
+function updateGPS() {
     if (driving_test_mode) {
         handlePositionUpdate(getTestModePosition());
     } else {
@@ -895,6 +894,11 @@ function showSection(sectionId) {
 
 // ***** Main code *****
 
+// Check for test parameter in URL
+const urlParams = new URLSearchParams(window.location.search);
+const testParam = urlParams.get('test');
+driving_test_mode = testParam !== null;
+
 // Update link click event listener
 document.addEventListener('click', function(e) {
     if (e.target.tagName === 'A' && !e.target.closest('.section-buttons')) {
@@ -908,8 +912,8 @@ document.addEventListener('click', function(e) {
 document.querySelector('.overlay').addEventListener('click', closeHourlyForecast);
 
 // Update location frequently but only trigger dependent updates when moved significantly
-updateLatLong();
-setInterval(updateLatLong, 1000*LATLON_UPDATE_INTERVAL);
+updateGPS();
+setInterval(updateGPS, 1000*LATLON_UPDATE_INTERVAL);
 
 // Show the initial section from URL parameter
 showSection(getInitialSection());
