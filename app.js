@@ -673,11 +673,11 @@ function updateWindage(vehicleSpeed, vehicleHeading, windSpeed, windDirection) {
         radarContext.setLineDash([]);
         
         // Add speed label
-        const speed = Math.round((MAX_SPEED * i) / 4);
+        const speedLabel = Math.round((MAX_SPEED * i) / 4);
         radarContext.fillStyle = '#666';
         radarContext.font = '10px Inter';
         radarContext.textAlign = 'right';
-        radarContext.fillText(speed, centerX - 5, centerY - currentRadius + 12);
+        radarContext.fillText(speedLabel, centerX - 5, centerY - currentRadius + 12);
     }
     
     // Draw cardinal direction lines
@@ -712,39 +712,6 @@ function updateWindage(vehicleSpeed, vehicleHeading, windSpeed, windDirection) {
     drawLabel('RT', centerX + labelOffset, centerY);
     drawLabel('LT', centerX - labelOffset, centerY);
     
-    const windAngle = windDirection - vehicleHeading; // car frame
-    const windAngleRad = (90 - windAngle) * Math.PI / 180;
-
-    // Wind vector components in global frame
-    const windX = windSpeed * Math.cos(windAngleRad);
-    const windY = windSpeed * Math.sin(windAngleRad);
-    
-    // Sum the vectors to get relative wind (for radar plot)
-    const relativeWindX = windX;
-    const relativeWindY = windY - vehicleSpeed;
-    
-    // Calculate headwind and crosswind components
-    let headWind = null;
-    let crossWind = null;
-    if (vehicleSpeed > 1) {  // Threshold for meaningful motion
-        headWind = -windY;  // Negative when wind is coming from ahead
-        crossWind = windX;  // Positive when wind is coming from left
-    }
-    
-    // Update the wind component displays
-    if (headWind !== null) {
-        document.getElementById('headwind').innerText = Math.abs(Math.round(headWind))
-            + (headWind < 0 ? '▼' : '▲');
-    } else {
-        document.getElementById('headwind').innerText = '--';
-    }
-    if (crossWind !== null) {
-        document.getElementById('crosswind').innerText = Math.abs(Math.round(crossWind))
-            + (crossWind >= 0 ? '►' : '◄');
-    } else {
-        document.getElementById('crosswind').innerText = '--';
-    }
-    
     // Get the Tesla blue color from CSS
     const teslaBlue = getComputedStyle(document.documentElement).getPropertyValue('--tesla-blue').trim();
     
@@ -773,12 +740,42 @@ function updateWindage(vehicleSpeed, vehicleHeading, windSpeed, windDirection) {
         radarContext.stroke();
     }
     
-    // Draw relative wind vector with arrow
-    if (vehicleHeading) {
+    // Calculate headwind and crosswind components
+    let headWind = null;
+    let crossWind = null;
+    if (vehicleHeading) {  // Threshold for meaningful motion    
+        const windAngle = windDirection - vehicleHeading; // car frame
+        const windAngleRad = (90 - windAngle) * Math.PI / 180;
+
+        // Wind vector components in global frame
+        const windX = windSpeed * Math.cos(windAngleRad);
+        const windY = windSpeed * Math.sin(windAngleRad);
+    
+        // Sum the vectors to get relative wind (for radar plot)
+        const relativeWindX = windX;
+        const relativeWindY = windY - vehicleSpeed;
+    
+        headWind = -windY;  // Negative when wind is coming from ahead
+        crossWind = windX;  // Positive when wind is coming from left
+
         const windScale = Math.min(1, radius / MAX_SPEED);
         const relativeWindXPlot = centerX + relativeWindX * windScale;
         const relativeWindYPlot = centerY - relativeWindY * windScale;
         drawArrow(centerX, centerY, relativeWindXPlot, relativeWindYPlot, teslaBlue);
+    }
+
+    // Update the wind component displays
+    if (headWind !== null) {
+        document.getElementById('headwind').innerText = Math.abs(Math.round(headWind))
+            + (headWind < 0 ? '▼' : '▲');
+    } else {
+        document.getElementById('headwind').innerText = '--';
+    }
+    if (crossWind !== null) {
+        document.getElementById('crosswind').innerText = Math.abs(Math.round(crossWind))
+            + (crossWind >= 0 ? '►' : '◄');
+    } else {
+        document.getElementById('crosswind').innerText = '--';
     }
 }
 
@@ -859,7 +856,7 @@ function getTestModePosition() {
             altitude: testModeAlt * 0.3048, // Convert feet to meters
             speed: testModeSpeed * 0.44704, // Convert mph to m/s
             heading: heading,
-            accuracy: 5 // Simulate a good GPS signal with 5m accuracy
+            accuracy: 5, // Simulate a good GPS signal with 5m accuracy
         },
         timestamp: Date.now()
     };
@@ -871,8 +868,10 @@ function handlePositionUpdate(position) {
     alt = position.coords.altitude;
     acc = position.coords.accuracy;
     speed = position.coords.speed / 0.44704; // Convert m/s to mph
-    lastKnownHeading = position.coords.heading;
-    
+    if (position.coords.heading) {
+        lastKnownHeading = position.coords.heading;
+    }
+
     // Add new location point to buffer
     const newPoint = new LocationPoint(lat, long, alt, position.timestamp || Date.now());
     locationBuffer.push(newPoint);
@@ -892,6 +891,7 @@ function handlePositionUpdate(position) {
         }
     } else {
         document.getElementById('heading').innerText = '--';
+        updateWindage(0, 0, 0, 0);
     }
     
     // Update display values
