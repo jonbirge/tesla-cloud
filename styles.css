@@ -424,7 +424,7 @@ input:checked + .toggle-slider:before {
     flex-direction: column;
     align-items: left;
     min-width: 200px;
-    height: 150px; /* fixed height added */
+    height: 140px; /* fixed height added */
 }
 
 .value-container {
@@ -433,14 +433,14 @@ input:checked + .toggle-slider:before {
 }
 
 .stat-value {
-    font-size: 46pt;
+    font-size: 48pt;
     font-weight: 650;
     color: var(--button-text);
     display: inline;
 }
 
 .stat-unit {
-    font-size: 28pt;
+    font-size: 24pt;
     font-weight: 650;
     color: var(--text-color);
     display: inline;
@@ -448,7 +448,7 @@ input:checked + .toggle-slider:before {
 }
 
 .stat-label {
-    font-size: 12pt;
+    font-size: 13pt;
     color: var(--text-color);
     font-weight: 550;
     margin-top: 0px;
@@ -469,13 +469,14 @@ input:checked + .toggle-slider:before {
 /* Radar Display */
 .radar-container {
     position: relative;
-    width: 240px;
-    height: 240px;
+    width: 220px;
+    height: 220px;
+    padding-top: 32px; /* Added padding to push radar down */
 }
 
 .radar-title {
     position: absolute;
-    top: -30px;
+    top: 0px; /* Changed from -30px to 0px */
     left: 0;
     text-align: left;
     margin: 0;
