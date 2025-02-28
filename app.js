@@ -755,8 +755,8 @@ function updateWindage(vehicleSpeed, vehicleHeading, windSpeed, windDirection) {
         const relativeWindX = windX;
         const relativeWindY = windY - vehicleSpeed;
     
-        headWind = -windY;  // Negative when wind is coming from ahead
-        crossWind = windX;  // Positive when wind is coming from left
+        headWind = -windY;  // Will be negative if a tailwind
+        crossWind = windX;  // Will be positive if from the left
 
         const windScale = Math.min(1, radius / MAX_SPEED);
         const relativeWindXPlot = centerX + relativeWindX * windScale;
@@ -766,16 +766,18 @@ function updateWindage(vehicleSpeed, vehicleHeading, windSpeed, windDirection) {
 
     // Update the wind component displays
     if (headWind !== null) {
-        document.getElementById('headwind').innerText = Math.abs(Math.round(headWind))
-            + (headWind < 0 ? '▼' : '▲');
+        document.getElementById('headwind').innerText = Math.abs(Math.round(headWind));
+        document.getElementById('headwind-arrow').innerText = headWind > 0 ? '▼' : '▲';
     } else {
         document.getElementById('headwind').innerText = '--';
+        document.getElementById('headwind-arrow').innerText = '';
     }
     if (crossWind !== null) {
-        document.getElementById('crosswind').innerText = Math.abs(Math.round(crossWind))
-            + (crossWind >= 0 ? '►' : '◄');
+        document.getElementById('crosswind').innerText = Math.abs(Math.round(crossWind));
+        document.getElementById('crosswind-arrow').innerText = crossWind >= 0 ? '►' : '◄';
     } else {
         document.getElementById('crosswind').innerText = '--';
+        document.getElementById('crosswind-arrow').innerText = '';
     }
 }
 

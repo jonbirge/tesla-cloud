@@ -5,8 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>teslas.cloud (beta)</title>
     <link rel="icon" type="image/svg+xml" href="favicon.svg">
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <!-- <link rel="preconnect" href="https://fonts.googleapis.com" crossorigin>
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin> -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="styles.css?ver=17">
 </head>
@@ -95,19 +95,30 @@
                         </div>
                         <div class="nav-stats">
                             <div class="stat-box">
-                                <div class="stat-value" id="heading">--°</div>
-                                <div class="stat-label">HDG</div>
+                                <div class="value-container">
+                                    <div class="stat-value" id="heading">--°</div>
+                                </div>
+                                <div class="stat-label">HEADING</div>
                             </div>
                             <div class="stat-box">
-                                <div class="stat-value" id="altitude">--</div>
-                                <div class="stat-label">FEET ALT</div>
+                                <div class="value-container">
+                                    <div class="stat-value" id="altitude">--</div>
+                                    <div class="stat-unit" id="altitude-unit">FT</div>
+                                </div>
+                                <div class="stat-label">ALTITUDE</div>
                             </div>
                             <div class="stat-box">
-                                <div class="stat-value" id="headwind">--</div>
+                                <div class="value-container">
+                                    <div class="stat-value" id="headwind">--</div>
+                                    <div class="stat-unit" id="headwind-arrow"></div>
+                                </div>
                                 <div class="stat-label">MPH HEADWIND</div>
                             </div>
                             <div class="stat-box">
-                                <div class="stat-value" id="crosswind">--</div>
+                                <div class="value-container">
+                                    <div class="stat-value" id="crosswind">--</div>
+                                    <div class="stat-unit" id="crosswind-arrow"></div>
+                                </div>
                                 <div class="stat-label">MPH CROSSWIND</div>
                             </div>
                         </div>

@@ -86,7 +86,7 @@ li {
 
 .section {
     display: none;
-    /* padding-bottom: 30px; /* Add padding to the bottom of each section */
+    padding-bottom: 30px; /* Add padding to the bottom of each section */
 }
 
 /* Navigation */
@@ -231,7 +231,7 @@ li {
 
 .toggle-label {
     margin-right: 10px;
-    color: var(--active-section-text);
+    color: var(--text-color);
 }
 
 .toggle-switch {
@@ -419,15 +419,6 @@ input:checked + .toggle-slider:before {
 }
 
 /* Stats Display */
-.location-stats {
-    display: flex;
-    gap: 30px;
-    margin: 20px 0 30px 0;
-    padding: 15px 0;
-    justify-content: space-between;
-    max-width: 800px;
-}
-
 .stat-box {
     display: flex;
     flex-direction: column;
@@ -436,10 +427,24 @@ input:checked + .toggle-slider:before {
     height: 150px; /* fixed height added */
 }
 
+.value-container {
+    display: flex;
+    align-items: center; /* Vertically align items in container */
+}
+
 .stat-value {
     font-size: 46pt;
-    font-weight: 675;
+    font-weight: 650;
     color: var(--button-text);
+    display: inline;
+}
+
+.stat-unit {
+    font-size: 28pt;
+    font-weight: 650;
+    color: var(--text-color);
+    display: inline;
+    margin-left: 5px; /* Add some spacing between value and unit */
 }
 
 .stat-label {
@@ -447,11 +452,8 @@ input:checked + .toggle-slider:before {
     color: var(--text-color);
     font-weight: 550;
     margin-top: 0px;
-}
-
-.metric {
-    font-size: 14pt;
-    opacity: 0.7;
+    display: block; /* Ensure it's on its own line */
+    clear: both; /* Clear the float to ensure it appears below */
 }
 
 /* Utility Classes */
@@ -501,10 +503,6 @@ input:checked + .toggle-slider:before {
     grid-template-rows: repeat(2, auto);
     gap: 20px;
     width: 450px;
-}
-
-.altitude-display {
-    padding-top: 40px;
 }
 
 .teslawaze-container {
