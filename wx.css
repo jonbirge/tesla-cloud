@@ -73,7 +73,7 @@
 
 .forecast-day {
     flex: 1;
-    background-color: var(--active-section-bg);
+    background-color: var(--button-bg);
     border-radius: var(--button-radius);
     padding: 15px;
     text-align: center;
