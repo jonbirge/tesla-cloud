@@ -194,20 +194,26 @@ li {
 }
 
 .button-list a {
-    display: block;
-    padding: 24px;
+    display: flex;
+    padding-top: 24px;
+    padding-bottom: 24px;
     background-color: var(--button-bg);
     color: var(--button-text);
     text-decoration: none;
     border-radius: var(--button-radius);
     transition: background-color 0.3s;
-    text-align: center;
     width: auto;
     font-weight: 600;
     height: 40px; /* Adjust the height as needed */
-    display: flex;
     align-items: center;
     justify-content: center;
+    gap: 10px;
+}
+
+.button-list a img {
+    width: 24px;
+    height: 24px;
+    /* object-fit: contain; */
 }
 
 .ping-button {
