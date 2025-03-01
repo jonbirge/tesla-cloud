@@ -14,7 +14,7 @@
 }
 
 body.dark-mode {
-    --bg-color: #262626;
+    --bg-color: #202020;
     --text-color: #717171;
     --active-section-bg: #333333;
     --separator-color: #999999;
@@ -204,6 +204,10 @@ li {
     text-align: center;
     width: auto;
     font-weight: 600;
+    height: 40px; /* Adjust the height as needed */
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
 .ping-button {
@@ -218,6 +222,10 @@ li {
     cursor: pointer;
     margin-bottom: 20px;
     transition: background-color 0.3s;
+    height: 80px; /* Adjust the height as needed */
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
 /* Dark Mode Toggle */
