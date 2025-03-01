@@ -4,8 +4,16 @@ const UPDATE_DISTANCE_THRESHOLD = 1000; // meters
 const UPDATE_TIME_THRESHOLD = 60; // minutes
 const NEWS_REFRESH_INTERVAL = 5; // minutes
 const MAX_BUFFER_SIZE = 5;
-const OPENWX_API_KEY = '6a1b1bcb03b5718a9b3a2b108ce3293d';
 const GEONAMES_USERNAME = 'birgefuller';
+const MAX_SPEED = 50; // Maximum speed for radar display (mph)
+const TEST_CENTER_LAT = 39.7392; // Denver
+const TEST_CENTER_LONG = -104.9903; // Denver
+const TEST_CIRCLE_RADIUS = 1; // miles
+const TEST_MIN_SPEED = 55; // mph
+const TEST_MAX_SPEED = 75; // mph
+const TEST_MIN_ALT = 100;
+const TEST_MAX_ALT = 200;
+const OPENWX_API_KEY = '6a1b1bcb03b5718a9b3a2b108ce3293d';
 const SAT_URLS = {
     latest: 'https://cdn.star.nesdis.noaa.gov/GOES16/GLM/CONUS/EXTENT3/1250x750.jpg',
     loop: 'https://cdn.star.nesdis.noaa.gov/GOES16/GLM/CONUS/EXTENT3/GOES16-CONUS-EXTENT3-625x375.gif',
@@ -13,95 +21,33 @@ const SAT_URLS = {
 };
 
 // Global variables
+let driving_test_mode = false; // Set to true if test parameter exists
 let lastUpdate = 0;
 let neverUpdatedLocation = true;
 let lat = null;
 let long = null;
-let alt = null;
+//let alt = null;
 let lastUpdateLat = null;
 let lastUpdateLong = null;
-let sunrise = null;
-let sunset = null;
-let moonPhaseData = null;
+let lastKnownHeading = null;
 let pingChart = null;
 let pingInterval = null;
 let pingData = [];
+//let sunrise = null;
+//let sunset = null;
 let manualDarkMode = false;
 let darkOn = false;
 let locationTimeZone = null;
+let newsUpdateInterval = null;
+let testModeAngle = 0;
+let testModeSpeed = TEST_MIN_SPEED;
+let testModeAlt = TEST_MIN_ALT;
+let testModeSpeedIncreasing = true;
+let testModeAltIncreasing = true;
+let radarContext = null;
 let weatherData = null;
 let forecastFetched = false;
-let newsUpdateInterval = null;
-let forecastData = null; // Add this with other global variables at the top
-const locationBuffer = [];
-
-class LocationPoint {
-    constructor(lat, long, alt, timestamp) {
-        this.lat = lat;
-        this.long = long;
-        this.alt = alt;
-        this.timestamp = timestamp;
-    }
-}
-
-function estimateSpeed(p1, p2) {
-    const R = 6371e3; // Earth's radius in meters
-    const φ1 = p1.lat * Math.PI/180;
-    const φ2 = p2.lat * Math.PI/180;
-    const Δφ = (p2.lat - p1.lat) * Math.PI/180;
-    const Δλ = (p2.long - p1.long) * Math.PI/180;
-
-    // Haversine formula for distance
-    const a = Math.sin(Δφ/2) * Math.sin(Δφ/2) +
-            Math.cos(φ1) * Math.cos(φ2) *
-            Math.sin(Δλ/2) * Math.sin(Δλ/2);
-    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
-    const horizontalDist = R * c;
-
-    // Add vertical component if altitude is available
-    let verticalDist = 0;
-    if (p1.alt != null && p2.alt != null) {
-        verticalDist = p2.alt - p1.alt;
-    }
-
-    // Total 3D distance
-    const distance = Math.sqrt(horizontalDist * horizontalDist + verticalDist * verticalDist);
-    
-    // Time difference in seconds
-    const timeDiff = (p2.timestamp - p1.timestamp) / 1000;
-    
-    if (timeDiff === 0) return 0;
-    
-    // Speed in meters per second
-    const speedMS = distance / timeDiff;
-    // Convert to miles per hour
-    return speedMS * 2.237; // 2.237 is the conversion factor from m/s to mph
-}
-
-function calculateHeading(p1, p2) {
-    // Convert coordinates to radians
-    const lat1 = p1.lat * Math.PI / 180;
-    const lat2 = p2.lat * Math.PI / 180;
-    const dLon = (p2.long - p1.long) * Math.PI / 180;
-
-    // Calculate heading using great circle formula
-    const y = Math.sin(dLon) * Math.cos(lat2);
-    const x = Math.cos(lat1) * Math.sin(lat2) -
-            Math.sin(lat1) * Math.cos(lat2) * Math.cos(dLon);
-    let heading = Math.atan2(y, x) * 180 / Math.PI;
-    
-    // Normalize to 0-360°
-    heading = (heading + 360) % 360;
-    
-    return heading;
-}
-
-function getCardinalDirection(heading) {
-    const directions = ['N', 'NNE', 'NE', 'ENE', 'E', 'ESE', 'SE', 'SSE',
-                       'S', 'SSW', 'SW', 'WSW', 'W', 'WNW', 'NW', 'NNW'];
-    const index = Math.round(heading * 16 / 360) % 16;
-    return directions[index];
-}
+let forecastData = null;
 
 function toggleMode() {
     manualDarkMode = true;
@@ -137,13 +83,14 @@ function shouldUpdateLocationData() {
 }
 
 function fetchCityData(lat, long) {
-    // Proxy request to Geonames reverse geocoding API endpoint
     fetch(`https://secure.geonames.org/findNearbyPlaceNameJSON?lat=${lat}&lng=${long}&username=${GEONAMES_USERNAME}`)
         .then(response => response.json())
         .then(cityData => {
             const place = cityData.geonames && cityData.geonames[0];
             document.getElementById('city').innerText =
-                (place ? (place.name || 'N/A') + ', ' + (place.adminName1 || 'N/A') : 'N/A');
+                place ? (place.name || 'N/A') : 'N/A';
+            document.getElementById('state').innerText =
+                place ? (place.adminName1 || 'N/A') : 'N/A';
         })
         .catch(error => {
             console.error('Error fetching city data:', error);
@@ -159,58 +106,6 @@ async function fetchTimeZone(lat, long) {
         console.error('Error fetching time zone:', error);
         return 'UTC';
     }
-}
-
-function fetchSunData(lat, long) {
-    Promise.all([
-        fetch(`https://api.sunrise-sunset.org/json?lat=${lat}&lng=${long}&formatted=0`),
-        fetch(`https://api.farmsense.net/v1/moonphases/?d=${Math.floor(Date.now() / 1000)}`)
-    ])
-        .then(([sunResponse, moonResponse]) => Promise.all([sunResponse.json(), moonResponse.json()]))
-        .then(([sunData, moonData]) => {
-            // console.log('Sun data:', sunData);
-            sunrise = sunData.results.sunrise;
-            sunset = sunData.results.sunset;
-            moonPhaseData = moonData[0];
-            
-            const sunriseElements = document.querySelectorAll('[id="sunrise"]');
-            const sunsetElements = document.querySelectorAll('[id="sunset"]');
-            const moonphaseElements = document.querySelectorAll('[id="moonphase"]');
-            
-            sunriseElements.forEach(element => {
-                element.innerText = new Date(sunrise).toLocaleTimeString('en-US', {
-                    timeZone: locationTimeZone || 'UTC',
-                    timeZoneName: 'short'
-                });
-            });
-            sunsetElements.forEach(element => {
-                element.innerText = new Date(sunset).toLocaleTimeString('en-US', {
-                    timeZone: locationTimeZone || 'UTC',
-                    timeZoneName: 'short'
-                });
-            });
-            moonphaseElements.forEach(element => {
-                element.innerText = getMoonPhaseName(moonPhaseData.Phase);
-            });
-            
-            // Automatically apply dark mode based on the local time
-            updateAutoDarkMode();
-        })
-        .catch(error => {
-            console.error('Error fetching sun/moon data: ', error);
-        });
-}
-
-function getMoonPhaseName(phase) {
-    // Convert numerical phase to human-readable name
-    if (phase === 0 || phase === 1) return "New Moon";
-    if (phase < 0.25) return "Waxing Crescent";
-    if (phase === 0.25) return "First Quarter";
-    if (phase < 0.5) return "Waxing Gibbous";
-    if (phase === 0.5) return "Full Moon";
-    if (phase < 0.75) return "Waning Gibbous";
-    if (phase === 0.75) return "Last Quarter";
-    return "Waning Crescent";
 }
 
 function updateAutoDarkMode() {
@@ -433,183 +328,6 @@ function pingTestServer() {
         });
 }
 
-function switchWeatherImage(type) {
-    const weatherImage = document.getElementById('weather-image');
-    weatherImage.style.opacity = '0';
-    
-    setTimeout(() => {
-        weatherImage.src = SAT_URLS[type];
-        weatherImage.style.opacity = '1';
-    }, 300);
-    
-    // Update buttons and slider position
-    const weatherSwitch = document.querySelector('.weather-switch');
-    const buttons = weatherSwitch.getElementsByTagName('button');
-    buttons[0].classList.toggle('active', type === 'latest');
-    buttons[1].classList.toggle('active', type === 'loop');
-    buttons[2].classList.toggle('active', type === 'latest_ir');
-    
-    // Update slider position for three states
-    const positions = { 'latest': 0, 'loop': 1, 'latest_ir': 2 };
-    weatherSwitch.style.setProperty('--slider-position', positions[type]);
-}
-
-function fetchWeatherData(lat, long) {
-    console.log('Fetching weather data...');
-    Promise.all([
-        fetch(`https://secure.geonames.org/findNearByWeatherJSON?lat=${lat}&lng=${long}&username=birgefuller`),
-        !forecastFetched ? fetch(`https://api.openweathermap.org/data/2.5/forecast?lat=${lat}&lon=${long}&appid=${OPENWX_API_KEY}&units=imperial`) : Promise.resolve(null)
-    ])
-        .then(([currentResponse, forecastResponse]) => Promise.all([
-            currentResponse.json(),
-            forecastResponse ? forecastResponse.json() : null
-        ]))
-        .then(([currentData, forecastData]) => {
-            if (currentData.weatherObservation) {
-                weatherData = currentData.weatherObservation;
-                updateWeatherDisplay();
-            }
-            
-            if (forecastData && !forecastFetched) {
-                updateForecastDisplay(forecastData);
-                forecastFetched = true;
-            }
-        })
-        .catch(error => {
-            console.error('Error fetching weather data: ', error);
-        });
-}
-
-function hasHazards(forecastData) {
-    // Weather conditions that warrant an alert
-    const hazardConditions = ['Rain', 'Snow', 'Sleet', 'Hail', 'Thunderstorm', 'Storm', 'Drizzle'];
-    return forecastData.weather.some(w => 
-        hazardConditions.some(condition => 
-            w.main.includes(condition) || w.description.includes(condition.toLowerCase())
-        )
-    );
-}
-
-function updateForecastDisplay(data) {
-    const forecastDays = document.querySelectorAll('.forecast-day');
-    const dailyData = extractDailyForecast(data.list);
-    
-    dailyData.forEach((day, index) => {
-        if (index < forecastDays.length) {
-            const date = new Date(day.dt * 1000);
-            const dayElement = forecastDays[index];
-            
-            // Clear previous content
-            dayElement.innerHTML = '';
-            
-            // Add alert symbol if hazards detected
-            if (hasHazards(day)) {
-                const alert = document.createElement('div');
-                alert.className = 'forecast-alert';
-                alert.innerHTML = '⚠️';
-                dayElement.appendChild(alert);
-            }
-            
-            // Add the rest of the forecast content
-            dayElement.innerHTML += `
-                <div class="forecast-date">${date.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })}</div>
-                <img class="forecast-icon" src="https://openweathermap.org/img/wn/${day.weather[0].icon}@2x.png" alt="${day.weather[0].description}">
-                <div class="forecast-temp">${Math.round(day.temp_min)}°/${Math.round(day.temp_max)}°</div>
-                <div class="forecast-desc">${day.weather[0].main}</div>
-            `;
-        }
-    });
-}
-
-function extractDailyForecast(forecastList) {
-    forecastData = forecastList;
-    const dailyData = [];
-    const dayMap = new Map();
-    
-    forecastList.forEach(item => {
-        const date = new Date(item.dt * 1000).toDateString();
-        
-        if (!dayMap.has(date)) {
-            dayMap.set(date, {
-                dt: item.dt,
-                temp_min: item.main.temp_min,
-                temp_max: item.main.temp_max,
-                weather: [item.weather[0]]  // Initialize weather array
-            });
-        } else {
-            const existing = dayMap.get(date);
-            existing.temp_min = Math.min(existing.temp_min, item.main.temp_min);
-            existing.temp_max = Math.max(existing.temp_max, item.main.temp_max);
-            // Add weather condition if it's not already included
-            if (!existing.weather.some(w => w.main === item.weather[0].main)) {
-                existing.weather.push(item.weather[0]);
-            }
-        }
-    });
-    
-    dayMap.forEach(day => dailyData.push(day));
-    return dailyData.slice(0, 5);
-}
-
-function showHourlyForecast(dayIndex) {
-    if (!forecastData) return;
-
-    const startDate = new Date(forecastData[0].dt * 1000).setHours(0, 0, 0, 0);
-    const targetDate = new Date(startDate + dayIndex * 24 * 60 * 60 * 1000);
-    const endDate = new Date(targetDate).setHours(23, 59, 59, 999);
-
-    // Filter forecast data for the selected day
-    const hourlyData = forecastData.filter(item => {
-        const itemDate = new Date(item.dt * 1000);
-        return itemDate >= targetDate && itemDate <= endDate;
-    });
-
-    // Create the popup content
-    const popupDate = document.getElementById('popup-date');
-    popupDate.textContent = targetDate.toLocaleDateString('en-US', {
-        weekday: 'long',
-        month: 'long',
-        day: 'numeric'
-    });
-
-    const hourlyContainer = document.querySelector('.hourly-forecast');
-    hourlyContainer.innerHTML = hourlyData.map(item => {
-        const time = new Date(item.dt * 1000).toLocaleTimeString('en-US', {
-            hour: 'numeric',
-            minute: '2-digit'
-        });
-        return `
-            <div class="hourly-item">
-                <div class="hourly-time">${time}</div>
-                <img src="https://openweathermap.org/img/wn/${item.weather[0].icon}@2x.png" alt="${item.weather[0].description}" style="width: 50px; height: 50px;">
-                <div class="hourly-temp">${Math.round(item.main.temp)}°F</div>
-                <div class="hourly-desc">${item.weather[0].main}</div>
-            </div>
-        `;
-    }).join('');
-
-    // Show the popup and overlay
-    document.querySelector('.overlay').classList.add('show');
-    document.querySelector('.forecast-popup').classList.add('show');
-}
-
-function closeHourlyForecast() {
-    document.querySelector('.overlay').classList.remove('show');
-    document.querySelector('.forecast-popup').classList.remove('show');
-}
-
-function updateWeatherDisplay() {
-    if (!weatherData) return;
-
-    const windSpeedMS = weatherData.windSpeed;
-    const windSpeedMPH = (windSpeedMS * 2.237).toFixed(1); // Convert m/s to mph
-    const windDir = weatherData.windDirection;
-    const humidity = weatherData.humidity;
-
-    document.getElementById('humidity').innerText = `${humidity}%`;
-    document.getElementById('wind').innerText = `${windSpeedMPH} mph at ${windDir}°`;
-}
-
 function loadExternalUrl(url, inFrame = false) {
     // Open external links in a new tab
     if (!inFrame) {
@@ -652,6 +370,10 @@ async function updateNews() {
 
         const html = items.map(item => {
             const date = new Date(item.date * 1000);
+            const dateString = date.toLocaleDateString('en-US', { 
+                month: 'short', 
+                day: 'numeric'
+            });
             const timeString = date.toLocaleTimeString('en-US', { 
                 hour: 'numeric', 
                 minute: '2-digit',
@@ -662,7 +384,8 @@ async function updateNews() {
                 <button class="news-item" onclick="loadExternalUrl('${item.link}')">
                     <div>
                         <span class="news-source">${item.source.toUpperCase()}</span>
-                        <span class="news-date">${timeString}</span>
+                        <span class="news-date">${dateString}</span>
+                        <span class="news-time">${timeString}</span>
                     </div>
                     <div class="news-title">${item.title}</div>
                 </button>`;
@@ -676,7 +399,153 @@ async function updateNews() {
     }
 }
 
-async function updateLocationData() {
+function initializeRadar() {
+    const canvas = document.getElementById('radarDisplay');
+    if (canvas) {
+        radarContext = canvas.getContext('2d');
+        // Initial draw
+        updateWindage(0, null, 0, 0);
+    }
+}
+
+function updateWindage(vehicleSpeed, vehicleHeading, windSpeed, windDirection) {
+    if (!radarContext) return;
+
+    const canvas = radarContext.canvas;
+    const centerX = canvas.width / 2;
+    const centerY = canvas.height / 2;
+    const radius = Math.min(centerX, centerY) - 8;
+    
+    // Clear canvas with transparent background
+    radarContext.clearRect(0, 0, canvas.width, canvas.height);
+    
+    // Draw circular background
+    radarContext.beginPath();
+    radarContext.arc(centerX, centerY, radius, 0, 2 * Math.PI);
+    radarContext.strokeStyle = '#666';
+    radarContext.lineWidth = 1;
+    radarContext.stroke();
+    
+    // Draw concentric circles with speed labels
+    for (let i = 1; i <= 4; i++) {
+        const currentRadius = (radius * i) / 4;
+        radarContext.beginPath();
+        radarContext.arc(centerX, centerY, currentRadius, 0, 2*Math.PI);
+        radarContext.strokeStyle = '#666';
+        radarContext.setLineDash([2, 2]);
+        radarContext.stroke();
+        radarContext.setLineDash([]);
+        
+        // Add speed label
+        const speedLabel = Math.round((MAX_SPEED * i) / 4);
+        radarContext.fillStyle = '#666';
+        radarContext.font = '10px Inter';
+        radarContext.textAlign = 'right';
+        radarContext.fillText(speedLabel, centerX - 5, centerY - currentRadius + 12);
+    }
+    
+    // Draw cardinal direction lines
+    radarContext.beginPath();
+    radarContext.moveTo(centerX, centerY - radius);
+    radarContext.lineTo(centerX, centerY + radius);
+    radarContext.moveTo(centerX - radius, centerY);
+    radarContext.lineTo(centerX + radius, centerY);
+    radarContext.strokeStyle = '#666';
+    radarContext.stroke();
+    
+    // Draw direction labels with dark gray background for visibility
+    radarContext.fillStyle = '#666';
+    radarContext.font = '12px Inter';
+    radarContext.textAlign = 'center';
+    radarContext.textBaseline = 'middle';
+    
+    // Position labels with proper spacing and background
+    const labelOffset = radius - 5;
+    function drawLabel(text, x, y) {
+        const padding = 4;
+        const metrics = radarContext.measureText(text);
+        //const width = metrics.width + padding * 2;
+        //const height = 16;
+        
+        radarContext.fillStyle = '#666';
+        radarContext.fillText(text, x, y);
+    }
+    
+    drawLabel('FWD', centerX, centerY - labelOffset);
+    drawLabel('AFT', centerX, centerY + labelOffset);
+    drawLabel('RT', centerX + labelOffset, centerY);
+    drawLabel('LT', centerX - labelOffset, centerY);
+    
+    // Get the Tesla blue color from CSS
+    const teslaBlue = getComputedStyle(document.documentElement).getPropertyValue('--tesla-blue').trim();
+    
+    // Helper function to draw arrow
+    function drawArrow(fromX, fromY, toX, toY, color, headLength = 9) {
+        const angle = Math.atan2(toY - fromY, toX - fromX);
+        const headAngle = Math.PI / 6; // 30 degrees
+        
+        radarContext.beginPath();
+        radarContext.moveTo(fromX, fromY);
+        radarContext.lineTo(toX, toY);
+        
+        // Draw the arrow head
+        radarContext.lineTo(
+            toX - headLength * Math.cos(angle - headAngle),
+            toY - headLength * Math.sin(angle - headAngle)
+        );
+        radarContext.moveTo(toX, toY);
+        radarContext.lineTo(
+            toX - headLength * Math.cos(angle + headAngle),
+            toY - headLength * Math.sin(angle + headAngle)
+        );
+        
+        radarContext.strokeStyle = color;
+        radarContext.lineWidth = 3;
+        radarContext.stroke();
+    }
+    
+    // Calculate headwind and crosswind components and display on radar
+    let headWind = null;
+    let crossWind = null;
+    if (vehicleHeading) {  // Threshold for meaningful motion    
+        const windAngle = windDirection - vehicleHeading; // car frame
+        const windAngleRad = (90 - windAngle) * Math.PI / 180;
+
+        // Wind vector components in global frame
+        const windX = windSpeed * Math.cos(windAngleRad);
+        const windY = windSpeed * Math.sin(windAngleRad);
+    
+        // Sum the vectors to get relative wind (for radar plot)
+        const relativeWindX = windX;
+        const relativeWindY = windY;
+    
+        headWind = -windY;  // Will be negative if a tailwind
+        crossWind = windX;  // Will be positive if from the left
+
+        const windScale = radius / MAX_SPEED;
+        const relativeWindXPlot = centerX + relativeWindX * windScale;
+        const relativeWindYPlot = centerY - relativeWindY * windScale;
+        drawArrow(centerX, centerY, relativeWindXPlot, relativeWindYPlot, teslaBlue);
+    }
+
+    // Update the wind component displays
+    if (headWind !== null) {
+        document.getElementById('headwind').innerText = Math.abs(Math.round(headWind));
+        document.getElementById('headwind-arrow').innerText = (headWind > 0 ? '▼' : '▲');
+    } else {
+        document.getElementById('headwind').innerText = '--';
+        document.getElementById('headwind-arrow').innerText = '';
+    }
+    if (crossWind !== null) {
+        document.getElementById('crosswind').innerText = Math.abs(Math.round(crossWind));
+        document.getElementById('crosswind-arrow').innerText = (crossWind >= 0 ? '►' : '◄');
+    } else {
+        document.getElementById('crosswind').innerText = '--';
+        document.getElementById('crosswind-arrow').innerText = '';
+    }
+}
+
+async function updateLocationData(lat, long) {
     if (lat !== null && long !== null) {
         console.log('Updating location dependent data...');
         neverUpdatedLocation = false;
@@ -695,8 +564,8 @@ async function updateLocationData() {
             updateNetworkInfo();
         }
 
-        // Update Wikipedia data if the Location section is visible
-        const locationSection = document.getElementById("navigation");
+        // Update Wikipedia data if the Landmarks section is visible
+        const locationSection = document.getElementById("landmarks");
         if (locationSection.style.display === "block") {
             console.log('Updating Wikipedia data...');
             fetchWikipediaData(lat, long);
@@ -706,53 +575,106 @@ async function updateLocationData() {
     }
 }
 
-function updateLatLong() {
-    if (navigator.geolocation) {
-        navigator.geolocation.getCurrentPosition((position) => {
-            lat = position.coords.latitude;
-            long = position.coords.longitude;
-            alt = position.coords.altitude;  // altitude in meters
-            
-            // Add new location point to buffer
-            const newPoint = new LocationPoint(lat, long, alt, Date.now());
-            locationBuffer.push(newPoint);
-            if (locationBuffer.length > MAX_BUFFER_SIZE) {
-                locationBuffer.shift(); // Remove oldest point
-            }
-            
-            // Calculate speed and heading if we have enough points
-            if (locationBuffer.length >= 2) {
-                const oldestPoint = locationBuffer[0];
-                const speed = estimateSpeed(oldestPoint, newPoint);
-                const heading = calculateHeading(oldestPoint, newPoint);
-                const cardinal = getCardinalDirection(heading);
-                
-                document.getElementById('speed').innerText = `${speed.toFixed(0)}`;
-                document.getElementById('heading').innerText = `${heading.toFixed(0)}°`;
-            }
-
-            // Check if we should update location-dependent data
-            if (shouldUpdateLocationData()) {
-                console.log('Location changed significantly or time threshold reached, updating dependent data...');
-                updateLocationData();
-                lastUpdateLat = lat;
-                lastUpdateLong = long;
-                lastUpdate = Date.now();
-            }
-            
-            document.getElementById('latitude').innerText = lat.toFixed(4) + '°';
-            document.getElementById('longitude').innerText = long.toFixed(4) + '°';
-
-            // Update altitude in feet
-            if (alt) {
-                const altFt = (alt * 3.28084).toFixed(0);
-                document.getElementById('altitude-imperial').innerText = altFt;
-            } else {
-                document.getElementById('altitude-imperial').innerText = '--';
-            }
-        });
+function getTestModePosition() {
+    // Calculate new position based on angle
+    const radiusInDegrees = TEST_CIRCLE_RADIUS / 69; // Rough conversion from miles to degrees
+    const testLat = TEST_CENTER_LAT + radiusInDegrees * Math.cos(testModeAngle);
+    const testLong = TEST_CENTER_LONG + radiusInDegrees * Math.sin(testModeAngle);
+    
+    // Update angle for next time (move about 1 degree per second at 40mph)
+    const angleIncrement = (testModeSpeed / (2 * Math.PI * TEST_CIRCLE_RADIUS)) * (2 * Math.PI) / (60 * 60);
+    testModeAngle = (testModeAngle + angleIncrement) % (2 * Math.PI);
+    
+    // Update speed (oscillate between min and max)
+    if (testModeSpeedIncreasing) {
+        testModeSpeed += 0.1;
+        if (testModeSpeed >= TEST_MAX_SPEED) {
+            testModeSpeedIncreasing = false;
+        }
     } else {
-        console.log('Geolocation is not supported by this browser.');
+        testModeSpeed -= 0.1;
+        if (testModeSpeed <= TEST_MIN_SPEED) {
+            testModeSpeedIncreasing = true;
+        }
+    }
+    
+    // Update altitude (oscillate between min and max)
+    if (testModeAltIncreasing) {
+        testModeAlt += 0.5;
+        if (testModeAlt >= TEST_MAX_ALT) {
+            testModeAltIncreasing = false;
+        }
+    } else {
+        testModeAlt -= 0.5;
+        if (testModeAlt <= TEST_MIN_ALT) {
+            testModeAltIncreasing = true;
+        }
+    }
+
+    // Calculate heading based on movement around the circle
+    // We add 90 degrees because moving east is 90° and we start heading east when angle is 0
+    const heading = (((testModeAngle * 180 / Math.PI) + 90) % 360);
+
+    return {
+        coords: {
+            latitude: testLat,
+            longitude: testLong,
+            altitude: testModeAlt * 0.3048, // Convert feet to meters
+            speed: testModeSpeed * 0.44704, // Convert mph to m/s
+            heading: heading,
+            accuracy: 5, // Simulate a good GPS signal with 5m accuracy
+        },
+        timestamp: Date.now()
+    };
+}
+
+function handlePositionUpdate(position) {
+    lat = position.coords.latitude;
+    long = position.coords.longitude;
+    alt = position.coords.altitude;
+    acc = position.coords.accuracy;
+    speed = position.coords.speed / 0.44704; // Convert m/s to mph
+    if (position.coords.heading) {
+        lastKnownHeading = position.coords.heading;
+    }
+    
+    // Update radar display with current speed and heading
+    if (lastKnownHeading) {
+        document.getElementById('heading').innerText = Math.round(lastKnownHeading) + '°';
+        if (weatherData) {
+            const windSpeedMPH = Math.min((weatherData.windSpeed * 2.237), MAX_SPEED);
+            const windDir = weatherData.windDirection;
+            updateWindage(speed, lastKnownHeading, windSpeedMPH, windDir);
+        } else {
+            updateWindage(speed, lastKnownHeading, 0, 0);
+        }
+    } else {
+        document.getElementById('heading').innerText = '--';
+        updateWindage(0, null, 0, 0);
+    }
+    
+    // Update display values
+    document.getElementById('altitude').innerText = alt ? Math.round(alt * 3.28084) : '--'; // Convert meters to feet
+    document.getElementById('accuracy').innerText = acc ? Math.round(acc) + ' m' : '--';
+    
+    // Check if we should update location-dependent data
+    if (shouldUpdateLocationData()) {
+        updateLocationData(lat, long);
+        lastUpdateLat = lat;
+        lastUpdateLong = long;
+        lastUpdate = Date.now();
+    }
+}
+
+function updateGPS() {
+    if (!driving_test_mode) {
+        if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition(handlePositionUpdate);
+        } else {
+            console.log('Geolocation is not supported by this browser.');
+        }
+    } else { // testing
+        handlePositionUpdate(getTestModePosition());
     }
 }
 
@@ -762,6 +684,7 @@ function getInitialSection() {
     return params.get('section') || 'news';  // default to navigation if no parameter
 }
 
+// Show a specific section and update URL
 function showSection(sectionId) {
     // Log the clicked section
     console.log(`Showing section: ${sectionId}`);
@@ -835,7 +758,7 @@ function showSection(sectionId) {
             updateNetworkInfo();
         }
         
-        if (sectionId === 'navigation') {
+        if (sectionId === 'landmarks') {
             if (lat !== null && long !== null) {
                 fetchWikipediaData(lat, long);
             } else {
@@ -853,7 +776,10 @@ function showSection(sectionId) {
 
 // ***** Main code *****
 
-// Set up event listeners
+// Check for test parameter in URL
+const urlParams = new URLSearchParams(window.location.search);
+const testParam = urlParams.get('test');
+driving_test_mode = testParam !== null;
 
 // Update link click event listener
 document.addEventListener('click', function(e) {
@@ -868,8 +794,8 @@ document.addEventListener('click', function(e) {
 document.querySelector('.overlay').addEventListener('click', closeHourlyForecast);
 
 // Update location frequently but only trigger dependent updates when moved significantly
-updateLatLong();
-setInterval(updateLatLong, 1000*LATLON_UPDATE_INTERVAL);
+updateGPS();
+setInterval(updateGPS, 1000*LATLON_UPDATE_INTERVAL);
 
 // Show the initial section from URL parameter
 showSection(getInitialSection());
@@ -878,3 +804,5 @@ showSection(getInitialSection());
 window.addEventListener('popstate', () => {
     showSection(getInitialSection());
 });
+
+initializeRadar();
