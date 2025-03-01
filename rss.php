@@ -1,7 +1,7 @@
 <?php
 
 // Cache duration in seconds
-$cacheDuration = 300;
+$cacheDuration = 30;
 $cacheFile = '/tmp/rss_cache.json';
 $cacheTimestampFile = '/tmp/rss_cache_timestamp';
 
@@ -33,6 +33,16 @@ $feeds = [
     'teslarumors' => 'https://teslarumors.com/feed/',
     'notatesla' => 'https://notateslaapp.com/feed/',
     'tesla' => 'https://www.tesla.com/rss/blog',
+    'theverge' => 'https://www.theverge.com/rss/transportation/index.xml',
+    'techcrunch' => 'https://techcrunch.com/transportation/feed/',
+    'jalopnik' => 'https://jalopnik.com/rss',
+    'bloomberg_tech' => 'https://www.bloomberg.com/feeds/technology.rss',
+    'bloomberg' => 'https://www.bloomberg.com/feeds/sitemap_news.xml',
+    'reuters' => 'https://www.reuters.com/arc/outboundfeeds/reuters-news/main/',
+    'ap' => 'https://feeds.feedburner.com/breaking-news/',
+    'bbc' => 'http://feeds.bbci.co.uk/news/world/rss.xml',
+    'economist' => 'https://www.economist.com/rss',
+    'thedrive' => 'https://www.thedrive.com/feed'
 ];
 
 function fetchRSS($url) {
