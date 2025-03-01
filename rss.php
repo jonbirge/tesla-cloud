@@ -10,9 +10,8 @@ header('Content-Type: application/json');
 // Check if reload parameter is set to bypass cache
 $forceReload = isset($_GET['reload']);
 
-// Get number of stories to return (default: 15)
+// Get number of stories to return
 $numStories = isset($_GET['n']) ? intval($_GET['n']) : 25;
-// Ensure reasonable limits
 $numStories = max(1, min(50, $numStories));
 
 // Check if cache exists and is fresh (unless forced reload is requested)
