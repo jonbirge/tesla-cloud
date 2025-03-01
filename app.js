@@ -59,13 +59,6 @@ class LocationPoint {
     }
 }
 
-function getCardinalDirection(heading) {
-    const directions = ['N', 'NNE', 'NE', 'ENE', 'E', 'ESE', 'SE', 'SSE',
-                       'S', 'SSW', 'SW', 'WSW', 'W', 'WNW', 'NW', 'NNW'];
-    const index = Math.round(heading * 16 / 360) % 16;
-    return directions[index];
-}
-
 function toggleMode() {
     manualDarkMode = true;
     document.body.classList.toggle('dark-mode');

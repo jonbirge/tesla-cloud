@@ -228,6 +228,16 @@ li {
     justify-content: center;
 }
 
+/* Utility Classes */
+.section {
+    display: none;
+    padding-bottom: 30px; /* Add padding to the bottom of each section */
+}
+
+.hidden {
+    display: none;
+}
+
 /* Dark Mode Toggle */
 .toggle-container {
     position: fixed;
@@ -315,6 +325,106 @@ input:checked + .toggle-slider:before {
     margin-bottom: 6px;
 }
 
+/* Stats Display */
+.stat-box {
+    display: flex;
+    flex-direction: column;
+    align-items: left;
+    min-width: 200px;
+    height: 140px; /* fixed height added */
+}
+
+.value-container {
+    display: flex;
+    align-items: center; /* Vertically align items in container */
+}
+
+.stat-value {
+    font-size: 48pt;
+    font-weight: 650;
+    color: var(--button-text);
+    display: inline;
+}
+
+.stat-unit {
+    font-size: 24pt;
+    font-weight: 650;
+    color: var(--text-color);
+    display: inline;
+    margin-left: 5px; /* Add some spacing between value and unit */
+}
+
+.stat-label {
+    font-size: 13pt;
+    color: var(--text-color);
+    font-weight: 550;
+    margin-top: 0px;
+    display: block; /* Ensure it's on its own line */
+    clear: both; /* Clear the float to ensure it appears below */
+}
+
+/* Dashboard Display */
+.radar-container {
+    position: relative;
+    width: 180px;
+    height: 180px;
+    padding-top: 30px; /* Added padding to push radar down */
+    margin-right: 30px;
+}
+
+.radar-title {
+    position: absolute;
+    top: 0px; /* Changed from -30px to 0px */
+    left: 0;
+    text-align: center;
+    margin: 0;
+}
+
+#radarDisplay {
+    border-radius: 50%;
+    background-color: rgba(0, 0, 0, 0.1);
+}
+
+.dark-mode #radarDisplay {
+    background-color: rgba(255, 255, 255, 0.1);
+}
+
+.nav-container {
+    display: flex;
+    gap: 50px;
+    margin: 30px 0px -25px 0px;
+    align-items: flex-start;
+}
+
+.nav-stats {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    grid-template-rows: repeat(2, auto);
+    gap: 10px 0 0 0;
+    width: 400px;
+}
+
+.nav-info {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    min-width: 220px;
+}
+
+.teslawaze-container {
+    height: calc(100vh - 270px);
+    min-height: 400px;
+    margin-top: 20px;
+    width: 100%;
+}
+
+#teslawaze {
+    width: 100%;
+    height: 100%;
+    border: none;
+    border-radius: var(--button-radius);
+}
+
 /* News Elements */
 .news-headlines {
     margin: 20px 0;
@@ -367,114 +477,4 @@ input:checked + .toggle-slider:before {
     color: var(--button-text);
     font-size: 15pt;
     font-weight: 625;
-}
-
-/* Stats Display */
-.stat-box {
-    display: flex;
-    flex-direction: column;
-    align-items: left;
-    min-width: 200px;
-    height: 140px; /* fixed height added */
-}
-
-.value-container {
-    display: flex;
-    align-items: center; /* Vertically align items in container */
-}
-
-.stat-value {
-    font-size: 48pt;
-    font-weight: 650;
-    color: var(--button-text);
-    display: inline;
-}
-
-.stat-unit {
-    font-size: 24pt;
-    font-weight: 650;
-    color: var(--text-color);
-    display: inline;
-    margin-left: 5px; /* Add some spacing between value and unit */
-}
-
-.stat-label {
-    font-size: 13pt;
-    color: var(--text-color);
-    font-weight: 550;
-    margin-top: 0px;
-    display: block; /* Ensure it's on its own line */
-    clear: both; /* Clear the float to ensure it appears below */
-}
-
-/* Utility Classes */
-.section {
-    display: none;
-    padding-bottom: 30px; /* Add padding to the bottom of each section */
-}
-
-.hidden {
-    display: none;
-}
-
-/* Dashboard Display */
-.radar-container {
-    position: relative;
-    width: 180px;
-    height: 180px;
-    padding-top: 30px; /* Added padding to push radar down */
-    margin-right: 30px;
-}
-
-.radar-title {
-    position: absolute;
-    top: 0px; /* Changed from -30px to 0px */
-    left: 0;
-    text-align: center;
-    margin: 0;
-}
-
-#radarDisplay {
-    border-radius: 50%;
-    background-color: rgba(0, 0, 0, 0.1);
-}
-
-.dark-mode #radarDisplay {
-    background-color: rgba(255, 255, 255, 0.1);
-}
-
-.nav-container {
-    display: flex;
-    gap: 50px;
-    margin: 30px 0px -30px 0px;
-    align-items: flex-start;
-}
-
-.nav-stats {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    grid-template-rows: repeat(2, auto);
-    gap: 10px 0 0 0;
-    width: 400px;
-}
-
-.nav-info {
-    display: flex;
-    flex-direction: column;
-    gap: 20px;
-    min-width: 220px;
-}
-
-.teslawaze-container {
-    height: calc(100vh - 270px);
-    min-height: 400px;
-    margin-top: 20px;
-    width: 100%;
-}
-
-#teslawaze {
-    width: 100%;
-    height: 100%;
-    border: none;
-    border-radius: var(--button-radius);
 }
