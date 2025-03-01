@@ -387,6 +387,10 @@ async function updateNews() {
 
         const html = items.map(item => {
             const date = new Date(item.date * 1000);
+            const dateString = date.toLocaleDateString('en-US', { 
+                month: 'short', 
+                day: 'numeric'
+            });
             const timeString = date.toLocaleTimeString('en-US', { 
                 hour: 'numeric', 
                 minute: '2-digit',
@@ -397,7 +401,8 @@ async function updateNews() {
                 <button class="news-item" onclick="loadExternalUrl('${item.link}')">
                     <div>
                         <span class="news-source">${item.source.toUpperCase()}</span>
-                        <span class="news-date">${timeString}</span>
+                        <span class="news-date">${dateString}</span>
+                        <span class="news-time">${timeString}</span>
                     </div>
                     <div class="news-title">${item.title}</div>
                 </button>`;

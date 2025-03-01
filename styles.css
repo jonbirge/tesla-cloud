@@ -351,6 +351,14 @@ input:checked + .toggle-slider:before {
 .news-date {
     color: var(--text-color);
     font-size: 12pt;
+    display: inline-block;
+}
+
+.news-time {
+    color: var(--text-color);
+    font-size: 12pt;
+    margin-left: 5px;
+    display: inline-block;
 }
 
 .news-title {
