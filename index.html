@@ -5,17 +5,15 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>teslas.cloud (beta)</title>
     <link rel="icon" type="image/svg+xml" href="favicon.svg">
-    <!-- <link rel="preconnect" href="https://fonts.googleapis.com" crossorigin>
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin> -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" crossorigin>
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="styles.css?ver=17">
 </head>
 
 <body>
     <!-- Include SVG sprite inline at the beginning of body for better browser compatibility -->
-    <div style="display: none;">
-        <!-- SVG sprite will be loaded via JavaScript -->
-    </div>
+    <div style="display: none;"></div>
     
     <div class="frame-container">
         <div class="left-frame">
@@ -122,19 +120,19 @@
                                 <div class="stat-label">MPH CROSSWIND</div>
                             </div>
                         </div>
-                    </div>
-                    <div class="data-info">
-                        <div class="data-item">
-                            <h2>Location</h2>
-                            <span id="latitude">--</span>, <span id="longitude">--</span>
-                        </div>
-                        <div class="data-item">
-                            <h2>Nearest City</h2>
-                            <span id="city">N/A</span>
-                        </div>
-                        <div class="data-item">
-                            <h2>GPS Accuracy</h2>
-                            <span id="accuracy">--</span>
+                        <div class="nav-info">
+                            <div class="data-item">
+                                <h2>City</h2>
+                                <span id="city">N/A</span>
+                            </div>
+                            <div class="data-item">
+                                <h2>State</h2>
+                                <span id="state">N/A</span>
+                            </div>
+                            <div class="data-item">
+                                <h2>Accuracy</h2>
+                                <span id="accuracy">--</span>
+                            </div>
                         </div>
                     </div>
                     <hr>

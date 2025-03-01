@@ -285,13 +285,14 @@ function shouldUpdateLocationData() {
 }
 
 function fetchCityData(lat, long) {
-    // Proxy request to Geonames reverse geocoding API endpoint
     fetch(`https://secure.geonames.org/findNearbyPlaceNameJSON?lat=${lat}&lng=${long}&username=${GEONAMES_USERNAME}`)
         .then(response => response.json())
         .then(cityData => {
             const place = cityData.geonames && cityData.geonames[0];
             document.getElementById('city').innerText =
-                (place ? (place.name || 'N/A') + ', ' + (place.adminName1 || 'N/A') : 'N/A');
+                place ? (place.name || 'N/A') : 'N/A';
+            document.getElementById('state').innerText =
+                place ? (place.adminName1 || 'N/A') : 'N/A';
         })
         .catch(error => {
             console.error('Error fetching city data:', error);
@@ -640,7 +641,7 @@ function initializeRadar() {
     if (canvas) {
         radarContext = canvas.getContext('2d');
         // Initial draw
-        updateWindage(0, 0, 0, 0);
+        updateWindage(0, null, 0, 0);
     }
 }
 
@@ -736,7 +737,7 @@ function updateWindage(vehicleSpeed, vehicleHeading, windSpeed, windDirection) {
         );
         
         radarContext.strokeStyle = color;
-        radarContext.lineWidth = 2;
+        radarContext.lineWidth = 3;
         radarContext.stroke();
     }
     
@@ -781,7 +782,7 @@ function updateWindage(vehicleSpeed, vehicleHeading, windSpeed, windDirection) {
     }
 }
 
-async function updateLocationData() {
+async function updateLocationData(lat, long) {
     if (lat !== null && long !== null) {
         console.log('Updating location dependent data...');
         neverUpdatedLocation = false;
@@ -893,18 +894,16 @@ function handlePositionUpdate(position) {
         }
     } else {
         document.getElementById('heading').innerText = '--';
-        updateWindage(0, 0, 0, 0);
+        updateWindage(0, null, 0, 0);
     }
     
     // Update display values
-    document.getElementById('latitude').innerText = lat.toFixed(4) + '°';
-    document.getElementById('longitude').innerText = long.toFixed(4) + '°';
     document.getElementById('altitude').innerText = alt ? Math.round(alt * 3.28084) : '--'; // Convert meters to feet
     document.getElementById('accuracy').innerText = acc ? Math.round(acc) + ' m' : '--';
     
     // Check if we should update location-dependent data
     if (shouldUpdateLocationData()) {
-        updateLocationData();
+        updateLocationData(lat, long);
         lastUpdateLat = lat;
         lastUpdateLong = long;
         lastUpdate = Date.now();

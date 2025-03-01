@@ -466,19 +466,20 @@ input:checked + .toggle-slider:before {
     display: none;
 }
 
-/* Radar Display */
+/* Dashboard Display */
 .radar-container {
     position: relative;
-    width: 220px;
-    height: 220px;
-    padding-top: 32px; /* Added padding to push radar down */
+    width: 180px;
+    height: 180px;
+    padding-top: 30px; /* Added padding to push radar down */
+    margin-right: 30px;
 }
 
 .radar-title {
     position: absolute;
     top: 0px; /* Changed from -30px to 0px */
     left: 0;
-    text-align: left;
+    text-align: center;
     margin: 0;
 }
 
@@ -493,8 +494,8 @@ input:checked + .toggle-slider:before {
 
 .nav-container {
     display: flex;
-    gap: 60px;
-    margin: 40px 0 20px;
+    gap: 50px;
+    margin: 30px 0px -30px 0px;
     align-items: flex-start;
 }
 
@@ -502,8 +503,15 @@ input:checked + .toggle-slider:before {
     display: grid;
     grid-template-columns: repeat(2, 1fr);
     grid-template-rows: repeat(2, auto);
+    gap: 10px 0 0 0;
+    width: 400px;
+}
+
+.nav-info {
+    display: flex;
+    flex-direction: column;
     gap: 20px;
-    width: 450px;
+    min-width: 220px;
 }
 
 .teslawaze-container {
