@@ -1,7 +1,7 @@
 <?php
 
 // Cache duration in seconds
-$cacheDuration = 30;
+$cacheDuration = 600;
 $cacheFile = '/tmp/rss_cache.json';
 $cacheTimestampFile = '/tmp/rss_cache_timestamp';
 
@@ -11,7 +11,7 @@ header('Content-Type: application/json');
 $forceReload = isset($_GET['reload']);
 
 // Get number of stories to return
-$numStories = isset($_GET['n']) ? intval($_GET['n']) : 25;
+$numStories = isset($_GET['n']) ? intval($_GET['n']) : 30;
 $numStories = max(1, min(50, $numStories));
 
 // Check if cache exists and is fresh (unless forced reload is requested)
@@ -27,22 +27,19 @@ if (!$forceReload && file_exists($cacheFile) && file_exists($cacheTimestampFile)
 $feeds = [
     'wsj' => 'https://feeds.content.dowjones.io/public/rss/RSSWorldNews',
     'nyt' => 'https://rss.nytimes.com/services/xml/rss/nyt/HomePage.xml',
-    'electrek' => 'https://electrek.co/feed/',
-    'teslarati' => 'https://www.teslarati.com/feed/',
-    'insideevs' => 'https://insideevs.com/rss/articles/all/',
-    'teslarumors' => 'https://teslarumors.com/feed/',
-    'notatesla' => 'https://notateslaapp.com/feed/',
-    'tesla' => 'https://www.tesla.com/rss/blog',
-    'theverge' => 'https://www.theverge.com/rss/transportation/index.xml',
-    'techcrunch' => 'https://techcrunch.com/transportation/feed/',
-    'jalopnik' => 'https://jalopnik.com/rss',
-    'bloomberg_tech' => 'https://www.bloomberg.com/feeds/technology.rss',
-    'bloomberg' => 'https://www.bloomberg.com/feeds/sitemap_news.xml',
-    'reuters' => 'https://www.reuters.com/arc/outboundfeeds/reuters-news/main/',
-    'ap' => 'https://feeds.feedburner.com/breaking-news/',
     'bbc' => 'http://feeds.bbci.co.uk/news/world/rss.xml',
-    'economist' => 'https://www.economist.com/rss',
-    'thedrive' => 'https://www.thedrive.com/feed'
+    'thedrive' => 'https://www.thedrive.com/feed',
+    'bloomberg-tech' => 'https://feeds.bloomberg.com/technology/news.rss',
+    'bloomberg' => 'https://feeds.bloomberg.com/news.rss',
+    'wapo' => 'https://feeds.washingtonpost.com/rss/national',
+    'notateslaapp' => 'https://www.notateslaapp.com/rss',
+    'teslarati' => 'https://www.teslarati.com/feed/',
+    'toc' => 'https://teslamotorsclub.com/tmc/forums/-/index.rss',
+    // 'electrek' => 'https://electrek.co/feed/',
+    // 'insideevs' => 'https://insideevs.com/rss/articles/all/',
+    // 'theverge' => 'https://www.theverge.com/rss/transportation/index.xml',
+    // 'techcrunch' => 'https://techcrunch.com/transportation/feed/',
+    // 'jalopnik' => 'https://jalopnik.com/rss',
 ];
 
 function fetchRSS($url) {
@@ -50,7 +47,16 @@ function fetchRSS($url) {
     curl_setopt($ch, CURLOPT_URL, $url);
     curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
     curl_setopt($ch, CURLOPT_TIMEOUT, 10);
+    curl_setopt($ch, CURLOPT_USERAGENT, 'Mozilla/5.0 (compatible; RSS Reader Bot/1.0)');
+    curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
     $response = curl_exec($ch);
+    
+    if (curl_errno($ch)) {
+        error_log("RSS Feed Error: " . curl_error($ch) . " - URL: " . $url);
+        curl_close($ch);
+        return false;
+    }
+    
     curl_close($ch);
     return $response;
 }
@@ -60,14 +66,83 @@ function parseRSS($xml, $source) {
     if (!$feed) return [];
 
     $items = [];
-    foreach ($feed->channel->item as $item) {
-        $pubDate = strtotime($item->pubDate);
+    
+    // Handle different RSS feed structures
+    $feedItems = null;
+    if (isset($feed->channel) && isset($feed->channel->item)) {
+        $feedItems = $feed->channel->item;  // Standard RSS format
+    } elseif (isset($feed->entry)) {
+        $feedItems = $feed->entry;  // Atom format
+    } elseif (isset($feed->item)) {
+        $feedItems = $feed->item;   // Some non-standard RSS variants
+    }
+    
+    if (!$feedItems) return [];
+    
+    foreach ($feedItems as $item) {
+        // Try to find the publication date in various formats
+        $pubDate = null;
+        $dateString = null;
+        
+        // Check for different date fields
+        if (isset($item->pubDate)) {
+            $dateString = (string)$item->pubDate;
+        } elseif (isset($item->published)) {
+            $dateString = (string)$item->published;
+        } elseif (isset($item->updated)) {
+            $dateString = (string)$item->updated;
+        } elseif (isset($item->children('dc', true)->date)) {
+            $dateString = (string)$item->children('dc', true)->date;
+        }
+        
+        if ($dateString) {
+            // Try to parse the date
+            $pubDate = strtotime($dateString);
+            
+            // If parsing failed, try to reformat common date patterns
+            if ($pubDate === false) {
+                // Try ISO 8601 format (remove milliseconds if present)
+                if (preg_match('/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}/', $dateString)) {
+                    $cleaned = preg_replace('/\.\d+/', '', $dateString);
+                    $pubDate = strtotime($cleaned);
+                }
+                
+                // Try common RFC formats with missing timezone
+                if ($pubDate === false && preg_match('/^\w+, \d+ \w+ \d+$/', $dateString)) {
+                    $pubDate = strtotime($dateString . " 00:00:00 +0000");
+                }
+                
+                // Last resort: use current time
+                if ($pubDate === false) {
+                    error_log("Failed to parse date: {$dateString} from source: {$source}");
+                    $pubDate = time();
+                }
+            }
+        } else {
+            // If no date is found, use current time
+            $pubDate = time();
+        }
+        
+        // Find the link (which could be in different formats)
+        $link = "";
+        if (isset($item->link)) {
+            if (is_object($item->link) && isset($item->link['href'])) {
+                $link = (string)$item->link['href']; // Atom format
+            } else {
+                $link = (string)$item->link; // RSS format
+            }
+        }
+        
+        // Find the title
+        $title = isset($item->title) ? (string)$item->title : "No Title";
+        
         $items[] = [
-            'title' => (string)$item->title,
-            'link' => (string)$item->link,
+            'title' => $title,
+            'link' => $link,
             'date' => $pubDate,
             'source' => $source
         ];
+        
         if (count($items) >= 5) break; // Only get first 5 items
     }
     return $items;
@@ -76,8 +151,10 @@ function parseRSS($xml, $source) {
 $allItems = [];
 foreach ($feeds as $source => $url) {
     $xml = fetchRSS($url);
-    $items = parseRSS($xml, $source);
-    $allItems = array_merge($allItems, $items);
+    if ($xml !== false) {
+        $items = parseRSS($xml, $source);
+        $allItems = array_merge($allItems, $items);
+    }
 }
 
 // Sort by date, newest first
