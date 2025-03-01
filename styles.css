@@ -1,7 +1,7 @@
 /* Root Variables */
 :root {
     --bg-color: #eeeeee;
-    --text-color: #9f9f9f;
+    --text-color: #999999;
     --active-section-bg: white;
     --separator-color: #cccccc;
     --button-text: #545454;
@@ -204,13 +204,15 @@ li {
 }
 
 .button-list a {
+    background-color: var(--button-bg);
+    color: var(--button-text);
+    border-radius: var(--button-radius);
     display: flex;
     padding-top: 24px;
     padding-bottom: 24px;
-    background-color: var(--button-bg);
-    color: var(--button-text);
+    padding-left: 9px;
+    padding-right: 9px;
     text-decoration: none;
-    border-radius: var(--button-radius);
     transition: background-color 0.3s;
     width: auto;
     font-weight: 600;
@@ -218,6 +220,7 @@ li {
     align-items: center;
     justify-content: center;
     gap: 10px;
+    text-align: center; /* Add this line to center the text */
 }
 
 .button-list a img {
