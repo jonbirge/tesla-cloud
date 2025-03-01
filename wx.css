@@ -63,6 +63,7 @@
     opacity: 1;
 }
 
+/* Weather Forecast */
 .forecast-container {
     display: flex;
     justify-content: space-between;
@@ -73,7 +74,7 @@
 
 .forecast-day {
     flex: 1;
-    background-color: var(--button-bg);
+    background-color: var(--info-bg);
     border-radius: var(--button-radius);
     padding: 15px;
     text-align: center;
@@ -83,15 +84,15 @@
 
 .forecast-alert {
     position: absolute;
-    top: 8px;
-    left: 8px;
+    top: 7px;
+    left: 7px;
     color: #ff8800;
     font-size: 16px;
 }
 
 .forecast-date {
-    font-size: 14pt;
-    font-weight: 600;
+    font-size: 13pt;
+    font-weight: 400;
     margin-bottom: 8px;
     color: var(--button-text);
 }
@@ -104,14 +105,15 @@
 
 .forecast-temp {
     font-size: 14pt;
-    font-weight: 600;
+    font-weight: 750;
     margin: 8px 0;
     color: var(--button-text);
 }
 
 .forecast-desc {
-    font-size: 12pt;
-    color: var(--text-color);
+    font-size: 13pt;
+    font-style: italic;
+    color: var(--button-text);
 }
 
 .forecast-popup {
@@ -169,7 +171,7 @@
 }
 
 .hourly-item {
-    background: var(--button-bg);
+    background: var(--info-bg);
     padding: 15px;
     border-radius: var(--button-radius);
     text-align: center;

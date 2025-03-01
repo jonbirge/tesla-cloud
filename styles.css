@@ -2,10 +2,11 @@
 :root {
     --bg-color: #eeeeee;
     --text-color: #9f9f9f;
-    --active-section-bg: #ffffff;
-    --separator-color: #d0d0d0;
+    --active-section-bg: white;
+    --separator-color: #888888;
     --button-text: #545454;
-    --button-bg: #d6d6d6;
+    --button-bg: #dddddd;
+    --info-bg: #c3c9cf;
     --button-hover-bg: #f3f3f3;
     --weather-switch-slider: #ffffff;
     --tesla-blue: #0077ff;
@@ -17,16 +18,19 @@ body.dark-mode {
     --bg-color: #202020;
     --text-color: #717171;
     --active-section-bg: #333333;
-    --separator-color: #999999;
+    --separator-color: #b1b1b1;
     --button-text: #d6d6d6;
     --button-bg: #333333;
+    --info-bg: #302f39;
     --button-hover-bg: #555555;
     --weather-switch-slider: #222222;
 }
 
 /* Basic HTML Elements */
 * {
-    font-family: 'Inter', sans-serif !important;
+    font-family: "Inter", sans-serif !important;
+    font-optical-sizing: auto;
+    font-variant-ligatures: common-ligatures, contextual;
 }
 
 body {
@@ -35,7 +39,7 @@ body {
     color: var(--text-color);
     padding: 0;
     text-align: left;
-    font-weight: 560;
+    font-weight: 500;
 }
 
 a {
@@ -53,7 +57,7 @@ h1 {
 
 h2 {
     font-size: 17pt;
-    font-weight: 680;
+    font-weight: 700;
     letter-spacing: 0.01em;
     margin-bottom: 12px;
     margin-top: 28px;
@@ -216,6 +220,17 @@ li {
     /* object-fit: contain; */
 }
 
+/* Utility Classes */
+.section {
+    display: none;
+    padding-bottom: 30px; /* Add padding to the bottom of each section */
+}
+
+.hidden {
+    display: none;
+}
+
+/* Ping Button */
 .ping-button {
     font-size: 16pt;
     font-weight: 600;
@@ -232,16 +247,6 @@ li {
     display: flex;
     align-items: center;
     justify-content: center;
-}
-
-/* Utility Classes */
-.section {
-    display: none;
-    padding-bottom: 30px; /* Add padding to the bottom of each section */
-}
-
-.hidden {
-    display: none;
 }
 
 /* Dark Mode Toggle */
@@ -320,6 +325,7 @@ input:checked + .toggle-slider:before {
 .data-item {
     display: block;
     margin-right: 0;
+    font-weight: 600;
 }
 
 .data-item:last-child {
@@ -346,25 +352,25 @@ input:checked + .toggle-slider:before {
 }
 
 .stat-value {
-    font-size: 48pt;
-    font-weight: 650;
     color: var(--button-text);
+    font-size: 48pt;
+    font-weight: 600;
     display: inline;
 }
 
 .stat-unit {
+    color: var(--text-color);
     font-size: 24pt;
     font-weight: 650;
     font-family: sans-serif;
-    color: var(--text-color);
     display: inline;
     margin-left: 5px; /* Add some spacing between value and unit */
 }
 
 .stat-label {
-    font-size: 13pt;
     color: var(--text-color);
-    font-weight: 550;
+    font-size: 13pt;
+    font-weight: 650;
     margin-top: 0px;
     display: block; /* Ensure it's on its own line */
     clear: both; /* Clear the float to ensure it appears below */
@@ -465,15 +471,10 @@ input:checked + .toggle-slider:before {
     font-size: 12pt;
 }
 
-.news-date {
+.news-time, .news-date {
     color: var(--text-color);
     font-size: 12pt;
-    display: inline-block;
-}
-
-.news-time {
-    color: var(--text-color);
-    font-size: 12pt;
+    font-weight: 500;
     margin-left: 5px;
     display: inline-block;
 }
@@ -483,5 +484,5 @@ input:checked + .toggle-slider:before {
     margin-top: 3px;
     color: var(--button-text);
     font-size: 15pt;
-    font-weight: 625;
+    font-weight: 600;
 }
