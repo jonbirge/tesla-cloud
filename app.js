@@ -26,14 +26,15 @@ let lastUpdate = 0;
 let neverUpdatedLocation = true;
 let lat = null;
 let long = null;
-let alt = null;
+//let alt = null;
 let lastUpdateLat = null;
 let lastUpdateLong = null;
+let lastKnownHeading = null;
 let pingChart = null;
 let pingInterval = null;
 let pingData = [];
-let sunrise = null;
-let sunset = null;
+//let sunrise = null;
+//let sunset = null;
 let manualDarkMode = false;
 let darkOn = false;
 let locationTimeZone = null;
@@ -43,21 +44,10 @@ let testModeSpeed = TEST_MIN_SPEED;
 let testModeAlt = TEST_MIN_ALT;
 let testModeSpeedIncreasing = true;
 let testModeAltIncreasing = true;
-let lastKnownHeading = null;
 let radarContext = null;
 let weatherData = null;
 let forecastFetched = false;
 let forecastData = null;
-const locationBuffer = [];
-
-class LocationPoint {
-    constructor(lat, long, alt, timestamp) {
-        this.lat = lat;
-        this.long = long;
-        this.alt = alt;
-        this.timestamp = timestamp;
-    }
-}
 
 function toggleMode() {
     manualDarkMode = true;
@@ -514,7 +504,7 @@ function updateWindage(vehicleSpeed, vehicleHeading, windSpeed, windDirection) {
         radarContext.stroke();
     }
     
-    // Calculate headwind and crosswind components
+    // Calculate headwind and crosswind components and display on radar
     let headWind = null;
     let crossWind = null;
     if (vehicleHeading) {  // Threshold for meaningful motion    
@@ -541,14 +531,14 @@ function updateWindage(vehicleSpeed, vehicleHeading, windSpeed, windDirection) {
     // Update the wind component displays
     if (headWind !== null) {
         document.getElementById('headwind').innerText = Math.abs(Math.round(headWind));
-        document.getElementById('headwind-arrow').innerText = headWind > 0 ? '▼' : '▲';
+        document.getElementById('headwind-arrow').innerText = (headWind > 0 ? '▼' : '▲');
     } else {
         document.getElementById('headwind').innerText = '--';
         document.getElementById('headwind-arrow').innerText = '';
     }
     if (crossWind !== null) {
         document.getElementById('crosswind').innerText = Math.abs(Math.round(crossWind));
-        document.getElementById('crosswind-arrow').innerText = crossWind >= 0 ? '►' : '◄';
+        document.getElementById('crosswind-arrow').innerText = (crossWind >= 0 ? '►' : '◄');
     } else {
         document.getElementById('crosswind').innerText = '--';
         document.getElementById('crosswind-arrow').innerText = '';
@@ -646,13 +636,6 @@ function handlePositionUpdate(position) {
     speed = position.coords.speed / 0.44704; // Convert m/s to mph
     if (position.coords.heading) {
         lastKnownHeading = position.coords.heading;
-    }
-
-    // Add new location point to buffer
-    const newPoint = new LocationPoint(lat, long, alt, position.timestamp || Date.now());
-    locationBuffer.push(newPoint);
-    if (locationBuffer.length > MAX_BUFFER_SIZE) {
-        locationBuffer.shift(); // Remove oldest point
     }
     
     // Update radar display with current speed and heading

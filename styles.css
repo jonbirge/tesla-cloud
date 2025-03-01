@@ -349,6 +349,7 @@ input:checked + .toggle-slider:before {
 .stat-unit {
     font-size: 24pt;
     font-weight: 650;
+    font-family: sans-serif;
     color: var(--text-color);
     display: inline;
     margin-left: 5px; /* Add some spacing between value and unit */
@@ -412,8 +413,8 @@ input:checked + .toggle-slider:before {
 }
 
 .teslawaze-container {
-    height: calc(100vh - 270px);
-    min-height: 400px;
+    height: calc(100vh - 280px);
+    min-height: 380px;
     margin-top: 20px;
     width: 100%;
 }
