@@ -3,7 +3,7 @@
     --bg-color: #eeeeee;
     --text-color: #9f9f9f;
     --active-section-bg: white;
-    --separator-color: #888888;
+    --separator-color: #cccccc;
     --button-text: #545454;
     --button-bg: #dddddd;
     --info-bg: #c3c9cf;
@@ -18,7 +18,7 @@ body.dark-mode {
     --bg-color: #202020;
     --text-color: #717171;
     --active-section-bg: #333333;
-    --separator-color: #b1b1b1;
+    --separator-color: #444444;
     --button-text: #d6d6d6;
     --button-bg: #333333;
     --info-bg: #302f39;
@@ -30,16 +30,16 @@ body.dark-mode {
 * {
     font-family: "Inter", sans-serif !important;
     font-optical-sizing: auto;
-    font-variant-ligatures: common-ligatures, contextual;
 }
 
 body {
-    font-size: 17pt;
     background-color: var(--bg-color);
     color: var(--text-color);
-    padding: 0;
-    text-align: left;
+    font-size: 17pt;
     font-weight: 500;
+    padding: 0;
+    text-align: justify;
+    margin: 0 auto; /* Center the content */
 }
 
 a {
@@ -48,21 +48,22 @@ a {
 }
 
 h1 {
+    color: var(--button-text);
     font-size: 19pt;
     margin-bottom: 15px;
     text-align: left;
     margin-top: 0px;
-    font-weight: 300;
+    font-weight: 200;
 }
 
 h2 {
+    color: var(--button-text);
     font-size: 17pt;
     font-weight: 700;
     letter-spacing: 0.01em;
     margin-bottom: 12px;
     margin-top: 28px;
     text-align: left;
-    color: var(--button-text);
 }
 
 p {
@@ -72,7 +73,7 @@ p {
 
 hr {
     border: 0;
-    border-top: 1px solid var(--separator-color);
+    border-top: 2px solid var(--separator-color);
     margin-top: 28px;
     margin-bottom: 28px;
 }
@@ -91,6 +92,11 @@ li {
 .section {
     display: none;
     padding-bottom: 30px; /* Add padding to the bottom of each section */
+    max-width: 940px;
+}
+
+#about {
+    font-variant-ligatures: all;
 }
 
 /* Navigation */
@@ -259,8 +265,10 @@ li {
 }
 
 .toggle-label {
-    margin-right: 10px;
+    font-size: 15pt;
+    font-weight: 600;
     color: var(--text-color);
+    margin-right: 10px;
 }
 
 .toggle-switch {
