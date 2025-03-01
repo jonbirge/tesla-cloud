@@ -5,12 +5,12 @@
     --active-section-bg: #ffffff;
     --separator-color: #d0d0d0;
     --button-text: #545454;
-    --button-bg: #dcdcdc;
+    --button-bg: #d6d6d6;
     --button-hover-bg: #f3f3f3;
+    --weather-switch-slider: #ffffff;
     --tesla-blue: #0077ff;
     --tesla-red: #ff0000;
-    --button-radius: 10px;
-    --weather-switch-slider: #ffffff;
+    --button-radius: 13px;
 }
 
 body.dark-mode {
