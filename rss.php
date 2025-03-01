@@ -24,22 +24,25 @@ if (!$forceReload && file_exists($cacheFile) && file_exists($cacheTimestampFile)
     }
 }
 
+// If cache is stale or missing, fetch new RSS feeds
+
+// List of RSS feeds to fetch
 $feeds = [
     'wsj' => 'https://feeds.content.dowjones.io/public/rss/RSSWorldNews',
     'nyt' => 'https://rss.nytimes.com/services/xml/rss/nyt/HomePage.xml',
     'bbc' => 'http://feeds.bbci.co.uk/news/world/rss.xml',
-    'thedrive' => 'https://www.thedrive.com/feed',
-    'bloomberg-tech' => 'https://feeds.bloomberg.com/technology/news.rss',
-    'bloomberg' => 'https://feeds.bloomberg.com/news.rss',
     'wapo' => 'https://feeds.washingtonpost.com/rss/national',
+    'techcrunch' => 'https://techcrunch.com/feed/',
+    'thedrive' => 'https://www.thedrive.com/feed',
     'notateslaapp' => 'https://www.notateslaapp.com/rss',
     'teslarati' => 'https://www.teslarati.com/feed/',
     'toc' => 'https://teslamotorsclub.com/tmc/forums/-/index.rss',
-    // 'electrek' => 'https://electrek.co/feed/',
-    // 'insideevs' => 'https://insideevs.com/rss/articles/all/',
-    // 'theverge' => 'https://www.theverge.com/rss/transportation/index.xml',
-    // 'techcrunch' => 'https://techcrunch.com/transportation/feed/',
+    'insideevs' => 'https://insideevs.com/rss/articles/all/',
+    'theverge' => 'https://www.theverge.com/rss/index.xml',
+    'electrek' => 'https://electrek.co/feed/',
     // 'jalopnik' => 'https://jalopnik.com/rss',
+    // 'bloomberg-tech' => 'https://feeds.bloomberg.com/technology/news.rss',
+    // 'bloomberg' => 'https://feeds.bloomberg.com/news.rss',
 ];
 
 function fetchRSS($url) {
