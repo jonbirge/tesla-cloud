@@ -5,7 +5,7 @@ const UPDATE_TIME_THRESHOLD = 60; // minutes
 const NEWS_REFRESH_INTERVAL = 5; // minutes
 const MAX_BUFFER_SIZE = 5;
 const GEONAMES_USERNAME = 'birgefuller';
-const MAX_SPEED = 80; // Maximum speed for radar display (mph)
+const MAX_SPEED = 50; // Maximum speed for radar display (mph)
 const TEST_CENTER_LAT = 39.7392; // Denver
 const TEST_CENTER_LONG = -104.9903; // Denver
 const TEST_CIRCLE_RADIUS = 1; // miles
@@ -430,7 +430,7 @@ function updateWindage(vehicleSpeed, vehicleHeading, windSpeed, windDirection) {
     for (let i = 1; i <= 4; i++) {
         const currentRadius = (radius * i) / 4;
         radarContext.beginPath();
-        radarContext.arc(centerX, centerY, currentRadius, 0, 2 * Math.PI);
+        radarContext.arc(centerX, centerY, currentRadius, 0, 2*Math.PI);
         radarContext.strokeStyle = '#666';
         radarContext.setLineDash([2, 2]);
         radarContext.stroke();
@@ -464,8 +464,8 @@ function updateWindage(vehicleSpeed, vehicleHeading, windSpeed, windDirection) {
     function drawLabel(text, x, y) {
         const padding = 4;
         const metrics = radarContext.measureText(text);
-        const width = metrics.width + padding * 2;
-        const height = 16;
+        //const width = metrics.width + padding * 2;
+        //const height = 16;
         
         radarContext.fillStyle = '#666';
         radarContext.fillText(text, x, y);
@@ -480,7 +480,7 @@ function updateWindage(vehicleSpeed, vehicleHeading, windSpeed, windDirection) {
     const teslaBlue = getComputedStyle(document.documentElement).getPropertyValue('--tesla-blue').trim();
     
     // Helper function to draw arrow
-    function drawArrow(fromX, fromY, toX, toY, color, headLength = 8) {
+    function drawArrow(fromX, fromY, toX, toY, color, headLength = 9) {
         const angle = Math.atan2(toY - fromY, toX - fromX);
         const headAngle = Math.PI / 6; // 30 degrees
         
@@ -517,12 +517,12 @@ function updateWindage(vehicleSpeed, vehicleHeading, windSpeed, windDirection) {
     
         // Sum the vectors to get relative wind (for radar plot)
         const relativeWindX = windX;
-        const relativeWindY = windY - vehicleSpeed;
+        const relativeWindY = windY;
     
         headWind = -windY;  // Will be negative if a tailwind
         crossWind = windX;  // Will be positive if from the left
 
-        const windScale = Math.min(1, radius / MAX_SPEED);
+        const windScale = radius / MAX_SPEED;
         const relativeWindXPlot = centerX + relativeWindX * windScale;
         const relativeWindYPlot = centerY - relativeWindY * windScale;
         drawArrow(centerX, centerY, relativeWindXPlot, relativeWindYPlot, teslaBlue);
