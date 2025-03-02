@@ -1,9 +1,30 @@
 <?php
 
-// Cache duration in seconds
-$cacheDuration = 300;
+// Cache settings
+$cacheDuration = 300; // 5 minutes
 $cacheFile = '/tmp/rss_cache.json';
 $cacheTimestampFile = '/tmp/rss_cache_timestamp';
+
+// Set up error logging - clear log file on each run
+file_put_contents('/tmp/rss-php-errors.log', ''); // Empty the file
+ini_set('log_errors', 1);
+ini_set('error_log', '/tmp/rss-php-errors.log');
+
+// Custom error handler to capture all types of errors
+set_error_handler(function($errno, $errstr, $errfile, $errline) {
+    $message = date('[Y-m-d H:i:s] ') . "Error ($errno): $errstr in $errfile on line $errline\n";
+    error_log($message);
+    return false; // Let PHP handle the error as well
+});
+
+// Register shutdown function to catch fatal errors
+register_shutdown_function(function() {
+    $error = error_get_last();
+    if ($error && in_array($error['type'], [E_ERROR, E_PARSE, E_CORE_ERROR, E_COMPILE_ERROR])) {
+        $message = date('[Y-m-d H:i:s] ') . "FATAL Error: {$error['message']} in {$error['file']} on line {$error['line']}\n";
+        error_log($message);
+    }
+});
 
 header('Content-Type: application/json');
 
@@ -24,7 +45,7 @@ if (!$forceReload && file_exists($cacheFile) && file_exists($cacheTimestampFile)
     }
 }
 
-// If cache is stale or missing, fetch new RSS feeds
+// If cache is stale or missing, fetch new RSS feeds...
 
 // List of RSS feeds to fetch
 $feeds = [
@@ -36,13 +57,12 @@ $feeds = [
     'thedrive' => 'https://www.thedrive.com/feed',
     'notateslaapp' => 'https://www.notateslaapp.com/rss',
     'teslarati' => 'https://www.teslarati.com/feed/',
-    'toc' => 'https://teslamotorsclub.com/tmc/forums/-/index.rss',
     'insideevs' => 'https://insideevs.com/rss/articles/all/',
-    'theverge' => 'https://www.theverge.com/rss/index.xml',
     'electrek' => 'https://electrek.co/feed/',
-    // 'jalopnik' => 'https://jalopnik.com/rss',
-    // 'bloomberg-tech' => 'https://feeds.bloomberg.com/technology/news.rss',
+    'bloomberg' => 'https://feeds.bloomberg.com/technology/news.rss',
     // 'bloomberg' => 'https://feeds.bloomberg.com/news.rss',
+    // 'theverge' => 'https://www.theverge.com/rss/index.xml',
+    // 'jalopnik' => 'https://jalopnik.com/rss',
 ];
 
 function fetchRSS($url) {
@@ -65,8 +85,16 @@ function fetchRSS($url) {
 }
 
 function parseRSS($xml, $source) {
-    $feed = simplexml_load_string($xml);
-    if (!$feed) return [];
+    try {
+        $feed = simplexml_load_string($xml);
+        if (!$feed) {
+            error_log("RSS Parse Error: Failed to parse XML feed from source: {$source}");
+            return [];
+        }
+    } catch (Exception $e) {
+        error_log("RSS Parse Exception for source {$source}: " . $e->getMessage());
+        return [];
+    }
 
     $items = [];
     
