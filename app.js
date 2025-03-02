@@ -547,10 +547,6 @@ function showSection(sectionId) {
     if (section) {
         section.style.display = 'block';
 
-        if (sectionId === 'waze') {
-            loadExternalUrl('https://teslawaze.azurewebsites.net/', true);
-        }
-
         // Original section-specific logic
         if (sectionId === 'news') {
             // Only update news if interval is not set (first visit)
