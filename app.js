@@ -528,17 +528,17 @@ function updateWindage(vehicleSpeed, vehicleHeading, windSpeed, windDirection) {
     // Update the wind component displays
     if (headWind !== null) {
         document.getElementById('headwind').innerText = Math.abs(Math.round(headWind));
-        document.getElementById('headwind-arrow').innerText = (headWind > 0 ? '🡻' : '🡹');
+        document.getElementById('headwind-arrow').innerHTML = (headWind > 0 ? '&#9660;' : '&#9650;'); // down/up filled triangles
     } else {
         document.getElementById('headwind').innerText = '--';
-        document.getElementById('headwind-arrow').innerText = '';
+        document.getElementById('headwind-arrow').innerHTML = '';
     }
     if (crossWind !== null) {
         document.getElementById('crosswind').innerText = Math.abs(Math.round(crossWind));
-        document.getElementById('crosswind-arrow').innerText = (crossWind >= 0 ? '🡺' : '🡸');
+        document.getElementById('crosswind-arrow').innerHTML = (crossWind >= 0 ? '&#9654;' : '&#9664;'); // right/left triangles
     } else {
         document.getElementById('crosswind').innerText = '--';
-        document.getElementById('crosswind-arrow').innerText = '';
+        document.getElementById('crosswind-arrow').innerHTML = '';
     }
 }
 
