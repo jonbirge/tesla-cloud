@@ -6,7 +6,7 @@
     --separator-color: #cccccc;
     --button-text: #545454;
     --button-bg: #dddddd;
-    --info-bg: #c3c9cf;
+    --info-bg: #cfd6db;
     --button-hover-bg: #f3f3f3;
     --weather-switch-slider: #ffffff;
     --tesla-blue: #0077ff;
@@ -53,7 +53,7 @@ h1 {
     margin-bottom: 15px;
     text-align: left;
     margin-top: 0px;
-    font-weight: 200;
+    font-weight: 250;
 }
 
 h2 {

@@ -84,17 +84,17 @@
 
 .forecast-alert {
     position: absolute;
-    top: 7px;
+    top: 5px;
     left: 7px;
-    color: #ff8800;
-    font-size: 16px;
+    color: #ff9900;
+    font-size: 17px;
 }
 
 .forecast-date {
     font-size: 13pt;
-    font-weight: 400;
+    font-weight: 600;
     margin-bottom: 8px;
-    color: var(--button-text);
+    color: var(--text-color);
 }
 
 .forecast-icon {
@@ -111,8 +111,10 @@
 }
 
 .forecast-desc {
+    font-family: "Inter", sans-serif;
     font-size: 13pt;
     font-style: italic;
+    font-weight: 600;
     color: var(--button-text);
 }
 
@@ -171,14 +173,15 @@
 }
 
 .hourly-item {
-    background: var(--info-bg);
+    background: var(--bg-color);
     padding: 15px;
     border-radius: var(--button-radius);
     text-align: center;
 }
 
 .hourly-time {
-    font-weight: 600;
+    font-weight: 500;
+    font-size: 14pt;;
     color: var(--button-text);
     margin-bottom: 5px;
 }
@@ -186,10 +189,13 @@
 .hourly-temp {
     color: var(--button-text);
     font-size: 14pt;
+    font-weight: 750;
     margin: 5px 0;
 }
 
 .hourly-desc {
-    color: var(--text-color);
-    font-size: 12pt;
+    color: var(--button-text);
+    font-size: 13pt;
+    font-style: italic;
+    font-weight: 600;
 }
