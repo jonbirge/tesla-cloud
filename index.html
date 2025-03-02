@@ -14,10 +14,11 @@
 
 <body>
     <!-- Include SVG sprite inline at the beginning of body for better browser compatibility -->
-    <div style="display: none;"></div>
+    <div id="spites" style="display: none;"></div>
     
     <div class="frame-container">
 
+    <!-- Section menu -->
     <div class="left-frame">
         <div class="section-buttons">
             <h1>teslas.cloud (beta)</h1>
@@ -68,6 +69,7 @@
         </div>
     </div>
     
+    <!-- Section content -->
     <div id="rightFrame" class="right-frame">
         <div class="sections">
 
@@ -386,6 +388,7 @@
 
     </div>
 
+    <!-- Dark mode toggle -->
     <div class="toggle-container">
         <label class="toggle-label">Dark Mode</label>
         <label class="toggle-switch">
@@ -394,14 +397,17 @@
         </label>
     </div>
 
+    <!-- Load section icons -->
     <script>
         // Load SVG sprite file and inject it into the page
         fetch('icons.svg')
-          .then(response => response.text())
-          .then(data => {
-            document.querySelector('div[style="display: none;"]').innerHTML = data;
-          });
+            .then(response => response.text())
+            .then(data => {
+                document.getElementById('spites').innerHTML = data;
+            });
     </script>
+
+    <!-- Load JavaScript -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="wx.js?ver=1"></script>
     <script src="net.js?ver=1"></script>
