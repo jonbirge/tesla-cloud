@@ -38,6 +38,7 @@ body {
     padding: 0;
     text-align: left;
     /* margin: 0 auto; */
+    word-spacing: normal;
     font-weight: 500;
     font-optical-sizing: auto;
     font-variant-numeric: tabular-nums;
@@ -71,6 +72,7 @@ h2 {
 p {
     margin-top: 12px;
     margin-bottom: 0px;
+    text-align: justify
 }
 
 ul {
@@ -334,7 +336,7 @@ input:checked + .toggle-slider:before {
 /* Data Display */
 .data-info {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
     gap: 16px;
     margin-top: 16px;
     width: 100%;
@@ -362,7 +364,7 @@ input:checked + .toggle-slider:before {
     flex-direction: column;
     align-items: left;
     min-width: 200px;
-    height: 140px; /* fixed height added */
+    height: 125px; /* fixed height added */
 }
 
 .value-container {
@@ -398,16 +400,14 @@ input:checked + .toggle-slider:before {
 /* Dashboard Display */
 .radar-container {
     position: relative;
-    width: 180px;
-    height: 180px;
     padding-top: 30px; /* Added padding to push radar down */
     margin-right: 30px;
 }
 
 .radar-title {
     position: absolute;
-    top: 0px; /* Changed from -30px to 0px */
-    left: 0;
+    top: 0px;
+    left: 24px;
     text-align: center;
     margin: 0;
 }
@@ -443,11 +443,15 @@ input:checked + .toggle-slider:before {
     min-width: 220px;
 }
 
+/* Waze frame */
 .teslawaze-container {
-    height: calc(100vh - 280px);
-    min-height: 380px;
+    height: calc(100vh - 350px);
+    min-height: 280px;
     margin-top: 20px;
     width: 100%;
+    margin-bottom: 0; /* Ensure no bottom margin */
+    position: relative; /* Add positioning context */
+    flex-grow: 1; /* Allow it to grow to fill available space */
 }
 
 #teslawaze {
@@ -455,6 +459,11 @@ input:checked + .toggle-slider:before {
     height: 100%;
     border: none;
     border-radius: var(--button-radius);
+    position: absolute; /* Position absolutely within container */
+    top: 0;
+    left: 0;
+    bottom: 0;
+    right: 0;
 }
 
 /* News Elements */
