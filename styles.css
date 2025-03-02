@@ -29,17 +29,19 @@ body.dark-mode {
 /* Basic HTML Elements */
 * {
     font-family: "Inter", sans-serif !important;
-    font-optical-sizing: auto;
 }
 
 body {
     background-color: var(--bg-color);
     color: var(--text-color);
     font-size: 17pt;
-    font-weight: 500;
     padding: 0;
     text-align: left;
-    margin: 0 auto; /* Center the content */
+    /* margin: 0 auto; */
+    font-weight: 500;
+    font-optical-sizing: auto;
+    font-variant-numeric: tabular-nums;
+    font-variant-ligatures: all;
 }
 
 a {
@@ -61,14 +63,27 @@ h2 {
     font-size: 17pt;
     font-weight: 700;
     letter-spacing: 0.01em;
-    margin-bottom: 12px;
+    margin-bottom: 9px;
     margin-top: 28px;
     text-align: left;
 }
 
 p {
-    margin-top: 18px;
+    margin-top: 12px;
     margin-bottom: 0px;
+}
+
+ul {
+    padding-left: 20px;
+    margin-top: 0px;
+    margin-bottom: 0px;
+}
+
+li {
+    margin: 9px 0;
+    line-height: 1.4;
+    padding-left: 0px;
+    margin-left: 0px;
 }
 
 hr {
@@ -76,13 +91,6 @@ hr {
     border-top: 2px solid var(--separator-color);
     margin-top: 28px;
     margin-bottom: 28px;
-}
-
-li {
-    margin: 18px 0;
-    line-height: 1.4;
-    padding-left: 0px;
-    margin-left: -18px;
 }
 
 .sections {
@@ -224,8 +232,8 @@ li {
 }
 
 .button-list a img {
-    width: 24px;
-    height: 24px;
+    width: 32px;
+    height: auto;
     /* object-fit: contain; */
 }
 
