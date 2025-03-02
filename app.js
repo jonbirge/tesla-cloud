@@ -529,9 +529,12 @@ function updateWindage(vehicleSpeed, vehicleHeading, windSpeed, windDirection) {
     if (headWind !== null) {
         document.getElementById('headwind').innerText = Math.abs(Math.round(headWind));
         document.getElementById('headwind-arrow').innerHTML = (headWind > 0 ? '&#9660;' : '&#9650;'); // down/up filled triangles
+        // Change the label to TAILWIND when headWind is negative
+        document.getElementById('headwind-label').innerText = (headWind < 0) ? "TAILWIND (MPH)" : "HEADWIND (MPH)";
     } else {
         document.getElementById('headwind').innerText = '--';
         document.getElementById('headwind-arrow').innerHTML = '';
+        document.getElementById('headwind-label').innerText = "HEADWIND (MPH)";
     }
     if (crossWind !== null) {
         document.getElementById('crosswind').innerText = Math.abs(Math.round(crossWind));
