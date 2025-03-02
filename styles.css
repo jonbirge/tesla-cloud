@@ -43,15 +43,15 @@ body.dark-mode {
     
     /* Weather condition-specific gradients for dark mode */
     --sky-clear-top: #0a1020;
-    --sky-clear-bottom: #1a2845;
+    --sky-clear-bottom: #441a45;
     --sky-cloudy-top: #1a1a1a;
-    --sky-cloudy-bottom: #2a3040;
-    --sky-rainy-top: #0a121e;
-    --sky-rainy-bottom: #172334;
+    --sky-cloudy-bottom: #1c2a3e;
+    --sky-rainy-top: #262729;
+    --sky-rainy-bottom: #2a3040;
     --sky-storm-top: #080e18;
-    --sky-storm-bottom: #111927;
-    --sky-snow-top: #171e28;
-    --sky-snow-bottom: #252f3f;
+    --sky-storm-bottom: #292b2e;
+    --sky-snow-top: #363c43;
+    --sky-snow-bottom: #3c3430;
 }
 
 /* Basic HTML Elements */
