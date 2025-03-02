@@ -43,8 +43,10 @@ function fetchWeatherData(lat, long) {
         ]))
         .then(([currentData, forecastDataResponse]) => {
             if (currentData.weatherObservation) {
+                // take the reciprocal of the wind direction to get the wind vector
+                currentData.weatherObservation.windDirection =
+                    (currentData.weatherObservation.windDirection + 180) % 360;
                 weatherData = currentData.weatherObservation;
-                window.weatherData = weatherData; // Expose weatherData globally for app.js compatibility
                 updateWeatherDisplay();
             }
             
@@ -227,4 +229,3 @@ function fetchSunData(lat, long) {
             console.error('Error fetching sun/moon data: ', error);
         });
 }
-
