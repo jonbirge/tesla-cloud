@@ -332,7 +332,7 @@ function updateWindage(vehicleSpeed, vehicleHeading, windSpeed, windDirection) {
     // Calculate headwind and crosswind components and display on radar
     let headWind = null;
     let crossWind = null;
-    if (vehicleHeading) {  // Threshold for meaningful motion    
+    if (vehicleHeading && windDirection) {  // Threshold for meaningful motion    
         const windAngle = windDirection - vehicleHeading; // car frame
         const windAngleRad = (90 - windAngle) * Math.PI / 180;
 

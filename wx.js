@@ -1,5 +1,5 @@
+// Convert numerical phase to human-readable name
 function getMoonPhaseName(phase) {
-    // Convert numerical phase to human-readable name
     if (phase === 0 || phase === 1) return "New Moon";
     if (phase < 0.25) return "Waxing Crescent";
     if (phase === 0.25) return "First Quarter";
@@ -43,9 +43,15 @@ function fetchWeatherData(lat, long) {
         ]))
         .then(([currentData, forecastDataResponse]) => {
             if (currentData.weatherObservation) {
-                // take the reciprocal of the wind direction to get the wind vector
-                currentData.weatherObservation.windDirection =
-                    (currentData.weatherObservation.windDirection + 180) % 360;
+                // check to see if wind direction is NaN
+                if (isNaN(currentData.weatherObservation.windDirection)) {
+                    currentData.weatherObservation.windDirection = null;
+                    currentData.weatherObservation.windSpeed = null;
+                } else {
+                    // take the reciprocal of the wind direction to get the wind vector
+                    currentData.weatherObservation.windDirection =
+                        (currentData.weatherObservation.windDirection + 180) % 360;
+                }
                 weatherData = currentData.weatherObservation;
                 updateWeatherDisplay();
             }
@@ -187,7 +193,11 @@ function updateWeatherDisplay() {
     const humidity = weatherData.humidity;
 
     document.getElementById('humidity').innerText = `${humidity}%`;
-    document.getElementById('wind').innerText = `${Math.round(windSpeedMPH)} mph at ${Math.round(windDir)}°`;
+    if (windDir && windSpeedMPH) {
+        document.getElementById('wind').innerText = `${Math.round(windSpeedMPH)} mph at ${Math.round(windDir)}°`;
+    } else {
+        document.getElementById('wind').innerText = '--';
+    }
 }
 
 function fetchSunData(lat, long) {
