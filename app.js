@@ -1,7 +1,7 @@
 // Settings
-const LATLON_UPDATE_INTERVAL = 1; // seconds
+const LATLON_UPDATE_INTERVAL = 2; // seconds
 const UPDATE_DISTANCE_THRESHOLD = 1000; // meters
-const UPDATE_TIME_THRESHOLD = 60; // minutes
+const UPDATE_TIME_THRESHOLD = 10; // minutes
 const NEWS_REFRESH_INTERVAL = 5; // minutes
 const MAX_BUFFER_SIZE = 5;
 const GEONAMES_USERNAME = 'birgefuller';
@@ -383,7 +383,7 @@ async function updateLocationData(lat, long) {
         console.log('Timezone: ', locationTimeZone);
         fetchCityData(lat, long);
         fetchSunData(lat, long);
-        fetchWeatherData(lat, long);
+        // fetchWeatherData(lat, long);
 
         // Update connectivity data if the Network section is visible
         const networkSection = document.getElementById("network");
@@ -466,26 +466,30 @@ function handlePositionUpdate(position) {
         lastKnownHeading = position.coords.heading;
     }
     
-    // Update radar display with current speed and heading
-    if (lastKnownHeading) {
-        document.getElementById('heading').innerText = Math.round(lastKnownHeading) + '°';
-        if (weatherData) {
-            const windSpeedMPH = Math.min((weatherData.windSpeed * 2.237), MAX_SPEED);
-            const windDir = weatherData.windDirection;
-            updateWindage(speed, lastKnownHeading, windSpeedMPH, windDir);
+    // Update radar display with current speed and heading iff navigation section is visible
+    const navigationSection = document.getElementById("navigation");
+    if (navigationSection.style.display === "block") {
+        // Update heading displays
+        if (lastKnownHeading) {
+            document.getElementById('heading').innerText = Math.round(lastKnownHeading) + '°';
+            if (weatherData) {
+                const windSpeedMPH = Math.min((weatherData.windSpeed * 2.237), MAX_SPEED);
+                const windDir = weatherData.windDirection;
+                updateWindage(speed, lastKnownHeading, windSpeedMPH, windDir);
+            } else {
+                updateWindage(speed, lastKnownHeading, 0, 0);
+            }
         } else {
-            updateWindage(speed, lastKnownHeading, 0, 0);
+            document.getElementById('heading').innerText = '--';
+            updateWindage(0, null, 0, 0);
         }
-    } else {
-        document.getElementById('heading').innerText = '--';
-        updateWindage(0, null, 0, 0);
+
+        // Update display values
+        document.getElementById('altitude').innerText = alt ? Math.round(alt * 3.28084) : '--'; // Convert meters to feet
+        document.getElementById('accuracy').innerText = acc ? Math.round(acc) + ' m' : '--';
     }
-    
-    // Update display values
-    document.getElementById('altitude').innerText = alt ? Math.round(alt * 3.28084) : '--'; // Convert meters to feet
-    document.getElementById('accuracy').innerText = acc ? Math.round(acc) + ' m' : '--';
-    
-    // Check if we should update location-dependent data
+
+    // Check if we should update location-dependent API data
     if (shouldUpdateLocationData()) {
         updateLocationData(lat, long);
         lastUpdateLat = lat;
@@ -617,16 +621,17 @@ document.addEventListener('click', function(e) {
 // Add click handler to close popup when clicking overlay
 document.querySelector('.overlay').addEventListener('click', closeHourlyForecast);
 
-// Update location frequently but only trigger dependent updates when moved significantly
-updateGPS();
-setInterval(updateGPS, 1000*LATLON_UPDATE_INTERVAL);
-
-// Show the initial section from URL parameter
-showSection(getInitialSection());
-
 // Handle browser back/forward buttons
 window.addEventListener('popstate', () => {
     showSection(getInitialSection());
 });
 
+// Initialize radar display
 initializeRadar();
+
+// Show the initial section from URL parameter
+showSection(getInitialSection());
+
+// Update location frequently but only trigger dependent updates when moved significantly
+updateGPS();
+setInterval(updateGPS, 1000*LATLON_UPDATE_INTERVAL);
