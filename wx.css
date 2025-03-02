@@ -81,6 +81,28 @@
     min-width: 100px;
     position: relative;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    transition: background 0.3s ease;
+}
+
+/* Weather condition-specific gradients */
+.forecast-day.clear {
+    background: linear-gradient(to bottom, var(--sky-clear-top), var(--sky-clear-bottom));
+}
+
+.forecast-day.clouds {
+    background: linear-gradient(to bottom, var(--sky-cloudy-top), var(--sky-cloudy-bottom));
+}
+
+.forecast-day.rain {
+    background: linear-gradient(to bottom, var(--sky-rainy-top), var(--sky-rainy-bottom));
+}
+
+.forecast-day.storm, .forecast-day.thunderstorm {
+    background: linear-gradient(to bottom, var(--sky-storm-top), var(--sky-storm-bottom));
+}
+
+.forecast-day.snow {
+    background: linear-gradient(to bottom, var(--sky-snow-top), var(--sky-snow-bottom));
 }
 
 .forecast-alert {

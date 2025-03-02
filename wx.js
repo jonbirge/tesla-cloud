@@ -76,8 +76,13 @@ function updateForecastDisplay(data) {
             const date = new Date(day.dt * 1000);
             const dayElement = forecastDays[index];
             
-            // Clear previous content
+            // Clear previous content and classes
             dayElement.innerHTML = '';
+            dayElement.className = 'forecast-day';
+            
+            // Add weather condition class based on main weather condition
+            const weatherCondition = day.weather[0].main.toLowerCase();
+            dayElement.classList.add(weatherCondition);
             
             // Add alert symbol if hazards detected
             if (hasHazards(day)) {
