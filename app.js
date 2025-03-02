@@ -551,6 +551,11 @@ function showSection(sectionId) {
     if (section) {
         section.style.display = 'block';
 
+        // Load images in this section if they're using data-src
+        if (sectionId === 'media' || sectionId === 'reference' || sectionId === 'travel') {
+            loadSectionImages(section);
+        }
+
         // Original section-specific logic
         if (sectionId === 'news') {
             // Only update news if interval is not set (first visit)
@@ -600,6 +605,17 @@ function showSection(sectionId) {
     if (button) {
         button.classList.add('active');
     }
+}
+
+// Function to load images in a section
+function loadSectionImages(section) {
+    const images = section.querySelectorAll('img[data-src]');
+    images.forEach(img => {
+        if (img.dataset.src) {
+            img.src = img.dataset.src;
+            // Keep data-src attribute for potential future reference
+        }
+    });
 }
 
 // ***** Main code *****
