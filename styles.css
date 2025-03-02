@@ -12,6 +12,8 @@
     --tesla-blue: #0077ff;
     --tesla-red: #ff0000;
     --button-radius: 13px;
+    --sky-gradient-top: #e6f7ff;
+    --sky-gradient-bottom: #a8d0f0;
 }
 
 body.dark-mode {
@@ -24,6 +26,8 @@ body.dark-mode {
     --info-bg: #302f39;
     --button-hover-bg: #555555;
     --weather-switch-slider: #222222;
+    --sky-gradient-top: #0a1020;
+    --sky-gradient-bottom: #1a2845;
 }
 
 /* Basic HTML Elements */
