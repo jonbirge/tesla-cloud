@@ -1,7 +1,7 @@
 <?php
 
 // Cache duration in seconds
-$cacheDuration = 600;
+$cacheDuration = 300;
 $cacheFile = '/tmp/rss_cache.json';
 $cacheTimestampFile = '/tmp/rss_cache_timestamp';
 
@@ -11,7 +11,7 @@ header('Content-Type: application/json');
 $forceReload = isset($_GET['reload']);
 
 // Get number of stories to return
-$numStories = isset($_GET['n']) ? intval($_GET['n']) : 30;
+$numStories = isset($_GET['n']) ? intval($_GET['n']) : 32;
 $numStories = max(1, min(50, $numStories));
 
 // Check if cache exists and is fresh (unless forced reload is requested)

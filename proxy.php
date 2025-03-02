@@ -7,7 +7,6 @@ $url = $_GET['url'];
 // Whitelist of allowed domains for security
 $allowedDomains = [
     'notateslaapp.com',
-    'api.geonames.org' // added to whitelist for Geonames API
 ];
 
 // die if none of the allowed domains are found in the URL string anywhere
