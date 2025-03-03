@@ -24,7 +24,7 @@ const SAT_URLS = {
 };
 
 // Global variables
-let driving_test_mode = false; // Set to true if test parameter exists
+let test_mode = false; // Set to true if test parameter exists
 let lastUpdate = 0; // Timestamp of last location update
 let lastUpdateLat = null;
 let lastUpdateLong = null;
@@ -541,7 +541,7 @@ function handlePositionUpdate(position) {
 }
 
 function updateGPS() {
-    if (!driving_test_mode) {
+    if (!test_mode) {
         if (navigator.geolocation) {
             navigator.geolocation.getCurrentPosition(handlePositionUpdate);
         } else {
@@ -688,8 +688,7 @@ function showSection(sectionId) {
 
 // Check for test parameter in URL
 const urlParams = new URLSearchParams(window.location.search);
-const testParam = urlParams.get('test');
-driving_test_mode = testParam !== null;
+test_mode = urlParams.has('test');
 
 // Update link click event listener
 document.addEventListener('click', function(e) {

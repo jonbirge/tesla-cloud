@@ -111,7 +111,7 @@ function fetchWeatherData(lat, long) {
 
     customLog('Fetching weather data...');
 
-    if (driving_test_mode) {
+    if (test_mode) {
         // Use mock data in test mode
         customLog('Using mock weather data (test mode)');
         weatherData = generateMockWeatherData();
