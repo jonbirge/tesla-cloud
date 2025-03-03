@@ -44,8 +44,7 @@ body {
     word-spacing: normal;
     font-weight: 500;
     font-optical-sizing: auto;
-    font-variant-numeric: tabular-nums;
-    font-variant-ligatures: all;
+    font-variant-ligatures: auto;
 }
 
 a {
@@ -380,6 +379,7 @@ input:checked + .toggle-slider:before {
     font-size: 48pt;
     font-weight: 600;
     display: inline;
+    font-variant-numeric: tabular-nums;
 }
 
 .stat-unit {
