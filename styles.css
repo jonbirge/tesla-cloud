@@ -542,3 +542,12 @@ input:checked + .toggle-slider:before {
     font-size: 15pt;
     font-weight: 600;
 }
+
+.news-favicon {
+    width: 16px;
+    height: 16px;
+    margin-right: 6px;
+    margin-top: -3px; /* Add negative margin to move up a few pixels */
+    vertical-align: middle;
+    display: inline-block;
+}
