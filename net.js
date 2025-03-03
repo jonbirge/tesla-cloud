@@ -1,6 +1,6 @@
 function updateNetworkInfo() {
     // Write diagnostic information to the console
-    console.log('Updating connection info...');
+    customLog('Updating connection info...');
 
     // Get detailed IP info from ipapi.co
     fetch('https://ipapi.co/json/')
@@ -28,6 +28,7 @@ function updateNetworkInfo() {
         })
         .catch(error => {
             console.error('Error fetching IP/DNS information: ', error);
+            customLog('Error fetching IP/DNS information: ', error);
             // Set default values in case of error
             document.getElementById('rdns').innerText = 'N/A';
             document.getElementById('exitLocation').innerText = 'N/A';
@@ -167,5 +168,6 @@ function pingTestServer() {
         })
         .catch(error => {
             console.error('Ping failed:', error);
+            customLog('Ping failed:', error);
         });
 }

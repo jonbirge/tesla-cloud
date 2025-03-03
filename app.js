@@ -45,6 +45,13 @@ let testModeSpeedIncreasing = true;
 let testModeAltIncreasing = true;
 let radarContext = null;
 
+// Custom log function that prepends the current time
+function customLog(...args) {
+    const now = new Date();
+    const timeString = now.toLocaleTimeString();
+    console.log(`[${timeString}] `, ...args);
+}
+
 function toggleMode() {
     manualDarkMode = true;
     document.body.classList.toggle('dark-mode');
@@ -67,6 +74,11 @@ function calculateDistance(lat1, lon1, lat2, lon2) {
 }
 
 function fetchCityData(lat, long) {
+    if (!lat || !long) {
+        customLog('Location not available for city data.');
+        return;
+    }
+
     fetch(`https://secure.geonames.org/findNearbyPlaceNameJSON?lat=${lat}&lng=${long}&username=${GEONAMES_USERNAME}`)
         .then(response => response.json())
         .then(cityData => {
@@ -82,12 +94,18 @@ function fetchCityData(lat, long) {
 }
 
 async function fetchTimeZone(lat, long) {
+    if (!lat || !long) {
+        customLog('Location not available for time zone.');
+        return 'UTC';
+    }
+
     try {
         const response = await fetch(`https://secure.geonames.org/timezoneJSON?lat=${lat}&lng=${long}&username=${GEONAMES_USERNAME}`);
         const tzData = await response.json();
         return tzData.timezoneId || 'UTC';
     } catch (error) {
-        console.error('Error fetching time zone:', error);
+        console.error('Error fetching time zone: ', error);
+        customLog('Error fetching time zone: ', error);
         return 'UTC';
     }
 }
@@ -100,23 +118,28 @@ function updateAutoDarkMode() {
         const sunsetTime = new Date(sunset).getTime();
 
         if (currentTime >= sunsetTime || currentTime < sunriseTime) {
-            console.log('Applying dark mode based on sunset...');
+            customLog('Applying dark mode based on sunset...');
             document.body.classList.add('dark-mode');
             darkOn = true;
             document.getElementById('darkModeToggle').checked = true;
         } else {
-            console.log('Applying light mode based on sunrise...');
+            customLog('Applying light mode based on sunrise...');
             document.body.classList.remove('dark-mode');
             darkOn = false;
             document.getElementById('darkModeToggle').checked = false;
         }
     } else {
-        console.log('Location not available for auto dark mode.');
+        customLog('Location not available for auto dark mode.');
     }
 }
 
 async function fetchWikipediaData(lat, long) {
-    console.log('Fetching Wikipedia data...');
+    if (!lat || !long) {
+        customLog('Location not available for Wikipedia data.');
+        return;
+    }
+
+    customLog('Fetching Wikipedia data...');
     const url = `https://secure.geonames.org/findNearbyWikipediaJSON?lat=${lat}&lng=${long}&username=birgefuller`;
     try {
         const response = await fetch(url);
@@ -136,6 +159,7 @@ async function fetchWikipediaData(lat, long) {
         }
     } catch (error) {
         console.error('Error fetching Wikipedia data:', error);
+        customLog('Error fetching Wikipedia data:', error);
         document.getElementById('wikipediaInfo').innerHTML = '<p><em>Error loading Wikipedia data.</em></p>';
     }
 }
@@ -178,7 +202,7 @@ async function updateNews() {
         const newsContainer = document.getElementById('newsHeadlines');
         if (!newsContainer) return;
 
-        console.log('Updating news headlines...');
+        customLog('Updating news headlines...');
 
         const html = items.map(item => {
             const date = new Date(item.date * 1000);
@@ -199,6 +223,7 @@ async function updateNews() {
                 faviconUrl = `https://${url.hostname}/favicon.ico`;
             } catch (e) {
                 console.error("Invalid URL:", item.link);
+                customLog("Invalid URL:", item.link);
                 faviconUrl = 'favicon.ico'; // Default fallback
             }
             
@@ -217,6 +242,7 @@ async function updateNews() {
         newsContainer.innerHTML = html || '<p><em>No headlines available</em></p>';
     } catch (error) {
         console.error('Error fetching news:', error);
+        customLog('Error fetching news:', error);
         document.getElementById('newsHeadlines').innerHTML = 
             '<p><em>Error loading headlines</em></p>';
     }
@@ -368,26 +394,26 @@ function updateWindage(vehicleSpeed, vehicleHeading, windSpeed, windDirection) {
 
 async function updateLocationData(lat, long) {
     if (lat && long) {
-        console.log('Updating location dependent data...');
+        customLog('Updating location dependent data for (', lat, ', ', long, ')');
         neverUpdatedLocation = false;
 
         // Fire off API requests for external data
         locationTimeZone = await fetchTimeZone(lat, long);
-        console.log('Timezone: ', locationTimeZone);
+        customLog('Timezone: ', locationTimeZone);
         fetchCityData(lat, long);
         fetchSunData(lat, long);
 
         // Update connectivity data if the Network section is visible
         const networkSection = document.getElementById("network");
         if (networkSection.style.display === "block") {
-            console.log('Updating connectivity data...');
+            customLog('Updating connectivity data...');
             updateNetworkInfo();
         }
 
         // Update Wikipedia data if the Landmarks section is visible
         const locationSection = document.getElementById("landmarks");
         if (locationSection.style.display === "block") {
-            console.log('Updating Wikipedia data...');
+            customLog('Updating Wikipedia data...');
             fetchWikipediaData(lat, long);
         }
 
@@ -395,7 +421,7 @@ async function updateLocationData(lat, long) {
         lastUpdateLong = long;
         lastUpdate = Date.now();
     } else {
-        console.log('Location not available for dependent data.');
+        customLog('Location not available for dependent data.');
     }
 }
 
@@ -516,7 +542,7 @@ function updateGPS() {
         if (navigator.geolocation) {
             navigator.geolocation.getCurrentPosition(handlePositionUpdate);
         } else {
-            console.log('Geolocation is not supported by this browser.');
+            customLog('Geolocation is not supported by this browser.');
         }
     } else { // testing
         handlePositionUpdate(getTestModePosition());
@@ -532,7 +558,7 @@ function getInitialSection() {
 // Show a specific section and update URL
 function showSection(sectionId) {
     // Log the clicked section
-    console.log(`Showing section: ${sectionId}`);
+    customLog(`Showing section: ${sectionId}`);
 
     // Update URL without page reload 
     const url = new URL(window.location);
@@ -581,7 +607,7 @@ function showSection(sectionId) {
                     fetchWeatherData(lat, long);
                 }
             } else {
-                console.log('Location not available to fetch weather data.');
+                customLog('Location not available to fetch weather data.');
             }
         }
 
@@ -605,7 +631,7 @@ function showSection(sectionId) {
             if (lat !== null && long !== null) {
                 fetchWikipediaData(lat, long);
             } else {
-                console.log('Location not available to fetch Wikipedia data.');
+                customLog('Location not available to fetch Wikipedia data.');
             }
         }
     }

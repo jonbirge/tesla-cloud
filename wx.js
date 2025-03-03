@@ -40,7 +40,7 @@ function switchWeatherImage(type) {
 
 function fetchWeatherData(lat, long) {
     if (lat && long) {
-        console.log('Fetching weather data...');
+        customLog('Fetching weather data...');
         Promise.all([
             fetch(`https://secure.geonames.org/findNearByWeatherJSON?lat=${lat}&lng=${long}&username=birgefuller`),
             fetch(`https://api.openweathermap.org/data/2.5/forecast?lat=${lat}&lon=${long}&appid=${OPENWX_API_KEY}&units=imperial`)
@@ -74,9 +74,11 @@ function fetchWeatherData(lat, long) {
             })
             .catch(error => {
                 console.error('Error fetching weather data: ', error);
+                customLog('Error fetching weather data: ', error);
             });
     } else {
         console.error('Cannot fetch weather data without valid coordinates.');
+        customLog('Cannot fetch weather data without valid coordinates.');
     }
 }
 
@@ -225,7 +227,7 @@ function fetchSunData(lat, long) {
     ])
         .then(([sunResponse, moonResponse]) => Promise.all([sunResponse.json(), moonResponse.json()]))
         .then(([sunData, moonData]) => {
-            // console.log('Sun data:', sunData);
+            // customLog('Sun data:', sunData);
             sunrise = sunData.results.sunrise;
             sunset = sunData.results.sunset;
             moonPhaseData = moonData[0];
@@ -255,6 +257,7 @@ function fetchSunData(lat, long) {
         })
         .catch(error => {
             console.error('Error fetching sun/moon data: ', error);
+            customLog('Error fetching sun/moon data: ', error);
         });
 }
 
