@@ -179,8 +179,12 @@ function showHourlyForecast(dayIndex) {
             hour: 'numeric',
             minute: '2-digit'
         });
+        
+        // Get weather condition class
+        const weatherCondition = item.weather[0].main.toLowerCase();
+        
         return `
-            <div class="hourly-item">
+            <div class="hourly-item ${weatherCondition}">
                 <div class="hourly-time">${time}</div>
                 <img src="https://openweathermap.org/img/wn/${item.weather[0].icon}@2x.png" alt="${item.weather[0].description}" style="width: 50px; height: 50px;">
                 <div class="hourly-temp">${Math.round(item.main.temp)}°F</div>

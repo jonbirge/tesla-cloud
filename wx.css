@@ -1,3 +1,29 @@
+:root {    
+    --sky-clear-top: #e6f7ff;
+    --sky-clear-bottom: #a8d0f0;
+    --sky-cloudy-top: #eaeaea;
+    --sky-cloudy-bottom: #c5d5e2;
+    --sky-rainy-top: #d6e4f0;
+    --sky-rainy-bottom: #94a8bb;
+    --sky-storm-top: #c9d6e2;
+    --sky-storm-bottom: #7b8a9a;
+    --sky-snow-top: #f0f5fb;
+    --sky-snow-bottom: #d9e2eb;
+}
+
+body.dark-mode {
+    --sky-clear-top: #0a1020;
+    --sky-clear-bottom: #441a45;
+    --sky-cloudy-top: #262729;
+    --sky-cloudy-bottom: #142236;
+    --sky-rainy-top: #262729;
+    --sky-rainy-bottom: #2a3040;
+    --sky-storm-top: #080e18;
+    --sky-storm-bottom: #292b2e;
+    --sky-snow-top: #363c43;
+    --sky-snow-bottom: #3c3430;
+}
+
 /* Weather Elements */
 .weather-switch-container {
     display: flex;
@@ -196,10 +222,33 @@
 }
 
 .hourly-item {
-    background: var(--bg-color);
+    background: linear-gradient(to bottom, var(--sky-gradient-top), var(--sky-gradient-bottom));
     padding: 15px;
     border-radius: var(--button-radius);
     text-align: center;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    transition: background 0.3s ease;
+}
+
+/* Weather condition-specific gradients for hourly items */
+.hourly-item.clear {
+    background: linear-gradient(to bottom, var(--sky-clear-top), var(--sky-clear-bottom));
+}
+
+.hourly-item.clouds {
+    background: linear-gradient(to bottom, var(--sky-cloudy-top), var(--sky-cloudy-bottom));
+}
+
+.hourly-item.rain {
+    background: linear-gradient(to bottom, var(--sky-rainy-top), var(--sky-rainy-bottom));
+}
+
+.hourly-item.storm, .hourly-item.thunderstorm {
+    background: linear-gradient(to bottom, var(--sky-storm-top), var(--sky-storm-bottom));
+}
+
+.hourly-item.snow {
+    background: linear-gradient(to bottom, var(--sky-snow-top), var(--sky-snow-bottom));
 }
 
 .hourly-time {
