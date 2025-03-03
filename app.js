@@ -204,8 +204,8 @@ async function updateNews() {
             
             return `
                 <button class="news-item" onclick="loadExternalUrl('${item.link}')">
+                    <img src="${faviconUrl}" class="news-favicon" onerror="this.style.display='none'">
                     <div>
-                        <img src="${faviconUrl}" class="news-favicon" onerror="this.style.display='none'">
                         <span class="news-source">${item.source.toUpperCase()}</span>
                         <span class="news-date">${dateString}</span>
                         <span class="news-time">${timeString}</span>

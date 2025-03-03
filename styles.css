@@ -477,7 +477,7 @@ input:checked + .toggle-slider:before {
 
 .news-item {
     margin-bottom: 10px;  /* Increased from 9px */
-    padding: 10px;        /* Increased from 9px */
+    padding: 10px 10px 10px 54px;  /* Increased left padding from 46px to 54px */
     background-color: var(--button-bg);
     border-radius: var(--button-radius);
     transition: background-color 0.3s;
@@ -485,6 +485,7 @@ input:checked + .toggle-slider:before {
     width: 100%;
     text-align: left;
     cursor: pointer;
+    position: relative;  /* Added for absolute positioning of the favicon */
 }
 
 .news-item:hover {
@@ -519,10 +520,11 @@ input:checked + .toggle-slider:before {
 }
 
 .news-favicon {
-    width: 24px;      /* Increased from 16px */
-    height: 24px;     /* Increased from 16px */
-    margin-right: 6px;
-    margin-top: -4px;
-    vertical-align: middle;
-    display: inline-block;
+    position: absolute;  /* Position absolutely within the news-item */
+    left: 10px;         /* Position on the left side with some padding */
+    top: 50%;           /* Center vertically */
+    transform: translateY(-50%);  /* Perfect vertical centering */
+    width: 32px;        /* Slightly increased width */
+    height: 32px;       /* Slightly increased height */
+    border-radius: 4px; /* Optional: adds a slight rounding to the icons */
 }
