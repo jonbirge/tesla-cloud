@@ -16,6 +16,7 @@ const TEST_MAX_SPEED = 75; // mph
 const TEST_MIN_ALT = 100;
 const TEST_MAX_ALT = 200;
 const OPENWX_API_KEY = '6a1b1bcb03b5718a9b3a2b108ce3293d';
+const MIN_GPS_UPDATE_INTERVAL = 500; // ms - minimum time between updates
 const SAT_URLS = {
     latest: 'https://cdn.star.nesdis.noaa.gov/GOES16/GLM/CONUS/EXTENT3/1250x750.jpg',
     loop: 'https://cdn.star.nesdis.noaa.gov/GOES16/GLM/CONUS/EXTENT3/GOES16-CONUS-EXTENT3-625x375.gif',
@@ -44,6 +45,8 @@ let testModeAlt = TEST_MIN_ALT;
 let testModeSpeedIncreasing = true;
 let testModeAltIncreasing = true;
 let radarContext = null;
+let gpsIntervalId = null;
+let lastGPSUpdate = 0;
 
 // Custom log function that prepends the current time
 function customLog(...args) {
@@ -549,6 +552,44 @@ function updateGPS() {
     }
 }
 
+// Modified updateGPS wrapper with throttling
+function throttledUpdateGPS() {
+    const now = Date.now();
+    if (now - lastGPSUpdate >= MIN_GPS_UPDATE_INTERVAL) {
+        lastGPSUpdate = now;
+        updateGPS();
+    } else {
+        customLog('Skipping rapid GPS update');
+    }
+}
+
+// Function to start the GPS updates
+function startGPSUpdates() {
+    if (!gpsIntervalId) {
+        updateGPS(); // Call immediately
+        gpsIntervalId = setInterval(throttledUpdateGPS, 1000*LATLON_UPDATE_INTERVAL);
+        customLog('GPS updates started');
+    }
+}
+
+// Function to stop the GPS updates
+function stopGPSUpdates() {
+    if (gpsIntervalId) {
+        clearInterval(gpsIntervalId);
+        gpsIntervalId = null;
+        customLog('GPS updates paused');
+    }
+}
+
+// Handle page visibility changes
+document.addEventListener('visibilitychange', () => {
+    if (document.hidden) {
+        stopGPSUpdates();
+    } else {
+        startGPSUpdates();
+    }
+});
+
 // Get initial section from URL parameter
 function getInitialSection() {
     const params = new URLSearchParams(window.location.search);
@@ -673,6 +714,5 @@ initializeRadar();
 // Show the initial section from URL parameter
 showSection(getInitialSection());
 
-// Update location frequently but only trigger dependent updates when moved significantly
-updateGPS();
-setInterval(updateGPS, 1000*LATLON_UPDATE_INTERVAL);
+// Replace the direct GPS update calls at the end of your script with:
+startGPSUpdates();
