@@ -1,3 +1,10 @@
+// Global variables
+let lastWxUpdate = 0;
+let lastWxUpdateLat = null;
+let lastWxUpdateLong = null;
+let forecastData = null;
+let weatherData = null;
+
 // Convert numerical phase to human-readable name
 function getMoonPhaseName(phase) {
     if (phase === 0 || phase === 1) return "New Moon";
@@ -32,38 +39,45 @@ function switchWeatherImage(type) {
 }
 
 function fetchWeatherData(lat, long) {
-    console.log('Fetching weather data...');
-    Promise.all([
-        fetch(`https://secure.geonames.org/findNearByWeatherJSON?lat=${lat}&lng=${long}&username=birgefuller`),
-        !forecastFetched ? fetch(`https://api.openweathermap.org/data/2.5/forecast?lat=${lat}&lon=${long}&appid=${OPENWX_API_KEY}&units=imperial`) : Promise.resolve(null)
-    ])
-        .then(([currentResponse, forecastResponse]) => Promise.all([
-            currentResponse.json(),
-            forecastResponse ? forecastResponse.json() : null
-        ]))
-        .then(([currentData, forecastDataResponse]) => {
-            if (currentData.weatherObservation) {
-                // check to see if wind direction is NaN
-                if (isNaN(currentData.weatherObservation.windDirection)) {
-                    currentData.weatherObservation.windDirection = null;
-                    currentData.weatherObservation.windSpeed = null;
-                } else {
-                    // take the reciprocal of the wind direction to get the wind vector
-                    currentData.weatherObservation.windDirection =
-                        (currentData.weatherObservation.windDirection + 180) % 360;
+    if (lat && long) {
+        console.log('Fetching weather data...');
+        Promise.all([
+            fetch(`https://secure.geonames.org/findNearByWeatherJSON?lat=${lat}&lng=${long}&username=birgefuller`),
+            fetch(`https://api.openweathermap.org/data/2.5/forecast?lat=${lat}&lon=${long}&appid=${OPENWX_API_KEY}&units=imperial`)
+        ])
+            .then(([currentResponse, forecastResponse]) => Promise.all([
+                currentResponse.json(),
+                forecastResponse ? forecastResponse.json() : null
+            ]))
+            .then(([currentData, forecastDataResponse]) => {
+                if (currentData) {
+                    // check to see if wind direction is NaN
+                    if (isNaN(currentData.weatherObservation.windDirection)) {
+                        currentData.weatherObservation.windDirection = null;
+                        currentData.weatherObservation.windSpeed = null;
+                    } else {
+                        // take the reciprocal of the wind direction to get the wind vector
+                        currentData.weatherObservation.windDirection =
+                            (currentData.weatherObservation.windDirection + 180) % 360;
+                    }
+                    weatherData = currentData.weatherObservation;
+                    updateWeatherDisplay();
                 }
-                weatherData = currentData.weatherObservation;
-                updateWeatherDisplay();
-            }
             
-            if (forecastDataResponse && !forecastFetched) {
-                updateForecastDisplay(forecastDataResponse);
-                forecastFetched = true;
-            }
-        })
-        .catch(error => {
-            console.error('Error fetching weather data: ', error);
-        });
+                if (forecastDataResponse) {
+                    updateForecastDisplay(forecastDataResponse);
+                }
+
+                lastWxUpdate = Date.now();
+                lastWxUpdateLat = lat;
+                lastWxUpdateLong = long;
+            })
+            .catch(error => {
+                console.error('Error fetching weather data: ', error);
+            });
+    } else {
+        console.error('Cannot fetch weather data without valid coordinates.');
+    }
 }
 
 function hasHazards(forecastData) {
@@ -238,4 +252,31 @@ function fetchSunData(lat, long) {
         .catch(error => {
             console.error('Error fetching sun/moon data: ', error);
         });
+}
+
+// Update Wx data if it's been more than 30 minutes since the last update
+// OR if we've moved more than 5 km since the last update
+function shouldUpdateWeatherData() {
+    // Check if we've never updated weather data
+    if (lastWxUpdate === 0 || lastWxUpdateLat === null || lastWxUpdateLong === null) {
+        return true;
+    }
+    
+    // Check time threshold using WX_TIME_THRESHOLD constant
+    const now = Date.now();
+    const timeSinceLastUpdate = now - lastWxUpdate;
+    if (timeSinceLastUpdate >= WX_TIME_THRESHOLD * 60 * 1000) { // Convert minutes to milliseconds
+        return true;
+    }
+    
+    // Check distance threshold using WX_DISTANCE_THRESHOLD constant
+    if (lat !== null && long !== null) {
+        const distance = calculateDistance(lat, long, lastWxUpdateLat, lastWxUpdateLong);
+        if (distance >= WX_DISTANCE_THRESHOLD) { // Use constant for meters
+            return true;
+        }
+    }
+    
+    // No need to update weather data
+    return false;
 }

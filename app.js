@@ -2,6 +2,8 @@
 const LATLON_UPDATE_INTERVAL = 2; // seconds
 const UPDATE_DISTANCE_THRESHOLD = 1000; // meters
 const UPDATE_TIME_THRESHOLD = 10; // minutes
+const WX_DISTANCE_THRESHOLD = 5000; // meters
+const WX_TIME_THRESHOLD = 30; // minutes
 const NEWS_REFRESH_INTERVAL = 5; // minutes
 const MAX_BUFFER_SIZE = 5;
 const GEONAMES_USERNAME = 'birgefuller';
@@ -22,13 +24,13 @@ const SAT_URLS = {
 
 // Global variables
 let driving_test_mode = false; // Set to true if test parameter exists
-let lastUpdate = 0;
-let neverUpdatedLocation = true;
-let lat = null;
-let long = null;
+let lastUpdate = 0; // Timestamp of last location update
 let lastUpdateLat = null;
 let lastUpdateLong = null;
 let lastKnownHeading = null;
+let neverUpdatedLocation = true;
+let lat = null;
+let long = null;
 let pingChart = null;
 let pingInterval = null;
 let pingData = [];
@@ -42,9 +44,6 @@ let testModeAlt = TEST_MIN_ALT;
 let testModeSpeedIncreasing = true;
 let testModeAltIncreasing = true;
 let radarContext = null;
-let weatherData = null;
-let forecastFetched = false;
-let forecastData = null;
 
 function toggleMode() {
     manualDarkMode = true;
@@ -65,18 +64,6 @@ function calculateDistance(lat1, lon1, lat2, lon2) {
             Math.sin(Δλ/2) * Math.sin(Δλ/2);
     const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
     return R * c; // returns distance in meters
-}
-
-function shouldUpdateLocationData() {
-    if (neverUpdatedLocation || !lastUpdateLat || !lastUpdateLong) {
-        return true;
-    }
-
-    const now = Date.now();
-    const timeSinceLastUpdate = (now - lastUpdate) / (1000 * 60); // Convert to minutes
-    const distance = calculateDistance(lat, long, lastUpdateLat, lastUpdateLong);
-    
-    return distance >= UPDATE_DISTANCE_THRESHOLD || timeSinceLastUpdate >= UPDATE_TIME_THRESHOLD;
 }
 
 function fetchCityData(lat, long) {
@@ -234,8 +221,6 @@ function initializeRadar() {
 }
 
 function updateWindage(vehicleSpeed, vehicleHeading, windSpeed, windDirection) {
-    if (!radarContext) return;
-
     const canvas = radarContext.canvas;
     const centerX = canvas.width / 2;
     const centerY = canvas.height / 2;
@@ -289,9 +274,6 @@ function updateWindage(vehicleSpeed, vehicleHeading, windSpeed, windDirection) {
     function drawLabel(text, x, y) {
         const padding = 4;
         const metrics = radarContext.measureText(text);
-        //const width = metrics.width + padding * 2;
-        //const height = 16;
-        
         radarContext.fillStyle = '#666';
         radarContext.fillText(text, x, y);
     }
@@ -374,7 +356,7 @@ function updateWindage(vehicleSpeed, vehicleHeading, windSpeed, windDirection) {
 }
 
 async function updateLocationData(lat, long) {
-    if (lat !== null && long !== null) {
+    if (lat && long) {
         console.log('Updating location dependent data...');
         neverUpdatedLocation = false;
 
@@ -383,7 +365,6 @@ async function updateLocationData(lat, long) {
         console.log('Timezone: ', locationTimeZone);
         fetchCityData(lat, long);
         fetchSunData(lat, long);
-        // fetchWeatherData(lat, long);
 
         // Update connectivity data if the Network section is visible
         const networkSection = document.getElementById("network");
@@ -398,6 +379,10 @@ async function updateLocationData(lat, long) {
             console.log('Updating Wikipedia data...');
             fetchWikipediaData(lat, long);
         }
+
+        lastUpdateLat = lat;
+        lastUpdateLong = long;
+        lastUpdate = Date.now();
     } else {
         console.log('Location not available for dependent data.');
     }
@@ -456,6 +441,18 @@ function getTestModePosition() {
     };
 }
 
+function shouldUpdateLocationData() {
+    if (neverUpdatedLocation || !lastUpdateLat || !lastUpdateLong) {
+        return true;
+    }
+
+    const now = Date.now();
+    const timeSinceLastUpdate = (now - lastUpdate) / (1000 * 60); // Convert to minutes
+    const distance = calculateDistance(lat, long, lastUpdateLat, lastUpdateLong);
+    
+    return distance >= UPDATE_DISTANCE_THRESHOLD || timeSinceLastUpdate >= UPDATE_TIME_THRESHOLD;
+}
+
 function handlePositionUpdate(position) {
     lat = position.coords.latitude;
     long = position.coords.longitude;
@@ -466,7 +463,7 @@ function handlePositionUpdate(position) {
         lastKnownHeading = position.coords.heading;
     }
     
-    // Update radar display with current speed and heading iff navigation section is visible
+    // Update radar display with current speed and heading if nav section is visible
     const navigationSection = document.getElementById("navigation");
     if (navigationSection.style.display === "block") {
         // Update heading displays
@@ -492,9 +489,14 @@ function handlePositionUpdate(position) {
     // Check if we should update location-dependent API data
     if (shouldUpdateLocationData()) {
         updateLocationData(lat, long);
-        lastUpdateLat = lat;
-        lastUpdateLong = long;
-        lastUpdate = Date.now();
+    }
+
+    // Check if we should update the expensive weather API data
+    const weatherSection = document.getElementById("weather");
+    if (weatherSection.style.display === "block" || navigationSection.style.display === "block") {
+        if (shouldUpdateWeatherData()) {
+            fetchWeatherData(lat, long);
+        }
     }
 }
 
@@ -560,11 +562,13 @@ function showSection(sectionId) {
             }
         }
         
-        // Load weather data for both weather and navigation sections
+        // Load expensive weather data if not already done
         if (sectionId === 'weather' || sectionId === 'navigation') {
             // Load latest weather data
             if (lat !== null && long !== null) {
-                fetchWeatherData(lat, long);
+                if (!forecastData || !weatherData) {
+                    fetchWeatherData(lat, long);
+                }
             } else {
                 console.log('Location not available to fetch weather data.');
             }
