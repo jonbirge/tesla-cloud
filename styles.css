@@ -501,8 +501,8 @@ input:checked + .toggle-slider:before {
 }
 
 .news-item {
-    margin-bottom: 9px;
-    padding: 9px;
+    margin-bottom: 10px;  /* Increased from 9px */
+    padding: 10px;        /* Increased from 9px */
     background-color: var(--button-bg);
     border-radius: var(--button-radius);
     transition: background-color 0.3s;
@@ -524,12 +524,12 @@ input:checked + .toggle-slider:before {
     color: var(--tesla-blue);
     font-weight: 600;
     margin-right: 10px;
-    font-size: 12pt;
+    font-size: 13pt;  /* Increased from 12pt */
 }
 
 .news-time, .news-date {
     color: var(--text-color);
-    font-size: 12pt;
+    font-size: 13pt;  /* Increased from 12pt */
     font-weight: 500;
     margin-left: 5px;
     display: inline-block;
@@ -537,17 +537,17 @@ input:checked + .toggle-slider:before {
 
 .news-title {
     display: block;
-    margin-top: 3px;
+    margin-top: 4px;  /* Increased from 3px */
     color: var(--button-text);
-    font-size: 15pt;
+    font-size: 16pt;  /* Increased from 15pt */
     font-weight: 600;
 }
 
 .news-favicon {
-    width: 16px;
-    height: 16px;
+    width: 24px;      /* Increased from 16px */
+    height: 24px;     /* Increased from 16px */
     margin-right: 6px;
-    margin-top: -3px; /* Add negative margin to move up a few pixels */
+    margin-top: -4px;
     vertical-align: middle;
     display: inline-block;
 }
