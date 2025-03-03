@@ -5,6 +5,71 @@ let lastWxUpdateLong = null;
 let forecastData = null;
 let weatherData = null;
 
+// Mock weather data for test mode
+function generateMockWeatherData() {
+    return {
+        temperature: 72,
+        windSpeed: 6.7, // ~15 MPH when converted
+        windDirection: 180, // From the north (will be flipped by 180° in updateWeatherDisplay)
+        humidity: 45,
+        weatherCondition: "Clear",
+        stationName: "MOCK-STATION",
+        datetime: new Date().toISOString()
+    };
+}
+
+function generateMockForecastData() {
+    const now = Date.now();
+    const oneDayMs = 24 * 60 * 60 * 1000;
+    
+    // Create 5 days with different weather types
+    const weatherTypes = [
+        { main: "Clear", description: "clear sky", icon: "01d" },
+        { main: "Rain", description: "moderate rain", icon: "10d" },
+        { main: "Thunderstorm", description: "thunderstorm", icon: "11d" },
+        { main: "Snow", description: "light snow", icon: "13d" },
+        { main: "Clouds", description: "overcast clouds", icon: "04d" }
+    ];
+    
+    const mockList = [];
+    
+    // For each day, create entries at 3-hour intervals
+    for (let day = 0; day < 5; day++) {
+        const dayType = weatherTypes[day];
+        
+        // Create 8 entries per day (3-hour intervals)
+        for (let hour = 0; hour < 24; hour += 3) {
+            const entryTime = now + (day * oneDayMs) + (hour * 60 * 60 * 1000);
+            const tempVariation = Math.sin((hour / 24) * Math.PI) * 10;
+            const baseTemp = 65 + (day * 2); // Slight temperature increase each day
+            
+            mockList.push({
+                dt: Math.floor(entryTime / 1000),
+                main: {
+                    temp: baseTemp + tempVariation,
+                    temp_min: baseTemp - 5 + tempVariation,
+                    temp_max: baseTemp + 5 + tempVariation,
+                    humidity: 45 + (day * 5)
+                },
+                weather: [{ 
+                    id: 800 + (day * 100),
+                    main: dayType.main, 
+                    description: dayType.description,
+                    icon: dayType.icon
+                }]
+            });
+        }
+    }
+    
+    return {
+        list: mockList,
+        city: {
+            name: "Test City",
+            country: "TC"
+        }
+    };
+}
+
 // Convert numerical phase to human-readable name
 function getMoonPhaseName(phase) {
     if (phase === 0 || phase === 1) return "New Moon";
@@ -39,47 +104,63 @@ function switchWeatherImage(type) {
 }
 
 function fetchWeatherData(lat, long) {
-    if (lat && long) {
-        customLog('Fetching weather data...');
-        Promise.all([
-            fetch(`https://secure.geonames.org/findNearByWeatherJSON?lat=${lat}&lng=${long}&username=birgefuller`),
-            fetch(`https://api.openweathermap.org/data/2.5/forecast?lat=${lat}&lon=${long}&appid=${OPENWX_API_KEY}&units=imperial`)
-        ])
-            .then(([currentResponse, forecastResponse]) => Promise.all([
-                currentResponse.json(),
-                forecastResponse ? forecastResponse.json() : null
-            ]))
-            .then(([currentData, forecastDataResponse]) => {
-                if (currentData) {
-                    // check to see if wind direction is NaN
-                    if (isNaN(currentData.weatherObservation.windDirection)) {
-                        currentData.weatherObservation.windDirection = null;
-                        currentData.weatherObservation.windSpeed = null;
-                    } else {
-                        // take the reciprocal of the wind direction to get the wind vector
-                        currentData.weatherObservation.windDirection =
-                            (currentData.weatherObservation.windDirection + 180) % 360;
-                    }
-                    weatherData = currentData.weatherObservation;
-                    updateWeatherDisplay();
-                }
-            
-                if (forecastDataResponse) {
-                    updateForecastDisplay(forecastDataResponse);
-                }
-
-                lastWxUpdate = Date.now();
-                lastWxUpdateLat = lat;
-                lastWxUpdateLong = long;
-            })
-            .catch(error => {
-                console.error('Error fetching weather data: ', error);
-                customLog('Error fetching weather data: ', error);
-            });
-    } else {
-        console.error('Cannot fetch weather data without valid coordinates.');
-        customLog('Cannot fetch weather data without valid coordinates.');
+    if (!lat || !long) {
+        customLog('No location data available for weather fetch');
+        return;
     }
+
+    customLog('Fetching weather data...');
+
+    if (driving_test_mode) {
+        // Use mock data in test mode
+        customLog('Using mock weather data (test mode)');
+        weatherData = generateMockWeatherData();
+        updateWeatherDisplay();
+
+        const mockForecastData = generateMockForecastData();
+        updateForecastDisplay(mockForecastData);
+
+        lastWxUpdate = Date.now();
+        lastWxUpdateLat = lat;
+        lastWxUpdateLong = long;
+        return;
+    }
+
+    Promise.all([
+        fetch(`https://secure.geonames.org/findNearByWeatherJSON?lat=${lat}&lng=${long}&username=birgefuller`),
+        fetch(`https://api.openweathermap.org/data/2.5/forecast?lat=${lat}&lon=${long}&appid=${OPENWX_API_KEY}&units=imperial`)
+    ])
+        .then(([currentResponse, forecastResponse]) => Promise.all([
+            currentResponse.json(),
+            forecastResponse ? forecastResponse.json() : null
+        ]))
+        .then(([currentData, forecastDataResponse]) => {
+            if (currentData) {
+                // check to see if wind direction is NaN
+                if (isNaN(currentData.weatherObservation.windDirection)) {
+                    currentData.weatherObservation.windDirection = null;
+                    currentData.weatherObservation.windSpeed = null;
+                } else {
+                    // take the reciprocal of the wind direction to get the wind vector
+                    currentData.weatherObservation.windDirection =
+                        (currentData.weatherObservation.windDirection + 180) % 360;
+                }
+                weatherData = currentData.weatherObservation;
+                updateWeatherDisplay();
+            }
+
+            if (forecastDataResponse) {
+                updateForecastDisplay(forecastDataResponse);
+            }
+
+            lastWxUpdate = Date.now();
+            lastWxUpdateLat = lat;
+            lastWxUpdateLong = long;
+        })
+        .catch(error => {
+            console.error('Error fetching weather data: ', error);
+            customLog('Error fetching weather data: ', error);
+        });
 }
 
 function hasHazards(forecastData) {
@@ -221,6 +302,11 @@ function updateWeatherDisplay() {
 }
 
 function fetchSunData(lat, long) {
+    if (!lat || !long) {
+        customLog('No location data available for sun/moon fetch');
+        return;
+    }
+
     Promise.all([
         fetch(`https://api.sunrise-sunset.org/json?lat=${lat}&lng=${long}&formatted=0`),
         fetch(`https://api.farmsense.net/v1/moonphases/?d=${Math.floor(Date.now() / 1000)}`)

@@ -1,7 +1,7 @@
 // Settings
 const LATLON_UPDATE_INTERVAL = 2; // seconds
 const UPDATE_DISTANCE_THRESHOLD = 1000; // meters
-const UPDATE_TIME_THRESHOLD = 10; // minutes
+const UPDATE_TIME_THRESHOLD = 15; // minutes
 const WX_DISTANCE_THRESHOLD = 5000; // meters
 const WX_TIME_THRESHOLD = 30; // minutes
 const NEWS_REFRESH_INTERVAL = 5; // minutes
