@@ -192,8 +192,19 @@ async function updateNews() {
                 timeZoneName: 'short'
             });
             
+            // Extract domain for favicon
+            let faviconUrl = '';
+            try {
+                const url = new URL(item.link);
+                faviconUrl = `https://${url.hostname}/favicon.ico`;
+            } catch (e) {
+                console.error("Invalid URL:", item.link);
+                faviconUrl = 'favicon.ico'; // Default fallback
+            }
+            
             return `
                 <button class="news-item" onclick="loadExternalUrl('${item.link}')">
+                    <img src="${faviconUrl}" class="news-favicon" onerror="this.style.display='none'">
                     <div>
                         <span class="news-source">${item.source.toUpperCase()}</span>
                         <span class="news-date">${dateString}</span>

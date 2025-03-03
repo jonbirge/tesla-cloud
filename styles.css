@@ -14,18 +14,6 @@
     --button-radius: 13px;
     --sky-gradient-top: #e6f7ff;
     --sky-gradient-bottom: #a8d0f0;
-    
-    /* Weather condition-specific gradients */
-    --sky-clear-top: #e6f7ff;
-    --sky-clear-bottom: #a8d0f0;
-    --sky-cloudy-top: #eaeaea;
-    --sky-cloudy-bottom: #c5d5e2;
-    --sky-rainy-top: #d6e4f0;
-    --sky-rainy-bottom: #94a8bb;
-    --sky-storm-top: #c9d6e2;
-    --sky-storm-bottom: #7b8a9a;
-    --sky-snow-top: #f0f5fb;
-    --sky-snow-bottom: #d9e2eb;
 }
 
 body.dark-mode {
@@ -40,18 +28,6 @@ body.dark-mode {
     --weather-switch-slider: #222222;
     --sky-gradient-top: #0a1020;
     --sky-gradient-bottom: #1a2845;
-    
-    /* Weather condition-specific gradients for dark mode */
-    --sky-clear-top: #0a1020;
-    --sky-clear-bottom: #441a45;
-    --sky-cloudy-top: #262729;
-    --sky-cloudy-bottom: #1c2a3e;
-    --sky-rainy-top: #262729;
-    --sky-rainy-bottom: #2a3040;
-    --sky-storm-top: #080e18;
-    --sky-storm-bottom: #292b2e;
-    --sky-snow-top: #363c43;
-    --sky-snow-bottom: #3c3430;
 }
 
 /* Basic HTML Elements */
@@ -65,7 +41,6 @@ body {
     font-size: 17pt;
     padding: 0;
     text-align: left;
-    /* margin: 0 auto; */
     word-spacing: normal;
     font-weight: 500;
     font-optical-sizing: auto;
@@ -501,8 +476,8 @@ input:checked + .toggle-slider:before {
 }
 
 .news-item {
-    margin-bottom: 9px;
-    padding: 9px;
+    margin-bottom: 10px;  /* Increased from 9px */
+    padding: 10px 10px 10px 54px;  /* Increased left padding from 46px to 54px */
     background-color: var(--button-bg);
     border-radius: var(--button-radius);
     transition: background-color 0.3s;
@@ -510,6 +485,7 @@ input:checked + .toggle-slider:before {
     width: 100%;
     text-align: left;
     cursor: pointer;
+    position: relative;  /* Added for absolute positioning of the favicon */
 }
 
 .news-item:hover {
@@ -524,12 +500,12 @@ input:checked + .toggle-slider:before {
     color: var(--tesla-blue);
     font-weight: 600;
     margin-right: 10px;
-    font-size: 12pt;
+    font-size: 13pt;  /* Increased from 12pt */
 }
 
 .news-time, .news-date {
     color: var(--text-color);
-    font-size: 12pt;
+    font-size: 13pt;  /* Increased from 12pt */
     font-weight: 500;
     margin-left: 5px;
     display: inline-block;
@@ -537,8 +513,18 @@ input:checked + .toggle-slider:before {
 
 .news-title {
     display: block;
-    margin-top: 3px;
+    margin-top: 4px;  /* Increased from 3px */
     color: var(--button-text);
-    font-size: 15pt;
+    font-size: 16pt;  /* Increased from 15pt */
     font-weight: 600;
+}
+
+.news-favicon {
+    position: absolute;  /* Position absolutely within the news-item */
+    left: 10px;         /* Position on the left side with some padding */
+    top: 50%;           /* Center vertically */
+    transform: translateY(-50%);  /* Perfect vertical centering */
+    width: 32px;        /* Slightly increased width */
+    height: 32px;       /* Slightly increased height */
+    border-radius: 4px; /* Optional: adds a slight rounding to the icons */
 }
