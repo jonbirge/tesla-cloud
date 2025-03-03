@@ -44,7 +44,7 @@ body.dark-mode {
     /* Weather condition-specific gradients for dark mode */
     --sky-clear-top: #0a1020;
     --sky-clear-bottom: #441a45;
-    --sky-cloudy-top: #1a1a1a;
+    --sky-cloudy-top: #262729;
     --sky-cloudy-bottom: #1c2a3e;
     --sky-rainy-top: #262729;
     --sky-rainy-bottom: #2a3040;
