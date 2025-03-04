@@ -299,6 +299,14 @@ function updateWeatherDisplay() {
     } else {
         document.getElementById('wind').innerText = '--';
     }
+
+    // Update wx-time with the time of the weather update
+    const wxTimeElement = document.getElementById('wx-time');
+    const updateTime = new Date(weatherData.datetime);
+    wxTimeElement.innerText = updateTime.toLocaleTimeString('en-US', {
+        hour: '2-digit',
+        minute: '2-digit'
+    });
 }
 
 function fetchSunData(lat, long) {
