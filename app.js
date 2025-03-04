@@ -10,13 +10,13 @@ const GEONAMES_USERNAME = 'birgefuller';
 const MAX_SPEED = 50; // Maximum speed for radar display (mph)
 const TEST_CENTER_LAT = 39.7392; // Denver
 const TEST_CENTER_LONG = -104.9903; // Denver
-const TEST_CIRCLE_RADIUS = 1; // miles
-const TEST_MIN_SPEED = 55; // mph
-const TEST_MAX_SPEED = 75; // mph
-const TEST_MIN_ALT = 100;
-const TEST_MAX_ALT = 200;
+const TEST_CIRCLE_RADIUS = 10; // miles
+const TEST_MIN_SPEED = 75; // mph
+const TEST_MAX_SPEED = 95; // mph
+const TEST_MIN_ALT = 50;
+const TEST_MAX_ALT = 250;
 const OPENWX_API_KEY = '6a1b1bcb03b5718a9b3a2b108ce3293d';
-const MIN_GPS_UPDATE_INTERVAL = 500; // ms - minimum time between updates
+const MIN_GPS_UPDATE_INTERVAL = 1000; // ms - minimum time between updates
 const SAT_URLS = {
     latest: 'https://cdn.star.nesdis.noaa.gov/GOES16/GLM/CONUS/EXTENT3/1250x750.jpg',
     loop: 'https://cdn.star.nesdis.noaa.gov/GOES16/GLM/CONUS/EXTENT3/GOES16-CONUS-EXTENT3-625x375.gif',
@@ -62,8 +62,14 @@ function toggleMode() {
     document.getElementById('darkModeToggle').checked = darkOn;
 }
 
-function highlightUpdate(id) {
+function highlightUpdate(id, content = null) {
     const element = document.getElementById(id);
+    if (content !== null) {
+        if (element.innerHTML === content) {
+            return; // Exit if content is the same
+        }
+        element.innerHTML = content;
+    }
     const highlightColor =
         document.body.classList.contains('dark-mode') ? 'orange' : 'red';
     element.style.color = highlightColor;
@@ -97,11 +103,8 @@ function fetchCityData(lat, long) {
         .then(response => response.json())
         .then(cityData => {
             const place = cityData.geonames && cityData.geonames[0];
-            document.getElementById('city').innerText =
-                place ? (place.name || 'N/A') : 'N/A';
-            document.getElementById('state').innerText =
-                place ? (place.adminName1 || 'N/A') : 'N/A';
-            highlightUpdate('city'); // Highlight the city update
+            highlightUpdate('city', place ? (place.name || 'N/A') : 'N/A'); // Highlight the city update
+            highlightUpdate('state', place ? (place.adminName1 || 'N/A') : 'N/A'); // Highlight the state update
         })
         .catch(error => {
             console.error('Error fetching city data:', error);
@@ -109,19 +112,22 @@ function fetchCityData(lat, long) {
 }
 
 async function fetchTimeZone(lat, long) {
-    if (!lat || !long) {
-        customLog('Location not available for time zone.');
-        return 'UTC';
-    }
-
     try {
+        if (!lat || !long) {
+            throw new Error('Location not available.');
+        }
         const response = await fetch(`https://secure.geonames.org/timezoneJSON?lat=${lat}&lng=${long}&username=${GEONAMES_USERNAME}`);
         const tzData = await response.json();
-        return tzData.timezoneId || 'UTC';
+        if (!tzData || !tzData.timezoneId) {
+            throw new Error('Timezone not returned from server.');
+        }
+        return tzData.timezoneId;
     } catch (error) {
         console.error('Error fetching time zone: ', error);
         customLog('Error fetching time zone: ', error);
-        return 'UTC';
+        const tz = Intl.DateTimeFormat().resolvedOptions().timeZone;
+        customLog('Using timezone: ', tz);
+        return tz;
     }
 }
 
@@ -163,7 +169,6 @@ async function fetchWikipediaData(lat, long) {
         if (data.geonames && data.geonames.length > 0) {
             let html = '<ul>';
             data.geonames.forEach(article => {
-                // Ensure URL starts with http:// for proper linking
                 const pageUrl = article.wikipediaUrl.startsWith('http') ? article.wikipediaUrl : 'http://' + article.wikipediaUrl;
                 html += `<li><a href="${pageUrl}" target="_blank">${article.title}</a>: ${article.summary}</li>`;
             });
@@ -408,36 +413,37 @@ function updateWindage(vehicleSpeed, vehicleHeading, windSpeed, windDirection) {
 }
 
 async function updateLocationData(lat, long) {
-    if (lat && long) {
-        customLog('Updating location dependent data for (', lat, ', ', long, ')');
-        neverUpdatedLocation = false;
-
-        // Fire off API requests for external data
-        locationTimeZone = await fetchTimeZone(lat, long);
-        customLog('Timezone: ', locationTimeZone);
-        fetchCityData(lat, long);
-        fetchSunData(lat, long);
-
-        // Update connectivity data if the Network section is visible
-        const networkSection = document.getElementById("network");
-        if (networkSection.style.display === "block") {
-            customLog('Updating connectivity data...');
-            updateNetworkInfo();
-        }
-
-        // Update Wikipedia data if the Landmarks section is visible
-        const locationSection = document.getElementById("landmarks");
-        if (locationSection.style.display === "block") {
-            customLog('Updating Wikipedia data...');
-            fetchWikipediaData(lat, long);
-        }
-
-        lastUpdateLat = lat;
-        lastUpdateLong = long;
-        lastUpdate = Date.now();
-    } else {
-        customLog('Location not available for dependent data.');
+    if (!lat || !long) {
+        customLog('Location not available for location data.');
+        return;
     }
+
+    customLog('Updating location dependent data for (', lat, ', ', long, ')');
+    neverUpdatedLocation = false;
+
+    // Fire off API requests for external data
+    locationTimeZone = await fetchTimeZone(lat, long);
+    customLog('Timezone: ', locationTimeZone);
+    fetchCityData(lat, long);
+    fetchSunData(lat, long);
+
+    // Update connectivity data if the Network section is visible
+    const networkSection = document.getElementById("network");
+    if (networkSection.style.display === "block") {
+        customLog('Updating connectivity data...');
+        updateNetworkInfo();
+    }
+
+    // Update Wikipedia data if the Landmarks section is visible
+    const locationSection = document.getElementById("landmarks");
+    if (locationSection.style.display === "block") {
+        customLog('Updating Wikipedia data...');
+        fetchWikipediaData(lat, long);
+    }
+
+    lastUpdateLat = lat;
+    lastUpdateLong = long;
+    lastUpdate = Date.now();
 }
 
 function getTestModePosition() {
@@ -477,7 +483,6 @@ function getTestModePosition() {
     }
 
     // Calculate heading based on movement around the circle
-    // We add 90 degrees because moving east is 90° and we start heading east when angle is 0
     const heading = (((testModeAngle * 180 / Math.PI) + 90) % 360);
 
     return {
@@ -489,7 +494,7 @@ function getTestModePosition() {
             heading: heading,
             accuracy: 5, // Simulate a good GPS signal with 5m accuracy
         },
-        timestamp: Date.now()
+        timestamp: Date.now(),
     };
 }
 

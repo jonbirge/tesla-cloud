@@ -293,24 +293,25 @@ function updateWeatherDisplay() {
     const windDir = weatherData.windDirection;
     const humidity = weatherData.humidity;
 
-    document.getElementById('humidity').innerText = `${humidity}%`;
+    highlightUpdate('humidity', `${humidity}%`);
     if (windDir && windSpeedMPH) {
-        document.getElementById('wind').innerText = `${Math.round(windSpeedMPH)} mph at ${Math.round(windDir)}°`;
+        highlightUpdate('wind',
+            `${Math.round(windSpeedMPH)} mph at ${Math.round(windDir)}°`);
     } else {
-        document.getElementById('wind').innerText = '--';
+        highlightUpdate('wind', '--');
     }
 
     // Update wx-time with the time of the weather update
-    const wxTimeElement = document.getElementById('wx-time');
     const updateTime = new Date(weatherData.datetime);
-    wxTimeElement.innerText = updateTime.toLocaleTimeString('en-US', {
+    const wxUpdateTime = updateTime.toLocaleTimeString('en-US', {
         hour: '2-digit',
         minute: '2-digit'
     });
+    highlightUpdate('wx-time', wxUpdateTime);
 
     // Update station name
-    const stationNameElement = document.getElementById('stationName');
-    stationNameElement.innerText = weatherData.stationName || 'N/A';
+    const stationName = weatherData.stationName || '';
+    highlightUpdate('stationName', stationName);
 }
 
 function fetchSunData(lat, long) {
@@ -325,32 +326,27 @@ function fetchSunData(lat, long) {
     ])
         .then(([sunResponse, moonResponse]) => Promise.all([sunResponse.json(), moonResponse.json()]))
         .then(([sunData, moonData]) => {
-            // customLog('Sun data:', sunData);
             sunrise = sunData.results.sunrise;
             sunset = sunData.results.sunset;
             moonPhaseData = moonData[0];
             
-            const sunriseElements = document.querySelectorAll('[id="sunrise"]');
-            const sunsetElements = document.querySelectorAll('[id="sunset"]');
             const moonphaseElements = document.querySelectorAll('[id="moonphase"]');
             
-            sunriseElements.forEach(element => {
-                element.innerText = new Date(sunrise).toLocaleTimeString('en-US', {
-                    timeZone: locationTimeZone || 'UTC',
-                    timeZoneName: 'short'
-                });
+            const sunriseTime = new Date(sunrise).toLocaleTimeString('en-US', {
+                timeZone: locationTimeZone,
+                timeZoneName: 'short'
             });
-            sunsetElements.forEach(element => {
-                element.innerText = new Date(sunset).toLocaleTimeString('en-US', {
-                    timeZone: locationTimeZone || 'UTC',
-                    timeZoneName: 'short'
-                });
+            highlightUpdate('sunrise', sunriseTime);
+
+            const sunsetTime = new Date(sunset).toLocaleTimeString('en-US', {
+                timeZone: locationTimeZone,
+                timeZoneName: 'short'
             });
-            moonphaseElements.forEach(element => {
-                element.innerText = getMoonPhaseName(moonPhaseData.Phase);
-            });
+            highlightUpdate('sunset', sunsetTime);
+
+            const moonPhase = getMoonPhaseName(moonPhaseData.Phase);
+            highlightUpdate('moonphase', moonPhase);
             
-            // Automatically apply dark mode based on the local time
             updateAutoDarkMode();
         })
         .catch(error => {
