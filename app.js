@@ -47,6 +47,7 @@ let testModeAltIncreasing = true;
 let radarContext = null;
 let gpsIntervalId = null;
 let lastGPSUpdate = 0;
+let pendingHighlights = {}; // Store elements that need highlighting when sections become visible
 
 // Custom log function that prepends the current time
 function customLog(...args) {
@@ -64,15 +65,43 @@ function toggleMode() {
 
 function highlightUpdate(id, content = null) {
     const element = document.getElementById(id);
+    if (!element) return;
+    
     if (content !== null) {
         if (element.innerHTML === content) {
             return; // Exit if content is the same
         }
         element.innerHTML = content;
     }
-    const highlightColor =
-        document.body.classList.contains('dark-mode') ? 'orange' : 'red';
-    element.style.color = highlightColor;
+    
+    // Find which section this element belongs to
+    const sectionEl = element.closest('.section');
+    if (!sectionEl) {
+        // Element not in a section, highlight immediately
+        applyHighlight(element);
+        return;
+    }
+    
+    const sectionId = sectionEl.id;
+    
+    // Check if the section is currently visible
+    if (sectionEl.style.display === 'block') {
+        // Section is visible, highlight immediately
+        applyHighlight(element);
+    } else {
+        // Section is hidden, queue the highlight for later
+        if (!pendingHighlights[sectionId]) {
+            pendingHighlights[sectionId] = [];
+        }
+        pendingHighlights[sectionId].push(id);
+        customLog(`Queued highlight for ${id} in hidden section ${sectionId}`);
+    }
+}
+
+// Function to actually apply the highlight effect
+function applyHighlight(element) {
+    const isDark = document.body.classList.contains('dark-mode');
+    element.style.color = isDark ? 'orange' : 'red';
     setTimeout(() => {
         element.style.transition = 'color 2s';
         element.style.color = ''; // Reset to default color
@@ -638,6 +667,19 @@ function showSection(sectionId) {
     const section = document.getElementById(sectionId);
     if (section) {
         section.style.display = 'block';
+
+        // Process any pending highlights for this section
+        if (pendingHighlights[sectionId] && pendingHighlights[sectionId].length > 0) {
+            customLog(`Processing ${pendingHighlights[sectionId].length} queued highlights for section ${sectionId}`);
+            pendingHighlights[sectionId].forEach(elementId => {
+                const element = document.getElementById(elementId);
+                if (element) {
+                    applyHighlight(element);
+                }
+            });
+            // Clear the queue after processing
+            pendingHighlights[sectionId] = [];
+        }
 
         // Original section-specific logic
         if (sectionId === 'news') {
