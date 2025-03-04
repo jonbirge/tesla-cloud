@@ -498,9 +498,9 @@ input:checked + .toggle-slider:before {
 
 .news-source {
     color: var(--tesla-blue);
-    font-weight: 600;
+    font-weight: 650;
     margin-right: 10px;
-    font-size: 13pt;  /* Increased from 12pt */
+    font-size: 11.5pt;
 }
 
 .news-time, .news-date {

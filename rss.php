@@ -67,6 +67,7 @@ $feeds = [
     //'bloomberg' => 'https://feeds.bloomberg.com/news.rss',
     'theverge' => 'https://www.theverge.com/rss/index.xml',
     // 'jalopnik' => 'https://jalopnik.com/rss',
+    'bos' => 'https://www.boston.com/tag/local-news/feed/',
 ];
 
 function fetchRSS($url) {
