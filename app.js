@@ -72,6 +72,7 @@ function highlightUpdate(id, content = null) {
     }
     const highlightColor =
         document.body.classList.contains('dark-mode') ? 'orange' : 'red';
+    element.style.transition = 'color 0.5s';
     element.style.color = highlightColor;
     setTimeout(() => {
         element.style.transition = 'color 2s';

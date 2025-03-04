@@ -50,7 +50,7 @@ register_shutdown_function(function() {
 });
 
 // Create empty log file
-file_put_contents($logFile, '');
+file_put_contents($logFile, 'rss.php started...' . "\n");
 
 // Set the content type and add headers to prevent caching
 header('Cache-Control: no-cache, no-store, must-revalidate');
