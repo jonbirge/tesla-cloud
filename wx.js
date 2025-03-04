@@ -301,18 +301,28 @@ function updateWeatherDisplay() {
         highlightUpdate('wind', '--');
     }
 
-    // Update wx-time with the timestamp of the weather update
+    // Get timestamp of weather data in local time
     const updateTime = new Date(Date.parse(weatherData.datetime + 'Z'));
     const wxUpdateTime = updateTime.toLocaleTimeString('en-US', {
         hour: '2-digit',
         minute: '2-digit',
         timeZone: locationTimeZone
     });
-    highlightUpdate('wx-time', wxUpdateTime);
 
-    // Update station name
+    // Get station name
     const stationName = weatherData.stationName || '';
-    highlightUpdate('stationName', stationName);
+
+    // Update station information
+    const stationInfoStr = stationName + ' @ ' + wxUpdateTime;
+    highlightUpdate('station-info', stationInfoStr);
+
+    // Update weather update time with current time
+    const currentTime = new Date().toLocaleTimeString('en-US', {
+        hour: '2-digit',
+        minute: '2-digit',
+        timeZone: locationTimeZone
+    });
+    highlightUpdate('wx-update', currentTime);
 }
 
 function fetchSunData(lat, long) {
