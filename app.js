@@ -60,6 +60,9 @@ function toggleMode() {
     document.body.classList.toggle('dark-mode');
     darkOn = document.body.classList.contains('dark-mode');
     document.getElementById('darkModeToggle').checked = darkOn;
+    
+    // Update favicon appearance when dark mode changes
+    updateFaviconDarkMode();
 }
 
 function highlightUpdate(id, content = null) {
@@ -247,9 +250,12 @@ async function updateNews() {
                 faviconUrl = 'favicon.ico'; // Default fallback
             }
             
+            // Apply grayscale filter to favicons
+            const darkModeClass = document.body.classList.contains('dark-mode') ? 'dark-mode-favicon' : '';
+            
             return `
                 <button class="news-item" onclick="loadExternalUrl('${item.link}')">
-                    <img src="${faviconUrl}" class="news-favicon" onerror="this.style.display='none'">
+                    <img src="${faviconUrl}" class="news-favicon ${darkModeClass}" onerror="this.style.display='none'">
                     <div>
                         <span class="news-source">${item.source.toUpperCase()}</span>
                         <span class="news-date">${dateString}</span>
@@ -260,12 +266,23 @@ async function updateNews() {
         }).join('');
 
         newsContainer.innerHTML = html || '<p><em>No headlines available</em></p>';
+        
+        // Apply dark mode class to favicons if needed
+        updateFaviconDarkMode();
     } catch (error) {
         console.error('Error fetching news:', error);
         customLog('Error fetching news:', error);
         document.getElementById('newsHeadlines').innerHTML = 
             '<p><em>Error loading headlines</em></p>';
     }
+}
+
+// Function to update favicon dark mode status
+function updateFaviconDarkMode() {
+    const favicons = document.querySelectorAll('.news-favicon');
+    favicons.forEach(favicon => {
+        favicon.classList.toggle('dark-mode-favicon', document.body.classList.contains('dark-mode'));
+    });
 }
 
 function initializeRadar() {

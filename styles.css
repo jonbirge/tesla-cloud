@@ -527,4 +527,13 @@ input:checked + .toggle-slider:before {
     width: 32px;        /* Slightly increased width */
     height: 32px;       /* Slightly increased height */
     border-radius: 4px; /* Optional: adds a slight rounding to the icons */
+    filter: grayscale(100%);
+    opacity: 0.8;
+    transition: filter 0.3s ease;
+}
+
+/* Invert favicons in dark mode for better visibility */
+.news-favicon.dark-mode-favicon {
+    filter: grayscale(100%) invert(1);
+    opacity: 0.9;
 }
