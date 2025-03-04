@@ -62,14 +62,14 @@ function toggleMode() {
     document.getElementById('darkModeToggle').checked = darkOn;
 }
 
-function highlightCityUpdate() {
-    const cityElement = document.getElementById('city');
+function highlightUpdate(id) {
+    const element = document.getElementById(id);
     const highlightColor =
         document.body.classList.contains('dark-mode') ? 'orange' : 'red';
-    cityElement.style.color = highlightColor;
+    element.style.color = highlightColor;
     setTimeout(() => {
-        cityElement.style.transition = 'color 2s';
-        cityElement.style.color = ''; // Reset to default color
+        element.style.transition = 'color 2s';
+        element.style.color = ''; // Reset to default color
     }, 3000);
 }
 
@@ -101,7 +101,7 @@ function fetchCityData(lat, long) {
                 place ? (place.name || 'N/A') : 'N/A';
             document.getElementById('state').innerText =
                 place ? (place.adminName1 || 'N/A') : 'N/A';
-            highlightCityUpdate(); // Highlight the city update
+            highlightUpdate('city'); // Highlight the city update
         })
         .catch(error => {
             console.error('Error fetching city data:', error);
