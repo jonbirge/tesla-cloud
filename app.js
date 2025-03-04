@@ -240,7 +240,11 @@ async function updateNews() {
             let faviconUrl = '';
             try {
                 const url = new URL(item.link);
-                faviconUrl = `https://${url.hostname}/favicon.ico`;
+                if (url.hostname === 'www.boston.com') {
+                    faviconUrl = 'https://www.bostonglobe.com/favicon.ico';
+                } else {
+                    faviconUrl = `https://${url.hostname}/favicon.ico`;
+                }
             } catch (e) {
                 console.error("Invalid URL:", item.link);
                 customLog("Invalid URL:", item.link);

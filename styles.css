@@ -527,4 +527,5 @@ input:checked + .toggle-slider:before {
     width: 32px;        /* Slightly increased width */
     height: 32px;       /* Slightly increased height */
     border-radius: 4px; /* Optional: adds a slight rounding to the icons */
+    opacity: 0.8;
 }

@@ -1,9 +1,32 @@
 <?php
 
-// Cache settings
+// Settings
 $cacheDuration = 300; // 5 minutes
 $cacheFile = '/tmp/rss_cache.json';
 $cacheTimestampFile = '/tmp/rss_cache_timestamp';
+$logFile = '/tmp/rss-php.log';
+$maxStories = 50; // Maximum number of stories to return
+$maxSingleSource = 10; // Maximum number of stories from a single source
+
+// List of RSS feeds to fetch
+$feeds = [
+    'wsj' => 'https://feeds.content.dowjones.io/public/rss/RSSWorldNews',
+    'nyt' => 'https://rss.nytimes.com/services/xml/rss/nyt/HomePage.xml',
+    'bbc' => 'http://feeds.bbci.co.uk/news/world/rss.xml',
+    'wapo' => 'https://feeds.washingtonpost.com/rss/national',
+    'latimes' => 'https://www.latimes.com/business/rss2.0.xml',
+    'bloomberg' => 'https://feeds.bloomberg.com/technology/news.rss',
+    'theverge' => 'https://www.theverge.com/rss/index.xml',
+    'notateslaapp' => 'https://www.notateslaapp.com/rss',
+    'teslarati' => 'https://www.teslarati.com/feed/',
+    'insideevs' => 'https://insideevs.com/rss/articles/all/',
+    'electrek' => 'https://electrek.co/feed/',
+    'bos' => 'https://www.boston.com/tag/local-news/feed',
+    // 'bloomberg' => 'https://feeds.bloomberg.com/news.rss',
+    // 'thedrive' => 'https://www.thedrive.com/feed',
+    // 'jalopnik' => 'https://jalopnik.com/rss',
+    // 'techcrunch' => 'https://techcrunch.com/feed/',
+];
 
 // Set up error logging - clear log file on each run
 file_put_contents('/tmp/rss-php-errors.log', ''); // Empty the file
@@ -26,6 +49,9 @@ register_shutdown_function(function() {
     }
 });
 
+// Create empty log file
+file_put_contents($logFile, '');
+
 // Set the content type and add headers to prevent caching
 header('Cache-Control: no-cache, no-store, must-revalidate');
 header('Pragma: no-cache');
@@ -36,8 +62,8 @@ header('Content-Type: application/json');
 $forceReload = isset($_GET['reload']) || isset($_GET['n']);
 
 // Get number of stories to return
-$numStories = isset($_GET['n']) ? intval($_GET['n']) : 48;
-$numStories = max(1, min(100, $numStories));
+$numStories = isset($_GET['n']) ? intval($_GET['n']) : $maxStories;
+$numStories = max(1, min(128, $numStories));
 
 // Check if cache exists and is fresh (unless forced reload is requested)
 if (!$forceReload && file_exists($cacheFile) && file_exists($cacheTimestampFile)) {
@@ -49,33 +75,20 @@ if (!$forceReload && file_exists($cacheFile) && file_exists($cacheTimestampFile)
     }
 }
 
-// If cache is stale or missing, fetch new RSS feeds...
+// If cache is stale or missing, proceed to fetch new RSS feeds...
 
-// List of RSS feeds to fetch
-$feeds = [
-    'wsj' => 'https://feeds.content.dowjones.io/public/rss/RSSWorldNews',
-    'nyt' => 'https://rss.nytimes.com/services/xml/rss/nyt/HomePage.xml',
-    'bbc' => 'http://feeds.bbci.co.uk/news/world/rss.xml',
-    'wapo' => 'https://feeds.washingtonpost.com/rss/national',
-    // 'techcrunch' => 'https://techcrunch.com/feed/',
-    // 'thedrive' => 'https://www.thedrive.com/feed',
-    'notateslaapp' => 'https://www.notateslaapp.com/rss',
-    'teslarati' => 'https://www.teslarati.com/feed/',
-    'insideevs' => 'https://insideevs.com/rss/articles/all/',
-    'electrek' => 'https://electrek.co/feed/',
-    'bloomberg' => 'https://feeds.bloomberg.com/technology/news.rss',
-    //'bloomberg' => 'https://feeds.bloomberg.com/news.rss',
-    'theverge' => 'https://www.theverge.com/rss/index.xml',
-    // 'jalopnik' => 'https://jalopnik.com/rss',
-    'bos' => 'https://www.boston.com/tag/local-news/feed/',
-];
+// Function to write timestamped log messages to the end of the log file
+function logMessage($message) {
+    global $logFile;
+    file_put_contents($logFile, date('[Y-m-d H:i:s] ') . $message . "\n", FILE_APPEND);
+}
 
 function fetchRSS($url) {
     $ch = curl_init();
     curl_setopt($ch, CURLOPT_URL, $url);
     curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
     curl_setopt($ch, CURLOPT_TIMEOUT, 10);
-    curl_setopt($ch, CURLOPT_USERAGENT, 'Mozilla/5.0 (compatible; RSS Reader Bot/1.0)');
+    curl_setopt($ch, CURLOPT_USERAGENT, 'Mozilla/5.0 (compatible; RSS Reader/1.0)');
     curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
     $response = curl_exec($ch);
     
@@ -90,6 +103,8 @@ function fetchRSS($url) {
 }
 
 function parseRSS($xml, $source) {
+    global $maxSingleSource;
+
     try {
         $feed = simplexml_load_string($xml);
         if (!$feed) {
@@ -155,7 +170,7 @@ function parseRSS($xml, $source) {
                 }
             }
         } else {
-            // If no date is found, use current time
+            // If no date is found, use current time (FIX: bad idea)
             $pubDate = time();
         }
         
@@ -178,9 +193,14 @@ function parseRSS($xml, $source) {
             'date' => $pubDate,
             'source' => $source
         ];
-        
-        if (count($items) >= 5) break; // Only get first 5 items
+
+        // Limit number from single source
+        if (count($items) > $maxSingleSource) {
+            logMessage("Limiting number of stories from source: {$source}");
+            break;
+        }
     }
+    logMessage("Fetched " . count($items) . " stories from source: {$source}");
     return $items;
 }
 
