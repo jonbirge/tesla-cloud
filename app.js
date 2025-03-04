@@ -76,7 +76,7 @@ function highlightUpdate(id, content = null) {
     setTimeout(() => {
         element.style.transition = 'color 2s';
         element.style.color = ''; // Reset to default color
-    }, 3000);
+    }, 2000);
 }
 
 function calculateDistance(lat1, lon1, lat2, lon2) {

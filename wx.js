@@ -301,11 +301,12 @@ function updateWeatherDisplay() {
         highlightUpdate('wind', '--');
     }
 
-    // Update wx-time with the time of the weather update
-    const updateTime = new Date(weatherData.datetime);
+    // Update wx-time with the timestamp of the weather update
+    const updateTime = new Date(Date.parse(weatherData.datetime + 'Z'));
     const wxUpdateTime = updateTime.toLocaleTimeString('en-US', {
         hour: '2-digit',
-        minute: '2-digit'
+        minute: '2-digit',
+        timeZone: locationTimeZone
     });
     highlightUpdate('wx-time', wxUpdateTime);
 
