@@ -271,3 +271,10 @@ body.dark-mode {
     font-style: italic;
     font-weight: 600;
 }
+
+.station-name {
+    font-size: small;
+    text-transform: uppercase;
+    margin-left: 10px;
+    color: var(--text-color);
+}

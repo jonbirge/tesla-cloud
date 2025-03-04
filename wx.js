@@ -307,6 +307,10 @@ function updateWeatherDisplay() {
         hour: '2-digit',
         minute: '2-digit'
     });
+
+    // Update station name
+    const stationNameElement = document.getElementById('stationName');
+    stationNameElement.innerText = weatherData.stationName || 'N/A';
 }
 
 function fetchSunData(lat, long) {
