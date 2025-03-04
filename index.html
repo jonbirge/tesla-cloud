@@ -13,8 +13,8 @@
 </head>
 
 <body>
-    <!-- Include SVG sprite inline at the beginning of body for better browser compatibility -->
-    <div id="spites" style="display: none;"></div>
+    <!-- Include SVG sprites -->
+    <div id="sprites" style="display: none;"></div>
     
     <div class="frame-container">
 
@@ -384,7 +384,7 @@
             </ul>
 
             <h2>Version</h2>
-            <p id="version">0.43</p>
+            <p id="version">0.45</p>
         </div>
 
         </div>
@@ -407,7 +407,7 @@
         fetch('icons.svg')
             .then(response => response.text())
             .then(data => {
-                document.getElementById('spites').innerHTML = data;
+                document.getElementById('sprites').innerHTML = data;
             });
     </script>
 

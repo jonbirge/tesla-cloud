@@ -24,7 +24,7 @@ const SAT_URLS = {
 };
 
 // Global variables
-let test_mode = false; // Set to true if test parameter exists
+let testMode = false; // Set to true if test parameter exists
 let lastUpdate = 0; // Timestamp of last location update
 let lastUpdateLat = null;
 let lastUpdateLong = null;
@@ -558,7 +558,7 @@ function handlePositionUpdate(position) {
 }
 
 function updateGPS() {
-    if (!test_mode) {
+    if (!testMode) {
         if (navigator.geolocation) {
             navigator.geolocation.getCurrentPosition(handlePositionUpdate);
         } else {
@@ -596,12 +596,6 @@ function stopGPSUpdates() {
         gpsIntervalId = null;
         customLog('GPS updates paused');
     }
-}
-
-// Get initial section from URL parameter
-function getInitialSection() {
-    const params = new URLSearchParams(window.location.search);
-    return params.get('section') || 'news';  // default to navigation if no parameter
 }
 
 // Show a specific section and update URL
@@ -694,9 +688,10 @@ function showSection(sectionId) {
 
 // ***** Main code *****
 
-// Check for test parameter in URL
+// Check for parameters in URL
 const urlParams = new URLSearchParams(window.location.search);
-test_mode = urlParams.has('test');
+testMode = urlParams.has('test');
+const initialSection = urlParams.get('section') || 'news';
 
 // Update link click event listener
 document.addEventListener('click', function(e) {
@@ -728,7 +723,7 @@ window.addEventListener('popstate', () => {
 initializeRadar();
 
 // Show the initial section from URL parameter
-showSection(getInitialSection());
+showSection(initialSection);
 
 // Replace the direct GPS update calls at the end of your script with:
 startGPSUpdates();
