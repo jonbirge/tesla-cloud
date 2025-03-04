@@ -26,14 +26,18 @@ register_shutdown_function(function() {
     }
 });
 
+// Set the content type and add headers to prevent caching
+header('Cache-Control: no-cache, no-store, must-revalidate');
+header('Pragma: no-cache');
+header('Expires: 0');
 header('Content-Type: application/json');
 
 // Check if reload parameter is set to bypass cache
-$forceReload = isset($_GET['reload']);
+$forceReload = isset($_GET['reload']) || isset($_GET['n']);
 
 // Get number of stories to return
 $numStories = isset($_GET['n']) ? intval($_GET['n']) : 48;
-$numStories = max(1, min(50, $numStories));
+$numStories = max(1, min(100, $numStories));
 
 // Check if cache exists and is fresh (unless forced reload is requested)
 if (!$forceReload && file_exists($cacheFile) && file_exists($cacheTimestampFile)) {
@@ -56,12 +60,12 @@ $feeds = [
     // 'techcrunch' => 'https://techcrunch.com/feed/',
     // 'thedrive' => 'https://www.thedrive.com/feed',
     'notateslaapp' => 'https://www.notateslaapp.com/rss',
-    // 'teslarati' => 'https://www.teslarati.com/feed/',
+    'teslarati' => 'https://www.teslarati.com/feed/',
     'insideevs' => 'https://insideevs.com/rss/articles/all/',
     'electrek' => 'https://electrek.co/feed/',
     'bloomberg' => 'https://feeds.bloomberg.com/technology/news.rss',
-    // 'bloomberg' => 'https://feeds.bloomberg.com/news.rss',
-    // 'theverge' => 'https://www.theverge.com/rss/index.xml',
+    //'bloomberg' => 'https://feeds.bloomberg.com/news.rss',
+    'theverge' => 'https://www.theverge.com/rss/index.xml',
     // 'jalopnik' => 'https://jalopnik.com/rss',
 ];
 
