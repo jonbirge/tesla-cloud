@@ -124,14 +124,14 @@ hr {
 }
 
 .section-button {
+    color: var(--text-color);
+    border-radius: var(--button-radius);
     font-size: 19pt;
     font-weight: 675;
     letter-spacing: 0.02em;
     padding: 16px 20px;
     background-color: transparent;
-    color: var(--text-color);
     border: none;
-    border-radius: var(--button-radius);
     cursor: pointer;
     text-align: left;
     margin-bottom: 5px;
@@ -168,12 +168,12 @@ hr {
 }
 
 .left-frame {
+    background-color: var(--bg-color);
     width: 290px;
     min-width: 290px;
     flex-shrink: 0;
     height: 100%;
     overflow-y: auto;
-    background-color: var(--bg-color);
     padding: 15px 15px 20px 20px;
 }
 
@@ -216,8 +216,8 @@ hr {
 }
 
 .button-list a {
-    background-color: var(--button-bg);
     color: var(--button-text);
+    background-color: var(--button-bg);
     border-radius: var(--button-radius);
     display: flex;
     padding-top: 24px;
@@ -253,14 +253,14 @@ hr {
 
 /* Ping Button */
 .ping-button {
+    color: var(--button-text);
+    background-color: var(--button-bg);
+    border-radius: var(--button-radius);
     font-size: 16pt;
     font-weight: 600;
     padding: 24px;
     width: 280px;
-    background-color: var(--button-bg);
-    color: var(--button-text);
     border: none;
-    border-radius: var(--button-radius);
     cursor: pointer;
     margin-bottom: 20px;
     transition: background-color 0.3s;
@@ -280,9 +280,9 @@ hr {
 }
 
 .toggle-label {
+    color: var(--text-color);
     font-size: 15pt;
     font-weight: 600;
-    color: var(--text-color);
     margin-right: 10px;
 }
 
@@ -458,10 +458,10 @@ input:checked + .toggle-slider:before {
 }
 
 #teslawaze {
+    border-radius: var(--button-radius);
     width: 100%;
     height: 100%;
     border: none;
-    border-radius: var(--button-radius);
     position: absolute; /* Position absolutely within container */
     top: 0;
     left: 0;
@@ -476,10 +476,10 @@ input:checked + .toggle-slider:before {
 }
 
 .news-item {
-    margin-bottom: 10px;  /* Increased from 9px */
-    padding: 10px 10px 10px 54px;  /* Increased left padding from 46px to 54px */
     background-color: var(--button-bg);
     border-radius: var(--button-radius);
+    margin-bottom: 10px;  /* Increased from 9px */
+    padding: 10px 10px 10px 54px;  /* Increased left padding from 46px to 54px */
     transition: background-color 0.3s;
     border: none;
     width: 100%;
@@ -512,9 +512,9 @@ input:checked + .toggle-slider:before {
 }
 
 .news-title {
+    color: var(--button-text);
     display: block;
     margin-top: 4px;  /* Increased from 3px */
-    color: var(--button-text);
     font-size: 16pt;  /* Increased from 15pt */
     font-weight: 600;
 }

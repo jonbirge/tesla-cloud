@@ -359,8 +359,8 @@ function fetchSunData(lat, long) {
         });
 }
 
-// Update Wx data if it's been more than 30 minutes since the last update
-// OR if we've moved more than 5 km since the last update
+// Update Wx data if more than 30 minutes since the last update
+// OR if we've moved more than a certain distance since the last update
 function shouldUpdateWeatherData() {
     // Check if we've never updated weather data
     if (lastWxUpdate === 0 || lastWxUpdateLat === null || lastWxUpdateLong === null) {

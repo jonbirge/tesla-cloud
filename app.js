@@ -581,15 +581,6 @@ function stopGPSUpdates() {
     }
 }
 
-// Handle page visibility changes
-document.addEventListener('visibilitychange', () => {
-    if (document.hidden) {
-        stopGPSUpdates();
-    } else {
-        startGPSUpdates();
-    }
-});
-
 // Get initial section from URL parameter
 function getInitialSection() {
     const params = new URLSearchParams(window.location.search);
@@ -696,6 +687,15 @@ document.addEventListener('click', function(e) {
         e.preventDefault();
         const inFrame = e.target.hasAttribute('data-frame');
         loadExternalUrl(e.target.href, inFrame);
+    }
+});
+
+// Handle page visibility changes
+document.addEventListener('visibilitychange', () => {
+    if (document.hidden) {
+        stopGPSUpdates();
+    } else {
+        startGPSUpdates();
     }
 });
 
