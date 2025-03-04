@@ -62,6 +62,17 @@ function toggleMode() {
     document.getElementById('darkModeToggle').checked = darkOn;
 }
 
+function highlightCityUpdate() {
+    const cityElement = document.getElementById('city');
+    const highlightColor =
+        document.body.classList.contains('dark-mode') ? 'orange' : 'red';
+    cityElement.style.color = highlightColor;
+    setTimeout(() => {
+        cityElement.style.transition = 'color 2s';
+        cityElement.style.color = ''; // Reset to default color
+    }, 3000);
+}
+
 function calculateDistance(lat1, lon1, lat2, lon2) {
     const R = 6371e3; // Earth's radius in meters
     const φ1 = lat1 * Math.PI/180;
@@ -90,6 +101,7 @@ function fetchCityData(lat, long) {
                 place ? (place.name || 'N/A') : 'N/A';
             document.getElementById('state').innerText =
                 place ? (place.adminName1 || 'N/A') : 'N/A';
+            highlightCityUpdate(); // Highlight the city update
         })
         .catch(error => {
             console.error('Error fetching city data:', error);
