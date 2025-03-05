@@ -5,6 +5,7 @@
     --active-section-bg: white;
     --separator-color: #cccccc;
     --button-bg: #dddddd;
+    --button-text: #545454;
     --info-bg: #d0d0d0;
     /* --button-hover-bg: #f3f3f3; */
     --weather-switch-slider: #ffffff;
@@ -20,6 +21,7 @@ body.dark-mode {
     --active-section-bg: #333333;
     --separator-color: #444444;
     --button-bg: #333333;
+    --button-text: #d6d6d6;
     --info-bg: #302f39;
     /* --button-hover-bg: #555555; */
     --weather-switch-slider: #222222;

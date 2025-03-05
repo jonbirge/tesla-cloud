@@ -5,73 +5,6 @@ let lastWxUpdateLong = null;
 let forecastData = null;
 let weatherData = null;
 
-// Mock weather data for test mode
-function generateMockWeatherData() {
-    return {
-        temperature: 72,
-        windSpeed: 6.7, // ~15 MPH when converted
-        windDirection: 180, // From the north (will be flipped by 180° in updateWeatherDisplay)
-        humidity: 45,
-        weatherCondition: "Clear",
-        stationName: "MOCK-STATION",
-        datetime: new Date().toISOString()
-    };
-}
-
-function generateMockForecastData() {
-    const now = Date.now();
-    const oneDayMs = 24 * 60 * 60 * 1000;
-    
-    // Create 5 days with different weather types
-    // Modified to make the first day rainy
-    const weatherTypes = [
-        { main: "Rain", description: "moderate rain", icon: "10d" },
-        { main: "Clear", description: "clear sky", icon: "01d" },
-        { main: "Thunderstorm", description: "thunderstorm", icon: "11d" },
-        { main: "Snow", description: "light snow", icon: "13d" },
-        { main: "Clouds", description: "overcast clouds", icon: "04d" }
-    ];
-    
-    const mockList = [];
-    
-    // For each day, create entries at 3-hour intervals
-    for (let day = 0; day < 5; day++) {
-        const dayType = weatherTypes[day];
-        
-        // Create 8 entries per day (3-hour intervals)
-        for (let hour = 0; hour < 24; hour += 3) {
-            const entryTime = now + (day * oneDayMs) + (hour * 60 * 60 * 1000);
-            const tempVariation = Math.sin((hour / 24) * Math.PI) * 10;
-            const baseTemp = 65 + (day * 2); // Slight temperature increase each day
-            
-            mockList.push({
-                dt: Math.floor(entryTime / 1000),
-                main: {
-                    temp: baseTemp + tempVariation,
-                    temp_min: baseTemp - 5 + tempVariation,
-                    temp_max: baseTemp + 5 + tempVariation,
-                    humidity: 45 + (day * 5)
-                },
-                weather: [{ 
-                    id: 800 + (day * 100),
-                    main: dayType.main, 
-                    description: dayType.description,
-                    icon: dayType.icon
-                }]
-            });
-        }
-    }
-    
-    customLog('Mock forecast data generated with rain on day 1');
-    return {
-        list: mockList,
-        city: {
-            name: "Test City",
-            country: "TC"
-        }
-    };
-}
-
 // Convert numerical phase to human-readable name
 function getMoonPhaseName(phase) {
     if (phase === 0 || phase === 1) return "New Moon";
@@ -168,7 +101,7 @@ function fetchWeatherData(lat, long) {
         });
 }
 
-function hasHazards(forecastData) {
+function dayHasHazards(forecastData) {
     const hazardConditions = ['Rain', 'Snow', 'Sleet', 'Hail', 'Thunderstorm', 'Storm', 'Drizzle'];
     return forecastData.weather.some(w => 
         hazardConditions.some(condition => 
@@ -195,7 +128,7 @@ function updateForecastDisplay(data) {
             dayElement.classList.add(weatherCondition);
             
             // Add alert symbol if hazards detected
-            if (hasHazards(day)) {
+            if (dayHasHazards(day)) {
                 const alert = document.createElement('div');
                 alert.className = 'forecast-alert';
                 alert.innerHTML = '⚠️';
@@ -450,4 +383,71 @@ function checkWeatherHazards() {
     }
     
     return hasHazardousWeather;
+}
+
+// Mock weather data for test mode
+function generateMockWeatherData() {
+    return {
+        temperature: 72,
+        windSpeed: 6.7, // ~15 MPH when converted
+        windDirection: 180, // From the north (will be flipped by 180° in updateWeatherDisplay)
+        humidity: 45,
+        weatherCondition: "Clear",
+        stationName: "MOCK-STATION",
+        datetime: new Date().toISOString()
+    };
+}
+
+function generateMockForecastData() {
+    const now = Date.now();
+    const oneDayMs = 24 * 60 * 60 * 1000;
+    
+    // Create 5 days with different weather types
+    // Modified to make the first day rainy
+    const weatherTypes = [
+        { main: "Rain", description: "moderate rain", icon: "10d" },
+        { main: "Clear", description: "clear sky", icon: "01d" },
+        { main: "Thunderstorm", description: "thunderstorm", icon: "11d" },
+        { main: "Snow", description: "light snow", icon: "13d" },
+        { main: "Clouds", description: "overcast clouds", icon: "04d" }
+    ];
+    
+    const mockList = [];
+    
+    // For each day, create entries at 3-hour intervals
+    for (let day = 0; day < 5; day++) {
+        const dayType = weatherTypes[day];
+        
+        // Create 8 entries per day (3-hour intervals)
+        for (let hour = 0; hour < 24; hour += 3) {
+            const entryTime = now + (day * oneDayMs) + (hour * 60 * 60 * 1000);
+            const tempVariation = Math.sin((hour / 24) * Math.PI) * 10;
+            const baseTemp = 65 + (day * 2); // Slight temperature increase each day
+            
+            mockList.push({
+                dt: Math.floor(entryTime / 1000),
+                main: {
+                    temp: baseTemp + tempVariation,
+                    temp_min: baseTemp - 5 + tempVariation,
+                    temp_max: baseTemp + 5 + tempVariation,
+                    humidity: 45 + (day * 5)
+                },
+                weather: [{ 
+                    id: 800 + (day * 100),
+                    main: dayType.main, 
+                    description: dayType.description,
+                    icon: dayType.icon
+                }]
+            });
+        }
+    }
+    
+    customLog('Mock forecast data generated with rain on day 1');
+    return {
+        list: mockList,
+        city: {
+            name: "Test City",
+            country: "TC"
+        }
+    };
 }
