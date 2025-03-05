@@ -157,6 +157,40 @@ hr {
     background-color: var(--button-hover-bg);
 }
 
+/* Notification dot for news section */
+.section-button.has-notification {
+  position: relative;
+}
+
+.section-button.has-notification::after {
+  content: "";
+  position: absolute;
+  top: 50%; /* Center vertically */
+  left: 1px; /* Moved further left from 10px */
+  transform: translateY(-50%); /* Perfect vertical centering */
+  width: 10px;
+  height: 10px;
+  background-color: var(--tesla-blue, #3e6ae1);
+  border-radius: 50%;
+  animation: pulse 2s 1; /* Changed from 3 pulses to 1 */
+  animation-fill-mode: forwards; /* Keep final state */
+}
+
+@keyframes pulse {
+  0% {
+    transform: translateY(-50%) scale(0.6);
+    opacity: 0.6;
+  }
+  50% {
+    transform: translateY(-50%) scale(1.5); /* Larger pulse */
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(-50%) scale(1);
+    opacity: 1;
+  }
+}
+
 /* Layout */
 .frame-container {
     display: flex;

@@ -47,6 +47,8 @@ let radarContext = null;
 let gpsIntervalId = null;
 let lastGPSUpdate = 0;
 let locationTimeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+let lastNewsTimestamp = 0; // Track the latest news timestamp we've seen
+let userHasSeenLatestNews = true; // Track if user has seen the latest news
 
 // Custom log function that prepends the current time
 function customLog(...args) {
@@ -217,13 +219,38 @@ function loadExternalUrl(url, inFrame = false) {
 
 async function updateNews() {
     try {
-        const response = await fetch('rss.php');
+        // Use test parameter when in test mode
+        const url = testMode ? 'rss.php?test' : 'rss.php';
+        const response = await fetch(url);
         const items = await response.json();
         
         const newsContainer = document.getElementById('newsHeadlines');
         if (!newsContainer) return;
 
-        customLog('Updating news headlines...');
+        customLog('Updating news headlines...' + (testMode ? ' (TEST MODE)' : ''));
+        
+        // Check if there are new news items
+        let hasNewItems = false;
+        if (items.length > 0) {
+            const newestTimestamp = Math.max(...items.map(item => item.date));
+            
+            // If this is the first load, just set the timestamp
+            if (lastNewsTimestamp === 0) {
+                lastNewsTimestamp = newestTimestamp;
+            } 
+            // If we have newer items than last time, mark as having new news
+            else if (newestTimestamp > lastNewsTimestamp) {
+                hasNewItems = true;
+                lastNewsTimestamp = newestTimestamp;
+                userHasSeenLatestNews = false;
+                
+                // Add notification dot to the news button
+                const newsButton = document.querySelector('.section-button[onclick="showSection(\'news\')"]');
+                if (newsButton) {
+                    newsButton.classList.add('has-notification');
+                }
+            }
+        }
 
         const html = items.map(item => {
             const date = new Date(item.date * 1000);
@@ -621,6 +648,15 @@ function showSection(sectionId) {
         rightFrame.classList.remove('external');
     }
 
+    // If switching to news section, clear the notification dot
+    if (sectionId === 'news') {
+        userHasSeenLatestNews = true;
+        const newsButton = document.querySelector('.section-button[onclick="showSection(\'news\')"]');
+        if (newsButton) {
+            newsButton.classList.remove('has-notification');
+        }
+    }
+
     // Then get a fresh reference to sections after DOM is restored
     const sections = document.querySelectorAll('.section');
     sections.forEach(section => {
@@ -643,7 +679,12 @@ function showSection(sectionId) {
             // Only update news if interval is not set (first visit)
             if (!newsUpdateInterval) {
                 updateNews();
-                newsUpdateInterval = setInterval(updateNews, 60000 * NEWS_REFRESH_INTERVAL);
+                // if we're in test mode, set the interval to update every 15 seconds
+                if (testMode) {
+                    newsUpdateInterval = setInterval(updateNews, 15000);
+                } else {
+                    newsUpdateInterval = setInterval(updateNews, 60000 * NEWS_REFRESH_INTERVAL);
+                }
             }
         }
         

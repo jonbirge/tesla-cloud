@@ -8,6 +8,33 @@ $logFile = '/tmp/rss-php.log';
 $maxStories = 50; // Maximum number of stories to return
 $maxSingleSource = 7; // Maximum number of stories from a single source
 
+// Check if we're in test mode
+$testMode = isset($_GET['test']);
+
+// If in test mode, return fake news items with timestamps 1-5 seconds ago
+if ($testMode) {
+    header('Content-Type: application/json');
+    
+    $testItems = [];
+    $now = time();
+    
+    // Test sources for variety
+    $testSources = ['testnews', 'testlert', 'testrati', 'insidetest', 'testrek'];
+    
+    // Generate 5 fake news items with timestamps from 1-5 seconds ago
+    for ($i = 1; $i <= 5; $i++) {
+        $testItems[] = [
+            'title' => "Test Breaking News Headline #$i - " . date('H:i:s'),
+            'link' => "https://example.com/news/$i",
+            'date' => $now - $i, // 1 to 5 seconds ago
+            'source' => $testSources[$i-1]
+        ];
+    }
+    
+    echo json_encode($testItems);
+    exit;
+}
+
 // List of RSS feeds to fetch
 $feeds = [
     'wsj' => 'https://feeds.content.dowjones.io/public/rss/RSSWorldNews',
@@ -16,12 +43,12 @@ $feeds = [
     'wapo' => 'https://feeds.washingtonpost.com/rss/national',
     'latimes' => 'https://www.latimes.com/business/rss2.0.xml',
     'bloomberg' => 'https://feeds.bloomberg.com/technology/news.rss',
-    'theverge' => 'https://www.theverge.com/rss/index.xml',
     'notateslaapp' => 'https://www.notateslaapp.com/rss',
     'teslarati' => 'https://www.teslarati.com/feed/',
     'insideevs' => 'https://insideevs.com/rss/articles/all/',
     'electrek' => 'https://electrek.co/feed/',
     'bos' => 'https://www.boston.com/tag/local-news/feed',
+    // 'theverge' => 'https://www.theverge.com/rss/index.xml',
     // 'bloomberg' => 'https://feeds.bloomberg.com/news.rss',
     // 'thedrive' => 'https://www.thedrive.com/feed',
     // 'jalopnik' => 'https://jalopnik.com/rss',
