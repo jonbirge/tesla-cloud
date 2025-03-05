@@ -14,6 +14,7 @@
     --button-radius: 13px;
     --sky-gradient-top: #e6f7ff;
     --sky-gradient-bottom: #a8d0f0;
+    --weather-warning-color: #ff0000; /* Red warning color for light mode */
 }
 
 body.dark-mode {
@@ -28,6 +29,7 @@ body.dark-mode {
     --weather-switch-slider: #222222;
     --sky-gradient-top: #0a1020;
     --sky-gradient-bottom: #1a2845;
+    --weather-warning-color: #ff9900; /* Orange warning color for dark mode */
 }
 
 /* Basic HTML Elements */
@@ -174,6 +176,25 @@ hr {
   border-radius: 50%;
   animation: pulse 2s 1; /* Changed from 3 pulses to 1 */
   animation-fill-mode: forwards; /* Keep final state */
+}
+
+/* Weather warning notification dot */
+.section-button.weather-warning {
+  position: relative;
+}
+
+.section-button.weather-warning::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 1px;
+  transform: translateY(-50%);
+  width: 10px;
+  height: 10px;
+  background-color: var(--weather-warning-color);
+  border-radius: 50%;
+  animation: pulse 2s 1;
+  animation-fill-mode: forwards;
 }
 
 @keyframes pulse {

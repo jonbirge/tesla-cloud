@@ -23,9 +23,10 @@ function generateMockForecastData() {
     const oneDayMs = 24 * 60 * 60 * 1000;
     
     // Create 5 days with different weather types
+    // Modified to make the first day rainy
     const weatherTypes = [
-        { main: "Clear", description: "clear sky", icon: "01d" },
         { main: "Rain", description: "moderate rain", icon: "10d" },
+        { main: "Clear", description: "clear sky", icon: "01d" },
         { main: "Thunderstorm", description: "thunderstorm", icon: "11d" },
         { main: "Snow", description: "light snow", icon: "13d" },
         { main: "Clouds", description: "overcast clouds", icon: "04d" }
@@ -61,6 +62,7 @@ function generateMockForecastData() {
         }
     }
     
+    customLog('Mock forecast data generated with rain on day 1');
     return {
         list: mockList,
         city: {
@@ -123,6 +125,9 @@ function fetchWeatherData(lat, long) {
         lastWxUpdate = Date.now();
         lastWxUpdateLat = lat;
         lastWxUpdateLong = long;
+        
+        // Check for weather hazards after updating forecast data
+        checkWeatherHazards();
         return;
     }
 
@@ -206,6 +211,9 @@ function updateForecastDisplay(data) {
             `;
         }
     });
+    
+    // After updating the forecast display, check for weather hazards
+    checkWeatherHazards();
 }
 
 function extractDailyForecast(forecastList) {
@@ -391,4 +399,55 @@ function shouldUpdateWeatherData() {
     
     // No need to update weather data
     return false;
+}
+
+// Simplified function to check for hazardous weather in the next forecast periods
+function checkWeatherHazards() {
+    customLog('Checking for weather hazards in next forecast periods...');
+    
+    if (!forecastData || !Array.isArray(forecastData)) {
+        customLog('No valid forecast data available for hazard check');
+        return false;
+    }
+    
+    // Log forecast data structure for debugging
+    customLog(`Forecast data: ${forecastData.length} entries available`);
+    
+    // Take just the first two forecast entries
+    const upcomingForecasts = forecastData.slice(0, 2);
+    
+    customLog(`Looking at ${upcomingForecasts.length} upcoming forecast periods`);
+    
+    // Check if any upcoming forecasts contain hazardous weather
+    const hazardousWeatherTypes = ['Rain', 'Snow', 'Thunderstorm', 'Storm', 'Drizzle', 'Hail'];
+    
+    if (upcomingForecasts.length > 0) {
+        // Log the upcoming forecasts for debugging
+        upcomingForecasts.forEach((item, index) => {
+            const time = new Date(item.dt * 1000).toLocaleTimeString();
+            customLog(`Forecast ${index + 1} at ${time}: ${JSON.stringify(item.weather[0].main)}`);
+        });
+    }
+    
+    const hasHazardousWeather = upcomingForecasts.some(item => 
+        item.weather && item.weather.some(w => 
+            hazardousWeatherTypes.some(type => 
+                w.main.includes(type) || w.description.toLowerCase().includes(type.toLowerCase())
+            )
+        )
+    );
+    
+    // Get the weather section button
+    const weatherButton = document.getElementById('wx-section');
+
+    // Add or remove the warning notification
+    if (hasHazardousWeather) {
+        customLog('⚠️ WEATHER ALERT: Hazardous weather detected in upcoming forecast!');
+        weatherButton.classList.add('weather-warning');
+    } else {
+        customLog('Weather check complete: No hazards detected in upcoming forecast');
+        weatherButton.classList.remove('weather-warning');
+    }
+    
+    return hasHazardousWeather;
 }
