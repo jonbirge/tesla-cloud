@@ -1,35 +1,29 @@
 /* Root Variables */
 :root {
     --bg-color: #eeeeee;
-    --text-color: #999999;
+    --text-color: #777777;
     --active-section-bg: white;
     --separator-color: #cccccc;
-    --button-text: #545454;
     --button-bg: #dddddd;
     --info-bg: #d0d0d0;
-    --button-hover-bg: #f3f3f3;
+    /* --button-hover-bg: #f3f3f3; */
     --weather-switch-slider: #ffffff;
     --tesla-blue: #0077ff;
     --tesla-red: #ff0000;
     --button-radius: 13px;
-    --sky-gradient-top: #e6f7ff;
-    --sky-gradient-bottom: #a8d0f0;
-    --weather-warning-color: #ff0000; /* Red warning color for light mode */
+    --weather-warning-color: #ff7700;
 }
 
 body.dark-mode {
     --bg-color: #1d1d1d;
-    --text-color: #717171;
+    --text-color: #777777;
     --active-section-bg: #333333;
     --separator-color: #444444;
-    --button-text: #d6d6d6;
     --button-bg: #333333;
     --info-bg: #302f39;
-    --button-hover-bg: #555555;
+    /* --button-hover-bg: #555555; */
     --weather-switch-slider: #222222;
-    --sky-gradient-top: #0a1020;
-    --sky-gradient-bottom: #1a2845;
-    --weather-warning-color: #ff9900; /* Orange warning color for dark mode */
+    --weather-warning-color: #ff9900;
 }
 
 /* Basic HTML Elements */
