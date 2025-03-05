@@ -256,10 +256,13 @@ async function updateNews() {
                     lastNewsTimestamp = newestTimestamp;
                     userHasSeenLatestNews = false;
                     
-                    // Add notification dot to the news button
-                    const newsButton = document.querySelector('.section-button[onclick="showSection(\'news\')"]');
-                    if (newsButton) {
-                        newsButton.classList.add('has-notification');
+                    // Only add notification dot if news section is not currently displayed
+                    const newsSection = document.getElementById('news');
+                    if (newsSection && newsSection.style.display !== 'block') {
+                        const newsButton = document.querySelector('.section-button[onclick="showSection(\'news\')"]');
+                        if (newsButton) {
+                            newsButton.classList.add('has-notification');
+                        }
                     }
                 }
                 
