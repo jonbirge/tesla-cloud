@@ -46,7 +46,10 @@ let testModeAltIncreasing = true;
 let radarContext = null;
 let gpsIntervalId = null;
 let lastGPSUpdate = 0;
-let locationTimeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+let locationTimeZone = browserTimeZone();
+let lastNewsTimestamp = 0; // Track the latest news timestamp we've seen
+let userHasSeenLatestNews = true; // Track if user has seen the latest news
+let seenNewsIds = new Set(); // Track news IDs we've already seen
 
 // Custom log function that prepends the current time
 function customLog(...args) {
@@ -78,6 +81,12 @@ function highlightUpdate(id, content = null) {
         element.style.transition = 'color 2s';
         element.style.color = ''; // Reset to default color
     }, 2000);
+}
+
+function browserTimeZone() {
+    const tz = Intl.DateTimeFormat().resolvedOptions().timeZone;
+    customLog('Browser timezone: ', tz);
+    return tz;
 }
 
 function calculateDistance(lat1, lon1, lat2, lon2) {
@@ -217,54 +226,106 @@ function loadExternalUrl(url, inFrame = false) {
 
 async function updateNews() {
     try {
-        const response = await fetch('rss.php');
+        // Use test parameter when in test mode
+        const url = testMode ? 'rss.php?test' : 'rss.php';
+        const response = await fetch(url);
         const items = await response.json();
         
         const newsContainer = document.getElementById('newsHeadlines');
         if (!newsContainer) return;
 
-        customLog('Updating news headlines...');
-
-        const html = items.map(item => {
-            const date = new Date(item.date * 1000);
-            const dateString = date.toLocaleDateString('en-US', { 
-                month: 'short', 
-                day: 'numeric'
-            });
-            const timeString = date.toLocaleTimeString('en-US', { 
-                hour: 'numeric', 
-                minute: '2-digit',
-                timeZoneName: 'short'
-            });
-            
-            // Extract domain for favicon
-            let faviconUrl = '';
-            try {
-                const url = new URL(item.link);
-                if (url.hostname === 'www.boston.com') {
-                    faviconUrl = 'https://www.bostonglobe.com/favicon.ico';
-                } else {
-                    faviconUrl = `https://${url.hostname}/favicon.ico`;
+        customLog('Updating news headlines...' + (testMode ? ' (TEST MODE)' : ''));
+        
+        // Filter for new items only
+        let hasNewItems = false;
+        const newItems = [];
+        
+        if (items.length > 0) {
+            // Generate unique IDs for each news item 
+            items.forEach(item => {
+                // Create a unique ID based on title and source
+                const itemId = `${item.source}-${item.title.substring(0, 40)}`;
+                item.id = itemId;
+                
+                // Check if this is a new item
+                if (!seenNewsIds.has(itemId)) {
+                    hasNewItems = true;
+                    newItems.push(item);
+                    seenNewsIds.add(itemId);
                 }
-            } catch (e) {
-                console.error("Invalid URL:", item.link);
-                customLog("Invalid URL:", item.link);
-                faviconUrl = 'favicon.ico'; // Default fallback
-            }
+            });
             
-            return `
-                <button class="news-item" onclick="loadExternalUrl('${item.link}')">
-                    <img src="${faviconUrl}" class="news-favicon" onerror="this.style.display='none'">
-                    <div>
-                        <span class="news-source">${item.source.toUpperCase()}</span>
-                        <span class="news-date">${dateString}</span>
-                        <span class="news-time">${timeString}</span>
-                    </div>
-                    <div class="news-title">${item.title}</div>
-                </button>`;
-        }).join('');
-
-        newsContainer.innerHTML = html || '<p><em>No headlines available</em></p>';
+            // If we have new items, update notification and add to container
+            if (hasNewItems) {
+                const newestTimestamp = Math.max(...items.map(item => item.date));
+                if (newestTimestamp > lastNewsTimestamp) {
+                    lastNewsTimestamp = newestTimestamp;
+                    userHasSeenLatestNews = false;
+                    
+                    // Only add notification dot if news section is not currently displayed
+                    const newsSection = document.getElementById('news');
+                    if (newsSection && newsSection.style.display !== 'block') {
+                        const newsButton = document.querySelector('.section-button[onclick="showSection(\'news\')"]');
+                        if (newsButton) {
+                            newsButton.classList.add('has-notification');
+                        }
+                    }
+                }
+                
+                // Create HTML for new items with blue dot indicator
+                let newItemsHtml = newItems.map(item => {
+                    const date = new Date(item.date * 1000);
+                    const dateString = date.toLocaleDateString('en-US', { 
+                        month: 'short', 
+                        day: 'numeric'
+                    });
+                    const timeString = date.toLocaleTimeString('en-US', { 
+                        hour: 'numeric', 
+                        minute: '2-digit',
+                        timeZoneName: 'short'
+                    });
+                    
+                    // Extract domain for favicon
+                    let faviconUrl = '';
+                    try {
+                        const url = new URL(item.link);
+                        if (url.hostname === 'www.boston.com') {
+                            faviconUrl = 'https://www.bostonglobe.com/favicon.ico';
+                        } else {
+                            faviconUrl = `https://${url.hostname}/favicon.ico`;
+                        }
+                    } catch (e) {
+                        console.error("Invalid URL:", item.link);
+                        customLog("Invalid URL:", item.link);
+                        faviconUrl = 'favicon.ico'; // Default fallback
+                    }
+                    
+                    return `
+                        <button class="news-item news-new" data-id="${item.id}" onclick="loadExternalUrl('${item.link}')">
+                            <img src="${faviconUrl}" class="news-favicon" onerror="this.style.display='none'">
+                            <div>
+                                <span class="news-source">${item.source.toUpperCase()}</span>
+                                <span class="news-date">${dateString}</span>
+                                <span class="news-time">${timeString}</span>
+                            </div>
+                            <div class="news-title">${item.title}</div>
+                        </button>`;
+                }).join('');
+                
+                // Prepend new items to existing content or initialize if empty
+                if (newsContainer.innerHTML && !newsContainer.innerHTML.includes('<em>')) {
+                    newsContainer.innerHTML = newItemsHtml + newsContainer.innerHTML;
+                } else {
+                    newsContainer.innerHTML = newItemsHtml || '<p><em>No headlines available</em></p>';
+                }
+            }
+        }
+        
+        // If there were no new items and the container is empty, show a message
+        if (!hasNewItems && (!newsContainer.innerHTML || newsContainer.innerHTML.includes('<em>'))) {
+            newsContainer.innerHTML = '<p><em>No new headlines available</em></p>';
+        }
+        
     } catch (error) {
         console.error('Error fetching news:', error);
         customLog('Error fetching news:', error);
@@ -621,6 +682,23 @@ function showSection(sectionId) {
         rightFrame.classList.remove('external');
     }
 
+    // If switching to news section, clear the notification dot
+    if (sectionId === 'news') {
+        userHasSeenLatestNews = true;
+        const newsButton = document.querySelector('.section-button[onclick="showSection(\'news\')"]');
+        if (newsButton) {
+            newsButton.classList.remove('has-notification');
+        }
+    }
+
+    // Clear "new" markers from news items when switching to a different section
+    if (sectionId !== 'news') {
+        const newNewsItems = document.querySelectorAll('.news-new');
+        newNewsItems.forEach(item => {
+            item.classList.remove('news-new');
+        });
+    }
+
     // Then get a fresh reference to sections after DOM is restored
     const sections = document.querySelectorAll('.section');
     sections.forEach(section => {
@@ -643,7 +721,12 @@ function showSection(sectionId) {
             // Only update news if interval is not set (first visit)
             if (!newsUpdateInterval) {
                 updateNews();
-                newsUpdateInterval = setInterval(updateNews, 60000 * NEWS_REFRESH_INTERVAL);
+                // if we're in test mode, set the interval to update every 15 seconds
+                if (testMode) {
+                    newsUpdateInterval = setInterval(updateNews, 15000);
+                } else {
+                    newsUpdateInterval = setInterval(updateNews, 60000 * NEWS_REFRESH_INTERVAL);
+                }
             }
         }
         
