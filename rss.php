@@ -6,7 +6,7 @@ $cacheFile = '/tmp/rss_cache.json';
 $cacheTimestampFile = '/tmp/rss_cache_timestamp';
 $logFile = '/tmp/rss-php.log';
 $maxStories = 50; // Maximum number of stories to return
-$maxSingleSource = 10; // Maximum number of stories from a single source
+$maxSingleSource = 7; // Maximum number of stories from a single source
 
 // List of RSS feeds to fetch
 $feeds = [

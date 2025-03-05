@@ -6,7 +6,6 @@ const WX_DISTANCE_THRESHOLD = 5000; // meters
 const WX_TIME_THRESHOLD = 30; // minutes
 const NEWS_REFRESH_INTERVAL = 5; // minutes
 const MAX_BUFFER_SIZE = 5;
-const GEONAMES_USERNAME = 'birgefuller';
 const MAX_SPEED = 50; // Maximum speed for radar display (mph)
 const TEST_CENTER_LAT = 39.7392; // Denver
 const TEST_CENTER_LONG = -104.9903; // Denver
@@ -15,6 +14,7 @@ const TEST_MIN_SPEED = 75; // mph
 const TEST_MAX_SPEED = 95; // mph
 const TEST_MIN_ALT = 50;
 const TEST_MAX_ALT = 250;
+const GEONAMES_USERNAME = 'birgefuller';
 const OPENWX_API_KEY = '6a1b1bcb03b5718a9b3a2b108ce3293d';
 const MIN_GPS_UPDATE_INTERVAL = 1000; // ms - minimum time between updates
 const SAT_URLS = {
@@ -37,7 +37,6 @@ let pingInterval = null;
 let pingData = [];
 let manualDarkMode = false;
 let darkOn = false;
-let locationTimeZone = null;
 let newsUpdateInterval = null;
 let testModeAngle = 0;
 let testModeSpeed = TEST_MIN_SPEED;
@@ -47,6 +46,7 @@ let testModeAltIncreasing = true;
 let radarContext = null;
 let gpsIntervalId = null;
 let lastGPSUpdate = 0;
+let locationTimeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
 
 // Custom log function that prepends the current time
 function customLog(...args) {
@@ -112,7 +112,7 @@ function fetchCityData(lat, long) {
         });
 }
 
-async function fetchTimeZone(lat, long) {
+async function updateTimeZone(lat, long) {
     try {
         if (!lat || !long) {
             throw new Error('Location not available.');
@@ -427,7 +427,7 @@ async function updateLocationData(lat, long) {
     neverUpdatedLocation = false;
 
     // Fire off API requests for external data
-    locationTimeZone = await fetchTimeZone(lat, long);
+    locationTimeZone = await updateTimeZone(lat, long);
     customLog('Timezone: ', locationTimeZone);
     fetchCityData(lat, long);
     fetchSunData(lat, long);
