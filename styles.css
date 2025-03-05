@@ -18,7 +18,7 @@
 }
 
 body.dark-mode {
-    --bg-color: #202020;
+    --bg-color: #1d1d1d;
     --text-color: #717171;
     --active-section-bg: #333333;
     --separator-color: #444444;
