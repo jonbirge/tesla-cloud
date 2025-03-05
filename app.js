@@ -49,6 +49,7 @@ let lastGPSUpdate = 0;
 let locationTimeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
 let lastNewsTimestamp = 0; // Track the latest news timestamp we've seen
 let userHasSeenLatestNews = true; // Track if user has seen the latest news
+let seenNewsIds = new Set(); // Track news IDs we've already seen
 
 // Custom log function that prepends the current time
 function customLog(...args) {
@@ -229,69 +230,93 @@ async function updateNews() {
 
         customLog('Updating news headlines...' + (testMode ? ' (TEST MODE)' : ''));
         
-        // Check if there are new news items
+        // Filter for new items only
         let hasNewItems = false;
+        const newItems = [];
+        
         if (items.length > 0) {
-            const newestTimestamp = Math.max(...items.map(item => item.date));
-            
-            // If this is the first load, just set the timestamp
-            if (lastNewsTimestamp === 0) {
-                lastNewsTimestamp = newestTimestamp;
-            } 
-            // If we have newer items than last time, mark as having new news
-            else if (newestTimestamp > lastNewsTimestamp) {
-                hasNewItems = true;
-                lastNewsTimestamp = newestTimestamp;
-                userHasSeenLatestNews = false;
+            // Generate unique IDs for each news item 
+            items.forEach(item => {
+                // Create a unique ID based on title and source
+                const itemId = `${item.source}-${item.title.substring(0, 40)}`;
+                item.id = itemId;
                 
-                // Add notification dot to the news button
-                const newsButton = document.querySelector('.section-button[onclick="showSection(\'news\')"]');
-                if (newsButton) {
-                    newsButton.classList.add('has-notification');
+                // Check if this is a new item
+                if (!seenNewsIds.has(itemId)) {
+                    hasNewItems = true;
+                    newItems.push(item);
+                    seenNewsIds.add(itemId);
+                }
+            });
+            
+            // If we have new items, update notification and add to container
+            if (hasNewItems) {
+                const newestTimestamp = Math.max(...items.map(item => item.date));
+                if (newestTimestamp > lastNewsTimestamp) {
+                    lastNewsTimestamp = newestTimestamp;
+                    userHasSeenLatestNews = false;
+                    
+                    // Add notification dot to the news button
+                    const newsButton = document.querySelector('.section-button[onclick="showSection(\'news\')"]');
+                    if (newsButton) {
+                        newsButton.classList.add('has-notification');
+                    }
+                }
+                
+                // Create HTML for new items with blue dot indicator
+                let newItemsHtml = newItems.map(item => {
+                    const date = new Date(item.date * 1000);
+                    const dateString = date.toLocaleDateString('en-US', { 
+                        month: 'short', 
+                        day: 'numeric'
+                    });
+                    const timeString = date.toLocaleTimeString('en-US', { 
+                        hour: 'numeric', 
+                        minute: '2-digit',
+                        timeZoneName: 'short'
+                    });
+                    
+                    // Extract domain for favicon
+                    let faviconUrl = '';
+                    try {
+                        const url = new URL(item.link);
+                        if (url.hostname === 'www.boston.com') {
+                            faviconUrl = 'https://www.bostonglobe.com/favicon.ico';
+                        } else {
+                            faviconUrl = `https://${url.hostname}/favicon.ico`;
+                        }
+                    } catch (e) {
+                        console.error("Invalid URL:", item.link);
+                        customLog("Invalid URL:", item.link);
+                        faviconUrl = 'favicon.ico'; // Default fallback
+                    }
+                    
+                    return `
+                        <button class="news-item news-new" data-id="${item.id}" onclick="loadExternalUrl('${item.link}')">
+                            <img src="${faviconUrl}" class="news-favicon" onerror="this.style.display='none'">
+                            <div>
+                                <span class="news-source">${item.source.toUpperCase()}</span>
+                                <span class="news-date">${dateString}</span>
+                                <span class="news-time">${timeString}</span>
+                            </div>
+                            <div class="news-title">${item.title}</div>
+                        </button>`;
+                }).join('');
+                
+                // Prepend new items to existing content or initialize if empty
+                if (newsContainer.innerHTML && !newsContainer.innerHTML.includes('<em>')) {
+                    newsContainer.innerHTML = newItemsHtml + newsContainer.innerHTML;
+                } else {
+                    newsContainer.innerHTML = newItemsHtml || '<p><em>No headlines available</em></p>';
                 }
             }
         }
-
-        const html = items.map(item => {
-            const date = new Date(item.date * 1000);
-            const dateString = date.toLocaleDateString('en-US', { 
-                month: 'short', 
-                day: 'numeric'
-            });
-            const timeString = date.toLocaleTimeString('en-US', { 
-                hour: 'numeric', 
-                minute: '2-digit',
-                timeZoneName: 'short'
-            });
-            
-            // Extract domain for favicon
-            let faviconUrl = '';
-            try {
-                const url = new URL(item.link);
-                if (url.hostname === 'www.boston.com') {
-                    faviconUrl = 'https://www.bostonglobe.com/favicon.ico';
-                } else {
-                    faviconUrl = `https://${url.hostname}/favicon.ico`;
-                }
-            } catch (e) {
-                console.error("Invalid URL:", item.link);
-                customLog("Invalid URL:", item.link);
-                faviconUrl = 'favicon.ico'; // Default fallback
-            }
-            
-            return `
-                <button class="news-item" onclick="loadExternalUrl('${item.link}')">
-                    <img src="${faviconUrl}" class="news-favicon" onerror="this.style.display='none'">
-                    <div>
-                        <span class="news-source">${item.source.toUpperCase()}</span>
-                        <span class="news-date">${dateString}</span>
-                        <span class="news-time">${timeString}</span>
-                    </div>
-                    <div class="news-title">${item.title}</div>
-                </button>`;
-        }).join('');
-
-        newsContainer.innerHTML = html || '<p><em>No headlines available</em></p>';
+        
+        // If there were no new items and the container is empty, show a message
+        if (!hasNewItems && (!newsContainer.innerHTML || newsContainer.innerHTML.includes('<em>'))) {
+            newsContainer.innerHTML = '<p><em>No new headlines available</em></p>';
+        }
+        
     } catch (error) {
         console.error('Error fetching news:', error);
         customLog('Error fetching news:', error);
@@ -655,6 +680,14 @@ function showSection(sectionId) {
         if (newsButton) {
             newsButton.classList.remove('has-notification');
         }
+    }
+
+    // Clear "new" markers from news items when switching to a different section
+    if (sectionId !== 'news') {
+        const newNewsItems = document.querySelectorAll('.news-new');
+        newNewsItems.forEach(item => {
+            item.classList.remove('news-new');
+        });
     }
 
     // Then get a fresh reference to sections after DOM is restored
