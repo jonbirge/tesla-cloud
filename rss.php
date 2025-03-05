@@ -4,7 +4,7 @@
 $cacheDuration = 300; // 5 minutes
 $cacheFile = '/tmp/rss_cache.json';
 $cacheTimestampFile = '/tmp/rss_cache_timestamp';
-$logFile = '/tmp/rss-php.log';
+$logFile = '/tmp/rss_php.log';
 $maxStories = 50; // Maximum number of stories to return
 $maxSingleSource = 7; // Maximum number of stories from a single source
 

@@ -46,7 +46,7 @@ let testModeAltIncreasing = true;
 let radarContext = null;
 let gpsIntervalId = null;
 let lastGPSUpdate = 0;
-let locationTimeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+let locationTimeZone = browserTimeZone();
 let lastNewsTimestamp = 0; // Track the latest news timestamp we've seen
 let userHasSeenLatestNews = true; // Track if user has seen the latest news
 let seenNewsIds = new Set(); // Track news IDs we've already seen
@@ -81,6 +81,12 @@ function highlightUpdate(id, content = null) {
         element.style.transition = 'color 2s';
         element.style.color = ''; // Reset to default color
     }, 2000);
+}
+
+function browserTimeZone() {
+    const tz = Intl.DateTimeFormat().resolvedOptions().timeZone;
+    customLog('Browser timezone: ', tz);
+    return tz;
 }
 
 function calculateDistance(lat1, lon1, lat2, lon2) {
