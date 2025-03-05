@@ -168,11 +168,11 @@ hr {
   content: "";
   position: absolute;
   top: 50%; /* Center vertically */
-  left: 1px; /* Moved further left from 10px */
+  left: 5px; /* Moved further left from 10px */
   transform: translateY(-50%); /* Perfect vertical centering */
   width: 10px;
   height: 10px;
-  background-color: var(--tesla-blue, #3e6ae1);
+  background-color: var(--tesla-blue);
   border-radius: 50%;
   animation: pulse 2s 1; /* Changed from 3 pulses to 1 */
   animation-fill-mode: forwards; /* Keep final state */
@@ -187,7 +187,7 @@ hr {
   content: "";
   position: absolute;
   top: 50%;
-  left: 1px;
+  left: 5px;
   transform: translateY(-50%);
   width: 10px;
   height: 10px;

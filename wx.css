@@ -131,6 +131,23 @@ body.dark-mode {
     background: linear-gradient(to bottom, var(--sky-snow-top), var(--sky-snow-bottom));
 }
 
+/* Invert snow icon in dark mode */
+body.dark-mode .forecast-day.snow img.forecast-icon {
+    filter: invert(1);
+}
+
+/* Invert clear icon in dark mode and make it grayscale */
+body.dark-mode .forecast-day.clear img.forecast-icon {
+    filter: invert(1);
+    filter: grayscale(1);
+}
+
+/* Invert rain icon in dark mode and make it grayscale */
+body.dark-mode .forecast-day.rain img.forecast-icon {
+    filter: invert(1);
+    filter: grayscale(1);
+}
+
 .forecast-alert {
     position: absolute;
     top: 5px;
