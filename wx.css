@@ -318,7 +318,7 @@ body.dark-mode .forecast-day.rain img.forecast-icon {
 }
 
 .station-name {
-    font-size: small;
+    font-size: 10pt;
     text-transform: uppercase;
     margin-left: 10px;
     color: var(--text-color);

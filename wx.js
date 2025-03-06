@@ -55,6 +55,9 @@ function fetchWeatherData(lat, long, silentLoad = false) {
         if (loadingSpinner) loadingSpinner.style.display = 'flex';
     }
 
+    // Fetch sunrise/sunset data alongside weather data
+    fetchSunData(lat, long);
+
     if (testMode) {
         // Use mock data in test mode
         customLog('Using mock weather data (test mode)');
@@ -130,6 +133,34 @@ function fetchWeatherData(lat, long, silentLoad = false) {
                     forecastContainer.innerHTML = '<div class="error-message">Unable to load weather data</div>';
                 }
             }
+        });
+}
+
+function fetchSunData(lat, long) {
+    if (!lat || !long) {
+        customLog('No location data available for sun/moon fetch');
+        return;
+    }
+    
+    customLog('Fetching sunrise/sunset data...');
+    
+    // Fetch sunrise/sunset data from API
+    fetch(`https://api.sunrise-sunset.org/json?lat=${lat}&lng=${long}&formatted=0`)
+        .then(response => response.json())
+        .then(data => {
+            if (data && data.status === "OK") {
+                sunrise = new Date(data.results.sunrise);
+                sunset = new Date(data.results.sunset);
+                
+                // Update sun/moon info display
+                updateSunMoonDisplay();
+                
+                // Check if dark mode should be enabled based on new sun data
+                updateAutoDarkMode();
+            }
+        })
+        .catch(error => {
+            console.error('Error fetching sun data:', error);
         });
 }
 

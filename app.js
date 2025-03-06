@@ -491,7 +491,6 @@ async function updateLocationData(lat, long) {
     locationTimeZone = await updateTimeZone(lat, long);
     customLog('Timezone: ', locationTimeZone);
     fetchCityData(lat, long);
-    fetchSunData(lat, long);
 
     // Update connectivity data if the Network section is visible
     const networkSection = document.getElementById("network");
