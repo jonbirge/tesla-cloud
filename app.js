@@ -2,10 +2,9 @@
 const LATLON_UPDATE_INTERVAL = 2; // seconds
 const UPDATE_DISTANCE_THRESHOLD = 1000; // meters
 const UPDATE_TIME_THRESHOLD = 15; // minutes
-const WX_DISTANCE_THRESHOLD = 5000; // meters
-const WX_TIME_THRESHOLD = 30; // minutes
-const NEWS_REFRESH_INTERVAL = 5; // minutes
-const MAX_BUFFER_SIZE = 5;
+const WX_DISTANCE_THRESHOLD = 50000; // meters
+const WX_TIME_THRESHOLD = 60; // minutes
+const NEWS_REFRESH_INTERVAL = 2.5; // minutes
 const MAX_SPEED = 50; // Maximum speed for radar display (mph)
 const TEST_CENTER_LAT = 39.7392; // Denver
 const TEST_CENTER_LONG = -104.9903; // Denver
@@ -38,6 +37,7 @@ let pingData = [];
 let manualDarkMode = false;
 let darkOn = false;
 let newsUpdateInterval = null;
+let newsUpdatesActive = false; // Track if news updates should be active
 let testModeAngle = 0;
 let testModeSpeed = TEST_MIN_SPEED;
 let testModeAlt = TEST_MIN_ALT;
@@ -664,6 +664,29 @@ function stopGPSUpdates() {
     }
 }
 
+// Function to pause news updates
+function pauseNewsUpdates() {
+    if (newsUpdateInterval) {
+        clearInterval(newsUpdateInterval);
+        newsUpdateInterval = null;
+        customLog('News updates paused');
+    }
+}
+
+// Function to resume news updates if they were active
+function resumeNewsUpdates() {
+    if (newsUpdatesActive && !newsUpdateInterval) {
+        updateNews(); // Call immediately
+        // Set interval based on test mode
+        if (testMode) {
+            newsUpdateInterval = setInterval(updateNews, 15000);
+        } else {
+            newsUpdateInterval = setInterval(updateNews, 60000 * NEWS_REFRESH_INTERVAL);
+        }
+        customLog('News updates resumed');
+    }
+}
+
 // Show a specific section and update URL
 function showSection(sectionId) {
     // Log the clicked section
@@ -721,6 +744,8 @@ function showSection(sectionId) {
             // Only update news if interval is not set (first visit)
             if (!newsUpdateInterval) {
                 updateNews();
+                // Set newsUpdatesActive to true
+                newsUpdatesActive = true;
                 // if we're in test mode, set the interval to update every 15 seconds
                 if (testMode) {
                     newsUpdateInterval = setInterval(updateNews, 15000);
@@ -794,8 +819,10 @@ document.addEventListener('click', function(e) {
 document.addEventListener('visibilitychange', () => {
     if (document.hidden) {
         stopGPSUpdates();
+        pauseNewsUpdates();
     } else {
         startGPSUpdates();
+        resumeNewsUpdates();
     }
 });
 

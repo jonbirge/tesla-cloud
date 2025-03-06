@@ -149,6 +149,7 @@ function updateForecastDisplay(data) {
     checkWeatherHazards();
 }
 
+// Summarize forecast data into daily data
 function extractDailyForecast(forecastList) {
     forecastData = forecastList;
     const dailyData = [];
