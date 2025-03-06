@@ -45,6 +45,13 @@ function fetchWeatherData(lat, long) {
     }
 
     customLog('Fetching weather data...');
+    
+    // Show loading spinner, hide forecast container
+    const forecastContainer = document.getElementById('forecast-container');
+    const loadingSpinner = document.getElementById('forecast-loading');
+    
+    if (forecastContainer) forecastContainer.style.display = 'none';
+    if (loadingSpinner) loadingSpinner.style.display = 'flex';
 
     if (testMode) {
         // Use mock data in test mode
@@ -61,6 +68,11 @@ function fetchWeatherData(lat, long) {
         
         // Check for weather hazards after updating forecast data
         checkWeatherHazards();
+        
+        // Hide spinner and show forecast after mock data is processed
+        if (forecastContainer) forecastContainer.style.display = 'flex';
+        if (loadingSpinner) loadingSpinner.style.display = 'none';
+        
         return;
     }
 
@@ -94,10 +106,22 @@ function fetchWeatherData(lat, long) {
             lastWxUpdate = Date.now();
             lastWxUpdateLat = lat;
             lastWxUpdateLong = long;
+            
+            // Hide spinner and show forecast when data is loaded
+            if (forecastContainer) forecastContainer.style.display = 'flex';
+            if (loadingSpinner) loadingSpinner.style.display = 'none';
         })
         .catch(error => {
             console.error('Error fetching weather data: ', error);
             customLog('Error fetching weather data: ', error);
+            
+            // In case of error, hide spinner and show error message
+            if (loadingSpinner) loadingSpinner.style.display = 'none';
+            if (forecastContainer) {
+                forecastContainer.style.display = 'flex';
+                // Show error message in the forecast container
+                forecastContainer.innerHTML = '<div class="error-message">Unable to load weather data</div>';
+            }
         });
 }
 

@@ -91,11 +91,39 @@ body.dark-mode {
 
 /* Weather Forecast */
 .forecast-container {
-    display: flex;
+    display: none; /* Initially hidden */
     justify-content: space-between;
     gap: 15px;
     margin: 20px 0;
     max-width: 1024px;
+}
+
+/* Loading spinner */
+.forecast-loading {
+    display: flex; /* Initially visible */
+    justify-content: center;
+    align-items: center;
+    height: 200px;
+    margin: 20px 0;
+}
+
+.spinner {
+    width: 50px;
+    height: 50px;
+    border: 5px solid rgba(0, 0, 0, 0.1);
+    border-radius: 50%;
+    border-top-color: var(--tesla-blue);
+    animation: spin 1s linear infinite;
+}
+
+body.dark-mode .spinner {
+    border-color: rgba(255, 255, 255, 0.1);
+    border-top-color: var(--tesla-blue);
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
 }
 
 .forecast-day {

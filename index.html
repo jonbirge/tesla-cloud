@@ -137,7 +137,10 @@
 
         <div id="weather" class="section">
             <h2>Forecast <span id="station-info" class="station-name"></span></h2>
-            <div class="forecast-container">
+            <div id="forecast-loading" class="forecast-loading">
+                <div class="spinner"></div>
+            </div>
+            <div id="forecast-container" class="forecast-container">
                 <div class="forecast-day" onclick="showHourlyForecast(0)">
                     <div class="forecast-date">Loading...</div>
                     <img class="forecast-icon" src="">
