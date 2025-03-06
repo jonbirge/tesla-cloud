@@ -614,10 +614,16 @@ function handlePositionUpdate(position) {
         updateLocationData(lat, long);
     }
 
-    // Check if we should update the expensive weather API data
-    const weatherSection = document.getElementById("weather");
-    if (weatherSection.style.display === "block" || navigationSection.style.display === "block") {
-        if (shouldUpdateWeatherData()) {
+    // Preload weather data on first position update
+    if (!weatherData || !forecastData) {
+        // Fetch weather data but don't show spinner unless in weather section
+        const weatherSection = document.getElementById("weather");
+        const shouldShowUI = weatherSection.style.display === "block" || navigationSection.style.display === "block";
+        fetchWeatherData(lat, long, !shouldShowUI);
+    } else if (shouldUpdateWeatherData()) {
+        // For subsequent updates, only fetch if relevant sections are visible
+        const weatherSection = document.getElementById("weather");
+        if (weatherSection.style.display === "block" || navigationSection.style.display === "block") {
             fetchWeatherData(lat, long);
         }
     }

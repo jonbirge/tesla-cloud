@@ -38,20 +38,22 @@ function switchWeatherImage(type) {
     weatherSwitch.style.setProperty('--slider-position', positions[type]);
 }
 
-function fetchWeatherData(lat, long) {
+function fetchWeatherData(lat, long, silentLoad = false) {
     if (!lat || !long) {
         customLog('No location data available for weather fetch');
         return;
     }
 
-    customLog('Fetching weather data...');
+    customLog('Fetching weather data...' + (silentLoad ? ' (background load)' : ''));
     
-    // Show loading spinner, hide forecast container
+    // Show loading spinner, hide forecast container - only if not silent loading
     const forecastContainer = document.getElementById('forecast-container');
     const loadingSpinner = document.getElementById('forecast-loading');
     
-    if (forecastContainer) forecastContainer.style.display = 'none';
-    if (loadingSpinner) loadingSpinner.style.display = 'flex';
+    if (!silentLoad) {
+        if (forecastContainer) forecastContainer.style.display = 'none';
+        if (loadingSpinner) loadingSpinner.style.display = 'flex';
+    }
 
     if (testMode) {
         // Use mock data in test mode
@@ -69,9 +71,11 @@ function fetchWeatherData(lat, long) {
         // Check for weather hazards after updating forecast data
         checkWeatherHazards();
         
-        // Hide spinner and show forecast after mock data is processed
-        if (forecastContainer) forecastContainer.style.display = 'flex';
-        if (loadingSpinner) loadingSpinner.style.display = 'none';
+        // Hide spinner and show forecast after mock data is processed - only if not silent loading
+        if (!silentLoad) {
+            if (forecastContainer) forecastContainer.style.display = 'flex';
+            if (loadingSpinner) loadingSpinner.style.display = 'none';
+        }
         
         return;
     }
@@ -107,20 +111,24 @@ function fetchWeatherData(lat, long) {
             lastWxUpdateLat = lat;
             lastWxUpdateLong = long;
             
-            // Hide spinner and show forecast when data is loaded
-            if (forecastContainer) forecastContainer.style.display = 'flex';
-            if (loadingSpinner) loadingSpinner.style.display = 'none';
+            // Hide spinner and show forecast when data is loaded - only if not silent loading
+            if (!silentLoad) {
+                if (forecastContainer) forecastContainer.style.display = 'flex';
+                if (loadingSpinner) loadingSpinner.style.display = 'none';
+            }
         })
         .catch(error => {
             console.error('Error fetching weather data: ', error);
             customLog('Error fetching weather data: ', error);
             
-            // In case of error, hide spinner and show error message
-            if (loadingSpinner) loadingSpinner.style.display = 'none';
-            if (forecastContainer) {
-                forecastContainer.style.display = 'flex';
-                // Show error message in the forecast container
-                forecastContainer.innerHTML = '<div class="error-message">Unable to load weather data</div>';
+            // In case of error, hide spinner and show error message - only if not silent loading
+            if (!silentLoad) {
+                if (loadingSpinner) loadingSpinner.style.display = 'none';
+                if (forecastContainer) {
+                    forecastContainer.style.display = 'flex';
+                    // Show error message in the forecast container
+                    forecastContainer.innerHTML = '<div class="error-message">Unable to load weather data</div>';
+                }
             }
         });
 }
