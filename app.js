@@ -613,18 +613,9 @@ function handlePositionUpdate(position) {
         updateLocationData(lat, long);
     }
 
-    // Preload weather data on first position update
-    if (!weatherData || !forecastData) {
-        // Fetch weather data but don't show spinner unless in weather section
-        const weatherSection = document.getElementById("weather");
-        const shouldShowUI = weatherSection.style.display === "block" || navigationSection.style.display === "block";
-        fetchWeatherData(lat, long, !shouldShowUI);
-    } else if (shouldUpdateWeatherData()) {
-        // For subsequent updates, only fetch if relevant sections are visible
-        const weatherSection = document.getElementById("weather");
-        if (weatherSection.style.display === "block" || navigationSection.style.display === "block") {
-            fetchWeatherData(lat, long);
-        }
+    // Load weather data if needed
+    if (shouldUpdateWeatherData()) {
+        fetchWeatherData(lat, long);
     }
 }
 
@@ -757,28 +748,6 @@ function showSection(sectionId) {
                 } else {
                     newsUpdateInterval = setInterval(updateNews, 60000 * NEWS_REFRESH_INTERVAL);
                 }
-            }
-        }
-        
-        // Load expensive weather data if not already done
-        if (sectionId === 'weather' || sectionId === 'navigation') {
-            // Load latest weather data
-            if (lat !== null && long !== null) {
-                const forecastContainer = document.getElementById('forecast-container');
-                const loadingSpinner = document.getElementById('forecast-loading');
-                
-                if (!forecastData || !weatherData) {
-                    // Show loading spinner only when no forecast data exists
-                    if (forecastContainer) forecastContainer.style.display = 'none';
-                    if (loadingSpinner) loadingSpinner.style.display = 'flex';
-                    fetchWeatherData(lat, long);
-                } else {
-                    // Show forecast panels if data already exists
-                    if (forecastContainer) forecastContainer.style.display = 'flex';
-                    if (loadingSpinner) loadingSpinner.style.display = 'none';
-                }
-            } else {
-                customLog('Location not available to fetch weather data.');
             }
         }
 

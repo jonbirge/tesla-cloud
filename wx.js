@@ -38,7 +38,7 @@ function switchWeatherImage(type) {
     weatherSwitch.style.setProperty('--slider-position', positions[type]);
 }
 
-function fetchWeatherData(lat, long, silentLoad = false) {
+function fetchWeatherData(lat, long, silentLoad = true) {
     if (!lat || !long) {
         customLog('No location data available for weather fetch');
         return;
@@ -75,10 +75,8 @@ function fetchWeatherData(lat, long, silentLoad = false) {
         checkWeatherHazards();
         
         // Hide spinner and show forecast after mock data is processed - only if not silent loading
-        if (!silentLoad) {
-            if (forecastContainer) forecastContainer.style.display = 'flex';
-            if (loadingSpinner) loadingSpinner.style.display = 'none';
-        }
+        if (forecastContainer) forecastContainer.style.display = 'flex';
+        if (loadingSpinner) loadingSpinner.style.display = 'none';
         
         return;
     }
@@ -115,10 +113,8 @@ function fetchWeatherData(lat, long, silentLoad = false) {
             lastWxUpdateLong = long;
             
             // Hide spinner and show forecast when data is loaded - only if not silent loading
-            if (!silentLoad) {
-                if (forecastContainer) forecastContainer.style.display = 'flex';
-                if (loadingSpinner) loadingSpinner.style.display = 'none';
-            }
+            if (forecastContainer) forecastContainer.style.display = 'flex';
+            if (loadingSpinner) loadingSpinner.style.display = 'none';
         })
         .catch(error => {
             console.error('Error fetching weather data: ', error);
