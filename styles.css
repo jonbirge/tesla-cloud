@@ -7,7 +7,7 @@
     --button-bg: #dddddd;
     --button-text: #545454;
     --info-bg: #d0d0d0;
-    /* --button-hover-bg: #f3f3f3; */
+    --button-hover-bg: #f3f3f3;
     --weather-switch-slider: #ffffff;
     --tesla-blue: #0077ff;
     --tesla-red: #ff0000;
@@ -23,7 +23,7 @@ body.dark-mode {
     --button-bg: #333333;
     --button-text: #d6d6d6;
     --info-bg: #302f39;
-    /* --button-hover-bg: #555555; */
+    --button-hover-bg: #555555;
     --weather-switch-slider: #222222;
     --weather-warning-color: #ff9900;
 }
