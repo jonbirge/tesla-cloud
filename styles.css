@@ -7,7 +7,6 @@
     --button-bg: #dddddd;
     --button-text: #545454;
     --info-bg: #d0d0d0;
-    --button-hover-bg: #f3f3f3;
     --weather-switch-slider: #ffffff;
     --tesla-blue: #0077ff;
     --tesla-red: #ff0000;
@@ -23,7 +22,6 @@ body.dark-mode {
     --button-bg: #333333;
     --button-text: #d6d6d6;
     --info-bg: #302f39;
-    --button-hover-bg: #555555;
     --weather-switch-slider: #222222;
     --weather-warning-color: #ff9900;
 }
@@ -124,18 +122,19 @@ hr {
 .section-button {
     color: var(--text-color);
     border-radius: var(--button-radius);
+    hover: var(--active-section-bg);
+    background-color: transparent;
     font-size: 19pt;
     font-weight: 675;
     letter-spacing: 0.02em;
     padding: 16px 20px;
-    background-color: transparent;
     border: none;
     cursor: pointer;
     text-align: left;
     margin-bottom: 5px;
-    transition: background-color 0.3s, color 0.3s;
     display: flex;
     align-items: center;
+    transition: background-color 0.3s, color 0.3s;
 }
 
 .button-icon {
@@ -152,7 +151,7 @@ hr {
 }
 
 .section-button:hover {
-    background-color: var(--button-hover-bg);
+    background-color: var(--active-section-bg);
 }
 
 /* Notification dot for news section */
