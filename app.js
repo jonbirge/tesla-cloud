@@ -585,6 +585,21 @@ function handlePositionUpdate(position) {
         lastKnownHeading = position.coords.heading;
     }
     
+    // Update GPS status indicator
+    const gpsStatusElement = document.getElementById('gps-status');
+    if (gpsStatusElement) {
+        if (lat === null || long === null) {
+            gpsStatusElement.className = 'gps-status unavailable';
+            gpsStatusElement.title = 'GPS Unavailable';
+        } else if (acc > 25) {
+            gpsStatusElement.className = 'gps-status poor';
+            gpsStatusElement.title = `GPS Accuracy: ${Math.round(acc)}m`;
+        } else {
+            gpsStatusElement.className = 'gps-status good';
+            gpsStatusElement.title = `GPS Accuracy: ${Math.round(acc)}m`;
+        }
+    }
+    
     // Update radar display with current speed and heading if nav section is visible
     const navigationSection = document.getElementById("navigation");
     if (navigationSection.style.display === "block") {

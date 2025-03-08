@@ -614,3 +614,26 @@ input:checked + .toggle-slider:before {
     border-radius: 4px; /* Optional: adds a slight rounding to the icons */
     opacity: 0.8;
 }
+
+/* GPS Status Indicator */
+.gps-status {
+    margin-right: 22px; /* Good separation from the Dark Mode text */
+    width: 24px;
+    height: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: color 0.3s ease;
+}
+
+.gps-status.unavailable {
+    color: #888888; /* Gray when GPS is unavailable */
+}
+
+.gps-status.poor {
+    color: #f9ca24; /* Yellow when GPS accuracy is poor (>25m) */
+}
+
+.gps-status.good {
+    color: #6ab04c; /* Green when GPS accuracy is good (<25m) */
+}

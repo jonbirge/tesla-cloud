@@ -396,6 +396,14 @@
 
     <!-- Dark mode toggle -->
     <div class="toggle-container">
+        <div id="gps-status" class="gps-status unavailable" title="GPS Status">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24">
+                <!-- Outer circle -->
+                <circle cx="12" cy="12" r="8" fill="none" stroke="currentColor" stroke-width="2"/>
+                <!-- Inner circle -->
+                <circle cx="12" cy="12" r="3" fill="currentColor"/>
+            </svg>
+        </div>
         <label class="toggle-label">Dark Mode</label>
         <label class="toggle-switch">
             <input type="checkbox" id="darkModeToggle" onchange="toggleMode()">
