@@ -585,17 +585,36 @@ function handlePositionUpdate(position) {
         lastKnownHeading = position.coords.heading;
     }
     
-    // Update GPS status indicator
+    // Update GPS status indicator with color gradient based on accuracy
     const gpsStatusElement = document.getElementById('gps-status');
     if (gpsStatusElement) {
         if (lat === null || long === null) {
-            gpsStatusElement.className = 'gps-status unavailable';
+            // Gray for unavailable GPS
+            gpsStatusElement.style.color = '#888888';
             gpsStatusElement.title = 'GPS Unavailable';
-        } else if (acc > 25) {
-            gpsStatusElement.className = 'gps-status poor';
-            gpsStatusElement.title = `GPS Accuracy: ${Math.round(acc)}m`;
         } else {
-            gpsStatusElement.className = 'gps-status good';
+            // Interpolate between yellow and green based on accuracy
+            // Yellow (#f9ca24) at 100m or worse, Green (#6ab04c) at 1m or better
+            const maxAccuracy = 100; // Yellow threshold
+            const minAccuracy = 1;   // Green threshold
+            
+            // Clamp accuracy between min and max thresholds
+            const clampedAcc = Math.min(Math.max(acc, minAccuracy), maxAccuracy);
+            
+            // Calculate interpolation factor (0 = yellow, 1 = green)
+            const factor = 1 - (clampedAcc - minAccuracy) / (maxAccuracy - minAccuracy);
+            
+            // RGB components for yellow (#f9ca24) and green (#6ab04c)
+            const startColor = { r: 249, g: 202, b: 36 };
+            const endColor = { r: 106, g: 176, b: 76 };
+            
+            // Interpolate RGB components
+            const r = Math.round(startColor.r + factor * (endColor.r - startColor.r));
+            const g = Math.round(startColor.g + factor * (endColor.g - startColor.g));
+            const b = Math.round(startColor.b + factor * (endColor.b - startColor.b));
+            
+            // Set the color directly using inline style
+            gpsStatusElement.style.color = `rgb(${r}, ${g}, ${b})`;
             gpsStatusElement.title = `GPS Accuracy: ${Math.round(acc)}m`;
         }
     }
