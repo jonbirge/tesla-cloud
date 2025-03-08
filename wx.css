@@ -67,8 +67,8 @@ body.dark-mode {
     position: absolute;
     top: 4px;
     left: 4px;
-    width: calc(33.33% - 4px);
-    height: calc(100% - 8px);
+    bottom: 4px;
+    width: calc((100% - 8px) / 3);
     background-color: var(--weather-switch-slider);
     border-radius: calc(var(--button-radius) - 4px);
     transform: translateX(calc(var(--slider-position) * 100%));
