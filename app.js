@@ -595,7 +595,7 @@ function handlePositionUpdate(position) {
         } else {
             // Interpolate between yellow and green based on accuracy
             // Yellow (#f9ca24) at 100m or worse, Green (#6ab04c) at 1m or better
-            const maxAccuracy = 100; // Yellow threshold
+            const maxAccuracy = 50;  // Yellow threshold
             const minAccuracy = 1;   // Green threshold
             
             // Clamp accuracy between min and max thresholds
@@ -604,9 +604,9 @@ function handlePositionUpdate(position) {
             // Calculate interpolation factor (0 = yellow, 1 = green)
             const factor = 1 - (clampedAcc - minAccuracy) / (maxAccuracy - minAccuracy);
             
-            // RGB components for yellow (#f9ca24) and green (#6ab04c)
-            const startColor = { r: 249, g: 202, b: 36 };
-            const endColor = { r: 106, g: 176, b: 76 };
+            // RGB components for yellow and green
+            const startColor = { r: 250, g: 200, b: 36 };
+            const endColor = { r: 50, g: 250, b: 100 };
             
             // Interpolate RGB components
             const r = Math.round(startColor.r + factor * (endColor.r - startColor.r));
