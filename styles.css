@@ -122,7 +122,6 @@ hr {
 .section-button {
     color: var(--text-color);
     border-radius: var(--button-radius);
-    hover: var(--active-section-bg);
     background-color: transparent;
     font-size: 19pt;
     font-weight: 675;
