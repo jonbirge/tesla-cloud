@@ -326,6 +326,11 @@ hr {
     right: 20px;
     display: flex;
     align-items: center;
+    background-color: var(--bg-color); /* Semi-transparent light mode background */
+    border-radius: var(--button-radius);
+    padding: 8px 12px;
+    z-index: 100; /* Ensure it stays above other content */
+    opacity: 0.75;
 }
 
 .toggle-label {
@@ -520,7 +525,7 @@ input:checked + .toggle-slider:before {
 
 /* News Elements */
 .news-headlines {
-    margin: 36px 0;
+    margin: 24px 0;
     max-width: 900px;
 }
 
