@@ -513,15 +513,40 @@ function generateMockForecastData() {
 }
 
 function updateAQI(lat, lon, apiKey) {
-  fetch(`https://api.openweathermap.org/data/2.5/air_pollution?lat=${lat}&lon=${lon}&appid=${apiKey}`)
-    .then(response => response.json())
-    .then(data => {
-      const aqi = data.list[0].main.aqi;
-      document.getElementById('aqi').innerHTML = aqi;
-      const dot = document.getElementById('aqi-dot');
-      let color = 'green';
-      if (aqi == 3) color = 'orange';
-      if (aqi > 3) color = 'red';
-      dot.style.backgroundColor = color;
-    });
+    fetch(`https://api.openweathermap.org/data/2.5/air_pollution?lat=${lat}&lon=${lon}&appid=${apiKey}`)
+        .then(response => response.json())
+        .then(data => {
+            const aqi = data.list[0].main.aqi;
+            let aqiText = '';
+            let color = '';
+
+            switch (aqi) {
+                case 1:
+                    aqiText = 'Good';
+                    color = 'green';
+                    break;
+                case 2:
+                    aqiText = 'Fine';
+                    color = 'lightgreen';
+                    break;
+                case 3:
+                    aqiText = 'Moderate';
+                    color = 'orange';
+                    break;
+                case 4:
+                    aqiText = 'Poor';
+                    color = 'orangered';
+                    break;
+                case 5:
+                    aqiText = 'Very Poor';
+                    color = 'red';
+                    break;
+                default:
+                    aqiText = 'Unknown';
+                    color = 'gray';
+            }
+
+            highlightUpdate('aqi', aqiText);
+            document.getElementById('aqi-dot').style.backgroundColor = color;
+        });
 }
