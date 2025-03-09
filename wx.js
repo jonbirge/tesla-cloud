@@ -108,6 +108,9 @@ function fetchWeatherData(lat, long, silentLoad = true) {
                 updateForecastDisplay(forecastDataResponse);
             }
 
+            // Call updateAQI after forecast is obtained
+            updateAQI(lat, long, OPENWX_API_KEY);
+
             lastWxUpdate = Date.now();
             lastWxUpdateLat = lat;
             lastWxUpdateLong = long;
@@ -303,8 +306,13 @@ function updateWeatherDisplay() {
     }
 
     // Get timestamp of weather data in local time
-    const updateTime = new Date(Date.parse(weatherData.datetime + 'Z'));
-    const wxUpdateTime = updateTime.toLocaleTimeString('en-US', {
+    // const updateTime = new Date(Date.parse(weatherData.datetime + 'Z'));
+    // const wxUpdateTime = updateTime.toLocaleTimeString('en-US', {
+    //     hour: '2-digit',
+    //     minute: '2-digit',
+    //     timeZone: locationTimeZone
+    // });
+    const wxUpdateTime = new Date().toLocaleTimeString('en-US', {
         hour: '2-digit',
         minute: '2-digit',
         timeZone: locationTimeZone
@@ -316,14 +324,6 @@ function updateWeatherDisplay() {
     // Update station information
     const stationInfoStr = stationName + ' @ ' + wxUpdateTime;
     highlightUpdate('station-info', stationInfoStr);
-
-    // Update weather update time with current time
-    const currentTime = new Date().toLocaleTimeString('en-US', {
-        hour: '2-digit',
-        minute: '2-digit',
-        timeZone: locationTimeZone
-    });
-    highlightUpdate('wx-update', currentTime);
 }
 
 function fetchSunData(lat, long) {
@@ -510,4 +510,18 @@ function generateMockForecastData() {
             country: "TC"
         }
     };
+}
+
+function updateAQI(lat, lon, apiKey) {
+  fetch(`https://api.openweathermap.org/data/2.5/air_pollution?lat=${lat}&lon=${lon}&appid=${apiKey}`)
+    .then(response => response.json())
+    .then(data => {
+      const aqi = data.list[0].main.aqi;
+      document.getElementById('aqi').innerHTML = aqi;
+      const dot = document.getElementById('aqi-dot');
+      let color = 'green';
+      if (aqi == 3) color = 'orange';
+      if (aqi > 3) color = 'red';
+      dot.style.backgroundColor = color;
+    });
 }

@@ -406,7 +406,7 @@ input:checked + .toggle-slider:before {
 }
 
 .data-item h2 {
-    margin-top: 6px;
+    margin-top: 0px;
     margin-bottom: 6px;
 }
 
@@ -521,7 +521,7 @@ input:checked + .toggle-slider:before {
 
 /* News Elements */
 .news-headlines {
-    margin: 20px 0;
+    margin: 36px 0;
     max-width: 900px;
 }
 
