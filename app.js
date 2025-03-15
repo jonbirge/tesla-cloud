@@ -589,12 +589,11 @@ function handlePositionUpdate(position) {
     const gpsStatusElement = document.getElementById('gps-status');
     if (gpsStatusElement) {
         if (lat === null || long === null) {
-            // Gray for unavailable GPS
-            gpsStatusElement.style.color = '#888888';
+            // Use CSS variable for unavailable GPS
+            gpsStatusElement.style.color = 'var(--status-unavailable)';
             gpsStatusElement.title = 'GPS Unavailable';
         } else {
             // Interpolate between yellow and green based on accuracy
-            // Yellow (#f9ca24) at 100m or worse, Green (#6ab04c) at 1m or better
             const maxAccuracy = 50;  // Yellow threshold
             const minAccuracy = 1;   // Green threshold
             
@@ -604,17 +603,12 @@ function handlePositionUpdate(position) {
             // Calculate interpolation factor (0 = yellow, 1 = green)
             const factor = 1 - (clampedAcc - minAccuracy) / (maxAccuracy - minAccuracy);
             
-            // RGB components for yellow and green
-            const startColor = { r: 250, g: 200, b: 36 };
-            const endColor = { r: 50, g: 250, b: 100 };
+            if (factor < 0.5) {
+                gpsStatusElement.style.color = 'var(--status-poor)';
+            } else {
+                gpsStatusElement.style.color = 'var(--status-good)';
+            }
             
-            // Interpolate RGB components
-            const r = Math.round(startColor.r + factor * (endColor.r - startColor.r));
-            const g = Math.round(startColor.g + factor * (endColor.g - startColor.g));
-            const b = Math.round(startColor.b + factor * (endColor.b - startColor.b));
-            
-            // Set the color directly using inline style
-            gpsStatusElement.style.color = `rgb(${r}, ${g}, ${b})`;
             gpsStatusElement.title = `GPS Accuracy: ${Math.round(acc)}m`;
         }
     }
@@ -799,6 +793,12 @@ function showSection(sectionId) {
 
         if (sectionId === 'network') {
             updateNetworkInfo();
+            
+            // Reinitialize the ping chart when showing the network section
+            if (pingData.length > 0 && pingChart) {
+                pingChart.data.labels = Array.from({ length: pingData.length }, (_, i) => i);
+                pingChart.update();
+            }
         }
         
         if (sectionId === 'landmarks') {

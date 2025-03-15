@@ -340,8 +340,7 @@
             <span id="isp">N/A</span>
             <hr>
             <h2>Health</h2>
-            <button id="pingTestButton" onclick="startPingTest()" class="ping-button">Start Ping Test</button>
-            <canvas id="pingChart" class="hidden"  width="600" height="200"></canvas>
+            <canvas id="pingChart" width="600" height="200"></canvas>
             <hr>
             <h2>Links</h2>
             <ul class="button-list">
@@ -387,7 +386,7 @@
             </ul>
 
             <h2>Version</h2>
-            <p id="version">0.56</p>
+            <p id="version">0.57</p>
         </div>
 
         </div>
@@ -395,8 +394,20 @@
 
     </div>
 
-    <!-- Dark mode toggle -->
-    <div class="toggle-container">
+    <!-- Indicators and dark mode toggle -->
+    <div class="control-container">
+        <div id="network-status" class="network-status unavailable" title="Network Status">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24">
+                <!-- Bar 1 (smallest) -->
+                <rect class="network-bar bar-1" x="3" y="14" width="3" height="5"/>
+                <!-- Bar 2 -->
+                <rect class="network-bar bar-2" x="8" y="12" width="3" height="7"/>
+                <!-- Bar 3 -->
+                <rect class="network-bar bar-3" x="13" y="10" width="3" height="9"/>
+                <!-- Bar 4 (tallest) -->
+                <rect class="network-bar bar-4" x="18" y="8" width="3" height="11"/>
+            </svg>
+        </div>
         <div id="gps-status" class="gps-status unavailable" title="GPS Status">
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24">
                 <!-- Outer circle -->
@@ -423,7 +434,7 @@
     </script>
 
     <!-- Load JavaScript -->
-    <script async src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="wx.js"></script>
     <script src="net.js"></script>
     <script src="app.js?1"></script>

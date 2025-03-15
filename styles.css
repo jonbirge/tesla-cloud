@@ -12,6 +12,9 @@
     --tesla-red: #ff0000;
     --button-radius: 13px;
     --weather-warning-color: #ff7700;
+    --status-poor: #f9ca24;    /* Yellow for poor connection */
+    --status-good: #6ab04c;    /* Green for good connection */
+    --status-unavailable: #888888;  /* Gray for unavailable/bad connection */
 }
 
 body.dark-mode {
@@ -319,8 +322,8 @@ hr {
     justify-content: center;
 }
 
-/* Dark Mode Toggle */
-.toggle-container {
+/* Indicator container and dark-mode toggle */
+.control-container {
     position: fixed;
     top: 10px;
     right: 20px;
@@ -618,6 +621,67 @@ input:checked + .toggle-slider:before {
     opacity: 0.8;
 }
 
+/* Network Status Indicator */
+.network-status {
+    margin-right: 22px;
+    width: 24px;
+    height: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: color 0.3s ease;
+}
+
+.network-status svg {
+    width: 24px;
+    height: 24px;
+}
+
+.network-status .network-bar {
+    transition: fill 0.3s ease;
+}
+
+.network-status.unavailable .network-bar {
+    fill: var(--status-unavailable);
+}
+
+.network-status.poor .bar-1 {
+    fill: var(--status-poor);
+}
+
+.network-status.poor .bar-2,
+.network-status.poor .bar-3,
+.network-status.poor .bar-4 {
+    fill: var(--status-unavailable);
+}
+
+.network-status.fair .bar-1,
+.network-status.fair .bar-2 {
+    fill: var(--status-poor);
+}
+
+.network-status.fair .bar-3,
+.network-status.fair .bar-4 {
+    fill: var(--status-unavailable);
+}
+
+.network-status.good .bar-1,
+.network-status.good .bar-2,
+.network-status.good .bar-3 {
+    fill: var(--status-good);
+}
+
+.network-status.good .bar-4 {
+    fill: var(--status-unavailable);
+}
+
+.network-status.excellent .bar-1,
+.network-status.excellent .bar-2,
+.network-status.excellent .bar-3,
+.network-status.excellent .bar-4 {
+    fill: var(--status-good);
+}
+
 /* GPS Status Indicator */
 .gps-status {
     margin-right: 22px; /* Good separation from the Dark Mode text */
@@ -630,13 +694,13 @@ input:checked + .toggle-slider:before {
 }
 
 .gps-status.unavailable {
-    color: #888888; /* Gray when GPS is unavailable */
+    color: var(--status-unavailable); /* Using the shared variable */
 }
 
 .gps-status.poor {
-    color: #f9ca24; /* Yellow when GPS accuracy is poor (>25m) */
+    color: var(--status-poor); /* Using the shared variable */
 }
 
 .gps-status.good {
-    color: #6ab04c; /* Green when GPS accuracy is good (<25m) */
+    color: var(--status-good); /* Using the shared variable */
 }
