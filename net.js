@@ -1,6 +1,6 @@
 function updateNetworkInfo() {
     // Write diagnostic information to the console
-    customLog('Updating connection info...');
+    customLog('Updating network info...');
 
     // Get detailed IP info from ipapi.co
     fetch('https://ipapi.co/json/')
@@ -55,6 +55,9 @@ function startPingTest() {
 function initializePingChart() {
     const chartCanvas = document.getElementById('pingChart');
     if (!chartCanvas) return;
+
+    // Logging
+    customLog('Initializing ping chart...');
     
     // Get the Tesla blue color from CSS
     const teslaBlue = getComputedStyle(document.documentElement).getPropertyValue('--tesla-blue').trim();
@@ -157,9 +160,12 @@ function pingTestServer() {
         .then(() => {
             const pingTime = performance.now() - startTime;
             pingData.push(pingTime);
-            if (pingData.length > 61) {
-                pingData.shift(); // Keep last ~60 seconds
+            if (pingData.length > 128) {
+                pingData.shift(); // Keep last n pings
             }
+
+            // Logging
+            customLog('Ping time: ', pingTime);
             
             // Always update network status indicator
             updateNetworkStatus(pingTime);
