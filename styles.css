@@ -7,13 +7,13 @@
     --button-bg: #dddddd;
     --button-text: #545454;
     --info-bg: #d0d0d0;
-    --weather-switch-slider: #ffffff;
     --tesla-blue: #0077ff;
     --tesla-red: #ff0000;
     --button-radius: 13px;
+    --weather-switch-slider: #ffffff;
     --weather-warning-color: #ff7700;
-    --status-poor: #f9ca24;    /* Yellow for poor connection */
-    --status-good: #6ab04c;    /* Green for good connection */
+    --status-poor: #ff9100;    /* Yellow for poor connection */
+    --status-good: #00d000;    /* Green for good connection */
     --status-unavailable: #888888;  /* Gray for unavailable/bad connection */
 }
 
@@ -27,6 +27,9 @@ body.dark-mode {
     --info-bg: #302f39;
     --weather-switch-slider: #222222;
     --weather-warning-color: #ff9900;
+    --status-poor: #ffcd27;    /* Yellow for poor connection */
+    --status-good: #5eff19;    /* Green for good connection */
+    --status-unavailable: #888888;  /* Gray for unavailable/bad connection */
 }
 
 /* Basic HTML Elements */
