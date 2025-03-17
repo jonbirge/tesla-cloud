@@ -160,7 +160,7 @@ function pingTestServer() {
         .then(() => {
             const pingTime = performance.now() - startTime;
             pingData.push(pingTime);
-            if (pingData.length > 128) {
+            if (pingData.length > 100) {
                 pingData.shift(); // Keep last n pings
             }
 
@@ -193,16 +193,16 @@ function updateNetworkStatus(pingTime) {
     networkStatus.classList.remove('unavailable', 'poor', 'fair', 'good', 'excellent');
     
     // Set class based on ping time
-    if (pingTime === null || pingTime > 500) {
+    if (pingTime === null || pingTime > 1000) {
         networkStatus.classList.add('unavailable');
         networkStatus.setAttribute('title', 'Network Status: Poor (>500ms)');
-    } else if (pingTime > 300) {
+    } else if (pingTime > 500) {
         networkStatus.classList.add('poor');
         networkStatus.setAttribute('title', `Network Status: Poor (${Math.round(pingTime)}ms)`);
-    } else if (pingTime > 150) {
+    } else if (pingTime > 250) {
         networkStatus.classList.add('fair');
         networkStatus.setAttribute('title', `Network Status: Fair (${Math.round(pingTime)}ms)`);
-    } else if (pingTime > 50) {
+    } else if (pingTime > 75) {
         networkStatus.classList.add('good');
         networkStatus.setAttribute('title', `Network Status: Good (${Math.round(pingTime)}ms)`);
     } else {
