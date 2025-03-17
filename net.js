@@ -62,9 +62,6 @@ function initializePingChart() {
     // Get the Tesla blue color from CSS
     const teslaBlue = getComputedStyle(document.documentElement).getPropertyValue('--tesla-blue').trim();
     
-    // Set colors based on dark mode
-    const axisColor = darkOn ? '#808080' : 'var(--text-color)';
-    
     const ctx = chartCanvas.getContext('2d');
 
     // Create gradient
@@ -95,10 +92,10 @@ function initializePingChart() {
                     type: 'linear',
                     display: true,
                     grid: {
-                        color: darkOn ? '#808080' : 'var(--separator-color)'
+                        color: 'black'
                     },
                     ticks: {
-                        color: axisColor,
+                        color: 'black',
                         font: {
                             family: 'Inter',
                             size: 14,
@@ -107,8 +104,8 @@ function initializePingChart() {
                     },
                     title: {
                         display: true,
-                        text: 'Elapsed Time (s)',
-                        color: axisColor,
+                        text: 'Ping Count',
+                        color: 'black',
                         font: {
                             family: 'Inter',
                             size: 16,
@@ -120,10 +117,10 @@ function initializePingChart() {
                     display: true,
                     beginAtZero: true,
                     grid: {
-                        color: darkOn ? '#808080' : 'var(--separator-color)'
+                        color: 'black'
                     },
                     ticks: {
-                        color: axisColor,
+                        color: 'black',
                         font: {
                             family: 'Inter',
                             size: 14,
@@ -133,7 +130,7 @@ function initializePingChart() {
                     title: {
                         display: true,
                         text: 'Latency (ms)',
-                        color: axisColor,
+                        color: 'black',
                         font: {
                             family: 'Inter',
                             size: 16,
@@ -149,6 +146,29 @@ function initializePingChart() {
             }
         }
     });
+
+    updateChartAxisColors(); // Ensure initial colors are right
+}
+
+function updateChartAxisColors() {
+    // Console log
+    customLog('Updating chart axis colors...');
+
+    // Get computed values from body element instead of document.documentElement
+    const computedStyle = getComputedStyle(document.body);
+    const axisColor = computedStyle.getPropertyValue('--button-text').trim();
+    const gridColor = computedStyle.getPropertyValue('--separator-color').trim();
+
+    // Update chart options
+    if (pingChart) {
+        pingChart.options.scales.x.ticks.color = axisColor;
+        pingChart.options.scales.y.ticks.color = axisColor;
+        pingChart.options.scales.x.grid.color = gridColor;
+        pingChart.options.scales.y.grid.color = gridColor;
+        pingChart.options.scales.y.title.color = axisColor;
+        pingChart.options.scales.x.title.color = axisColor;
+        pingChart.update();
+    }
 }
 
 function pingTestServer() {

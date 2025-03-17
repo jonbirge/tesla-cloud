@@ -155,7 +155,7 @@ function fetchSunData(lat, long) {
                 updateSunMoonDisplay();
                 
                 // Check if dark mode should be enabled based on new sun data
-                updateAutoDarkMode();
+                autoDarkMode();
             }
         })
         .catch(error => {
@@ -359,7 +359,7 @@ function fetchSunData(lat, long) {
             const moonPhase = getMoonPhaseName(moonPhaseData.Phase);
             highlightUpdate('moonphase', moonPhase);
             
-            updateAutoDarkMode();
+            autoDarkMode();
         })
         .catch(error => {
             console.error('Error fetching sun/moon data: ', error);

@@ -63,6 +63,7 @@ function toggleMode() {
     document.body.classList.toggle('dark-mode');
     darkOn = document.body.classList.contains('dark-mode');
     document.getElementById('darkModeToggle').checked = darkOn;
+    updateDarkModeDependants();
 }
 
 function highlightUpdate(id, content = null) {
@@ -141,7 +142,7 @@ async function updateTimeZone(lat, long) {
     }
 }
 
-function updateAutoDarkMode() {
+function autoDarkMode() {
     if (!manualDarkMode && lat !== null && long !== null) {
         const now = new Date();
         const currentTime = now.getTime();
@@ -160,8 +161,13 @@ function updateAutoDarkMode() {
             document.getElementById('darkModeToggle').checked = false;
         }
     } else {
-        customLog('Location not available for auto dark mode.');
+        customLog('Auto dark mode disabled either manually or by lack of location.');
     }
+}
+
+function updateDarkModeDependants() {
+    // Update the network graph axis colors
+    updateChartAxisColors();
 }
 
 async function fetchWikipediaData(lat, long) {
