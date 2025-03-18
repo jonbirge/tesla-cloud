@@ -543,7 +543,7 @@ input:checked + .toggle-slider:before {
 
 /* Waze frame */
 .teslawaze-container {
-    height: calc(100vh - 350px);
+    height: calc(100vh - 380px);
     min-height: 280px;
     margin-top: 20px;
     width: 100%;
