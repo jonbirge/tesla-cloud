@@ -318,6 +318,19 @@ body.dark-mode .img-adaptive-dark-invert {
     filter: invert(100%);
 }
 
+/* Make white areas in images transparent */
+.img-white-transparent {
+    /* Remove the inverting filters */
+    mix-blend-mode: multiply; /* Keep this to make white transparent */
+    transition: filter 0.3s;
+}
+
+/* Add specific dark mode handling */
+body.dark-mode .img-white-transparent {
+    mix-blend-mode: screen; /* In dark mode, use screen blend mode to make white transparent */
+    filter: invert(100%) brightness(120%) grayscale(100%); /* Invert colors and slightly increase brightness for better visibility */
+}
+
 /* Utility Classes */
 .section {
     display: none;
