@@ -844,9 +844,11 @@ document.addEventListener('visibilitychange', () => {
     if (document.hidden) {
         stopGPSUpdates();
         pauseNewsUpdates();
+        stopPingTest(); // Add this line to stop ping testing when hidden
     } else {
         startGPSUpdates();
         resumeNewsUpdates();
+        resumePingTest(); // Add this line to resume ping testing when visible
     }
 });
 

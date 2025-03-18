@@ -52,9 +52,25 @@ function startPingTest() {
     }
 }
 
+function stopPingTest() {
+    if (pingInterval) {
+        clearInterval(pingInterval);
+        pingInterval = null;
+        customLog('Network ping testing paused');
+    }
+}
+
+function resumePingTest() {
+    if (!pingInterval) {
+        pingInterval = setInterval(pingTestServer, 5000);
+        customLog('Network ping testing resumed');
+    }
+}
+
 function initializePingChart() {
     const chartCanvas = document.getElementById('pingChart');
     if (!chartCanvas) return;
+    const ctx = chartCanvas.getContext('2d');
 
     // Logging
     customLog('Initializing ping chart...');
@@ -62,8 +78,6 @@ function initializePingChart() {
     // Get the Tesla blue color from CSS
     const teslaBlue = getComputedStyle(document.documentElement).getPropertyValue('--tesla-blue').trim();
     
-    const ctx = chartCanvas.getContext('2d');
-
     // Create gradient
     const gradient = ctx.createLinearGradient(0, 0, 0, 400);
     gradient.addColorStop(0, teslaBlue + '50');  // 25% opacity at top
@@ -178,14 +192,14 @@ function pingTestServer() {
         method: 'HEAD'  // reduce timing bias
     })
         .then(() => {
-            const pingTime = performance.now() - startTime;
+            const pingTime = performance.now() - startTime; // ms
             pingData.push(pingTime);
             if (pingData.length > 100) {
                 pingData.shift(); // Keep last n pings
             }
 
             // Logging
-            customLog('Ping time: ', pingTime);
+            customLog('Ping time: ', Math.round(pingTime));
             
             // Always update network status indicator
             updateNetworkStatus(pingTime);
@@ -198,9 +212,7 @@ function pingTestServer() {
             }
         })
         .catch(error => {
-            console.error('Ping failed:', error);
-            customLog('Ping failed:', error);
-            // Update network status to unavailable on error
+            customLog('Ping failed: ', error);
             updateNetworkStatus(null);
         });
 }
