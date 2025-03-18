@@ -248,7 +248,7 @@ hr {
     display: block;
 }
 
-/* Button Lists */
+/* Link Button Lists */
 .button-list {
     list-style: none;
     padding: 0;
@@ -285,8 +285,10 @@ hr {
 }
 
 .button-list a img {
-    width: 32px;
-    height: auto;
+    /* width: 32px;
+    height: auto; */
+    height: 32px;
+    width: auto;
     /* object-fit: contain; */
 }
 
