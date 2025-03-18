@@ -173,9 +173,9 @@ function updateChartAxisColors() {
 
 function pingTestServer() {
     const startTime = performance.now();
-    fetch('ping.php', { 
+    fetch('https://www.npr.org/', {  // useful for testing, at least
         cache: 'no-store',
-        method: 'HEAD'  // Only get headers, we don't need content
+        method: 'HEAD'  // reduce timing bias
     })
         .then(() => {
             const pingTime = performance.now() - startTime;
@@ -222,7 +222,7 @@ function updateNetworkStatus(pingTime) {
     } else if (pingTime > 250) {
         networkStatus.classList.add('fair');
         networkStatus.setAttribute('title', `Network Status: Fair (${Math.round(pingTime)}ms)`);
-    } else if (pingTime > 75) {
+    } else if (pingTime > 50) {
         networkStatus.classList.add('good');
         networkStatus.setAttribute('title', `Network Status: Good (${Math.round(pingTime)}ms)`);
     } else {
