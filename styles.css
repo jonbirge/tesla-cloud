@@ -363,12 +363,12 @@ body.dark-mode .img-white-transparent {
 /* Indicator container and dark-mode toggle */
 .control-container {
     position: fixed;
-    top: 10px;
+    top: -5px; /* Changed from 10px to -5px to move above screen edge */
     right: 20px;
     display: flex;
     align-items: center;
     background-color: var(--bg-color); /* Semi-transparent light mode background */
-    border-radius: var(--button-radius);
+    border-radius: 5px;
     padding: 8px 12px;
     z-index: 100; /* Ensure it stays above other content */
     opacity: 0.75;
@@ -384,8 +384,8 @@ body.dark-mode .img-white-transparent {
 .toggle-switch {
     position: relative;
     display: inline-block;
-    width: 60px;
-    height: 34px;
+    width: 48px; /* Reduced by 20% from 60px */
+    height: 27px; /* Reduced by 20% from 34px */
 }
 
 .toggle-switch input {
@@ -409,10 +409,10 @@ body.dark-mode .img-white-transparent {
 .toggle-slider:before {
     position: absolute;
     content: "";
-    height: 26px;
-    width: 26px;
-    left: 4px;
-    bottom: 4px;
+    height: 21px; /* Reduced by 20% from 26px */
+    width: 21px; /* Reduced by 20% from 26px */
+    left: 3px; /* Adjusted from 4px */
+    bottom: 3px; /* Adjusted from 4px */
     background-color: white;
     transition: .4s;
     border-radius: 50%;
@@ -427,7 +427,7 @@ input:focus + .toggle-slider {
 }
 
 input:checked + .toggle-slider:before {
-    transform: translateX(26px);
+    transform: translateX(21px); /* Reduced by 20% from 26px */
 }
 
 /* Data Display */
