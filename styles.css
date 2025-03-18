@@ -298,6 +298,26 @@ hr {
     /* object-fit: contain; */
 }
 
+/* Enhanced Image Visibility Classes */
+.img-adaptive,
+.img-adaptive-light-invert,
+.img-adaptive-dark-invert {
+    /* Base styling shared by all image adaptive classes */
+    filter: grayscale(100%) contrast(1.5);
+    transition: filter 0.3s;
+}
+
+/* Invert colors only in light mode */
+body:not(.dark-mode) .img-adaptive,
+body:not(.dark-mode) .img-adaptive-light-invert {
+    filter: invert(100%);
+}
+
+/* Invert colors only in dark mode */
+body.dark-mode .img-adaptive-dark-invert {
+    filter: invert(100%);
+}
+
 /* Utility Classes */
 .section {
     display: none;
