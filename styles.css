@@ -1,6 +1,6 @@
 /* Root Variables */
 :root {
-    --bg-color: #eeeeee;
+    --bg-color: #efefef;
     --text-color: #777777;
     --active-section-bg: white;
     --separator-color: #cccccc;
@@ -66,7 +66,7 @@ h1 {
 h2 {
     color: var(--button-text);
     font-size: 17pt;
-    font-weight: 700;
+    font-weight: 600;
     letter-spacing: 0.01em;
     margin-bottom: 9px;
     margin-top: 28px;
@@ -291,11 +291,8 @@ hr {
 }
 
 .button-list a img {
-    /* width: 32px;
-    height: auto; */
     height: 32px;
     width: auto;
-    /* object-fit: contain; */
 }
 
 /* Enhanced Image Visibility Classes */
@@ -431,28 +428,48 @@ input:checked + .toggle-slider:before {
 }
 
 /* Data Display */
+
+/* Common settings for both classes */
+.data-info, .data-info-column {
+    row-gap: 18px;
+    max-width: 1024px;
+    width: 100%; /* Ensure it spans full width */
+}
+
 .data-info {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
-    gap: 16px;
+    column-gap: 12px;
+}
+
+.data-info-column {
     margin-top: 16px;
-    width: 100%;
-    max-width: 1024px;
+    display: flex;
+    flex-direction: column;
+}
+
+.data-info-column .data-item {
+    margin-right: 0; /* Ensure no extra margin */
+    width: 100%; /* Ensure items span full width */
 }
 
 .data-item {
+    color: var(--button-text);
     display: block;
     margin-right: 0;
-    font-weight: 600;
+    padding-top: 0px;
+    font-weight: 500;
 }
 
 .data-item:last-child {
     margin-right: 0;
+    margin-bottom: 0;
 }
 
 .data-item h2 {
+    color: var(--text-color);
     margin-top: 0px;
-    margin-bottom: 6px;
+    margin-bottom: 4px;
 }
 
 /* Stats Display */

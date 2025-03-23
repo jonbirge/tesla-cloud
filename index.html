@@ -333,12 +333,20 @@
         </div>
 
         <div id="network" class="section">
-            <h2>Internet Address</h2>
-            <span id="rdns">N/A</span>
-            <h2>Exit Location</h2>
-            <span id="exitLocation">N/A</span>
-            <h2>Provider</h2>
-            <span id="isp">N/A</span>
+            <div class="data-info-column">
+                <div class="data-item">
+                    <h2>IP Address</h2>
+                    <span id="rdns">N/A</span>
+                </div>
+                <div class="data-item">
+                    <h2>Exit Location</h2>
+                    <span id="exitLocation">N/A</span>
+                </div>
+                <div class="data-item">
+                    <h2>Provider</h2>
+                    <span id="isp">N/A</span>
+                </div>
+            </div>
             <hr>
             <h2>Network Latency</h2>
             <canvas id="pingChart" width="600" height="200"></canvas>
@@ -373,12 +381,11 @@
 
         <div id="about" class="section">
             <h2>About</h2>
-            <p>This service was created by <a href="https://www.mit.edu/~birge/">Jonathan Birge</a> and Alex Birge as an educational father-son project. It is in no way affiliated with Tesla, Inc.</p>
-            <p>If there turns out to be any interest in this, future versions may include features such as links based on your current location, customizable news sources, and persistent user customization of the interface.</p>
+            <p>This service was created by <a href="https://www.mit.edu/~birge/">Jonathan Birge</a> and Alex Birge as an educational father-son project. It is in no way affiliated with Tesla, Inc. and no warranty is made for its utility.</p>
             <p>For questions or feedback, please email <a href="mailto:admin@teslas.cloud">admin@teslas.cloud</a> or submit an issue to the <a href="https://github.com/jonbirge/Tesla/issues">GitHub repository</a>. Even a quick note letting us know you’re using this would be motivation to keep improving it.</p>
-            <p>Apologies to those outside of the US; right now some functionality is limited to CONUS. If you’re using this from another region, please let us know where you're using this (via the contact email above) and we'll see what we can do to improve support for your region with news and weather maps.</p>
+            <p>Apologies to those outside of the US; right now some functionality is limited to CONUS, such as the weather satellite feed. If you’re using this from another region, please let us know where (via the contact email above) and we'll see what we can do to improve support for your region with news and weather maps.</p>
             
-            <h2>Tips</h2>
+            <h2>Quick Tips</h2>
             <ul>
                 <li>Bookmark this page using the star in the browser menu.</li>
                 <li>You can make the browser easily available by dragging it to the left-hand side of the dock at the bottom of the screen.</li>
@@ -387,7 +394,7 @@
             </ul>
 
             <h2>Version</h2>
-            <p id="version">0.61.2</p>
+            <p id="version">0.62</p>
         </div>
 
         </div>
@@ -436,8 +443,8 @@
 
     <!-- Load JavaScript -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script src="wx.js?5"></script>
     <script src="net.js?29"></script>
+    <script src="wx.js?5"></script>
     <script src="app.js?7"></script>
 </body>
 
