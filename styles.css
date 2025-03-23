@@ -652,9 +652,9 @@ input:checked + .toggle-slider:before {
 .news-time, .news-date {
     color: var(--text-color);
     font-size: 13pt;  /* Increased from 12pt */
-    font-weight: 500;
     margin-left: 5px;
     display: inline-block;
+    font-weight: 400;
 }
 
 .news-title {
@@ -662,7 +662,7 @@ input:checked + .toggle-slider:before {
     display: block;
     margin-top: 4px;  /* Increased from 3px */
     font-size: 16pt;  /* Increased from 15pt */
-    font-weight: 600;
+    font-weight: 500;
 }
 
 .news-favicon {
