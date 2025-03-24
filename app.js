@@ -818,6 +818,23 @@ function showSection(sectionId) {
                 customLog('Location not available to fetch Wikipedia data.');
             }
         }
+
+        if (sectionId === 'about') {
+            const versionElement = document.getElementById('version');
+            if (versionElement && !versionElement.dataset.loaded) {
+                fetch('vers.php')
+                    .then(response => response.json())
+                    .then(data => {
+                        const versionText = `${data.branch || 'unknown'}-${data.commit || 'unknown'}`;
+                        versionElement.innerHTML = versionText;
+                        versionElement.dataset.loaded = true; // Mark as loaded
+                    })
+                    .catch(error => {
+                        console.error('Error fetching version:', error);
+                        versionElement.innerHTML = 'Error loading version';
+                    });
+            }
+        }
     }
 
     // Activate the clicked button
