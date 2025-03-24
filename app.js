@@ -1,9 +1,9 @@
 // Settings
 const LATLON_UPDATE_INTERVAL = 2; // seconds
-const UPDATE_DISTANCE_THRESHOLD = 1000; // meters
-const UPDATE_TIME_THRESHOLD = 15; // minutes
-const WX_DISTANCE_THRESHOLD = 50000; // meters
-const WX_TIME_THRESHOLD = 60; // minutes
+const UPDATE_DISTANCE_THRESHOLD = 500; // meters
+const UPDATE_TIME_THRESHOLD = 10; // minutes
+const WX_DISTANCE_THRESHOLD = 25000; // meters
+const WX_TIME_THRESHOLD = 30; // minutes
 const NEWS_REFRESH_INTERVAL = 2.5; // minutes
 const MAX_SPEED = 50; // Maximum speed for radar display (mph)
 const TEST_CENTER_LAT = 39.7392; // Denver
