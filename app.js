@@ -845,6 +845,209 @@ function showSection(sectionId) {
     }
 }
 
+// ***** Login functionality *****
+let isLoggedIn = false;
+let currentUser = null;
+
+// Function to show the login modal
+function showLoginModal() {
+    const modal = document.getElementById('login-modal');
+    modal.style.display = 'flex';
+    document.getElementById('user-id').focus();
+    document.getElementById('login-error').textContent = ''; // Clear previous errors
+}
+
+// Function to hide the login modal
+function closeLoginModal() {
+    document.getElementById('login-modal').style.display = 'none';
+}
+
+// Function to validate user ID
+function validateUserId(userId) {
+    // Check for minimum length (9 characters)
+    if (userId.length < 9) {
+        return { valid: false, message: 'User ID must be at least 9 characters long.' };
+    }
+    
+    // Check for standard characters (letters, numbers, underscore, hyphen)
+    const validFormat = /^[a-zA-Z0-9_-]+$/;
+    if (!validFormat.test(userId)) {
+        return { valid: false, message: 'User ID can only contain letters, numbers, underscore, and hyphen.' };
+    }
+    
+    return { valid: true };
+}
+
+// Function to handle login
+async function handleLogin() {
+    const userId = document.getElementById('user-id').value.trim();
+    const validation = validateUserId(userId);
+    
+    if (!validation.valid) {
+        document.getElementById('login-error').textContent = validation.message;
+        return;
+    }
+    
+    // Successful validation
+    try {
+        // Check if user exists and create if needed
+        const response = await fetch(`settings.php?user=${encodeURIComponent(userId)}`, {
+            method: 'GET'
+        });
+        
+        if (response.ok) {
+            // Login successful
+            isLoggedIn = true;
+            currentUser = userId;
+            
+            // Update UI
+            closeLoginModal();
+            updateLoginState();
+            
+            // Load settings
+            loadUserSettings();
+            
+            // Activate the settings section button
+            document.getElementById('settings-section').classList.remove('hidden');
+        } else {
+            document.getElementById('login-error').textContent = 'Error authenticating. Please try again.';
+        }
+    } catch (error) {
+        console.error('Login error:', error);
+        document.getElementById('login-error').textContent = 'Network error. Please try again.';
+    }
+}
+
+// Function to handle logout
+function handleLogout() {
+    isLoggedIn = false;
+    currentUser = null;
+    
+    // Update UI
+    updateLoginState();
+    
+    // Hide settings section
+    document.getElementById('settings-section').classList.add('hidden');
+    
+    // If currently in settings section, redirect to news
+    const sections = document.querySelectorAll('.section');
+    const settingsSection = document.getElementById('settings');
+    if (settingsSection.style.display === 'block') {
+        showSection('news');
+    }
+}
+
+// Function to update login/logout button based on state
+function updateLoginState() {
+    const loginButton = document.getElementById('login-button');
+    
+    if (isLoggedIn) {
+        loginButton.textContent = 'Logout';
+        loginButton.onclick = handleLogout;
+        
+        // Update settings section header
+        document.getElementById('settings-header').textContent = `Settings for ${currentUser}`;
+    } else {
+        loginButton.textContent = 'Login';
+        loginButton.onclick = showLoginModal;
+    }
+}
+
+// Function to load user settings
+async function loadUserSettings() {
+    if (!isLoggedIn || !currentUser) return;
+    
+    try {
+        const response = await fetch(`settings.php?user=${encodeURIComponent(currentUser)}`, {
+            method: 'GET'
+        });
+        
+        if (response.ok) {
+            const settings = await response.json();
+            
+            // Display settings in the settings section
+            displayUserSettings(settings);
+        } else {
+            console.error('Error loading settings');
+        }
+    } catch (error) {
+        console.error('Settings loading error:', error);
+    }
+}
+
+// Function to display user settings
+function displayUserSettings(settings) {
+    const settingsContent = document.getElementById('settings-content');
+    
+    if (!settings || Object.keys(settings).length === 0) {
+        settingsContent.innerHTML = '<p>No settings have been saved yet.</p>';
+        return;
+    }
+    
+    let html = '<div class="settings-list">';
+    
+    for (const [key, value] of Object.entries(settings)) {
+        html += `
+            <div class="setting-item">
+                <div class="setting-key">${key}</div>
+                <div class="setting-value">${value}</div>
+            </div>
+        `;
+    }
+    
+    html += '</div>';
+    settingsContent.innerHTML = html;
+}
+
+// Function to save a user setting
+async function saveUserSetting(key, value) {
+    if (!isLoggedIn || !currentUser) return;
+    
+    try {
+        const response = await fetch('settings.php', {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                user: currentUser,
+                key: key,
+                value: value
+            })
+        });
+        
+        if (response.ok) {
+            // Refresh settings display
+            loadUserSettings();
+            return true;
+        } else {
+            console.error('Error saving setting');
+            return false;
+        }
+    } catch (error) {
+        console.error('Setting save error:', error);
+        return false;
+    }
+}
+
+// On page load, check for stored login state
+document.addEventListener('DOMContentLoaded', function() {
+    // Add event listeners for login modal
+    document.getElementById('login-cancel').addEventListener('click', closeLoginModal);
+    document.getElementById('login-submit').addEventListener('click', handleLogin);
+    
+    // Handle Enter key in login form
+    document.getElementById('user-id').addEventListener('keyup', function(event) {
+        if (event.key === 'Enter') {
+            handleLogin();
+        }
+    });
+    
+    // Check for stored login state (could use localStorage or cookies for persistence)
+    // For now, we're just initializing with logged out state
+    updateLoginState();
+});
+
 // ***** Main code *****
 
 // Check for parameters in URL
