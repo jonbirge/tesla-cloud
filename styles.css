@@ -1,11 +1,11 @@
-/* Root Variables */
+/* Variables */
 :root {
     --bg-color: #efefef;
-    --text-color: #777777;
+    --text-color: #888888;
     --active-section-bg: white;
     --separator-color: #cccccc;
     --button-bg: #dddddd;
-    --button-text: #545454;
+    --button-text: #333333;
     --info-bg: #d0d0d0;
     --tesla-blue: #0077ff;
     --tesla-red: #ff0000;
@@ -40,7 +40,7 @@ body.dark-mode {
 body {
     background-color: var(--bg-color);
     color: var(--text-color);
-    font-size: 17pt;
+    font-size: 16pt;
     padding: 0;
     text-align: left;
     word-spacing: normal;
@@ -458,7 +458,7 @@ input:checked + .toggle-slider:before {
     display: block;
     margin-right: 0;
     padding-top: 0px;
-    font-weight: 500;
+    font-weight: 600;
 }
 
 .data-item:last-child {
@@ -635,7 +635,7 @@ input:checked + .toggle-slider:before {
 }
 
 .news-item:hover {
-    background-color: var(--button-hover-bg);
+    background-color: var(--button-bg); /* Keep the hover color consistent */
 }
 
 .news-item:last-child {
@@ -660,8 +660,8 @@ input:checked + .toggle-slider:before {
 .news-title {
     color: var(--button-text);
     display: block;
-    margin-top: 4px;  /* Increased from 3px */
-    font-size: 16pt;  /* Increased from 15pt */
+    margin-top: 4px;
+    font-size: 16pt;
     font-weight: 500;
 }
 
