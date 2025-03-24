@@ -187,12 +187,20 @@ function updateChartAxisColors() {
 
 function pingTestServer() {
     const startTime = performance.now();
-    fetch('https://www.npr.org/', {  // useful for testing, at least
+    fetch('ping.php', {
         cache: 'no-store',
         method: 'HEAD'  // reduce timing bias
     })
         .then(() => {
             const pingTime = performance.now() - startTime; // ms
+            
+            // Discard the first ping
+            if (!pingTestServer.firstPingDiscarded) {
+                pingTestServer.firstPingDiscarded = true;
+                customLog('First ping discarded: ', Math.round(pingTime));
+                return;
+            }
+
             pingData.push(pingTime);
             if (pingData.length > 100) {
                 pingData.shift(); // Keep last n pings
@@ -216,6 +224,9 @@ function pingTestServer() {
             updateNetworkStatus(null);
         });
 }
+
+// Initialize the firstPingDiscarded flag
+pingTestServer.firstPingDiscarded = false;
 
 function updateNetworkStatus(pingTime) {
     const networkStatus = document.getElementById('network-status');
