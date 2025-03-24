@@ -909,6 +909,9 @@ async function handleLogin() {
             
             // Activate the settings section button
             document.getElementById('settings-section').classList.remove('hidden');
+            
+            // Update URL with userid parameter
+            updateUrlWithUserId(userId);
         } else {
             document.getElementById('login-error').textContent = 'Error authenticating. Please try again.';
         }
@@ -934,6 +937,64 @@ function handleLogout() {
     const settingsSection = document.getElementById('settings');
     if (settingsSection.style.display === 'block') {
         showSection('news');
+    }
+    
+    // Remove userid from URL
+    removeUserIdFromUrl();
+}
+
+// Function to update URL with userId
+function updateUrlWithUserId(userId) {
+    const url = new URL(window.location);
+    url.searchParams.set('userid', userId);
+    window.history.pushState({}, '', url);
+}
+
+// Function to remove userId from URL
+function removeUserIdFromUrl() {
+    const url = new URL(window.location);
+    url.searchParams.delete('userid');
+    window.history.pushState({}, '', url);
+}
+
+// Function to attempt login from URL parameter
+async function attemptLoginFromUrl() {
+    const urlParams = new URLSearchParams(window.location.search);
+    const userId = urlParams.get('userid');
+    
+    if (userId) {
+        const validation = validateUserId(userId);
+        if (validation.valid) {
+            try {
+                // Check if user exists and create if needed
+                const response = await fetch(`settings.php?user=${encodeURIComponent(userId)}`, {
+                    method: 'GET'
+                });
+                
+                if (response.ok) {
+                    // Login successful
+                    isLoggedIn = true;
+                    currentUser = userId;
+                    
+                    // Update UI
+                    updateLoginState();
+                    
+                    // Load settings
+                    loadUserSettings();
+                    
+                    // Activate the settings section button
+                    document.getElementById('settings-section').classList.remove('hidden');
+                    
+                    console.log('Successfully logged in via URL parameter');
+                } else {
+                    console.error('Error authenticating with URL parameter');
+                }
+            } catch (error) {
+                console.error('Login error from URL parameter:', error);
+            }
+        } else {
+            console.error('Invalid user ID in URL parameter:', validation.message);
+        }
     }
 }
 
@@ -1042,6 +1103,9 @@ document.addEventListener('DOMContentLoaded', function() {
             handleLogin();
         }
     });
+    
+    // Attempt login from URL parameter
+    attemptLoginFromUrl();
     
     // Check for stored login state (could use localStorage or cookies for persistence)
     // For now, we're just initializing with logged out state
