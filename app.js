@@ -1045,6 +1045,9 @@ async function loadUserSettings() {
             
             // Display settings in the settings section
             displayUserSettings(settings);
+            
+            // Initialize toggle states based on saved settings
+            initializeToggleStates(settings);
         } else {
             console.error('Error loading settings');
         }
@@ -1105,6 +1108,54 @@ async function saveUserSetting(key, value) {
     } catch (error) {
         console.error('Setting save error:', error);
         return false;
+    }
+}
+
+// Function to toggle a setting
+async function toggleSetting(key, value) {
+    if (!isLoggedIn || !currentUser) return;
+    
+    try {
+        // Save the setting using the existing saveUserSetting function
+        const success = await saveUserSetting(key, value);
+        
+        if (success) {
+            console.log(`Setting "${key}" updated to "${value}"`);
+        } else {
+            console.error(`Failed to update setting "${key}"`);
+        }
+    } catch (error) {
+        console.error('Error toggling setting:', error);
+    }
+}
+
+// Function to initialize toggle states based on settings
+function initializeToggleStates(settings) {
+    // Auto Dark Mode toggle
+    const autoDarkModeToggle = document.getElementById('auto-dark-mode-toggle');
+    if (autoDarkModeToggle) {
+        const autoDarkModeSetting = settings['auto-dark-mode'];
+        autoDarkModeToggle.checked = autoDarkModeSetting === 'on';
+        
+        console.log(`Initialized Auto Dark Mode toggle: ${autoDarkModeSetting || 'not set'}`);
+    }
+    
+    // 24 Hour Time toggle
+    const timeFormatToggle = document.getElementById('24hr-time-toggle');
+    if (timeFormatToggle) {
+        const timeFormatSetting = settings['24hr-time'];
+        timeFormatToggle.checked = timeFormatSetting === 'on';
+        
+        console.log(`Initialized 24 Hour Time toggle: ${timeFormatSetting || 'not set'}`);
+    }
+    
+    // Test Mode toggle
+    const testModeToggle = document.getElementById('test-mode-toggle');
+    if (testModeToggle) {
+        const testModeSetting = settings['test-mode'];
+        testModeToggle.checked = testModeSetting === 'on';
+        
+        console.log(`Initialized Test Mode toggle: ${testModeSetting || 'not set'}`);
     }
 }
 

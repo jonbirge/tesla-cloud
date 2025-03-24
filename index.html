@@ -408,6 +408,32 @@
             <div id="settings-content">
                 <!-- Settings content will be populated when logged in -->
             </div>
+            
+            <div class="settings-controls">
+                <div class="settings-toggle-item">
+                    <span class="settings-toggle-label">Auto Dark Mode</span>
+                    <label class="settings-toggle-switch">
+                        <input type="checkbox" id="auto-dark-mode-toggle" onchange="toggleSetting('auto-dark-mode', this.checked ? 'on' : 'off')">
+                        <span class="settings-toggle-slider"></span>
+                    </label>
+                </div>
+                
+                <div class="settings-toggle-item">
+                    <span class="settings-toggle-label">24 Hour Time</span>
+                    <label class="settings-toggle-switch">
+                        <input type="checkbox" id="24hr-time-toggle" onchange="toggleSetting('24hr-time', this.checked ? 'on' : 'off')">
+                        <span class="settings-toggle-slider"></span>
+                    </label>
+                </div>
+                
+                <div class="settings-toggle-item">
+                    <span class="settings-toggle-label">Test Mode</span>
+                    <label class="settings-toggle-switch">
+                        <input type="checkbox" id="test-mode-toggle" onchange="toggleSetting('test-mode', this.checked ? 'on' : 'off')">
+                        <span class="settings-toggle-slider"></span>
+                    </label>
+                </div>
+            </div>
         </div>
 
         </div>

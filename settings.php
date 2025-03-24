@@ -3,14 +3,33 @@
 // Provides a simple key-value store for user settings
 header('Content-Type: application/json');
 
+// Enable error reporting for debugging
+ini_set('display_errors', 1);
+error_reporting(E_ALL);
+
 // Configuration
-$dataDir = 'user_data';  // Directory to store user data files
+$dataDir = '/tmp/teslacloud_user_data';  // Use /tmp directory for storage
 $maxKeyLength = 64;      // Maximum length for setting keys
 $maxValueLength = 1024;  // Maximum length for setting values
 
 // Ensure data directory exists
 if (!file_exists($dataDir)) {
-    mkdir($dataDir, 0755, true);
+    $mkdirResult = mkdir($dataDir, 0777, true);
+    if (!$mkdirResult) {
+        http_response_code(500);
+        echo json_encode(['error' => 'Failed to create data directory', 'path' => $dataDir]);
+        exit;
+    }
+}
+
+// Ensure the directory is writable
+if (!is_writable($dataDir)) {
+    chmod($dataDir, 0777);
+    if (!is_writable($dataDir)) {
+        http_response_code(500);
+        echo json_encode(['error' => 'Data directory is not writable', 'path' => $dataDir]);
+        exit;
+    }
 }
 
 // Helper function to validate user ID
