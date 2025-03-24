@@ -912,6 +912,9 @@ async function handleLogin() {
             
             // Update URL with userid parameter
             updateUrlWithUserId(userId);
+            
+            // Save user ID in a cookie
+            setCookie('userid', userId);
         } else {
             document.getElementById('login-error').textContent = 'Error authenticating. Please try again.';
         }
@@ -941,6 +944,9 @@ function handleLogout() {
     
     // Remove userid from URL
     removeUserIdFromUrl();
+    
+    // Remove the userid cookie
+    deleteCookie('userid');
 }
 
 // Function to update URL with userId
@@ -957,10 +963,16 @@ function removeUserIdFromUrl() {
     window.history.pushState({}, '', url);
 }
 
-// Function to attempt login from URL parameter
+// Function to attempt login from URL parameter or cookie
 async function attemptLoginFromUrl() {
     const urlParams = new URLSearchParams(window.location.search);
-    const userId = urlParams.get('userid');
+    let userId = urlParams.get('userid');
+    
+    // If no userid in URL, try to get from cookie
+    if (!userId) {
+        userId = getCookie('userid');
+        console.log('Checking for userid cookie:', userId ? 'found' : 'not found');
+    }
     
     if (userId) {
         const validation = validateUserId(userId);
@@ -985,15 +997,20 @@ async function attemptLoginFromUrl() {
                     // Activate the settings section button
                     document.getElementById('settings-section').classList.remove('hidden');
                     
-                    console.log('Successfully logged in via URL parameter');
+                    console.log('Successfully logged in via ' + (urlParams.get('userid') ? 'URL parameter' : 'cookie'));
+                    
+                    // If login was from cookie, also update the URL
+                    if (!urlParams.get('userid')) {
+                        updateUrlWithUserId(userId);
+                    }
                 } else {
-                    console.error('Error authenticating with URL parameter');
+                    console.error('Error authenticating with user ID');
                 }
             } catch (error) {
-                console.error('Login error from URL parameter:', error);
+                console.error('Login error:', error);
             }
         } else {
-            console.error('Invalid user ID in URL parameter:', validation.message);
+            console.error('Invalid user ID:', validation.message);
         }
     }
 }
@@ -1111,6 +1128,42 @@ document.addEventListener('DOMContentLoaded', function() {
     // For now, we're just initializing with logged out state
     updateLoginState();
 });
+
+// Cookie management functions
+function setCookie(name, value, days = 36500) { // Default to ~100 years (forever)
+    const d = new Date();
+    d.setTime(d.getTime() + (days * 24 * 60 * 60 * 1000));
+    const expires = "expires=" + d.toUTCString();
+    document.cookie = name + "=" + value + ";" + expires + ";path=/";
+    console.log(`Cookie set: ${name}=${value}, expires: ${d.toUTCString()}`);
+}
+
+function getCookie(name) {
+    const cookieName = name + "=";
+    const decodedCookie = decodeURIComponent(document.cookie);
+    const cookieArray = decodedCookie.split(';');
+    
+    console.log(`All cookies: ${document.cookie}`);
+    
+    for (let i = 0; i < cookieArray.length; i++) {
+        let cookie = cookieArray[i];
+        while (cookie.charAt(0) === ' ') {
+            cookie = cookie.substring(1);
+        }
+        if (cookie.indexOf(cookieName) === 0) {
+            const value = cookie.substring(cookieName.length, cookie.length);
+            console.log(`Cookie found: ${name}=${value}`);
+            return value;
+        }
+    }
+    console.log(`Cookie not found: ${name}`);
+    return "";
+}
+
+function deleteCookie(name) {
+    document.cookie = name + "=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+    console.log(`Cookie deleted: ${name}`);
+}
 
 // ***** Main code *****
 
