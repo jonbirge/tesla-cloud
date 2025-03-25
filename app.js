@@ -997,7 +997,7 @@ function removeUserIdFromUrl() {
 }
 
 // Function to attempt login from URL parameter or cookie
-async function attemptLoginFromUrl() {
+async function attemptLogin() {
     const urlParams = new URLSearchParams(window.location.search);
     let userId = urlParams.get('userid');
     
@@ -1025,12 +1025,12 @@ async function attemptLoginFromUrl() {
                     updateLoginState();
                     
                     // Load settings
-                    loadUserSettings();
+                    await loadUserSettings();
                     
                     // Activate the settings section button
                     document.getElementById('settings-section').classList.remove('hidden');
                     
-                    console.log('Successfully logged in via ' + (urlParams.get('userid') ? 'URL parameter' : 'cookie'));
+                    customLog('Successfully logged in via ' + (urlParams.get('userid') ? 'URL parameter' : 'cookie'));
                     
                     // If login was from cookie, also update the URL
                     if (!urlParams.get('userid')) {
@@ -1077,7 +1077,7 @@ async function loadUserSettings() {
             // Load settings directly from server
             // The server now returns booleans directly
             settings = await response.json();
-            console.log('Settings loaded:', settings);
+            customLog('Settings loaded:', settings);
             
             // Initialize toggle states based on saved settings
             initializeToggleStates();
@@ -1124,12 +1124,12 @@ async function toggleSetting(key, value) {
         });
         
         if (response.ok) {
-            console.log(`Setting "${key}" updated to ${value}`);
+            customLog(`Setting "${key}" updated to ${value}`);
         } else {
-            console.error(`Failed to update setting "${key}" on server`);
+            customLog(`Failed to update setting "${key}" on server`);
         }
     } catch (error) {
-        console.error('Error toggling setting:', error);
+        customLog('Error toggling setting:', error);
     }
 }
 
@@ -1158,7 +1158,7 @@ function initializeToggleStates() {
         
         if (toggle) {
             toggle.checked = value;
-            console.log(`Initialized toggle for ${key}: ${value}`);
+            customLog(`Initialized toggle for ${key}: ${value}`);
         }
     });
 }
@@ -1169,7 +1169,7 @@ function setCookie(name, value, days = 36500) { // Default to ~100 years (foreve
     d.setTime(d.getTime() + (days * 24 * 60 * 60 * 1000));
     const expires = "expires=" + d.toUTCString();
     document.cookie = name + "=" + value + ";" + expires + ";path=/";
-    console.log(`Cookie set: ${name}=${value}, expires: ${d.toUTCString()}`);
+    customLog(`Cookie set: ${name}=${value}, expires: ${d.toUTCString()}`);
 }
 
 function getCookie(name) {
@@ -1206,25 +1206,46 @@ const urlParams = new URLSearchParams(window.location.search);
 testMode = urlParams.has('test');
 const initialSection = urlParams.get('section') || 'news';
 
-// On page load, check for stored login state
-document.addEventListener('DOMContentLoaded', function() {
+// Event listeners and initialization after DOM content is loaded
+document.addEventListener('DOMContentLoaded', async function () {
+    // Attempt login from URL parameter or cookie
+    await attemptLogin();
+
+    // Initialize the login/logout button
+    updateLoginState();
+
+    // Initialize radar display
+    initializeRadar();
+
+    // Start location services
+    startGPSUpdates();
+
+    // Handle page visibility changes
+    document.addEventListener('visibilitychange', () => {
+        if (document.hidden) {
+            stopGPSUpdates();
+            pauseNewsUpdates();
+            stopPingTest();
+        } else {
+            startGPSUpdates();
+            resumeNewsUpdates();
+            resumePingTest();
+        }
+    });
+
     // Add event listeners for login modal
     document.getElementById('login-cancel').addEventListener('click', closeLoginModal);
     document.getElementById('login-submit').addEventListener('click', handleLogin);
-    
+
     // Handle Enter key in login form
-    document.getElementById('user-id').addEventListener('keyup', function(event) {
+    document.getElementById('user-id').addEventListener('keyup', function (event) {
         if (event.key === 'Enter') {
             handleLogin();
         }
     });
-    
-    // Attempt login from URL parameter
-    attemptLoginFromUrl();
-    
-    // Check for stored login state (could use localStorage or cookies for persistence)
-    // For now, we're just initializing with logged out state
-    updateLoginState();
+
+    // Show the initial section from URL parameter
+    showSection(initialSection);
 });
 
 // Update link click event listener
@@ -1236,29 +1257,7 @@ document.addEventListener('click', function(e) {
     }
 });
 
-// Handle page visibility changes
-document.addEventListener('visibilitychange', () => {
-    if (document.hidden) {
-        stopGPSUpdates();
-        pauseNewsUpdates();
-        stopPingTest(); // Add this line to stop ping testing when hidden
-    } else {
-        startGPSUpdates();
-        resumeNewsUpdates();
-        resumePingTest(); // Add this line to resume ping testing when visible
-    }
-});
-
 // Handle browser back/forward buttons
 window.addEventListener('popstate', () => {
     showSection(getInitialSection());
 });
-
-// Initialize radar display
-initializeRadar();
-
-// Start location services
-startGPSUpdates();
-
-// Show the initial section from URL parameter
-showSection(initialSection);
