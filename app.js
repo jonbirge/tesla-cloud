@@ -31,7 +31,7 @@ let lastKnownHeading = null;
 let neverUpdatedLocation = true;
 let lat = null;
 let long = null;
-let manualDarkMode = false;
+let localManualDarkMode = false; // Transient manual dark mode (when settings are not available)
 let darkOn = false;
 let newsUpdateInterval = null;
 let newsUpdatesActive = false; // Track if news updates should be active
@@ -79,6 +79,7 @@ function highlightUpdate(id, content = null) {
     }, 2000);
 }
 
+// Return time zone based on browser settings
 function browserTimeZone() {
     const tz = Intl.DateTimeFormat().resolvedOptions().timeZone;
     customLog('Browser timezone: ', tz);
@@ -138,15 +139,26 @@ async function updateTimeZone(lat, long) {
     }
 }
 
+// Manually set dark/light mode
 function toggleMode() {
-    manualDarkMode = true;
+    if (currentUser) {
+        toggleSetting('auto-dark-mode', false);
+    } else {
+        localManualDarkMode = true;
+    }
     document.body.classList.toggle('dark-mode');
-    darkOn = document.body.classList.contains('dark-mode');
+    var darkOn = document.body.classList.contains('dark-mode');
     document.getElementById('darkModeToggle').checked = darkOn;
     updateDarkModeDependants();
 }
 
+// Update the dark/light mode based on sunrise/sunset
 function autoDarkMode() {
+    if (currentUser) {
+        manualDarkMode = settings['auto-dark-mode'];
+    } else {
+        manualDarkMode = localManualDarkMode;
+    }
     if (!manualDarkMode && lat !== null && long !== null) {
         const now = new Date();
         const currentTime = now.getTime();
