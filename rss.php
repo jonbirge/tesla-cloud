@@ -28,8 +28,8 @@ $feeds = [
     'electrek' => 'https://electrek.co/feed/',
     'thedrive' => 'https://www.thedrive.com/feed',
     'techcrunch' => 'https://techcrunch.com/feed/',
-    // 'theverge' => 'https://www.theverge.com/rss/index.xml',
-    // 'jalopnik' => 'https://jalopnik.com/rss',
+    'theverge' => 'https://www.theverge.com/rss/index.xml',
+    'jalopnik' => 'https://jalopnik.com/rss',
 ];
 
 // Check if we're in test mode
