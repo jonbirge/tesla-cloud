@@ -47,6 +47,7 @@ let locationTimeZone = browserTimeZone();
 let lastNewsTimestamp = 0; // Track the latest news timestamp we've seen
 let userHasSeenLatestNews = true; // Track if user has seen the latest news
 let seenNewsIds = new Set(); // Track news IDs we've already seen
+let settings = {}; // Global settings object to cache user settings
 
 // Custom log function that prepends the current time
 function customLog(...args) {
@@ -1042,9 +1043,11 @@ async function loadUserSettings() {
         });
         
         if (response.ok) {
-            const settings = await response.json();
+            // Store settings in our global variable
+            settings = await response.json();
+            
             // Initialize toggle states based on saved settings
-            initializeToggleStates(settings);
+            initializeToggleStates();
         } else {
             console.error('Error loading settings');
         }
@@ -1053,11 +1056,21 @@ async function loadUserSettings() {
     }
 }
 
-// Function to save a user setting
-async function saveUserSetting(key, value) {
+// Function to toggle a setting
+async function toggleSetting(key, value) {
     if (!isLoggedIn || !currentUser) return;
     
     try {
+        // Update the local settings cache first
+        settings[key] = value;
+        
+        // Also update toggle state visually (no need to wait for server response)
+        const toggleElement = document.getElementById(`${key}-toggle`);
+        if (toggleElement) {
+            toggleElement.checked = value === 'on';
+        }
+        
+        // Then update the server asynchronously
         const response = await fetch('settings.php', {
             method: 'PUT',
             headers: {
@@ -1071,31 +1084,11 @@ async function saveUserSetting(key, value) {
         });
         
         if (response.ok) {
-            // Refresh settings display
-            loadUserSettings();
-            return true;
-        } else {
-            console.error('Error saving setting');
-            return false;
-        }
-    } catch (error) {
-        console.error('Setting save error:', error);
-        return false;
-    }
-}
-
-// Function to toggle a setting
-async function toggleSetting(key, value) {
-    if (!isLoggedIn || !currentUser) return;
-    
-    try {
-        // Save the setting using the existing saveUserSetting function
-        const success = await saveUserSetting(key, value);
-        
-        if (success) {
             console.log(`Setting "${key}" updated to "${value}"`);
         } else {
-            console.error(`Failed to update setting "${key}"`);
+            console.error(`Failed to update setting "${key}" on server`);
+            // If server update fails, we might want to revert the local setting
+            // but for now we'll keep it simple
         }
     } catch (error) {
         console.error('Error toggling setting:', error);
@@ -1103,7 +1096,7 @@ async function toggleSetting(key, value) {
 }
 
 // Function to initialize toggle states based on settings
-function initializeToggleStates(settings) {
+function initializeToggleStates() {
     // Auto Dark Mode toggle
     const autoDarkModeToggle = document.getElementById('auto-dark-mode-toggle');
     if (autoDarkModeToggle) {
