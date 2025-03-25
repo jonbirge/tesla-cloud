@@ -860,7 +860,7 @@ input:checked + .toggle-slider:before {
 
 /* Settings Controls */
 .settings-controls {
-    margin-top: 30px;
+    margin-top: 12px;
 }
 
 .settings-toggle-item {
@@ -871,11 +871,13 @@ input:checked + .toggle-slider:before {
     border-radius: var(--button-radius);
     padding: 20px;
     margin-bottom: 15px;
+    max-width: 480px;
+    width: 100%;
 }
 
 .settings-toggle-label {
     color: var(--button-text);
-    font-size: 16pt;
+    /* font-size: 16pt; */
     font-weight: 600;
 }
 

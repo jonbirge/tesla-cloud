@@ -55,6 +55,7 @@ function customLog(...args) {
     console.log(`[${timeString}] `, ...args);
 }
 
+// Update element with a change-dependent highlight effect
 function highlightUpdate(id, content = null) {
     const element = document.getElementById(id);
     if (content !== null) {
@@ -1042,10 +1043,6 @@ async function loadUserSettings() {
         
         if (response.ok) {
             const settings = await response.json();
-            
-            // Display settings in the settings section
-            displayUserSettings(settings);
-            
             // Initialize toggle states based on saved settings
             initializeToggleStates(settings);
         } else {
@@ -1054,30 +1051,6 @@ async function loadUserSettings() {
     } catch (error) {
         console.error('Settings loading error:', error);
     }
-}
-
-// Function to display user settings
-function displayUserSettings(settings) {
-    const settingsContent = document.getElementById('settings-content');
-    
-    if (!settings || Object.keys(settings).length === 0) {
-        settingsContent.innerHTML = '<p>No settings have been saved yet.</p>';
-        return;
-    }
-    
-    let html = '<div class="settings-list">';
-    
-    for (const [key, value] of Object.entries(settings)) {
-        html += `
-            <div class="setting-item">
-                <div class="setting-key">${key}</div>
-                <div class="setting-value">${value}</div>
-            </div>
-        `;
-    }
-    
-    html += '</div>';
-    settingsContent.innerHTML = html;
 }
 
 // Function to save a user setting
@@ -1159,27 +1132,6 @@ function initializeToggleStates(settings) {
     }
 }
 
-// On page load, check for stored login state
-document.addEventListener('DOMContentLoaded', function() {
-    // Add event listeners for login modal
-    document.getElementById('login-cancel').addEventListener('click', closeLoginModal);
-    document.getElementById('login-submit').addEventListener('click', handleLogin);
-    
-    // Handle Enter key in login form
-    document.getElementById('user-id').addEventListener('keyup', function(event) {
-        if (event.key === 'Enter') {
-            handleLogin();
-        }
-    });
-    
-    // Attempt login from URL parameter
-    attemptLoginFromUrl();
-    
-    // Check for stored login state (could use localStorage or cookies for persistence)
-    // For now, we're just initializing with logged out state
-    updateLoginState();
-});
-
 // Cookie management functions
 function setCookie(name, value, days = 36500) { // Default to ~100 years (forever)
     const d = new Date();
@@ -1222,6 +1174,27 @@ function deleteCookie(name) {
 const urlParams = new URLSearchParams(window.location.search);
 testMode = urlParams.has('test');
 const initialSection = urlParams.get('section') || 'news';
+
+// On page load, check for stored login state
+document.addEventListener('DOMContentLoaded', function() {
+    // Add event listeners for login modal
+    document.getElementById('login-cancel').addEventListener('click', closeLoginModal);
+    document.getElementById('login-submit').addEventListener('click', handleLogin);
+    
+    // Handle Enter key in login form
+    document.getElementById('user-id').addEventListener('keyup', function(event) {
+        if (event.key === 'Enter') {
+            handleLogin();
+        }
+    });
+    
+    // Attempt login from URL parameter
+    attemptLoginFromUrl();
+    
+    // Check for stored login state (could use localStorage or cookies for persistence)
+    // For now, we're just initializing with logged out state
+    updateLoginState();
+});
 
 // Update link click event listener
 document.addEventListener('click', function(e) {
