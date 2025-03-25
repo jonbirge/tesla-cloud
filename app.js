@@ -58,14 +58,6 @@ function customLog(...args) {
     console.log(`[${timeString}] `, ...args);
 }
 
-function toggleMode() {
-    manualDarkMode = true;
-    document.body.classList.toggle('dark-mode');
-    darkOn = document.body.classList.contains('dark-mode');
-    document.getElementById('darkModeToggle').checked = darkOn;
-    updateDarkModeDependants();
-}
-
 function highlightUpdate(id, content = null) {
     const element = document.getElementById(id);
     if (content !== null) {
@@ -136,6 +128,7 @@ async function updateTimeZone(lat, long) {
         if (!tzData || !tzData.timezoneId) {
             throw new Error('Timezone not returned from server.');
         }
+        customLog('Timezone: ', tzData);
         return tzData.timezoneId;
     } catch (error) {
         console.error('Error fetching time zone: ', error);
@@ -146,6 +139,14 @@ async function updateTimeZone(lat, long) {
     }
 }
 
+function toggleMode() {
+    manualDarkMode = true;
+    document.body.classList.toggle('dark-mode');
+    darkOn = document.body.classList.contains('dark-mode');
+    document.getElementById('darkModeToggle').checked = darkOn;
+    updateDarkModeDependants();
+}
+
 function autoDarkMode() {
     if (!manualDarkMode && lat !== null && long !== null) {
         const now = new Date();
@@ -154,18 +155,22 @@ function autoDarkMode() {
         const sunsetTime = new Date(sunset).getTime();
 
         if (currentTime >= sunsetTime || currentTime < sunriseTime) {
-            customLog('Applying dark mode based on sunset...');
-            document.body.classList.add('dark-mode');
-            darkOn = true;
-            document.getElementById('darkModeToggle').checked = true;
+            if (!darkOn) {
+                customLog('Applying dark mode based on sunset...');
+                document.body.classList.add('dark-mode');
+                darkOn = true;
+                document.getElementById('darkModeToggle').checked = true;
+                updateDarkModeDependants();
+            }
         } else {
-            customLog('Applying light mode based on sunrise...');
-            document.body.classList.remove('dark-mode');
-            darkOn = false;
-            document.getElementById('darkModeToggle').checked = false;
+            if (darkOn) {
+                customLog('Applying light mode based on sunrise...');
+                document.body.classList.remove('dark-mode');
+                darkOn = false;
+                document.getElementById('darkModeToggle').checked = false;
+                updateDarkModeDependants();
+            }
         }
-    } else {
-        customLog('Auto dark mode disabled either manually or by lack of location.');
     }
 }
 
@@ -498,18 +503,17 @@ async function updateLocationData(lat, long) {
     neverUpdatedLocation = false;
 
     // Fire off API requests for external data
-    locationTimeZone = await updateTimeZone(lat, long);
-    customLog('Timezone: ', locationTimeZone);
+    locationTimeZone = await updateTimeZone(lat, long);  // TODO: this should be done more rarely
     fetchCityData(lat, long);
 
-    // Update connectivity data if the Network section is visible
+    // Update connectivity data iff the Network section is visible
     const networkSection = document.getElementById("network");
     if (networkSection.style.display === "block") {
         customLog('Updating connectivity data...');
         updateNetworkInfo();
     }
 
-    // Update Wikipedia data if the Landmarks section is visible
+    // Update Wikipedia data iff the Landmarks section is visible
     const locationSection = document.getElementById("landmarks");
     if (locationSection.style.display === "block") {
         customLog('Updating Wikipedia data...');
@@ -646,12 +650,12 @@ function handlePositionUpdate(position) {
         document.getElementById('accuracy').innerText = acc ? Math.round(acc) + ' m' : '--';
     }
 
-    // Check if we should update location-dependent API data
+    // Short distance updates
     if (shouldUpdateLocationData()) {
         updateLocationData(lat, long);
     }
 
-    // Load weather data if needed
+    // Long distance updates
     if (shouldUpdateWeatherData()) {
         fetchWeatherData(lat, long);
     }

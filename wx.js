@@ -4,6 +4,8 @@ let lastWxUpdateLat = null;
 let lastWxUpdateLong = null;
 let forecastData = null;
 let weatherData = null;
+let sunrise = null;
+let sunset = null;
 
 // Convert numerical phase to human-readable name
 function getMoonPhaseName(phase) {
@@ -55,9 +57,11 @@ function fetchWeatherData(lat, long, silentLoad = true) {
         if (loadingSpinner) loadingSpinner.style.display = 'flex';
     }
 
-    // Fetch sunrise/sunset data alongside weather data
+    // Fetch sunrise/sunset data
     fetchSunData(lat, long);
+    autoDarkMode();
 
+    // Use fake data in test mode
     if (testMode) {
         // Use mock data in test mode
         customLog('Using mock weather data (test mode)');
@@ -81,6 +85,7 @@ function fetchWeatherData(lat, long, silentLoad = true) {
         return;
     }
 
+    // Fetch weather data from APIs
     Promise.all([
         fetch(`https://secure.geonames.org/findNearByWeatherJSON?lat=${lat}&lng=${long}&username=birgefuller`),
         fetch(`https://api.openweathermap.org/data/2.5/forecast?lat=${lat}&lon=${long}&appid=${OPENWX_API_KEY}&units=imperial`)
@@ -305,13 +310,6 @@ function updateWeatherDisplay() {
         highlightUpdate('wind', '--');
     }
 
-    // Get timestamp of weather data in local time
-    // const updateTime = new Date(Date.parse(weatherData.datetime + 'Z'));
-    // const wxUpdateTime = updateTime.toLocaleTimeString('en-US', {
-    //     hour: '2-digit',
-    //     minute: '2-digit',
-    //     timeZone: locationTimeZone
-    // });
     const wxUpdateTime = new Date().toLocaleTimeString('en-US', {
         hour: '2-digit',
         minute: '2-digit',
@@ -341,8 +339,6 @@ function fetchSunData(lat, long) {
             sunrise = sunData.results.sunrise;
             sunset = sunData.results.sunset;
             moonPhaseData = moonData[0];
-            
-            const moonphaseElements = document.querySelectorAll('[id="moonphase"]');
             
             const sunriseTime = new Date(sunrise).toLocaleTimeString('en-US', {
                 timeZone: locationTimeZone,
