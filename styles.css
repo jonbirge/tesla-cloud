@@ -858,7 +858,6 @@ input:checked + .toggle-slider:before {
 .settings-list {
     margin-top: 20px;
 }
-
 .setting-item {
     background-color: var(--button-bg);
     border-radius: var(--button-radius);
@@ -868,13 +867,11 @@ input:checked + .toggle-slider:before {
     justify-content: space-between;
     flex-wrap: wrap;
 }
-
 .setting-key {
     font-weight: 600;
     color: var(--button-text);
     margin-right: 15px;
 }
-
 .setting-value {
     color: var(--text-color);
     word-break: break-word;
@@ -884,23 +881,36 @@ input:checked + .toggle-slider:before {
 .settings-controls {
     margin-top: 12px;
 }
-
 .settings-toggle-item {
     display: flex;
     align-items: center;
     justify-content: space-between;
     background-color: var(--button-bg);
     border-radius: var(--button-radius);
-    padding: 20px;
-    margin-bottom: 15px;
-    max-width: 480px;
-    width: 100%;
+    padding: 18px;
+    margin-bottom: 14px;
+    /* max-width: 480px; */
+    width: auto;
 }
 
-.settings-toggle-label {
-    color: var(--button-text);
-    /* font-size: 16pt; */
-    font-weight: 600;
+/* News Source Grid */
+.news-source-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 15px;
+    width: 100%;
+    max-width: 1200px;
+}
+
+/* News toggle item - narrower and shorter */
+.news-toggle-item {
+    padding: 12px 15px;
+    margin-bottom: 0;
+    max-width: none;
+    width: auto;
+}
+.news-toggle-item .settings-toggle-label {
+    font-size: 16pt;
 }
 
 /* Larger Toggle Switch for Settings */
