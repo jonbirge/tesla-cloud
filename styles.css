@@ -856,28 +856,13 @@ input:checked + .toggle-slider:before {
 
 /* Settings Section Styles */
 .settings-list {
-    margin-top: 20px;
+    margin-top: 15px;
 }
-.setting-item {
-    background-color: var(--button-bg);
-    border-radius: var(--button-radius);
-    margin-bottom: 10px;
-    padding: 15px;
-    display: flex;
-    justify-content: space-between;
-    flex-wrap: wrap;
+.settings-toggle-label {
+    font-weight: var(--heading-font-weight);
+    /* font-size: 16pt; */
+    margin-right: 12px;
 }
-.setting-key {
-    font-weight: 600;
-    color: var(--button-text);
-    margin-right: 15px;
-}
-.setting-value {
-    color: var(--text-color);
-    word-break: break-word;
-}
-
-/* Settings Controls */
 .settings-controls {
     margin-top: 12px;
 }
@@ -887,9 +872,8 @@ input:checked + .toggle-slider:before {
     justify-content: space-between;
     background-color: var(--button-bg);
     border-radius: var(--button-radius);
-    padding: 18px;
-    margin-bottom: 14px;
-    /* max-width: 480px; */
+    padding: 15px;
+    margin-bottom: 12px;
     width: auto;
 }
 
