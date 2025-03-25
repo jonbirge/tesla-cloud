@@ -99,7 +99,7 @@ function formatTime(date, options = {}) {
     const timeOptions = {...defaultOptions, ...options};
     
     // Check if 24-hour format is enabled in settings
-    if (currentUser && settings && settings['24hr-time'] === 'on') {
+    if (currentUser && settings && settings['24hr-time']) {
         timeOptions.hour12 = false;
     }
     
@@ -174,8 +174,9 @@ function toggleMode() {
 
 // Update the dark/light mode based on sunrise/sunset
 function autoDarkMode() {
-    if (currentUser) {
-        manualDarkMode = settings['auto-dark-mode'];
+    if (currentUser && settings && settings['auto-dark-mode'] !== undefined) {
+        manualDarkMode = !settings['auto-dark-mode'];
+        customLog('Using auto dark mode user setting: ', manualDarkMode);
     } else {
         manualDarkMode = localManualDarkMode;
     }
@@ -1073,8 +1074,10 @@ async function loadUserSettings() {
         });
         
         if (response.ok) {
-            // Store settings in our global variable
+            // Load settings directly from server
+            // The server now returns booleans directly
             settings = await response.json();
+            console.log('Settings loaded:', settings);
             
             // Initialize toggle states based on saved settings
             initializeToggleStates();
@@ -1091,7 +1094,7 @@ function toggleSettingFromElement(element) {
     const settingItem = element.closest('.settings-toggle-item');
     if (settingItem && settingItem.dataset.setting) {
         const key = settingItem.dataset.setting;
-        const value = element.checked ? 'on' : 'off';
+        const value = element.checked;
         toggleSetting(key, value);
     }
 }
@@ -1101,13 +1104,13 @@ async function toggleSetting(key, value) {
     if (!isLoggedIn || !currentUser) return;
     
     try {
-        // Update the local settings cache first
+        // Update the local settings cache with boolean value
         settings[key] = value;
         
         // Update toggle state visually
         updateToggleVisualState(key, value);
         
-        // Update the server asynchronously
+        // Update the server with the boolean value directly
         const response = await fetch('settings.php', {
             method: 'PUT',
             headers: {
@@ -1121,7 +1124,7 @@ async function toggleSetting(key, value) {
         });
         
         if (response.ok) {
-            console.log(`Setting "${key}" updated to "${value}"`);
+            console.log(`Setting "${key}" updated to ${value}`);
         } else {
             console.error(`Failed to update setting "${key}" on server`);
         }
@@ -1136,7 +1139,7 @@ function updateToggleVisualState(key, value) {
     if (settingItem) {
         const toggle = settingItem.querySelector('input[type="checkbox"]');
         if (toggle) {
-            toggle.checked = value === 'on';
+            toggle.checked = value;
         }
     }
 }
@@ -1150,11 +1153,11 @@ function initializeToggleStates() {
         const key = item.dataset.setting;
         if (!key) return;
         
-        const value = settings[key] || 'off'; // Default to 'off' if not set
+        const value = settings[key] !== undefined ? settings[key] : false; // Default to false if not set
         const toggle = item.querySelector('input[type="checkbox"]');
         
         if (toggle) {
-            toggle.checked = value === 'on';
+            toggle.checked = value;
             console.log(`Initialized toggle for ${key}: ${value}`);
         }
     });
@@ -1246,9 +1249,6 @@ document.addEventListener('visibilitychange', () => {
     }
 });
 
-// Add click handler to close popup when clicking overlay
-document.querySelector('.overlay').addEventListener('click', closeHourlyForecast);
-
 // Handle browser back/forward buttons
 window.addEventListener('popstate', () => {
     showSection(getInitialSection());
@@ -1257,8 +1257,8 @@ window.addEventListener('popstate', () => {
 // Initialize radar display
 initializeRadar();
 
+// Start location services
+startGPSUpdates();
+
 // Show the initial section from URL parameter
 showSection(initialSection);
-
-// Replace the direct GPS update calls at the end of your script with:
-startGPSUpdates();

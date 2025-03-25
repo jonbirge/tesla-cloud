@@ -544,3 +544,6 @@ function updateAQI(lat, lon, apiKey) {
             document.getElementById('aqi-dot').style.backgroundColor = color;
         });
 }
+
+// Add click handler to close popup when clicking overlay
+document.querySelector('.overlay').addEventListener('click', closeHourlyForecast);

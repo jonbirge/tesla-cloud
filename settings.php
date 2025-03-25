@@ -103,10 +103,20 @@ switch ($method) {
         }
         
         // Validate key and value
-        if (strlen($key) > $maxKeyLength || strlen($value) > $maxValueLength) {
+        if (strlen($key) > $maxKeyLength || strlen(json_encode($value)) > $maxValueLength) {
             http_response_code(400);
             echo json_encode(['error' => 'Key or value too long']);
             exit;
+        }
+        
+        // Convert value to boolean if it's a boolean string or already boolean
+        if (is_string($value)) {
+            if ($value === 'true') {
+                $value = true;
+            } elseif ($value === 'false') {
+                $value = false;
+            }
+            // Keep other string values as is - this handles non-boolean settings
         }
         
         // Load current settings
