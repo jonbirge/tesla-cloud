@@ -314,7 +314,7 @@
                 <li><a href="https://www.disneyplus.com"><img class="img-adaptive" src="https://cnbl-cdn.bamgrid.com/assets/e41a64255b8a5840df6162a10642ad98f42a80d3ca8aeb5ebcd70f74d096c0b0/original" loading="lazy">Disney+</a></li>
                 <li><a href="https://www.paramountplus.com"><img src="https://www.paramountplus.com/favicon.ico" loading="lazy">Paramount+</a></li>
                 <li><a href="https://www.mgmplus.com"><img src="https://www.mgmplus.com/favicon.svg" loading="lazy">MGM+</a></li>
-                <li><a href="https://www.discoveryplus.com"><img src="https://www.discoveryplus.com/img/dplus/favicon.ico" loading="lazy">Discovery+</a></li>
+                <li><a href="https://www.discoveryplus.com"><img class="img-white-transparent" src="https://www.discoveryplus.com/img/dplus/favicon.ico" loading="lazy">Discovery+</a></li>
                 <li><a href="https://www.amc.com"><img class="img-adaptive" src="https://cdn.amcnetworks.com/amc/theme/web/amc_logo_bk_bg.png" loading="lazy">AMC</a></li>
                 <li><a href="https://www.mlb.com/live-stream-games"><img src="https://www.mlb.com/favicon.ico" loading="lazy">MLB.tv</a></li>
                 <li><a href="https://www.siriusxm.com/player"><img src="https://www.siriusxm.com/favicon.ico" loading="lazy">SiriusXM</a></li>
@@ -408,26 +408,26 @@
             
             <h2>General</h2>
             <div class="settings-controls">
-                <div class="settings-toggle-item">
+                <div class="settings-toggle-item" data-setting="auto-dark-mode">
                     <span class="settings-toggle-label">Auto Dark Mode</span>
                     <label class="settings-toggle-switch">
-                        <input type="checkbox" id="auto-dark-mode-toggle" onchange="toggleSetting('auto-dark-mode', this.checked ? 'on' : 'off')">
+                        <input type="checkbox" class="settings-toggle" onchange="toggleSettingFromElement(this)">
                         <span class="settings-toggle-slider"></span>
                     </label>
                 </div>
                 
-                <div class="settings-toggle-item">
+                <div class="settings-toggle-item" data-setting="24hr-time">
                     <span class="settings-toggle-label">24 Hour Time</span>
                     <label class="settings-toggle-switch">
-                        <input type="checkbox" id="24hr-time-toggle" onchange="toggleSetting('24hr-time', this.checked ? 'on' : 'off')">
+                        <input type="checkbox" class="settings-toggle" onchange="toggleSettingFromElement(this)">
                         <span class="settings-toggle-slider"></span>
                     </label>
                 </div>
                 
-                <div class="settings-toggle-item">
+                <div class="settings-toggle-item" data-setting="test-mode">
                     <span class="settings-toggle-label">Test Mode</span>
                     <label class="settings-toggle-switch">
-                        <input type="checkbox" id="test-mode-toggle" onchange="toggleSetting('test-mode', this.checked ? 'on' : 'off')">
+                        <input type="checkbox" class="settings-toggle" onchange="toggleSettingFromElement(this)">
                         <span class="settings-toggle-slider"></span>
                     </label>
                 </div>

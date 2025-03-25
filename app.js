@@ -1056,7 +1056,17 @@ async function loadUserSettings() {
     }
 }
 
-// Function to toggle a setting
+// Function called by the toggle UI elements
+function toggleSettingFromElement(element) {
+    const settingItem = element.closest('.settings-toggle-item');
+    if (settingItem && settingItem.dataset.setting) {
+        const key = settingItem.dataset.setting;
+        const value = element.checked ? 'on' : 'off';
+        toggleSetting(key, value);
+    }
+}
+
+// Function to toggle a setting (updates both local cache and server)
 async function toggleSetting(key, value) {
     if (!isLoggedIn || !currentUser) return;
     
@@ -1064,13 +1074,10 @@ async function toggleSetting(key, value) {
         // Update the local settings cache first
         settings[key] = value;
         
-        // Also update toggle state visually (no need to wait for server response)
-        const toggleElement = document.getElementById(`${key}-toggle`);
-        if (toggleElement) {
-            toggleElement.checked = value === 'on';
-        }
+        // Update toggle state visually
+        updateToggleVisualState(key, value);
         
-        // Then update the server asynchronously
+        // Update the server asynchronously
         const response = await fetch('settings.php', {
             method: 'PUT',
             headers: {
@@ -1087,42 +1094,40 @@ async function toggleSetting(key, value) {
             console.log(`Setting "${key}" updated to "${value}"`);
         } else {
             console.error(`Failed to update setting "${key}" on server`);
-            // If server update fails, we might want to revert the local setting
-            // but for now we'll keep it simple
         }
     } catch (error) {
         console.error('Error toggling setting:', error);
     }
 }
 
-// Function to initialize toggle states based on settings
+// Update visual state of a toggle
+function updateToggleVisualState(key, value) {
+    const settingItem = document.querySelector(`.settings-toggle-item[data-setting="${key}"]`);
+    if (settingItem) {
+        const toggle = settingItem.querySelector('input[type="checkbox"]');
+        if (toggle) {
+            toggle.checked = value === 'on';
+        }
+    }
+}
+
+// Initialize all toggle states based on settings
 function initializeToggleStates() {
-    // Auto Dark Mode toggle
-    const autoDarkModeToggle = document.getElementById('auto-dark-mode-toggle');
-    if (autoDarkModeToggle) {
-        const autoDarkModeSetting = settings['auto-dark-mode'];
-        autoDarkModeToggle.checked = autoDarkModeSetting === 'on';
-        
-        console.log(`Initialized Auto Dark Mode toggle: ${autoDarkModeSetting || 'not set'}`);
-    }
+    // Find all settings toggle items with data-setting attributes
+    const toggleItems = document.querySelectorAll('.settings-toggle-item[data-setting]');
     
-    // 24 Hour Time toggle
-    const timeFormatToggle = document.getElementById('24hr-time-toggle');
-    if (timeFormatToggle) {
-        const timeFormatSetting = settings['24hr-time'];
-        timeFormatToggle.checked = timeFormatSetting === 'on';
+    toggleItems.forEach(item => {
+        const key = item.dataset.setting;
+        if (!key) return;
         
-        console.log(`Initialized 24 Hour Time toggle: ${timeFormatSetting || 'not set'}`);
-    }
-    
-    // Test Mode toggle
-    const testModeToggle = document.getElementById('test-mode-toggle');
-    if (testModeToggle) {
-        const testModeSetting = settings['test-mode'];
-        testModeToggle.checked = testModeSetting === 'on';
+        const value = settings[key] || 'off'; // Default to 'off' if not set
+        const toggle = item.querySelector('input[type="checkbox"]');
         
-        console.log(`Initialized Test Mode toggle: ${testModeSetting || 'not set'}`);
-    }
+        if (toggle) {
+            toggle.checked = value === 'on';
+            console.log(`Initialized toggle for ${key}: ${value}`);
+        }
+    });
 }
 
 // Cookie management functions
