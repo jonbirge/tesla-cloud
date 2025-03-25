@@ -31,50 +31,70 @@ function validateUserId(userId) {
     return { valid: true };
 }
 
-// Function to handle login
+// Function to attempt login from URL parameter or cookie
+async function attemptLogin() {
+    const urlParams = new URLSearchParams(window.location.search);
+    let userId = urlParams.get('user');
+    
+    // If no userid in URL, try to get from cookie
+    if (!userId) {
+        userId = getCookie('userid');
+        customLog('Checking for userid cookie:', userId ? 'found' : 'not found');
+    }
+
+    if (userId) {
+        await fetchSettings(userId);
+    }
+}
+
+async function fetchSettings(userId) {
+    const validation = validateUserId(userId);
+    if (validation.valid) {
+        try {
+            // Check if user exists and create if needed
+            const response = await fetch(`settings.php?user=${encodeURIComponent(userId)}`, {
+                method: 'GET'
+            });
+            
+            if (response.ok) {
+                // Login successful
+                isLoggedIn = true;
+                currentUser = userId;
+        
+                // Update UI
+                updateLoginState();
+                
+                // Activate the settings section button
+                document.getElementById('settings-section').classList.remove('hidden');
+                
+                // Update URL with userid parameter
+                updateUrlWithUserId(userId);
+        
+                // Save user ID in a cookie
+                setCookie('userid', userId);
+
+                // Load settings
+                settings = await response.json();
+                customLog('Settings loaded: ', settings);
+        
+                // Initialize toggle states based on settings
+                initializeToggleStates();
+            } else {
+                console.error('Error authenticating with user ID');
+            }
+        } catch (error) {
+            console.error('Login error: ', error);
+        }
+    } else {
+        console.error('Invalid user ID: ', validation.message);
+    }
+}
+
+// Function to handle login from dialog
 async function handleLogin() {
     const userId = document.getElementById('user-id').value.trim();
-    const validation = validateUserId(userId);
-    
-    if (!validation.valid) {
-        document.getElementById('login-error').textContent = validation.message;
-        return;
-    }
-    
-    // Successful validation
-    try {
-        // Check if user exists and create if needed
-        const response = await fetch(`settings.php?user=${encodeURIComponent(userId)}`, {
-            method: 'GET'
-        });
-        
-        if (response.ok) {
-            // Login successful
-            isLoggedIn = true;
-            currentUser = userId;
-            
-            // Update UI
-            closeLoginModal();
-            updateLoginState();
-            
-            // Load settings
-            loadUserSettings();
-            
-            // Activate the settings section button
-            document.getElementById('settings-section').classList.remove('hidden');
-            
-            // Update URL with userid parameter
-            updateUrlWithUserId(userId);
-            
-            // Save user ID in a cookie
-            setCookie('userid', userId);
-        } else {
-            document.getElementById('login-error').textContent = 'Error authenticating. Please try again.';
-        }
-    } catch (error) {
-        console.error('Login error:', error);
-        document.getElementById('login-error').textContent = 'Network error. Please try again.';
-    }
+    closeLoginModal();
+    fetchSettings(userId);
 }
 
 // Function to handle logout
@@ -116,58 +136,6 @@ function removeUserIdFromUrl() {
     window.history.pushState({}, '', url);
 }
 
-// Function to attempt login from URL parameter or cookie
-async function attemptLogin() {
-    const urlParams = new URLSearchParams(window.location.search);
-    let userId = urlParams.get('user');
-    
-    // If no userid in URL, try to get from cookie
-    if (!userId) {
-        userId = getCookie('userid');
-        customLog('Checking for userid cookie:', userId ? 'found' : 'not found');
-    }
-    
-    if (userId) {
-        const validation = validateUserId(userId);
-        if (validation.valid) {
-            try {
-                // Check if user exists and create if needed
-                const response = await fetch(`settings.php?user=${encodeURIComponent(userId)}`, {
-                    method: 'GET'
-                });
-                
-                if (response.ok) {
-                    // Login successful
-                    isLoggedIn = true;
-                    currentUser = userId;
-                    
-                    // Update UI
-                    updateLoginState();
-                    
-                    // Load settings
-                    await loadUserSettings();
-                    
-                    // Activate the settings section button
-                    document.getElementById('settings-section').classList.remove('hidden');
-                    
-                    customLog('Successfully logged in via ' + (urlParams.get('user') ? 'URL parameter' : 'cookie'));
-                    
-                    // If login was from cookie, also update the URL
-                    if (!urlParams.get('user')) {
-                        updateUrlWithUser(userId);
-                    }
-                } else {
-                    console.error('Error authenticating with user ID');
-                }
-            } catch (error) {
-                console.error('Login error:', error);
-            }
-        } else {
-            console.error('Invalid user ID:', validation.message);
-        }
-    }
-}
- 
 // Function to update login/logout button based on state
 function updateLoginState() {
     const loginButton = document.getElementById('login-button');
@@ -181,31 +149,6 @@ function updateLoginState() {
     } else {
         loginButton.textContent = 'Login';
         loginButton.onclick = showLoginModal;
-    }
-}
-
-// Function to load user settings
-async function loadUserSettings() {
-    if (!isLoggedIn || !currentUser) return;
-    
-    try {
-        const response = await fetch(`settings.php?user=${encodeURIComponent(currentUser)}`, {
-            method: 'GET'
-        });
-        
-        if (response.ok) {
-            // Load settings directly from server
-            // The server now returns booleans directly
-            settings = await response.json();
-            customLog('Settings loaded:', settings);
-            
-            // Initialize toggle states based on saved settings
-            initializeToggleStates();
-        } else {
-            console.error('Error loading settings');
-        }
-    } catch (error) {
-        console.error('Settings loading error:', error);
     }
 }
 
@@ -297,7 +240,7 @@ function getCookie(name) {
     const decodedCookie = decodeURIComponent(document.cookie);
     const cookieArray = decodedCookie.split(';');
     
-    customLog(`All cookies: ${document.cookie}`);
+    // customLog(`All cookies: ${document.cookie}`);
     
     for (let i = 0; i < cookieArray.length; i++) {
         let cookie = cookieArray[i];
