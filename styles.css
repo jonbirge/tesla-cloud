@@ -99,6 +99,15 @@ hr {
     margin-bottom: 28px;
 }
 
+#about {
+    font-variant-ligatures: all;
+}
+
+/* Navigation */
+.hidden {
+    display: none;
+}
+
 .sections {
     padding-bottom: 30px; /* Add padding to the bottom of all sections */
 }
@@ -109,11 +118,6 @@ hr {
     max-width: 940px;
 }
 
-#about {
-    font-variant-ligatures: all;
-}
-
-/* Navigation */
 .section-buttons {
     position: sticky;
     top: 0;
@@ -328,35 +332,6 @@ body.dark-mode .img-white-transparent {
     filter: invert(100%) brightness(125%); /* Invert colors and slightly increase brightness for better visibility */
 }
 
-/* Utility Classes */
-.section {
-    display: none;
-    padding-bottom: 30px; /* Add padding to the bottom of each section */
-}
-
-.hidden {
-    display: none;
-}
-
-/* Ping Button */
-.ping-button {
-    color: var(--button-text);
-    background-color: var(--button-bg);
-    border-radius: var(--button-radius);
-    font-size: 16pt;
-    font-weight: 600;
-    padding: 24px;
-    width: 280px;
-    border: none;
-    cursor: pointer;
-    margin-bottom: 20px;
-    transition: background-color 0.3s;
-    height: 80px; /* Adjust the height as needed */
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
 /* Indicator container and dark-mode toggle */
 .control-container {
     position: fixed;
@@ -473,6 +448,21 @@ input:checked + .toggle-slider:before {
 }
 
 /* Stats Display */
+.nav-container {
+    display: flex;
+    gap: 50px;
+    margin: 30px 0px -25px 0px;
+    align-items: flex-start;
+}
+
+.nav-stats {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    grid-template-rows: repeat(2, auto);
+    gap: 10px 0 0 0;
+    width: 400px;
+}
+
 .stat-box {
     display: flex;
     flex-direction: column;
@@ -534,28 +524,6 @@ input:checked + .toggle-slider:before {
 
 .dark-mode #radarDisplay {
     background-color: rgba(255, 255, 255, 0.1);
-}
-
-.nav-container {
-    display: flex;
-    gap: 50px;
-    margin: 30px 0px -25px 0px;
-    align-items: flex-start;
-}
-
-.nav-stats {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    grid-template-rows: repeat(2, auto);
-    gap: 10px 0 0 0;
-    width: 400px;
-}
-
-.nav-info {
-    display: flex;
-    flex-direction: column;
-    gap: 20px;
-    min-width: 220px;
 }
 
 /* Waze frame */
