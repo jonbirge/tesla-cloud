@@ -267,7 +267,8 @@ function showHourlyForecast(dayIndex) {
 
     const hourlyContainer = document.querySelector('.hourly-forecast');
     hourlyContainer.innerHTML = hourlyData.map(item => {
-        const time = new Date(item.dt * 1000).toLocaleTimeString('en-US', {
+        const itemDate = new Date(item.dt * 1000);
+        const time = formatTime(itemDate, {
             hour: 'numeric',
             minute: '2-digit'
         });
@@ -310,10 +311,9 @@ function updateWeatherDisplay() {
         highlightUpdate('wind', '--');
     }
 
-    const wxUpdateTime = new Date().toLocaleTimeString('en-US', {
+    const wxUpdateTime = formatTime(new Date(), {
         hour: '2-digit',
-        minute: '2-digit',
-        timeZone: locationTimeZone
+        minute: '2-digit'
     });
 
     // Get station name
@@ -340,14 +340,12 @@ function fetchSunData(lat, long) {
             sunset = sunData.results.sunset;
             moonPhaseData = moonData[0];
             
-            const sunriseTime = new Date(sunrise).toLocaleTimeString('en-US', {
-                timeZone: locationTimeZone,
+            const sunriseTime = formatTime(new Date(sunrise), {
                 timeZoneName: 'short'
             });
             highlightUpdate('sunrise', sunriseTime);
 
-            const sunsetTime = new Date(sunset).toLocaleTimeString('en-US', {
-                timeZone: locationTimeZone,
+            const sunsetTime = formatTime(new Date(sunset), {
                 timeZoneName: 'short'
             });
             highlightUpdate('sunset', sunsetTime);

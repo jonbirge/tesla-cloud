@@ -86,6 +86,26 @@ function browserTimeZone() {
     return tz;
 }
 
+// Helper function to format time according to user settings
+function formatTime(date, options = {}) {
+    // Default options
+    const defaultOptions = {
+        hour: 'numeric',
+        minute: '2-digit',
+        timeZone: locationTimeZone
+    };
+    
+    // Merge provided options with defaults
+    const timeOptions = {...defaultOptions, ...options};
+    
+    // Check if 24-hour format is enabled in settings
+    if (currentUser && settings && settings['24hr-time'] === 'on') {
+        timeOptions.hour12 = false;
+    }
+    
+    return date.toLocaleTimeString('en-US', timeOptions);
+}
+
 function calculateDistance(lat1, lon1, lat2, lon2) {
     const R = 6371e3; // Earth's radius in meters
     const φ1 = lat1 * Math.PI/180;
@@ -305,9 +325,7 @@ async function updateNews() {
                         month: 'short', 
                         day: 'numeric'
                     });
-                    const timeString = date.toLocaleTimeString('en-US', { 
-                        hour: 'numeric', 
-                        minute: '2-digit',
+                    const timeString = formatTime(date, { 
                         timeZoneName: 'short'
                     });
                     
