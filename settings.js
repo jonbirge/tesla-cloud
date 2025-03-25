@@ -51,8 +51,8 @@ async function fetchSettings(userId) {
     const validation = validateUserId(userId);
     if (validation.valid) {
         try {
-            // Check if user exists and create if needed
-            const response = await fetch(`settings.php?user=${encodeURIComponent(userId)}`, {
+            // Check if user exists and fetch settings using RESTful API
+            const response = await fetch(`settings.php/${encodeURIComponent(userId)}`, {
                 method: 'GET'
             });
             
@@ -173,15 +173,13 @@ async function toggleSetting(key, value) {
         // Update toggle state visually
         updateToggleVisualState(key, value);
         
-        // Update the server with the boolean value directly
-        const response = await fetch('settings.php', {
+        // Update the server with the boolean value using the RESTful API
+        const response = await fetch(`settings.php/${encodeURIComponent(currentUser)}/${encodeURIComponent(key)}`, {
             method: 'PUT',
             headers: {
                 'Content-Type': 'application/json'
             },
             body: JSON.stringify({
-                user: currentUser,
-                key: key,
                 value: value
             })
         });

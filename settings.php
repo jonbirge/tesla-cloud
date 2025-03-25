@@ -62,50 +62,94 @@ function saveUserSettings($userId, $settings) {
     return file_put_contents($filePath, json_encode($settings, JSON_PRETTY_PRINT));
 }
 
+// Parse the request URI to extract user and key
+$requestUri = $_SERVER['REQUEST_URI'];
+$uriParts = explode('/', trim(parse_url($requestUri, PHP_URL_PATH), '/'));
+
+// Determine which parts of the URL contain our parameters
+// Format: settings.php/{userId}[/{key}]
+$userId = null;
+$key = null;
+
+// Check if we have enough parts to contain a user ID
+if (count($uriParts) > 1) {
+    $scriptName = basename(__FILE__); // Should be settings.php
+    $scriptPos = array_search($scriptName, $uriParts);
+    
+    if ($scriptPos !== false && isset($uriParts[$scriptPos + 1])) {
+        $userId = $uriParts[$scriptPos + 1];
+        
+        // Check if we also have a key
+        if (isset($uriParts[$scriptPos + 2])) {
+            $key = $uriParts[$scriptPos + 2];
+        }
+    }
+}
+
 // Handle the request based on method
 $method = $_SERVER['REQUEST_METHOD'];
 
 switch ($method) {
     case 'GET':
         // GET request - retrieve settings for a user
-        $userId = isset($_GET['user']) ? $_GET['user'] : null;
-        
         if (!$userId || !validateUserId($userId)) {
             http_response_code(400);
-            echo json_encode(['error' => 'Invalid user ID']);
+            echo json_encode(['error' => 'Invalid or missing user ID in URL path']);
             exit;
         }
         
         $settings = loadUserSettings($userId);
-        echo json_encode($settings);
+        
+        if ($key) {
+            // Return specific setting if key is provided
+            if (isset($settings[$key])) {
+                echo json_encode(['key' => $key, 'value' => $settings[$key]]);
+            } else {
+                http_response_code(404);
+                echo json_encode(['error' => "Setting '$key' not found"]);
+            }
+        } else {
+            // Return all settings if no key is provided
+            echo json_encode($settings);
+        }
         break;
         
     case 'PUT':
         // PUT request - update a setting
+        if (!$userId || !validateUserId($userId)) {
+            http_response_code(400);
+            echo json_encode(['error' => 'Invalid or missing user ID in URL path']);
+            exit;
+        }
+        
+        if (!$key) {
+            http_response_code(400);
+            echo json_encode(['error' => 'Missing key in URL path']);
+            exit;
+        }
+        
+        // Validate key length
+        if (strlen($key) > $maxKeyLength) {
+            http_response_code(400);
+            echo json_encode(['error' => 'Key too long']);
+            exit;
+        }
+        
+        // Parse the input
         $requestData = json_decode(file_get_contents('php://input'), true);
         
-        // Validate request data
-        if (!isset($requestData['user']) || !isset($requestData['key']) || !isset($requestData['value'])) {
+        if (!isset($requestData['value'])) {
             http_response_code(400);
-            echo json_encode(['error' => 'Missing required parameters']);
+            echo json_encode(['error' => 'Missing value parameter']);
             exit;
         }
         
-        $userId = $requestData['user'];
-        $key = $requestData['key'];
         $value = $requestData['value'];
         
-        // Validate user ID
-        if (!validateUserId($userId)) {
+        // Validate value length
+        if (strlen(json_encode($value)) > $maxValueLength) {
             http_response_code(400);
-            echo json_encode(['error' => 'Invalid user ID']);
-            exit;
-        }
-        
-        // Validate key and value
-        if (strlen($key) > $maxKeyLength || strlen(json_encode($value)) > $maxValueLength) {
-            http_response_code(400);
-            echo json_encode(['error' => 'Key or value too long']);
+            echo json_encode(['error' => 'Value too long']);
             exit;
         }
         
@@ -127,7 +171,7 @@ switch ($method) {
         
         // Save updated settings
         if (saveUserSettings($userId, $settings)) {
-            echo json_encode(['success' => true]);
+            echo json_encode(['success' => true, 'key' => $key]);
         } else {
             http_response_code(500);
             echo json_encode(['error' => 'Failed to save setting']);
