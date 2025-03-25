@@ -42,17 +42,17 @@ $feeds = [
     'bbc' => 'http://feeds.bbci.co.uk/news/world/rss.xml',
     'wapo' => 'https://feeds.washingtonpost.com/rss/national',
     'latimes' => 'https://www.latimes.com/business/rss2.0.xml',
-    'bloomberg' => 'https://feeds.bloomberg.com/technology/news.rss',
+    'bos' => 'https://www.boston.com/tag/local-news/feed',
+    'bloomberg' => 'https://feeds.bloomberg.com/news.rss',
+    'bloomberg-tech' => 'https://feeds.bloomberg.com/technology/news.rss',
     'notateslaapp' => 'https://www.notateslaapp.com/rss',
     'teslarati' => 'https://www.teslarati.com/feed/',
     'insideevs' => 'https://insideevs.com/rss/articles/all/',
     'electrek' => 'https://electrek.co/feed/',
-    'bos' => 'https://www.boston.com/tag/local-news/feed',
+    'thedrive' => 'https://www.thedrive.com/feed',
+    'techcrunch' => 'https://techcrunch.com/feed/',
     // 'theverge' => 'https://www.theverge.com/rss/index.xml',
-    // 'bloomberg' => 'https://feeds.bloomberg.com/news.rss',
-    // 'thedrive' => 'https://www.thedrive.com/feed',
     // 'jalopnik' => 'https://jalopnik.com/rss',
-    // 'techcrunch' => 'https://techcrunch.com/feed/',
 ];
 
 // Set up error logging - clear log file on each run
@@ -84,6 +84,20 @@ header('Cache-Control: no-cache, no-store, must-revalidate');
 header('Pragma: no-cache');
 header('Expires: 0');
 header('Content-Type: application/json');
+
+// Check if we're receiving a POST request with excluded feeds
+$excludedFeeds = [];
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    // Get the request body
+    $requestBody = file_get_contents('php://input');
+    $requestData = json_decode($requestBody, true);
+    
+    // Check if excludedFeeds is set in the request
+    if (isset($requestData['excludedFeeds']) && is_array($requestData['excludedFeeds'])) {
+        $excludedFeeds = $requestData['excludedFeeds'];
+        logMessage("Received excluded feeds: " . implode(', ', $excludedFeeds));
+    }
+}
 
 // Check if reload parameter is set to bypass cache
 $forceReload = isset($_GET['reload']) || isset($_GET['n']);
@@ -248,8 +262,19 @@ usort($allItems, function($a, $b) {
 // Keep only the most recent items
 $allItems = array_slice($allItems, 0, $numStories);
 
-// Cache the results
+// Cache the results - the cache contains ALL items (for all users)
 file_put_contents($cacheFile, json_encode($allItems));
 file_put_contents($cacheTimestampFile, time());
+
+// Filter out excluded feeds as the final step (after caching)
+if (!empty($excludedFeeds)) {
+    logMessage("Filtering out excluded feeds: " . implode(', ', $excludedFeeds));
+    $allItems = array_filter($allItems, function($item) use ($excludedFeeds) {
+        return !in_array($item['source'], $excludedFeeds);
+    });
+    // Re-index array after filtering
+    $allItems = array_values($allItems);
+    logMessage("After filtering: " . count($allItems) . " items remain");
+}
 
 echo json_encode($allItems);

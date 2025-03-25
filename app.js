@@ -275,15 +275,55 @@ function loadExternalUrl(url, inFrame = false) {
 
 async function updateNews() {
     try {
+        // Collect excluded RSS feeds from user settings
+        const excludedFeeds = [];
+        if (currentUser && settings) {
+            // Collect all RSS feed settings that are set to false
+            for (const key in settings) {
+                if (key.startsWith('rss-') && settings[key] === false) {
+                    // Extract feed ID after the "rss-" prefix
+                    const feedId = key.substring(4);
+                    excludedFeeds.push(feedId);
+                }
+            }
+        }
+        
         // Use test parameter when in test mode
-        const url = testMode ? 'rss.php?test' : 'rss.php';
-        const response = await fetch(url);
-        const items = await response.json();
+        const baseUrl = testMode ? 'rss.php?test' : 'rss.php';
         
         const newsContainer = document.getElementById('newsHeadlines');
         if (!newsContainer) return;
-
+        // Show loading spinner if no items are displayed yet or only showing a message
+        const isEmpty = !newsContainer.innerHTML || 
+                       newsContainer.innerHTML.includes('<em>') || 
+                       newsContainer.innerHTML.trim() === '';
+        
+        if (isEmpty) {
+            customLog('Showing news loading spinner...');
+            newsContainer.innerHTML = '<div class="spinner-container"><div class="spinner"></div></div>';
+        }
+        
         customLog('Updating news headlines...' + (testMode ? ' (TEST MODE)' : ''));
+        if (excludedFeeds.length > 0) {
+            customLog('Excluding RSS feeds:', excludedFeeds);
+        }
+        
+        // Send the request with excluded feeds in the body
+        const response = await fetch(baseUrl, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ excludedFeeds })
+        });
+        
+        const items = await response.json();
+        
+        // Make sure to remove the spinner when data arrives
+        const spinnerContainer = newsContainer.querySelector('.spinner-container');
+        if (spinnerContainer) {
+            spinnerContainer.remove();
+        }
         
         // Filter for new items only
         let hasNewItems = false;
@@ -336,15 +376,9 @@ async function updateNews() {
                     let faviconUrl = '';
                     try {
                         const url = new URL(item.link);
-                        if (url.hostname === 'www.boston.com') {
-                            faviconUrl = 'https://www.bostonglobe.com/favicon.ico';
-                        } else {
-                            faviconUrl = `https://${url.hostname}/favicon.ico`;
-                        }
+                        faviconUrl = `https://www.google.com/s2/favicons?domain=${url.hostname}&sz=32`;
                     } catch (e) {
-                        console.error("Invalid URL:", item.link);
-                        customLog("Invalid URL:", item.link);
-                        faviconUrl = 'favicon.ico'; // Default fallback
+                        console.error('Error parsing URL for favicon:', e);
                     }
                     
                     return `
@@ -360,7 +394,7 @@ async function updateNews() {
                 }).join('');
                 
                 // Prepend new items to existing content or initialize if empty
-                if (newsContainer.innerHTML && !newsContainer.innerHTML.includes('<em>')) {
+                if (newsContainer.innerHTML && !newsContainer.innerHTML.includes('<em>') && !newsContainer.innerHTML.includes('spinner-container')) {
                     newsContainer.innerHTML = newItemsHtml + newsContainer.innerHTML;
                 } else {
                     newsContainer.innerHTML = newItemsHtml || '<p><em>No headlines available</em></p>';
@@ -368,16 +402,26 @@ async function updateNews() {
             }
         }
         
-        // If there were no new items and the container is empty, show a message
-        if (!hasNewItems && (!newsContainer.innerHTML || newsContainer.innerHTML.includes('<em>'))) {
+        // If there were no new items and the container is empty or only contains a spinner, show a message
+        if (!hasNewItems && (!newsContainer.innerHTML || 
+                            newsContainer.innerHTML.includes('<em>') || 
+                            newsContainer.innerHTML.includes('spinner-container'))) {
             newsContainer.innerHTML = '<p><em>No new headlines available</em></p>';
         }
         
     } catch (error) {
         console.error('Error fetching news:', error);
         customLog('Error fetching news:', error);
-        document.getElementById('newsHeadlines').innerHTML = 
-            '<p><em>Error loading headlines</em></p>';
+        
+        const newsContainer = document.getElementById('newsHeadlines');
+        // Make sure to remove the spinner even in case of an error
+        if (newsContainer) {
+            const spinnerContainer = newsContainer.querySelector('.spinner-container');
+            if (spinnerContainer) {
+                spinnerContainer.remove();
+            }
+            newsContainer.innerHTML = '<p><em>Error loading headlines</em></p>';
+        }
     }
 }
 
