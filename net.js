@@ -1,3 +1,8 @@
+// Global variables
+let pingChart = null;
+let pingInterval = null;
+let pingData = [];
+
 function updateNetworkInfo() {
     // Write diagnostic information to the console
     customLog('Updating network info...');
@@ -206,9 +211,6 @@ function pingTestServer() {
                 pingData.shift(); // Keep last n pings
             }
 
-            // Logging
-            customLog('Ping time: ', Math.round(pingTime));
-            
             // Always update network status indicator
             updateNetworkStatus(pingTime);
             
