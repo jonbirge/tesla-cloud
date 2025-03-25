@@ -106,15 +106,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 // Check if reload parameter is set to bypass cache
 $forceReload = isset($_GET['reload']) || isset($_GET['n']);
 
+// Check if serial fetching is requested
+$useSerialFetch = isset($_GET['serial']);
+
 // Get number of stories to return
 $numStories = isset($_GET['n']) ? intval($_GET['n']) : $maxStories;
 $numStories = max(1, min($maxStories, $numStories));
-
-// Function to write timestamped log messages to the end of the log file
-function logMessage($message) {
-    global $logFile;
-    file_put_contents($logFile, date('[Y-m-d H:i:s] ') . $message . "\n", FILE_APPEND);
-}
 
 // Get items from cache or from external sources
 if (!$forceReload && file_exists($cacheFile) && file_exists($cacheTimestampFile)) {
@@ -125,11 +122,26 @@ if (!$forceReload && file_exists($cacheFile) && file_exists($cacheTimestampFile)
     }
 } else {
     $allItems = [];
-    foreach ($feeds as $source => $url) {
-        $xml = fetchRSS($url);
-        if ($xml !== false) {
-            $items = parseRSS($xml, $source);
-            $allItems = array_merge($allItems, $items);
+    
+    if ($useSerialFetch) {
+        // Serial fetching mode
+        foreach ($feeds as $source => $url) {
+            $xml = fetchRSS($url);
+            if ($xml !== false) {
+                $items = parseRSS($xml, $source);
+                $allItems = array_merge($allItems, $items);
+            }
+        }
+    } else {
+        // Parallel fetching mode (default)
+        $feedResults = fetchRSSParallel($feeds);
+        
+        // Process the results
+        foreach ($feedResults as $source => $xml) {
+            if ($xml !== false) {
+                $items = parseRSS($xml, $source);
+                $allItems = array_merge($allItems, $items);
+            }
         }
     }
     
@@ -154,6 +166,59 @@ echo json_encode($outputItems);
 
 
 // ***** Utility functions *****
+
+function fetchRSSParallel($feedUrls) {
+    $multiHandle = curl_multi_init();
+    $curlHandles = [];
+    $results = [];
+    
+    // Initialize all curl handles and add them to multi handle
+    foreach ($feedUrls as $source => $url) {
+        $ch = curl_init();
+        curl_setopt($ch, CURLOPT_URL, $url);
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($ch, CURLOPT_TIMEOUT, 10);
+        curl_setopt($ch, CURLOPT_USERAGENT, 'Mozilla/5.0 (compatible; RSS Reader/1.0)');
+        curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
+        curl_setopt($ch, CURLOPT_PRIVATE, $source); // Store the source as private data
+        
+        curl_multi_add_handle($multiHandle, $ch);
+        $curlHandles[] = $ch;
+        $results[$source] = false; // Initialize with false for error checking later
+    }
+    
+    // Execute all queries simultaneously
+    $active = null;
+    do {
+        $mrc = curl_multi_exec($multiHandle, $active);
+    } while ($mrc == CURLM_CALL_MULTI_PERFORM);
+    
+    while ($active && $mrc == CURLM_OK) {
+        if (curl_multi_select($multiHandle) != -1) {
+            do {
+                $mrc = curl_multi_exec($multiHandle, $active);
+            } while ($mrc == CURLM_CALL_MULTI_PERFORM);
+        }
+    }
+    
+    // Process the results
+    foreach ($curlHandles as $ch) {
+        $source = curl_getinfo($ch, CURLINFO_PRIVATE);
+        $content = curl_multi_getcontent($ch);
+        
+        if (curl_errno($ch)) {
+            error_log("RSS Feed Error: " . curl_error($ch) . " - URL: " . $feedUrls[$source]);
+        } else {
+            $results[$source] = $content;
+        }
+        
+        curl_multi_remove_handle($multiHandle, $ch);
+        curl_close($ch);
+    }
+    
+    curl_multi_close($multiHandle);
+    return $results;
+}
 
 function fetchRSS($url) {
     $ch = curl_init();
@@ -292,4 +357,10 @@ function applyExclusionFilters($items, $excludedFeeds) {
     logMessage("After filtering: " . count($filteredItems) . " items remain");
     
     return $filteredItems;
+}
+
+// Function to write timestamped log messages to the end of the log file
+function logMessage($message) {
+    global $logFile;
+    file_put_contents($logFile, date('[Y-m-d H:i:s] ') . $message . "\n", FILE_APPEND);
 }
