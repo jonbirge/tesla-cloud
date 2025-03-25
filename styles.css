@@ -860,7 +860,7 @@ input:checked + .toggle-slider:before {
 }
 .settings-toggle-label {
     font-weight: var(--heading-font-weight);
-    /* font-size: 16pt; */
+    font-size: var(--heading-font-size);
     margin-right: 12px;
 }
 .settings-controls {
@@ -873,7 +873,7 @@ input:checked + .toggle-slider:before {
     background-color: var(--button-bg);
     border-radius: var(--button-radius);
     padding: 15px;
-    margin-bottom: 12px;
+    margin-bottom: 9px;
     width: auto;
 }
 
@@ -881,12 +881,10 @@ input:checked + .toggle-slider:before {
 .news-source-grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-    gap: 15px;
+    gap: 9px;
     width: 100%;
     max-width: 1200px;
 }
-
-/* News toggle item - narrower and shorter */
 .news-toggle-item {
     padding: 12px 15px;
     margin-bottom: 0;
