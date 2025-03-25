@@ -325,7 +325,7 @@ body.dark-mode .img-adaptive-dark-invert {
 /* Add specific dark mode handling */
 body.dark-mode .img-white-transparent {
     mix-blend-mode: screen; /* In dark mode, use screen blend mode to make white transparent */
-    filter: invert(100%) brightness(120%) grayscale(100%); /* Invert colors and slightly increase brightness for better visibility */
+    filter: invert(100%) brightness(125%); /* Invert colors and slightly increase brightness for better visibility */
 }
 
 /* Utility Classes */
