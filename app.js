@@ -880,10 +880,10 @@ function showSection(sectionId) {
 
 // ***** Main code *****
 
-// Check for parameters in URL
+// URL parameters
 const urlParams = new URLSearchParams(window.location.search);
-testMode = urlParams.has('test');
 const initialSection = urlParams.get('section') || 'news';
+testMode = urlParams.has('test');
 
 // Update link click event listener
 document.addEventListener('click', function(e) {

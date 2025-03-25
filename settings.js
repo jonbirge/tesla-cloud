@@ -105,26 +105,26 @@ function handleLogout() {
 // Function to update URL with userId
 function updateUrlWithUserId(userId) {
     const url = new URL(window.location);
-    url.searchParams.set('userid', userId);
+    url.searchParams.set('user', userId);
     window.history.pushState({}, '', url);
 }
 
 // Function to remove userId from URL
 function removeUserIdFromUrl() {
     const url = new URL(window.location);
-    url.searchParams.delete('userid');
+    url.searchParams.delete('user');
     window.history.pushState({}, '', url);
 }
 
 // Function to attempt login from URL parameter or cookie
 async function attemptLogin() {
     const urlParams = new URLSearchParams(window.location.search);
-    let userId = urlParams.get('userid');
+    let userId = urlParams.get('user');
     
     // If no userid in URL, try to get from cookie
     if (!userId) {
         userId = getCookie('userid');
-        console.log('Checking for userid cookie:', userId ? 'found' : 'not found');
+        customLog('Checking for userid cookie:', userId ? 'found' : 'not found');
     }
     
     if (userId) {
@@ -150,11 +150,11 @@ async function attemptLogin() {
                     // Activate the settings section button
                     document.getElementById('settings-section').classList.remove('hidden');
                     
-                    customLog('Successfully logged in via ' + (urlParams.get('userid') ? 'URL parameter' : 'cookie'));
+                    customLog('Successfully logged in via ' + (urlParams.get('user') ? 'URL parameter' : 'cookie'));
                     
                     // If login was from cookie, also update the URL
-                    if (!urlParams.get('userid')) {
-                        updateUrlWithUserId(userId);
+                    if (!urlParams.get('user')) {
+                        updateUrlWithUser(userId);
                     }
                 } else {
                     console.error('Error authenticating with user ID');
@@ -167,7 +167,7 @@ async function attemptLogin() {
         }
     }
 }
-
+ 
 // Function to update login/logout button based on state
 function updateLoginState() {
     const loginButton = document.getElementById('login-button');
@@ -297,7 +297,7 @@ function getCookie(name) {
     const decodedCookie = decodeURIComponent(document.cookie);
     const cookieArray = decodedCookie.split(';');
     
-    console.log(`All cookies: ${document.cookie}`);
+    customLog(`All cookies: ${document.cookie}`);
     
     for (let i = 0; i < cookieArray.length; i++) {
         let cookie = cookieArray[i];
@@ -306,15 +306,15 @@ function getCookie(name) {
         }
         if (cookie.indexOf(cookieName) === 0) {
             const value = cookie.substring(cookieName.length, cookie.length);
-            console.log(`Cookie found: ${name}=${value}`);
+            customLog(`Cookie found: ${name}=${value}`);
             return value;
         }
     }
-    console.log(`Cookie not found: ${name}`);
+    customLog(`Cookie not found: ${name}`);
     return "";
 }
 
 function deleteCookie(name) {
     document.cookie = name + "=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
-    console.log(`Cookie deleted: ${name}`);
+    customLog(`Cookie deleted: ${name}`);
 }
