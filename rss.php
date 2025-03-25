@@ -1,31 +1,35 @@
 <?php
 
 // Settings
-$cacheDuration = 300; // 5 minutes
+$cacheDuration = 600; // 10 minutes
 $cacheFile = '/tmp/rss_cache.json';
 $cacheTimestampFile = '/tmp/rss_cache_timestamp';
 $logFile = '/tmp/rss_php.log';
-$maxStories = 64; // Maximum number of stories to return
+$maxStories = 128; // Maximum number of stories to cache
 $maxSingleSource = 7; // Maximum number of stories from a single source
 
 // List of RSS feeds to fetch
 $feeds = [
     'wsj' => 'https://feeds.content.dowjones.io/public/rss/RSSWorldNews',
     'nyt' => 'https://rss.nytimes.com/services/xml/rss/nyt/HomePage.xml',
-    'bbc' => 'http://feeds.bbci.co.uk/news/world/rss.xml',
     'wapo' => 'https://feeds.washingtonpost.com/rss/national',
     'latimes' => 'https://www.latimes.com/business/rss2.0.xml',
     'bos' => 'https://www.boston.com/tag/local-news/feed',
     'bloomberg' => 'https://feeds.bloomberg.com/news.rss',
     'bloomberg-tech' => 'https://feeds.bloomberg.com/technology/news.rss',
+    'bbc' => 'http://feeds.bbci.co.uk/news/world/rss.xml',
+    'telegraph' => 'https://www.telegraph.co.uk/news/rss.xml',
+    'economist' => 'https://www.economist.com/latest/rss.xml',
+    'lemonde' => 'https://www.lemonde.fr/rss/une.xml',
+    'derspiegel' => 'https://www.spiegel.de/international/index.rss',
     'notateslaapp' => 'https://www.notateslaapp.com/rss',
     'teslarati' => 'https://www.teslarati.com/feed/',
     'insideevs' => 'https://insideevs.com/rss/articles/all/',
     'electrek' => 'https://electrek.co/feed/',
     'thedrive' => 'https://www.thedrive.com/feed',
     'techcrunch' => 'https://techcrunch.com/feed/',
-    'theverge' => 'https://www.theverge.com/rss/index.xml',
-    'jalopnik' => 'https://jalopnik.com/rss',
+    // 'theverge' => 'https://www.theverge.com/rss/index.xml',
+    // 'jalopnik' => 'https://jalopnik.com/rss',
 ];
 
 // Check if we're in test mode
@@ -104,25 +108,52 @@ $forceReload = isset($_GET['reload']) || isset($_GET['n']);
 
 // Get number of stories to return
 $numStories = isset($_GET['n']) ? intval($_GET['n']) : $maxStories;
-$numStories = max(1, min(128, $numStories));
-
-// Check if cache exists and is fresh (unless forced reload is requested)
-if (!$forceReload && file_exists($cacheFile) && file_exists($cacheTimestampFile)) {
-    $timestamp = file_get_contents($cacheTimestampFile);
-    if ((time() - $timestamp) < $cacheDuration) {
-        // Cache is still fresh, return cached content
-        echo file_get_contents($cacheFile);
-        exit;
-    }
-}
-
-// If cache is stale or missing, proceed to fetch new RSS feeds...
+$numStories = max(1, min($maxStories, $numStories));
 
 // Function to write timestamped log messages to the end of the log file
 function logMessage($message) {
     global $logFile;
     file_put_contents($logFile, date('[Y-m-d H:i:s] ') . $message . "\n", FILE_APPEND);
 }
+
+// Get items from cache or from external sources
+if (!$forceReload && file_exists($cacheFile) && file_exists($cacheTimestampFile)) {
+    $timestamp = file_get_contents($cacheTimestampFile);
+    if ((time() - $timestamp) < $cacheDuration) {
+        // Cache is still fresh, load cached content
+        $allItems = json_decode(file_get_contents($cacheFile), true);
+    }
+} else {
+    $allItems = [];
+    foreach ($feeds as $source => $url) {
+        $xml = fetchRSS($url);
+        if ($xml !== false) {
+            $items = parseRSS($xml, $source);
+            $allItems = array_merge($allItems, $items);
+        }
+    }
+    
+    // Sort by date, newest first
+    usort($allItems, function($a, $b) {
+        return $b['date'] - $a['date'];
+    });
+
+    // Cache the results - the cache contains ALL items
+    file_put_contents($cacheFile, json_encode($allItems));
+    file_put_contents($cacheTimestampFile, time());
+}
+
+// Apply exclusion filters to cached data
+$outputItems = applyExclusionFilters($allItems, $excludedFeeds);
+    
+// Limit number of stories if needed
+$outputItems = array_slice($outputItems, 0, $numStories);
+
+// Return filtered cached content
+echo json_encode($outputItems);
+
+
+// ***** Utility functions *****
 
 function fetchRSS($url) {
     $ch = curl_init();
@@ -245,36 +276,20 @@ function parseRSS($xml, $source) {
     return $items;
 }
 
-$allItems = [];
-foreach ($feeds as $source => $url) {
-    $xml = fetchRSS($url);
-    if ($xml !== false) {
-        $items = parseRSS($xml, $source);
-        $allItems = array_merge($allItems, $items);
+// Function to apply exclusion filters to items
+function applyExclusionFilters($items, $excludedFeeds) {
+    if (empty($excludedFeeds)) {
+        return $items;
     }
-}
-
-// Sort by date, newest first
-usort($allItems, function($a, $b) {
-    return $b['date'] - $a['date'];
-});
-
-// Keep only the most recent items
-$allItems = array_slice($allItems, 0, $numStories);
-
-// Cache the results - the cache contains ALL items (for all users)
-file_put_contents($cacheFile, json_encode($allItems));
-file_put_contents($cacheTimestampFile, time());
-
-// Filter out excluded feeds as the final step (after caching)
-if (!empty($excludedFeeds)) {
+    
     logMessage("Filtering out excluded feeds: " . implode(', ', $excludedFeeds));
-    $allItems = array_filter($allItems, function($item) use ($excludedFeeds) {
+    $filteredItems = array_filter($items, function($item) use ($excludedFeeds) {
         return !in_array($item['source'], $excludedFeeds);
     });
+    
     // Re-index array after filtering
-    $allItems = array_values($allItems);
-    logMessage("After filtering: " . count($allItems) . " items remain");
+    $filteredItems = array_values($filteredItems);
+    logMessage("After filtering: " . count($filteredItems) . " items remain");
+    
+    return $filteredItems;
 }
-
-echo json_encode($allItems);
