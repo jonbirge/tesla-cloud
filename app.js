@@ -25,29 +25,31 @@ const SAT_URLS = {
 // Global variables
 let testMode = false; // Set to true if test parameter exists
 let lastUpdate = 0; // Timestamp of last location update
+let lat = null;
+let long = null;
 let lastUpdateLat = null;
 let lastUpdateLong = null;
 let lastKnownHeading = null;
 let neverUpdatedLocation = true;
-let lat = null;
-let long = null;
 let localManualDarkMode = false; // Transient manual dark mode (when settings are not available)
 let darkOn = false;
+let radarContext = null;
+let gpsIntervalId = null;
+let lastGPSUpdate = 0;
+let locationTimeZone = browserTimeZone();
+let settings = {}; // Global settings object to cache user settings
+
 let newsUpdateInterval = null;
 let newsUpdatesActive = false; // Track if news updates should be active
+let userHasSeenLatestNews = true; // Track if user has seen the latest news
+let lastNewsTimestamp = 0; // Track the latest news timestamp we've seen
+let seenNewsIds = new Set(); // Track news IDs we've already seen
+
 let testModeAngle = 0;
 let testModeSpeed = TEST_MIN_SPEED;
 let testModeAlt = TEST_MIN_ALT;
 let testModeSpeedIncreasing = true;
 let testModeAltIncreasing = true;
-let radarContext = null;
-let gpsIntervalId = null;
-let lastGPSUpdate = 0;
-let locationTimeZone = browserTimeZone();
-let lastNewsTimestamp = 0; // Track the latest news timestamp we've seen
-let userHasSeenLatestNews = true; // Track if user has seen the latest news
-let seenNewsIds = new Set(); // Track news IDs we've already seen
-let settings = {}; // Global settings object to cache user settings
 
 // Custom log function that prepends the current time
 function customLog(...args) {
@@ -167,7 +169,7 @@ function toggleMode() {
         localManualDarkMode = true;
     }
     document.body.classList.toggle('dark-mode');
-    var darkOn = document.body.classList.contains('dark-mode');
+    darkOn = document.body.classList.contains('dark-mode');
     document.getElementById('darkModeToggle').checked = darkOn;
     updateDarkModeDependants();
 }
