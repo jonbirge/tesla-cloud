@@ -186,6 +186,11 @@ async function toggleSetting(key, value) {
             })
         });
         
+        // If the setting is RSS-related, update the news feed
+        if (key.startsWith('rss-')) {
+            updateNews(true);
+        }
+
         if (response.ok) {
             customLog(`Setting "${key}" updated to ${value}`);
         } else {

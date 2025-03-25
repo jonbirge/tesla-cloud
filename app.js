@@ -273,7 +273,7 @@ function loadExternalUrl(url, inFrame = false) {
     }
 }
 
-async function updateNews() {
+async function updateNews(clear = false) {
     try {
         // Collect excluded RSS feeds from user settings
         const excludedFeeds = [];
@@ -291,15 +291,25 @@ async function updateNews() {
         // Use test parameter when in test mode
         const baseUrl = testMode ? 'rss.php?test' : 'rss.php';
         
+        // Get the news container element
         const newsContainer = document.getElementById('newsHeadlines');
         if (!newsContainer) return;
+
+        // Clear the news container if requested
+        // TODO: Differentiate between loaded news and read news...
+        if (clear) {
+            newsContainer.innerHTML = '';
+            lastNewsTimestamp = 0; // Reset last news timestamp
+            seenNewsIds.clear(); // Clear seen news IDs
+            userHasSeenLatestNews = true; // Reset user seen status
+        }
+
         // Show loading spinner if no items are displayed yet or only showing a message
         const isEmpty = !newsContainer.innerHTML || 
                        newsContainer.innerHTML.includes('<em>') || 
                        newsContainer.innerHTML.trim() === '';
         
         if (isEmpty) {
-            customLog('Showing news loading spinner...');
             newsContainer.innerHTML = '<div class="spinner-container"><div class="spinner"></div></div>';
         }
         
