@@ -153,7 +153,7 @@ function updateLoginState() {
 }
 
 // Function called by the toggle UI elements
-function toggleSettingFromElement(element) {
+function toggleSettingFrom(element) {
     const settingItem = element.closest('.settings-toggle-item');
     if (settingItem && settingItem.dataset.setting) {
         const key = settingItem.dataset.setting;

@@ -5,8 +5,28 @@ $cacheDuration = 300; // 5 minutes
 $cacheFile = '/tmp/rss_cache.json';
 $cacheTimestampFile = '/tmp/rss_cache_timestamp';
 $logFile = '/tmp/rss_php.log';
-$maxStories = 50; // Maximum number of stories to return
+$maxStories = 64; // Maximum number of stories to return
 $maxSingleSource = 7; // Maximum number of stories from a single source
+
+// List of RSS feeds to fetch
+$feeds = [
+    'wsj' => 'https://feeds.content.dowjones.io/public/rss/RSSWorldNews',
+    'nyt' => 'https://rss.nytimes.com/services/xml/rss/nyt/HomePage.xml',
+    'bbc' => 'http://feeds.bbci.co.uk/news/world/rss.xml',
+    'wapo' => 'https://feeds.washingtonpost.com/rss/national',
+    'latimes' => 'https://www.latimes.com/business/rss2.0.xml',
+    'bos' => 'https://www.boston.com/tag/local-news/feed',
+    'bloomberg' => 'https://feeds.bloomberg.com/news.rss',
+    'bloomberg-tech' => 'https://feeds.bloomberg.com/technology/news.rss',
+    'notateslaapp' => 'https://www.notateslaapp.com/rss',
+    'teslarati' => 'https://www.teslarati.com/feed/',
+    'insideevs' => 'https://insideevs.com/rss/articles/all/',
+    'electrek' => 'https://electrek.co/feed/',
+    'thedrive' => 'https://www.thedrive.com/feed',
+    'techcrunch' => 'https://techcrunch.com/feed/',
+    'theverge' => 'https://www.theverge.com/rss/index.xml',
+    'jalopnik' => 'https://jalopnik.com/rss',
+];
 
 // Check if we're in test mode
 $testMode = isset($_GET['test']);
@@ -34,26 +54,6 @@ if ($testMode) {
     echo json_encode($testItems);
     exit;
 }
-
-// List of RSS feeds to fetch
-$feeds = [
-    'wsj' => 'https://feeds.content.dowjones.io/public/rss/RSSWorldNews',
-    'nyt' => 'https://rss.nytimes.com/services/xml/rss/nyt/HomePage.xml',
-    'bbc' => 'http://feeds.bbci.co.uk/news/world/rss.xml',
-    'wapo' => 'https://feeds.washingtonpost.com/rss/national',
-    'latimes' => 'https://www.latimes.com/business/rss2.0.xml',
-    'bos' => 'https://www.boston.com/tag/local-news/feed',
-    'bloomberg' => 'https://feeds.bloomberg.com/news.rss',
-    'bloomberg-tech' => 'https://feeds.bloomberg.com/technology/news.rss',
-    'notateslaapp' => 'https://www.notateslaapp.com/rss',
-    'teslarati' => 'https://www.teslarati.com/feed/',
-    'insideevs' => 'https://insideevs.com/rss/articles/all/',
-    'electrek' => 'https://electrek.co/feed/',
-    'thedrive' => 'https://www.thedrive.com/feed',
-    'techcrunch' => 'https://techcrunch.com/feed/',
-    // 'theverge' => 'https://www.theverge.com/rss/index.xml',
-    // 'jalopnik' => 'https://jalopnik.com/rss',
-];
 
 // Set up error logging - clear log file on each run
 file_put_contents('/tmp/rss-php-errors.log', ''); // Empty the file
