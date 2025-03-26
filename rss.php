@@ -1,7 +1,7 @@
 <?php
 
 // Settings
-$cacheDuration = 60; // 10 minutes
+$cacheDuration = 600; // 10 minutes
 $cacheFile = '/tmp/rss_cache.json';
 $cacheTimestampFile = '/tmp/rss_cache_timestamp';
 $logFile = '/tmp/rss_php.log';
