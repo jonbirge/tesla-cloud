@@ -771,7 +771,7 @@ input:checked + .toggle-slider:before {
     background-color: var(--active-section-bg);
 }
 
-/* Modal Dialog */
+/* Modal Login Dialog */
 .modal {
     display: none;
     position: fixed;
@@ -850,19 +850,7 @@ input:checked + .toggle-slider:before {
     min-height: 20px;
 }
 
-.hidden {
-    display: none !important;
-}
-
 /* Settings Section Styles */
-.settings-list {
-    margin-top: 15px;
-}
-.settings-toggle-label {
-    font-weight: var(--heading-font-weight);
-    font-size: var(--heading-font-size);
-    margin-right: 12px;
-}
 .settings-controls {
     margin-top: 12px;
 }
@@ -875,21 +863,26 @@ input:checked + .toggle-slider:before {
     padding: 15px;
     margin-bottom: 9px;
     width: auto;
+    font-weight: 550;
+    cursor: pointer; /* Add cursor pointer to indicate it's clickable */
 }
-
-.settings-toggle-switch {
+.settings-toggle-item label {
+    flex-grow: 1; /* Make label take up all available space */
+    cursor: pointer; /* Add cursor pointer to label */
+}
+.settings-toggle-item input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+    position: absolute;
+}
+.settings-toggle-item span.settings-toggle-slider {
     position: relative;
     display: inline-block;
     width: 60px;
     height: 34px;
+    flex-shrink: 0; /* Prevent slider from shrinking */
 }
-
-.settings-toggle-switch input {
-    opacity: 0;
-    width: 0;
-    height: 0;
-}
-
 .settings-toggle-slider {
     position: absolute;
     cursor: pointer;
@@ -901,7 +894,6 @@ input:checked + .toggle-slider:before {
     transition: .4s;
     border-radius: 34px;
 }
-
 .settings-toggle-slider:before {
     position: absolute;
     content: "";
@@ -913,15 +905,12 @@ input:checked + .toggle-slider:before {
     transition: .4s;
     border-radius: 50%;
 }
-
 input:checked + .settings-toggle-slider {
     background-color: var(--tesla-blue);
 }
-
 input:focus + .settings-toggle-slider {
     box-shadow: 0 0 1px var(--tesla-blue);
 }
-
 input:checked + .settings-toggle-slider:before {
     transform: translateX(26px);
 }
@@ -940,6 +929,6 @@ input:checked + .settings-toggle-slider:before {
     max-width: none;
     width: auto;
 }
-.news-toggle-item .settings-toggle-label {
-    font-size: 16pt;
+.news-toggle-item {
+    font-size: 15pt;
 }
