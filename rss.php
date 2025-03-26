@@ -1,7 +1,7 @@
 <?php
 
 // Settings
-$cacheDuration = 600; // 10 minutes
+$cacheDuration = 60; // 10 minutes
 $cacheFile = '/tmp/rss_cache.json';
 $cacheTimestampFile = '/tmp/rss_cache_timestamp';
 $logFile = '/tmp/rss_php.log';
@@ -85,7 +85,6 @@ file_put_contents($logFile, 'rss.php started...' . "\n");
 
 // Set the content type and add headers to prevent caching
 header('Cache-Control: no-cache, no-store, must-revalidate');
-header('Pragma: no-cache');
 header('Expires: 0');
 header('Content-Type: application/json');
 
@@ -113,16 +112,26 @@ $useSerialFetch = isset($_GET['serial']);
 $numStories = isset($_GET['n']) ? intval($_GET['n']) : $maxStories;
 $numStories = max(1, min($maxStories, $numStories));
 
-// Get items from cache or from external sources
+// Cache logic
 if (!$forceReload && file_exists($cacheFile) && file_exists($cacheTimestampFile)) {
     $timestamp = file_get_contents($cacheTimestampFile);
     if ((time() - $timestamp) < $cacheDuration) {
-        // Cache is still fresh, load cached content
-        $allItems = json_decode(file_get_contents($cacheFile), true);
+        logMessage("Using cached data, last updated: " . date('Y-m-d H:i:s', $timestamp));
+        $useCache = true;
+    } else {
+        logMessage("Cache expired, fetching new data...");
+        $useCache = false;
     }
 } else {
-    $allItems = [];
-    
+    logMessage("Cache not found or expired, fetching new data...");
+    $useCache = false;
+}
+
+// Get items from cache or from external sources
+$allItems = [];
+if ($useCache) {
+    $allItems = json_decode(file_get_contents($cacheFile), true);
+} else {    
     if ($useSerialFetch) {
         // Serial fetching mode
         foreach ($feeds as $source => $url) {

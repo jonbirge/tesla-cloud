@@ -899,7 +899,7 @@ input:checked + .toggle-slider:before {
     bottom: 0;
     background-color: #ccc;
     transition: .4s;
-    border-radius: 50%;
+    border-radius: 34px;
 }
 
 .settings-toggle-slider:before {
