@@ -1,18 +1,10 @@
 <?php
+// Include the git info function
+require_once __DIR__ . '/git_info.php';
 
-// Get version from vers.php to use in filenames
-// TODO: Use a common PHP function library and do this directly
-$versUrl = 'http://' . $_SERVER['HTTP_HOST'] . dirname($_SERVER['PHP_SELF']) . '/vers.php';
-$versContext = stream_context_create(['http' => ['timeout' => 2]]);
-$versJson = @file_get_contents($versUrl, false, $versContext);
-
-$version = 'unknown';
-if ($versJson) {
-    $versData = json_decode($versJson, true);
-    if (isset($versData['commit'])) {
-        $version = $versData['commit'];
-    }
-}
+// Get version information directly using the function
+$gitInfo = getGitInfo();
+$version = isset($gitInfo['commit']) ? $gitInfo['commit'] : 'unknown';
 
 // Settings
 $cacheDuration = 600; // 10 minutes
