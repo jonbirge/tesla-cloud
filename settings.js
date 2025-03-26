@@ -209,19 +209,18 @@ function removeUserIdFromUrl() {
     window.history.pushState({}, '', url);
 }
 
-// Function to update login/logout button based on state
+// Update login/logout button visibility based on state
 function updateLoginState() {
     const loginButton = document.getElementById('login-button');
-    
+    const logoutButton = document.getElementById('logout-button');
+
     if (isLoggedIn) {
-        loginButton.textContent = 'Logout';
-        loginButton.onclick = handleLogout;
-        
-        // Update settings section header
-        document.getElementById('settings-header').textContent = `Settings for ${currentUser}`;
+        loginButton.classList.add('hidden');
+        logoutButton.classList.remove('hidden');
+        logoutButton.textContent = `Logout ${currentUser}`;
     } else {
-        loginButton.textContent = 'Login';
-        loginButton.onclick = showLoginModal;
+        loginButton.classList.remove('hidden');
+        logoutButton.classList.add('hidden');
     }
 }
 
