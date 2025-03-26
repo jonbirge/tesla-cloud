@@ -31,13 +31,11 @@ let lastUpdateLat = null;
 let lastUpdateLong = null;
 let lastKnownHeading = null;
 let neverUpdatedLocation = true;
-let localManualDarkMode = false; // Transient manual dark mode (when settings are not available)
 let darkOn = false;
 let radarContext = null;
 let gpsIntervalId = null;
 let lastGPSUpdate = 0;
 let locationTimeZone = browserTimeZone();
-let settings = {}; // Global settings object to cache user settings
 
 let newsUpdateInterval = null;
 let newsUpdatesActive = false; // Track if news updates should be active
@@ -163,11 +161,7 @@ async function updateTimeZone(lat, long) {
 
 // Manually set dark/light mode
 function toggleMode() {
-    if (currentUser) {
-        toggleSetting('auto-dark-mode', false);
-    } else {
-        localManualDarkMode = true;
-    }
+    toggleSetting('auto-dark-mode', false);
     document.body.classList.toggle('dark-mode');
     darkOn = document.body.classList.contains('dark-mode');
     document.getElementById('darkModeToggle').checked = darkOn;
@@ -176,13 +170,7 @@ function toggleMode() {
 
 // Update the dark/light mode based on sunrise/sunset
 function autoDarkMode() {
-    if (currentUser && settings && settings['auto-dark-mode'] !== undefined) {
-        manualDarkMode = !settings['auto-dark-mode'];
-        customLog('Using auto dark mode user setting: ', manualDarkMode);
-    } else {
-        manualDarkMode = localManualDarkMode;
-    }
-    if (!manualDarkMode && lat !== null && long !== null) {
+    if (settings && settings['auto-dark-mode'] && lat !== null && long !== null) {
         const now = new Date();
         const currentTime = now.getTime();
         const sunriseTime = new Date(sunrise).getTime();

@@ -2,6 +2,49 @@
 let isLoggedIn = false;
 let currentUser = null;
 let hashedUser = null; // Store the hashed version of the user ID
+let settings = {}; // Initialize settings object
+
+// Default settings that will be used when no user is logged in
+const defaultSettings = {
+    // General settings
+    "auto-dark-mode": true,
+    "24-hour-time": false,
+    "imperial-units": true,
+    "small-fonts": false,
+    
+    // News source settings - default to most sources enabled
+    "rss-wsj": false,
+    "rss-nyt": true,
+    "rss-wapo": true,
+    "rss-latimes": true,
+    "rss-bos": true,
+    "rss-bloomberg": true,
+    "rss-bloomberg-tech": true,
+    "rss-bbc": true,
+    "rss-telegraph": true,
+    "rss-economist": true,
+    "rss-lemonde": true,
+    "rss-derspiegel": true,
+    "rss-notateslaapp": true,
+    "rss-teslarati": true,
+    "rss-insideevs": true,
+    "rss-electrek": true,
+    "rss-thedrive": true,
+    "rss-techcrunch": true,
+    "rss-jalopnik": true,
+    "rss-theverge": true
+};
+
+// Function to initialize application with either user settings or defaults
+function initializeSettings() {
+    // If no login has happened yet, use default settings
+    if (!isLoggedIn) {
+        settings = { ...defaultSettings };
+        initializeToggleStates();
+        updateNews(true);
+        customLog('Using default settings (no login)');
+    }
+}
 
 // Function to hash a user ID using SHA-256
 async function hashUserId(userId) {
@@ -108,6 +151,8 @@ async function attemptLogin() {
 
     if (userId) {
         await fetchSettings(userId);
+    } else {
+        initializeSettings();
     }
 }
 
@@ -221,6 +266,7 @@ function updateLoginState() {
     } else {
         loginButton.classList.remove('hidden');
         logoutButton.classList.add('hidden');
+        logoutButton.textContent = 'Logout';
     }
 }
 
@@ -236,7 +282,21 @@ function toggleSettingFrom(element) {
 
 // Function to toggle a setting (updates both local cache and server)
 async function toggleSetting(key, value) {
-    if (!isLoggedIn || !currentUser) return;
+    if (!isLoggedIn || !currentUser) {
+        // Update the local settings cache with boolean value
+        settings[key] = value;
+        
+        // Update toggle state visually
+        updateToggleVisualState(key, value);
+        
+        // If the setting is RSS-related, update the news feed
+        if (key.startsWith('rss-')) {
+            updateNews(true);
+        }
+
+        customLog(`Setting "${key}" updated to ${value} (local only)`);
+        return;
+    }
     
     try {
         // Update the local settings cache with boolean value
