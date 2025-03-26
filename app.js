@@ -23,6 +23,7 @@ const SAT_URLS = {
 };
 
 // Global variables
+let version = null;
 let testMode = false; // Set to true if test parameter exists
 let lastUpdate = 0; // Timestamp of last location update
 let lat = null;
@@ -896,23 +897,6 @@ function showSection(sectionId) {
                 customLog('Location not available to fetch Wikipedia data.');
             }
         }
-
-        if (sectionId === 'about') {
-            const versionElement = document.getElementById('version');
-            if (versionElement && !versionElement.dataset.loaded) {
-                fetch('vers.php')
-                    .then(response => response.json())
-                    .then(data => {
-                        const versionText = `${data.branch || 'unknown'}-${data.commit || 'unknown'}`;
-                        versionElement.innerHTML = versionText;
-                        versionElement.dataset.loaded = true; // Mark as loaded
-                    })
-                    .catch(error => {
-                        console.error('Error fetching version:', error);
-                        versionElement.innerHTML = 'Error loading version';
-                    });
-            }
-        }
     }
 
     // Activate the clicked button
@@ -956,6 +940,22 @@ document.addEventListener('DOMContentLoaded', async function () {
 
     // Start location services
     startGPSUpdates();
+
+    // Get version from vers.php asyncly
+    const versionElement = document.getElementById('version');
+    if (versionElement) {
+        fetch('vers.php')
+            .then(response => response.json())
+            .then(data => {
+                const versionText = `${data.branch || 'unknown'}-${data.commit || 'unknown'}`;
+                versionElement.innerHTML = versionText;
+                version = versionText;
+            })
+            .catch(error => {
+                console.error('Error fetching version:', error);
+                versionElement.innerHTML = 'Error loading version';
+            });
+    }
 
     // Handle page visibility changes
     document.addEventListener('visibilitychange', () => {

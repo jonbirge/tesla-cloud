@@ -1,10 +1,24 @@
 <?php
 
+// Get version from vers.php to use in filenames
+// TODO: Use a common PHP function library and do this directly
+$versUrl = 'http://' . $_SERVER['HTTP_HOST'] . dirname($_SERVER['PHP_SELF']) . '/vers.php';
+$versContext = stream_context_create(['http' => ['timeout' => 2]]);
+$versJson = @file_get_contents($versUrl, false, $versContext);
+
+$version = 'unknown';
+if ($versJson) {
+    $versData = json_decode($versJson, true);
+    if (isset($versData['commit'])) {
+        $version = $versData['commit'];
+    }
+}
+
 // Settings
 $cacheDuration = 600; // 10 minutes
-$cacheFile = '/tmp/rss_cache.json';
-$cacheTimestampFile = '/tmp/rss_cache_timestamp';
-$logFile = '/tmp/rss_php.log';
+$cacheFile = '/tmp/rss_cache_' . $version . '.json';
+$cacheTimestampFile = '/tmp/rss_cache_timestamp_' . $version;
+$logFile = '/tmp/rss_php_' . $version . '.log';
 $maxStories = 128; // Maximum number of stories to send to client
 $maxSingleSource = 9; // Maximum number of stories to keep from a single source
 
