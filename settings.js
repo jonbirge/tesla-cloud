@@ -1,6 +1,22 @@
 // Global variables
 let isLoggedIn = false;
 let currentUser = null;
+let hashedUser = null; // Store the hashed version of the user ID
+
+// Function to hash a user ID using SHA-256
+async function hashUserId(userId) {
+    // Use the SubtleCrypto API to create a SHA-256 hash
+    const encoder = new TextEncoder();
+    const data = encoder.encode(userId);
+    const hashBuffer = await crypto.subtle.digest('SHA-256', data);
+    
+    // Convert the hash buffer to a hexadecimal string
+    const hashArray = Array.from(new Uint8Array(hashBuffer));
+    const hashHex = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+    
+    // Return only the first 16 characters (64 bits) of the hash
+    return hashHex.substring(0, 16);
+}
 
 // Function to show the login modal
 function showLoginModal() {
@@ -29,14 +45,17 @@ async function validateUserId(userId) {
     }
     
     try {
+        // Hash the user ID before sending to the server
+        const hashedId = await hashUserId(userId);
+        
         // Use HEAD request to check if the user exists
-        const response = await fetch(`settings.php/${encodeURIComponent(userId)}`, {
+        const response = await fetch(`settings.php/${encodeURIComponent(hashedId)}`, {
             method: 'HEAD'
         });
         
         if (response.status === 404) {
             // User doesn't exist, create default settings
-            const created = await createNewUser(userId);
+            const created = await createNewUser(userId, hashedId);
             if (!created) {
                 return { valid: false, message: 'Failed to create new user.' };
             }
@@ -52,9 +71,14 @@ async function validateUserId(userId) {
 }
 
 // Function to create a new user with default settings
-async function createNewUser(userId) {
+async function createNewUser(userId, hashedId = null) {
     try {
-        const response = await fetch(`settings.php/${encodeURIComponent(userId)}`, {
+        // If hashedId wasn't provided, generate it
+        if (!hashedId) {
+            hashedId = await hashUserId(userId);
+        }
+        
+        const response = await fetch(`settings.php/${encodeURIComponent(hashedId)}`, {
             method: 'POST'
         });
         
@@ -91,8 +115,11 @@ async function fetchSettings(userId) {
     const validation = await validateUserId(userId);
     if (validation.valid) {
         try {
+            // Hash the user ID before sending to the server
+            hashedUser = await hashUserId(userId);
+            
             // Check if user exists and fetch settings using RESTful API
-            const response = await fetch(`settings.php/${encodeURIComponent(userId)}`, {
+            const response = await fetch(`settings.php/${encodeURIComponent(hashedUser)}`, {
                 method: 'GET'
             });
             
@@ -146,6 +173,7 @@ async function handleLogin() {
 function handleLogout() {
     isLoggedIn = false;
     currentUser = null;
+    hashedUser = null;
     
     // Update UI
     updateLoginState();
@@ -219,7 +247,7 @@ async function toggleSetting(key, value) {
         updateToggleVisualState(key, value);
         
         // Update the server with the boolean value using the RESTful API
-        const response = await fetch(`settings.php/${encodeURIComponent(currentUser)}/${encodeURIComponent(key)}`, {
+        const response = await fetch(`settings.php/${encodeURIComponent(hashedUser)}/${encodeURIComponent(key)}`, {
             method: 'PUT',
             headers: {
                 'Content-Type': 'application/json'
