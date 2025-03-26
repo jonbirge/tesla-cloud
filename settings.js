@@ -269,7 +269,7 @@ function initializeToggleStates() {
         
         if (toggle) {
             toggle.checked = value;
-            customLog(`Initialized toggle for ${key}: ${value}`);
+            // customLog(`Initialized toggle for ${key}: ${value}`);
         }
     });
 }
