@@ -250,30 +250,34 @@ switch ($method) {
         if (!$userId || !validateUserId($userId)) {
             logMessage("Invalid or missing user ID: $userId", "ERROR");
             http_response_code(400);
-            // echo json_encode(['error' => 'Invalid or missing user ID in URL path']);
+            echo json_encode(['error' => 'Invalid or missing user ID in URL path']);
             exit;
         }
-        
+
         // Check if the user settings exist
         logMessage("Checking if user settings exist for $userId");
         if (!userSettingsExist($userId)) {
             logMessage("User settings not found for $userId", "WARNING");
             http_response_code(404);
-            // echo json_encode(['error' => 'User ID not found']);
+            echo json_encode(['error' => 'User ID not found']);
             exit;
         }
-        
+
         $settings = loadUserSettings($userId);
-        
+
         if ($key) {
-            // Return specific setting if key is provided
-            if (isset($settings[$key])) {
-                logMessage("Returning setting $key for user $userId");
-                echo json_encode(['key' => $key, 'value' => $settings[$key]]);
+            // Return settings where the key starts with the given prefix
+            $filteredSettings = array_filter($settings, function ($k) use ($key) {
+                return strpos($k, $key) === 0; // Check if the key starts with the prefix
+            }, ARRAY_FILTER_USE_KEY);
+
+            if (!empty($filteredSettings)) {
+                logMessage("Returning settings with prefix '$key' for user $userId");
+                echo json_encode($filteredSettings);
             } else {
-                logMessage("Setting $key not found for user $userId", "WARNING");
+                logMessage("No settings found with prefix '$key' for user $userId", "WARNING");
                 http_response_code(404);
-                echo json_encode(['error' => "Setting '$key' not found"]);
+                echo json_encode(['error' => "No settings found with prefix '$key'"]);
             }
         } else {
             // Return all settings if no key is provided
