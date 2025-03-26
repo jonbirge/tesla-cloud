@@ -1,33 +1,40 @@
 <?php
-$gitHeadFile = __DIR__ . '/.git/HEAD';
+$gitRefsFile = __DIR__ . '/.git/info/refs';
 
-if (file_exists($gitHeadFile)) {
-    $headContent = file_get_contents($gitHeadFile);
-    if (strpos($headContent, 'ref:') === 0) {
-        $branchRef = trim(substr($headContent, 5));
-        $branchFile = __DIR__ . '/.git/' . $branchRef;
-        $branchName = basename($branchRef); // Extract branch name
-        if (file_exists($branchFile)) {
-            $version = substr(trim(file_get_contents($branchFile)), 0, 8); // Truncate to 8 digits
-        } else {
-            $version = 'unknown';
-        }
+if (file_exists($gitRefsFile)) {
+    $headContent = file($gitRefsFile, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
+    if (!empty($headContent)) {
+        $version = substr(trim($headContent[0]), 0, 8); // Truncate to 8 digits
     } else {
-        $version = substr(trim($headContent), 0, 8); // Truncate to 8 digits
-        $branchName = null;
-    }
-
-    // Check for tag name
-    $tagName = null;
-    $tagsOutput = [];
-    exec('git describe --tags --exact-match 2>/dev/null', $tagsOutput);
-    if (!empty($tagsOutput)) {
-        $tagName = $tagsOutput[0];
+        $version = 'unknown';
     }
 } else {
     $version = 'unknown';
+}
+
+$gitHeadFile = __DIR__ . '/.git/HEAD';
+
+if (file_exists($gitHeadFile)) {
+    $headContent = file($gitHeadFile, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
+    if (!empty($headContent)) {
+        if (strpos($headContent[0], 'ref:') === 0) {
+            $branchName = trim(str_replace('ref: refs/heads/', '', $headContent[0]));
+        } else {
+            $branchName = null;
+        }
+    } else {
+        $branchName = null;
+    }
+} else {
     $branchName = null;
-    $tagName = null;
+}
+
+// Check for tag name
+$tagName = null;
+$tagsOutput = [];
+exec('git describe --tags --exact-match 2>/dev/null', $tagsOutput);
+if (!empty($tagsOutput)) {
+    $tagName = $tagsOutput[0];
 }
 
 header('Content-Type: application/json');

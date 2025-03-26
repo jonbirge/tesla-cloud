@@ -16,6 +16,7 @@
     <!-- Container for SVG sprites -->
     <div id="sprites" style="display: none;"></div>
     
+    <!-- Main container -->
     <div class="frame-container">
 
     <!-- Section menu -->
@@ -70,9 +71,7 @@
                 <svg class="button-icon"><use href="#icon-settings"></use></svg>
                 Settings
             </button>
-            <button id="login-button" class="login-button" onclick="showLoginModal()">
-                Login
-            </button>
+            <button id="login-button" class="login-button" onclick="showLoginModal()">Login</button>
         </div> <!-- End of section buttons -->
     </div> <!-- End of left frame -->
     
@@ -573,7 +572,7 @@
             <p>Enter a user ID to login or create a new account.</p>
             <div class="login-form">
                 <label for="user-id">User ID:</label>
-                <input type="text" id="user-id" placeholder="Enter your ID (minimum 9 characters)">
+                <input type="text" id="user-id" placeholder="Enter user ID (minimum 9 characters)">
                 <div id="login-error" class="error-message"></div>
                 <div class="button-container">
                     <button id="login-cancel" class="modal-button cancel">Cancel</button>
@@ -625,9 +624,9 @@
     <!-- Load JavaScript -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="settings.js?1"></script>
-    <script src="net.js?35"></script>
-    <script src="wx.js?7"></script>
-    <script src="app.js?11"></script>
+    <script src="net.js?37"></script>
+    <script src="wx.js?9"></script>
+    <script src="app.js?15"></script>
 </body>
 
 </html>
