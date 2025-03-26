@@ -16,7 +16,7 @@ function closeLoginModal() {
 }
 
 // Function to validate user ID
-function validateUserId(userId) {
+async function validateUserId(userId) {
     // Check for minimum length (9 characters)
     if (userId.length < 9) {
         return { valid: false, message: 'User ID must be at least 9 characters long.' };
@@ -28,7 +28,47 @@ function validateUserId(userId) {
         return { valid: false, message: 'User ID can only contain letters, numbers, underscore, and hyphen.' };
     }
     
-    return { valid: true };
+    try {
+        // Use HEAD request to check if the user exists
+        const response = await fetch(`settings.php/${encodeURIComponent(userId)}`, {
+            method: 'HEAD'
+        });
+        
+        if (response.status === 404) {
+            // User doesn't exist, create default settings
+            const created = await createNewUser(userId);
+            if (!created) {
+                return { valid: false, message: 'Failed to create new user.' };
+            }
+        } else if (!response.ok) {
+            return { valid: false, message: 'Error checking user existence.' };
+        }
+        
+        return { valid: true };
+    } catch (error) {
+        console.error('Error validating user ID:', error);
+        return { valid: false, message: 'Network error during validation.' };
+    }
+}
+
+// Function to create a new user with default settings
+async function createNewUser(userId) {
+    try {
+        const response = await fetch(`settings.php/${encodeURIComponent(userId)}`, {
+            method: 'POST'
+        });
+        
+        if (response.ok) {
+            customLog('Created new user with default settings:', userId);
+            return true;
+        } else {
+            customLog('Failed to create new user:', userId);
+            return false;
+        }
+    } catch (error) {
+        console.error('Error creating new user:', error);
+        return false;
+    }
 }
 
 // Function to attempt login from URL parameter or cookie
@@ -48,7 +88,7 @@ async function attemptLogin() {
 }
 
 async function fetchSettings(userId) {
-    const validation = validateUserId(userId);
+    const validation = await validateUserId(userId);
     if (validation.valid) {
         try {
             // Check if user exists and fetch settings using RESTful API
@@ -79,6 +119,11 @@ async function fetchSettings(userId) {
         
                 // Initialize toggle states based on settings
                 initializeToggleStates();
+
+                // Update news feed
+                updateNews(true);
+
+                // TODO: Update weather data
             } else {
                 console.error('Error authenticating with user ID');
             }

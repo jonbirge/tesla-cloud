@@ -296,13 +296,13 @@ async function updateNews(clear = false) {
         if (!newsContainer) return;
 
         // Clear the news container if requested
-        // TODO: Differentiate between loaded news and read news...
         if (clear) {
             newsContainer.innerHTML = '';
             lastNewsTimestamp = 0; // Reset last news timestamp
             seenNewsIds.clear(); // Clear seen news IDs
             userHasSeenLatestNews = true; // Reset user seen status
         }
+        // TODO: Differentiate between loaded news and read news...
 
         // Show loading spinner if no items are displayed yet or only showing a message
         const isEmpty = !newsContainer.innerHTML || 
@@ -995,4 +995,55 @@ document.addEventListener('DOMContentLoaded', async function () {
 
     // Show the initial section from URL parameter
     showSection(initialSection);
+});
+
+// Set up event handlers for login modal
+document.addEventListener('DOMContentLoaded', function() {
+    // Login submit button
+    document.getElementById('login-submit').addEventListener('click', async function() {
+        const userId = document.getElementById('user-id').value.trim();
+        const errorElement = document.getElementById('login-error');
+        
+        const validation = await validateUserId(userId);
+        if (validation.valid) {
+            closeLoginModal();
+            fetchSettings(userId);
+        } else {
+            errorElement.textContent = validation.message;
+        }
+    });
+    
+    // Login cancel button
+    document.getElementById('login-cancel').addEventListener('click', function() {
+        closeLoginModal();
+    });
+    
+    // Close modal when clicking outside
+    const loginModal = document.getElementById('login-modal');
+    window.addEventListener('click', function(event) {
+        if (event.target === loginModal) {
+            closeLoginModal();
+        }
+    });
+    
+    // Handle enter key in user ID field
+    document.getElementById('user-id').addEventListener('keypress', async function(event) {
+        if (event.key === 'Enter') {
+            event.preventDefault();
+            
+            const userId = this.value.trim();
+            const errorElement = document.getElementById('login-error');
+            
+            const validation = await validateUserId(userId);
+            if (validation.valid) {
+                closeLoginModal();
+                fetchSettings(userId);
+            } else {
+                errorElement.textContent = validation.message;
+            }
+        }
+    });
+    
+    // Attempt login from URL or cookie
+    attemptLogin();
 });

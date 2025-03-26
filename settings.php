@@ -90,11 +90,94 @@ if (count($uriParts) > 1) {
 $method = $_SERVER['REQUEST_METHOD'];
 
 switch ($method) {
+    case 'POST':
+        // POST request - create a new user settings resource
+        if (!$userId || !validateUserId($userId)) {
+            http_response_code(400);
+            echo json_encode(['error' => 'Invalid or missing user ID in URL path']);
+            exit;
+        }
+        
+        // Check if user settings already exist
+        $filePath = getUserFilePath($userId);
+        if (file_exists($filePath)) {
+            http_response_code(409); // Conflict
+            echo json_encode(['error' => 'User settings already exist']);
+            exit;
+        }
+        
+        // Define default settings
+        $defaultSettings = [
+            "imperial-units" => true,
+            "auto-dark-mode" => true,
+            "24-hour-time" => false,
+            "rss-wsj" => true,
+            "rss-nyt" => true,
+            "rss-wapo" => true,
+            "rss-latimes" => true,
+            "rss-bloomberg" => false,
+            "rss-bos" => false,
+            "rss-bloomberg-tech" => false,
+            "rss-bbc" => true,
+            "rss-economist" => true,
+            "rss-telegraph" => false,
+            "rss-lemonde" => false,
+            "rss-derspiegel" => true,
+            "rss-teslarati" => true,
+            "rss-notateslaapp" => true,
+            "rss-insideevs" => true,
+            "rss-electrek" => false,
+            "rss-techcrunch" => true,
+            "rss-theverge" => false,
+            "rss-jalopnik" => false,
+            "rss-thedrive" => false,
+        ];
+        
+        // Save the default settings
+        if (saveUserSettings($userId, $defaultSettings)) {
+            http_response_code(201); // Created
+            echo json_encode([
+                'success' => true, 
+                'userId' => $userId, 
+                'message' => 'User settings created with default values',
+                'settings' => $defaultSettings
+            ]);
+        } else {
+            http_response_code(500);
+            echo json_encode(['error' => 'Failed to create user settings']);
+        }
+        break;
+        
+    case 'HEAD':
+        // HEAD request - check if user settings exist without returning content
+        if (!$userId || !validateUserId($userId)) {
+            http_response_code(400);
+            exit;
+        }
+        
+        $filePath = getUserFilePath($userId);
+        if (!file_exists($filePath)) {
+            http_response_code(404);
+            exit;
+        }
+        
+        // Resource exists, return 200 OK (with no body)
+        http_response_code(200);
+        exit;
+        
     case 'GET':
         // GET request - retrieve settings for a user
         if (!$userId || !validateUserId($userId)) {
             http_response_code(400);
             echo json_encode(['error' => 'Invalid or missing user ID in URL path']);
+            exit;
+        }
+        
+        // Check if the user settings file exists
+        $filePath = getUserFilePath($userId);
+        if (!file_exists($filePath)) {
+            http_response_code(404);
+            echo json_encode(['error' => 'User ID not found']);
             exit;
         }
         
@@ -115,7 +198,7 @@ switch ($method) {
         break;
         
     case 'PUT':
-        // PUT request - update a setting
+        // PUT request - update or create a setting
         if (!$userId || !validateUserId($userId)) {
             http_response_code(400);
             echo json_encode(['error' => 'Invalid or missing user ID in URL path']);
@@ -166,12 +249,21 @@ switch ($method) {
         // Load current settings
         $settings = loadUserSettings($userId);
         
+        // Track if this is a creation operation
+        $isCreatingResource = !file_exists(getUserFilePath($userId));
+        
         // Update the setting
         $settings[$key] = $value;
         
         // Save updated settings
         if (saveUserSettings($userId, $settings)) {
-            echo json_encode(['success' => true, 'key' => $key]);
+            // Return 201 Created if this was a new resource, otherwise 200 OK
+            if ($isCreatingResource) {
+                http_response_code(201);
+                echo json_encode(['success' => true, 'key' => $key, 'created' => true]);
+            } else {
+                echo json_encode(['success' => true, 'key' => $key]);
+            }
         } else {
             http_response_code(500);
             echo json_encode(['error' => 'Failed to save setting']);

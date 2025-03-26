@@ -877,25 +877,6 @@ input:checked + .toggle-slider:before {
     width: auto;
 }
 
-/* News Source Grid */
-.news-source-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-    gap: 9px;
-    width: 100%;
-    max-width: 1200px;
-}
-.news-toggle-item {
-    padding: 12px 15px;
-    margin-bottom: 0;
-    max-width: none;
-    width: auto;
-}
-.news-toggle-item .settings-toggle-label {
-    font-size: 16pt;
-}
-
-/* Larger Toggle Switch for Settings */
 .settings-toggle-switch {
     position: relative;
     display: inline-block;
@@ -918,7 +899,7 @@ input:checked + .toggle-slider:before {
     bottom: 0;
     background-color: #ccc;
     transition: .4s;
-    border-radius: 34px;
+    border-radius: 50%;
 }
 
 .settings-toggle-slider:before {
@@ -943,4 +924,22 @@ input:focus + .settings-toggle-slider {
 
 input:checked + .settings-toggle-slider:before {
     transform: translateX(26px);
+}
+
+/* News Source Grid */
+.news-source-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 9px;
+    width: 100%;
+    max-width: 1200px;
+}
+.news-toggle-item {
+    padding: 12px 15px;
+    margin-bottom: 0;
+    max-width: none;
+    width: auto;
+}
+.news-toggle-item .settings-toggle-label {
+    font-size: 16pt;
 }
