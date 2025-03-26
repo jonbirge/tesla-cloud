@@ -12,6 +12,33 @@ $dataDir = '/tmp/teslacloud_user_data';  // Use /tmp directory for storage
 $maxKeyLength = 64;      // Maximum length for setting keys
 $maxValueLength = 1024;  // Maximum length for setting values
 
+// Define default settings
+$defaultSettings = [
+    "auto-dark-mode" => true,
+    "24-hour-time" => false,
+    "imperial-units" => true,
+    "rss-wsj" => true,
+    "rss-nyt" => true,
+    "rss-wapo" => true,
+    "rss-latimes" => true,
+    "rss-bloomberg" => false,
+    "rss-bos" => false,
+    "rss-bloomberg-tech" => false,
+    "rss-bbc" => true,
+    "rss-economist" => true,
+    "rss-telegraph" => false,
+    "rss-lemonde" => false,
+    "rss-derspiegel" => true,
+    "rss-teslarati" => true,
+    "rss-notateslaapp" => true,
+    "rss-insideevs" => true,
+    "rss-electrek" => false,
+    "rss-techcrunch" => true,
+    "rss-theverge" => false,
+    "rss-jalopnik" => false,
+    "rss-thedrive" => false,
+];
+
 // Ensure data directory exists
 if (!file_exists($dataDir)) {
     $mkdirResult = mkdir($dataDir, 0777, true);
@@ -30,36 +57,6 @@ if (!is_writable($dataDir)) {
         echo json_encode(['error' => 'Data directory is not writable', 'path' => $dataDir]);
         exit;
     }
-}
-
-// Helper function to validate user ID
-function validateUserId($userId) {
-    // Check if it has at least 9 characters and only contains valid characters
-    return (strlen($userId) >= 9) && preg_match('/^[a-zA-Z0-9_-]+$/', $userId);
-}
-
-// Helper function to get user settings file path
-function getUserFilePath($userId) {
-    global $dataDir;
-    return $dataDir . '/' . preg_replace('/[^a-zA-Z0-9_-]/', '', $userId) . '.json';
-}
-
-// Helper function to load user settings
-function loadUserSettings($userId) {
-    $filePath = getUserFilePath($userId);
-    
-    if (file_exists($filePath)) {
-        $content = file_get_contents($filePath);
-        return json_decode($content, true) ?: [];
-    }
-    
-    return [];
-}
-
-// Helper function to save user settings
-function saveUserSettings($userId, $settings) {
-    $filePath = getUserFilePath($userId);
-    return file_put_contents($filePath, json_encode($settings, JSON_PRETTY_PRINT));
 }
 
 // Parse the request URI to extract user and key
@@ -105,33 +102,6 @@ switch ($method) {
             echo json_encode(['error' => 'User settings already exist']);
             exit;
         }
-        
-        // Define default settings
-        $defaultSettings = [
-            "imperial-units" => true,
-            "auto-dark-mode" => true,
-            "24-hour-time" => false,
-            "rss-wsj" => true,
-            "rss-nyt" => true,
-            "rss-wapo" => true,
-            "rss-latimes" => true,
-            "rss-bloomberg" => false,
-            "rss-bos" => false,
-            "rss-bloomberg-tech" => false,
-            "rss-bbc" => true,
-            "rss-economist" => true,
-            "rss-telegraph" => false,
-            "rss-lemonde" => false,
-            "rss-derspiegel" => true,
-            "rss-teslarati" => true,
-            "rss-notateslaapp" => true,
-            "rss-insideevs" => true,
-            "rss-electrek" => false,
-            "rss-techcrunch" => true,
-            "rss-theverge" => false,
-            "rss-jalopnik" => false,
-            "rss-thedrive" => false,
-        ];
         
         // Save the default settings
         if (saveUserSettings($userId, $defaultSettings)) {
@@ -276,4 +246,35 @@ switch ($method) {
         echo json_encode(['error' => 'Method not allowed']);
         break;
 }
-?>
+
+// ***** Utility Functions *****
+
+// Helper function to validate user ID
+function validateUserId($userId) {
+    // Check if it has at least 9 characters and only contains valid characters
+    return (strlen($userId) >= 9) && preg_match('/^[a-zA-Z0-9_-]+$/', $userId);
+}
+
+// Helper function to get user settings file path
+function getUserFilePath($userId) {
+    global $dataDir;
+    return $dataDir . '/' . preg_replace('/[^a-zA-Z0-9_-]/', '', $userId) . '.json';
+}
+
+// Helper function to load user settings
+function loadUserSettings($userId) {
+    $filePath = getUserFilePath($userId);
+    
+    if (file_exists($filePath)) {
+        $content = file_get_contents($filePath);
+        return json_decode($content, true) ?: [];
+    }
+    
+    return [];
+}
+
+// Helper function to save user settings
+function saveUserSettings($userId, $settings) {
+    $filePath = getUserFilePath($userId);
+    return file_put_contents($filePath, json_encode($settings, JSON_PRETTY_PRINT));
+}
