@@ -4,17 +4,7 @@ const UPDATE_DISTANCE_THRESHOLD = 500; // meters
 const UPDATE_TIME_THRESHOLD = 10; // minutes
 const WX_DISTANCE_THRESHOLD = 25000; // meters
 const WX_TIME_THRESHOLD = 30; // minutes
-const NEWS_REFRESH_INTERVAL = 2.5; // minutes
 const MAX_SPEED = 50; // Maximum speed for radar display (mph)
-const TEST_CENTER_LAT = 39.7392; // Denver
-const TEST_CENTER_LONG = -104.9903; // Denver
-const TEST_CIRCLE_RADIUS = 10; // miles
-const TEST_MIN_SPEED = 75; // mph
-const TEST_MAX_SPEED = 95; // mph
-const TEST_MIN_ALT = 50;
-const TEST_MAX_ALT = 250;
-const GEONAMES_USERNAME = 'birgefuller';
-const OPENWX_API_KEY = '6a1b1bcb03b5718a9b3a2b108ce3293d';
 const MIN_GPS_UPDATE_INTERVAL = 1000; // ms - minimum time between updates
 const SAT_URLS = {
     latest: 'https://cdn.star.nesdis.noaa.gov/GOES16/GLM/CONUS/EXTENT3/1250x750.jpg',
@@ -22,66 +12,32 @@ const SAT_URLS = {
     latest_ir: 'https://cdn.star.nesdis.noaa.gov/GOES16/ABI/CONUS/11/1250x750.jpg',
 };
 
-// Global variables
-let testMode = false; // Set to true if test parameter exists
+// Imports
+import { customLog, highlightUpdate, testMode, GEONAMES_USERNAME } from './common.js';
+import { PositionSimulator } from './location.js';
+import { attemptLogin, updateLoginState, settings } from './settings.js';
+import { fetchWeatherData } from './wx.js';
+import { updateNetworkInfo, startPingTest } from './net.js';
+import { setUserHasSeenLatestNews } from './news.js';
+
+// Variables
 let lastUpdate = 0; // Timestamp of last location update
+let lat = null;
+let long = null;
+let alt = null;
+let acc = null;
+let speed = null;
 let lastUpdateLat = null;
 let lastUpdateLong = null;
 let lastKnownHeading = null;
+let lastWxUpdate = 0;
+let lastWxUpdateLat = null;
+let lastWxUpdateLong = null;
 let neverUpdatedLocation = true;
-let lat = null;
-let long = null;
-let manualDarkMode = false;
-let darkOn = false;
-let newsUpdateInterval = null;
-let newsUpdatesActive = false; // Track if news updates should be active
-let testModeAngle = 0;
-let testModeSpeed = TEST_MIN_SPEED;
-let testModeAlt = TEST_MIN_ALT;
-let testModeSpeedIncreasing = true;
-let testModeAltIncreasing = true;
 let radarContext = null;
 let gpsIntervalId = null;
 let lastGPSUpdate = 0;
-let locationTimeZone = browserTimeZone();
-let lastNewsTimestamp = 0; // Track the latest news timestamp we've seen
-let userHasSeenLatestNews = true; // Track if user has seen the latest news
-let seenNewsIds = new Set(); // Track news IDs we've already seen
-
-// Custom log function that prepends the current time
-function customLog(...args) {
-    const now = new Date();
-    const timeString = now.toLocaleTimeString();
-    console.log(`[${timeString}] `, ...args);
-}
-
-function highlightUpdate(id, content = null) {
-    const element = document.getElementById(id);
-    if (content !== null) {
-        if (element.innerHTML === content) {
-            return; // Exit if content is the same
-        }
-        element.innerHTML = content;
-    }
-    const highlightColor = getComputedStyle(document.documentElement).getPropertyValue('--tesla-blue').trim();
-    const originalFontWeight = getComputedStyle(element).fontWeight;
-
-    element.style.transition = 'color 0.5s, font-weight 0.5s';
-    element.style.color = highlightColor;
-    // element.style.fontWeight = '800';
-
-    setTimeout(() => {
-        element.style.transition = 'color 2s, font-weight 2s';
-        element.style.color = ''; // Reset to default color
-        // element.style.fontWeight = ''; // Reset to original font weight
-    }, 2000);
-}
-
-function browserTimeZone() {
-    const tz = Intl.DateTimeFormat().resolvedOptions().timeZone;
-    customLog('Browser timezone: ', tz);
-    return tz;
-}
+const positionSimulator = new PositionSimulator();
 
 function calculateDistance(lat1, lon1, lat2, lon2) {
     const R = 6371e3; // Earth's radius in meters
@@ -98,11 +54,6 @@ function calculateDistance(lat1, lon1, lat2, lon2) {
 }
 
 function fetchCityData(lat, long) {
-    if (!lat || !long) {
-        customLog('Location not available for city data.');
-        return;
-    }
-
     fetch(`https://secure.geonames.org/findNearbyPlaceNameJSON?lat=${lat}&lng=${long}&username=${GEONAMES_USERNAME}`)
         .then(response => response.json())
         .then(cityData => {
@@ -115,75 +66,9 @@ function fetchCityData(lat, long) {
         });
 }
 
-async function updateTimeZone(lat, long) {
-    try {
-        if (!lat || !long) {
-            throw new Error('Location not available.');
-        }
-        const response = await fetch(`https://secure.geonames.org/timezoneJSON?lat=${lat}&lng=${long}&username=${GEONAMES_USERNAME}`);
-        const tzData = await response.json();
-        if (!tzData || !tzData.timezoneId) {
-            throw new Error('Timezone not returned from server.');
-        }
-        customLog('Timezone: ', tzData);
-        return tzData.timezoneId;
-    } catch (error) {
-        console.error('Error fetching time zone: ', error);
-        customLog('Error fetching time zone: ', error);
-        const tz = Intl.DateTimeFormat().resolvedOptions().timeZone;
-        customLog('Using timezone: ', tz);
-        return tz;
-    }
-}
-
-function toggleMode() {
-    manualDarkMode = true;
-    document.body.classList.toggle('dark-mode');
-    darkOn = document.body.classList.contains('dark-mode');
-    document.getElementById('darkModeToggle').checked = darkOn;
-    updateDarkModeDependants();
-}
-
-function autoDarkMode() {
-    if (!manualDarkMode && lat !== null && long !== null) {
-        const now = new Date();
-        const currentTime = now.getTime();
-        const sunriseTime = new Date(sunrise).getTime();
-        const sunsetTime = new Date(sunset).getTime();
-
-        if (currentTime >= sunsetTime || currentTime < sunriseTime) {
-            if (!darkOn) {
-                customLog('Applying dark mode based on sunset...');
-                document.body.classList.add('dark-mode');
-                darkOn = true;
-                document.getElementById('darkModeToggle').checked = true;
-                updateDarkModeDependants();
-            }
-        } else {
-            if (darkOn) {
-                customLog('Applying light mode based on sunrise...');
-                document.body.classList.remove('dark-mode');
-                darkOn = false;
-                document.getElementById('darkModeToggle').checked = false;
-                updateDarkModeDependants();
-            }
-        }
-    }
-}
-
-function updateDarkModeDependants() {
-    // Update the network graph axis colors
-    updateChartAxisColors();
-}
-
 async function fetchWikipediaData(lat, long) {
-    if (!lat || !long) {
-        customLog('Location not available for Wikipedia data.');
-        return;
-    }
-
     customLog('Fetching Wikipedia data...');
-    const url = `https://secure.geonames.org/findNearbyWikipediaJSON?lat=${lat}&lng=${long}&username=birgefuller`;
+    const url = `https://secure.geonames.org/findNearbyWikipediaJSON?lat=${lat}&lng=${long}&username=${GEONAMES_USERNAME}`;
     try {
         const response = await fetch(url);
         const data = await response.json();
@@ -201,12 +86,11 @@ async function fetchWikipediaData(lat, long) {
         }
     } catch (error) {
         console.error('Error fetching Wikipedia data:', error);
-        customLog('Error fetching Wikipedia data:', error);
         document.getElementById('wikipediaInfo').innerHTML = '<p><em>Error loading Wikipedia data.</em></p>';
     }
 }
 
-function loadExternalUrl(url, inFrame = false) {
+window.loadExternalUrl = function (url, inFrame = false) {
     // Open external links in a new tab
     if (!inFrame) {
         window.open(url, '_blank');
@@ -233,116 +117,6 @@ function loadExternalUrl(url, inFrame = false) {
     const activeButton = document.querySelector('.section-button.active');
     if (activeButton) {
         activeButton.classList.remove('active');
-    }
-}
-
-async function updateNews() {
-    try {
-        // Use test parameter when in test mode
-        const url = testMode ? 'rss.php?test' : 'rss.php';
-        const response = await fetch(url);
-        const items = await response.json();
-        
-        const newsContainer = document.getElementById('newsHeadlines');
-        if (!newsContainer) return;
-
-        customLog('Updating news headlines...' + (testMode ? ' (TEST MODE)' : ''));
-        
-        // Filter for new items only
-        let hasNewItems = false;
-        const newItems = [];
-        
-        if (items.length > 0) {
-            // Generate unique IDs for each news item 
-            items.forEach(item => {
-                // Create a unique ID based on title and source
-                const itemId = `${item.source}-${item.title.substring(0, 40)}`;
-                item.id = itemId;
-                
-                // Check if this is a new item
-                if (!seenNewsIds.has(itemId)) {
-                    hasNewItems = true;
-                    newItems.push(item);
-                    seenNewsIds.add(itemId);
-                }
-            });
-            
-            // If we have new items, update notification and add to container
-            if (hasNewItems) {
-                const newestTimestamp = Math.max(...items.map(item => item.date));
-                if (newestTimestamp > lastNewsTimestamp) {
-                    lastNewsTimestamp = newestTimestamp;
-                    userHasSeenLatestNews = false;
-                    
-                    // Only add notification dot if news section is not currently displayed
-                    const newsSection = document.getElementById('news');
-                    if (newsSection && newsSection.style.display !== 'block') {
-                        const newsButton = document.querySelector('.section-button[onclick="showSection(\'news\')"]');
-                        if (newsButton) {
-                            newsButton.classList.add('has-notification');
-                        }
-                    }
-                }
-                
-                // Create HTML for new items with blue dot indicator
-                let newItemsHtml = newItems.map(item => {
-                    const date = new Date(item.date * 1000);
-                    const dateString = date.toLocaleDateString('en-US', { 
-                        month: 'short', 
-                        day: 'numeric'
-                    });
-                    const timeString = date.toLocaleTimeString('en-US', { 
-                        hour: 'numeric', 
-                        minute: '2-digit',
-                        timeZoneName: 'short'
-                    });
-                    
-                    // Extract domain for favicon
-                    let faviconUrl = '';
-                    try {
-                        const url = new URL(item.link);
-                        if (url.hostname === 'www.boston.com') {
-                            faviconUrl = 'https://www.bostonglobe.com/favicon.ico';
-                        } else {
-                            faviconUrl = `https://${url.hostname}/favicon.ico`;
-                        }
-                    } catch (e) {
-                        console.error("Invalid URL:", item.link);
-                        customLog("Invalid URL:", item.link);
-                        faviconUrl = 'favicon.ico'; // Default fallback
-                    }
-                    
-                    return `
-                        <button class="news-item news-new" data-id="${item.id}" onclick="loadExternalUrl('${item.link}')">
-                            <img src="${faviconUrl}" class="news-favicon" onerror="this.style.display='none'">
-                            <div>
-                                <span class="news-source">${item.source.toUpperCase()}</span>
-                                <span class="news-date">${dateString}</span>
-                                <span class="news-time">${timeString}</span>
-                            </div>
-                            <div class="news-title">${item.title}</div>
-                        </button>`;
-                }).join('');
-                
-                // Prepend new items to existing content or initialize if empty
-                if (newsContainer.innerHTML && !newsContainer.innerHTML.includes('<em>')) {
-                    newsContainer.innerHTML = newItemsHtml + newsContainer.innerHTML;
-                } else {
-                    newsContainer.innerHTML = newItemsHtml || '<p><em>No headlines available</em></p>';
-                }
-            }
-        }
-        
-        // If there were no new items and the container is empty, show a message
-        if (!hasNewItems && (!newsContainer.innerHTML || newsContainer.innerHTML.includes('<em>'))) {
-            newsContainer.innerHTML = '<p><em>No new headlines available</em></p>';
-        }
-        
-    } catch (error) {
-        console.error('Error fetching news:', error);
-        customLog('Error fetching news:', error);
-        document.getElementById('newsHeadlines').innerHTML = 
-            '<p><em>Error loading headlines</em></p>';
     }
 }
 
@@ -470,19 +244,39 @@ function updateWindage(vehicleSpeed, vehicleHeading, windSpeed, windDirection) {
         drawArrow(centerX, centerY, relativeWindXPlot, relativeWindYPlot, teslaBlue);
     }
 
-    // Update the wind component displays
+    // Update the wind component displays with proper units
     if (headWind !== null) {
-        document.getElementById('headwind').innerText = Math.abs(Math.round(headWind));
+        if (!settings || settings["imperial-units"]) {
+            document.getElementById('headwind').innerText = Math.abs(Math.round(headWind));
+        } else {
+            // Convert mph to m/s (1 mph ≈ 0.44704 m/s)
+            document.getElementById('headwind').innerText = Math.abs(Math.round(headWind * 0.44704));
+        }
         document.getElementById('headwind-arrow').innerHTML = (headWind > 0 ? '&#9660;' : '&#9650;'); // down/up filled triangles
-        // Change the label to TAILWIND when headWind is negative
-        document.getElementById('headwind-label').innerText = (headWind < 0) ? "TAILWIND (MPH)" : "HEADWIND (MPH)";
+        // Change the label to TAILWIND when headWind is negative and use appropriate units
+        if (!settings || settings["imperial-units"]) {
+            document.getElementById('headwind-label').innerText = (headWind < 0) ? "TAILWIND (MPH)" : "HEADWIND (MPH)";
+        } else {
+            document.getElementById('headwind-label').innerText = (headWind < 0) ? "TAILWIND (M/S)" : "HEADWIND (M/S)";
+        }
     } else {
         document.getElementById('headwind').innerText = '--';
         document.getElementById('headwind-arrow').innerHTML = '';
-        document.getElementById('headwind-label').innerText = "HEADWIND (MPH)";
+        // Set label with appropriate units
+        if (!settings || settings["imperial-units"]) {
+            document.getElementById('headwind-label').innerText = "HEADWIND (MPH)";
+        } else {
+            document.getElementById('headwind-label').innerText = "HEADWIND (M/S)";
+        }
     }
+    
     if (crossWind !== null) {
-        document.getElementById('crosswind').innerText = Math.abs(Math.round(crossWind));
+        if (!settings || settings["imperial-units"]) {
+            document.getElementById('crosswind').innerText = Math.abs(Math.round(crossWind));
+        } else {
+            // Convert mph to m/s
+            document.getElementById('crosswind').innerText = Math.abs(Math.round(crossWind * 0.44704));
+        }
         document.getElementById('crosswind-arrow').innerHTML = (crossWind >= 0 ? '&#9654;' : '&#9664;'); // right/left triangles
     } else {
         document.getElementById('crosswind').innerText = '--';
@@ -491,16 +285,11 @@ function updateWindage(vehicleSpeed, vehicleHeading, windSpeed, windDirection) {
 }
 
 async function updateLocationData(lat, long) {
-    if (!lat || !long) {
-        customLog('Location not available for location data.');
-        return;
-    }
-
     customLog('Updating location dependent data for (', lat, ', ', long, ')');
     neverUpdatedLocation = false;
 
     // Fire off API requests for external data
-    locationTimeZone = await updateTimeZone(lat, long);  // TODO: this should be done more rarely
+    // updateTimeZone(lat, long);
     fetchCityData(lat, long);
 
     // Update connectivity data iff the Network section is visible
@@ -516,65 +305,9 @@ async function updateLocationData(lat, long) {
         customLog('Updating Wikipedia data...');
         fetchWikipediaData(lat, long);
     }
-
-    lastUpdateLat = lat;
-    lastUpdateLong = long;
-    lastUpdate = Date.now();
 }
 
-function getTestModePosition() {
-    // Calculate new position based on angle
-    const radiusInDegrees = TEST_CIRCLE_RADIUS / 69; // Rough conversion from miles to degrees
-    const testLat = TEST_CENTER_LAT + radiusInDegrees * Math.cos(testModeAngle);
-    const testLong = TEST_CENTER_LONG + radiusInDegrees * Math.sin(testModeAngle);
-    
-    // Update angle for next time (move about 1 degree per second at 40mph)
-    const angleIncrement = (testModeSpeed / (2 * Math.PI * TEST_CIRCLE_RADIUS)) * (2 * Math.PI) / (60 * 60);
-    testModeAngle = (testModeAngle + angleIncrement) % (2 * Math.PI);
-    
-    // Update speed (oscillate between min and max)
-    if (testModeSpeedIncreasing) {
-        testModeSpeed += 0.1;
-        if (testModeSpeed >= TEST_MAX_SPEED) {
-            testModeSpeedIncreasing = false;
-        }
-    } else {
-        testModeSpeed -= 0.1;
-        if (testModeSpeed <= TEST_MIN_SPEED) {
-            testModeSpeedIncreasing = true;
-        }
-    }
-    
-    // Update altitude (oscillate between min and max)
-    if (testModeAltIncreasing) {
-        testModeAlt += 0.5;
-        if (testModeAlt >= TEST_MAX_ALT) {
-            testModeAltIncreasing = false;
-        }
-    } else {
-        testModeAlt -= 0.5;
-        if (testModeAlt <= TEST_MIN_ALT) {
-            testModeAltIncreasing = true;
-        }
-    }
-
-    // Calculate heading based on movement around the circle
-    const heading = (((testModeAngle * 180 / Math.PI) + 90) % 360);
-
-    return {
-        coords: {
-            latitude: testLat,
-            longitude: testLong,
-            altitude: testModeAlt * 0.3048, // Convert feet to meters
-            speed: testModeSpeed * 0.44704, // Convert mph to m/s
-            heading: heading,
-            accuracy: 5, // Simulate a good GPS signal with 5m accuracy
-        },
-        timestamp: Date.now(),
-    };
-}
-
-function shouldUpdateLocationData() {
+function shouldUpdateShortRangeData() {
     if (neverUpdatedLocation || !lastUpdateLat || !lastUpdateLong) {
         return true;
     }
@@ -584,6 +317,31 @@ function shouldUpdateLocationData() {
     const distance = calculateDistance(lat, long, lastUpdateLat, lastUpdateLong);
     
     return distance >= UPDATE_DISTANCE_THRESHOLD || timeSinceLastUpdate >= UPDATE_TIME_THRESHOLD;
+}
+
+function shouldUpdateLongRangeData() {
+    // Check if we've never updated weather data
+    if (lastWxUpdate === 0 || lastWxUpdateLat === null || lastWxUpdateLong === null) {
+        return true;
+    }
+    
+    // Check time threshold using WX_TIME_THRESHOLD constant
+    const now = Date.now();
+    const timeSinceLastUpdate = now - lastWxUpdate;
+    if (timeSinceLastUpdate >= WX_TIME_THRESHOLD * 60 * 1000) { // Convert minutes to milliseconds
+        return true;
+    }
+    
+    // Check distance threshold using WX_DISTANCE_THRESHOLD constant
+    if (lat !== null && long !== null) {
+        const distance = calculateDistance(lat, long, lastWxUpdateLat, lastWxUpdateLong);
+        if (distance >= WX_DISTANCE_THRESHOLD) { // Use constant for meters
+            return true;
+        }
+    }
+    
+    // No need to update weather data
+    return false;
 }
 
 function handlePositionUpdate(position) {
@@ -642,19 +400,50 @@ function handlePositionUpdate(position) {
             updateWindage(0, null, 0, 0);
         }
 
-        // Update display values
-        document.getElementById('altitude').innerText = alt ? Math.round(alt * 3.28084) : '--'; // Convert meters to feet
+        // Update display values with proper units
+        if (alt) {
+            if (!settings || settings["imperial-units"]) {
+                // Convert meters to feet
+                document.getElementById('altitude').innerText = Math.round(alt * 3.28084);
+                document.getElementById('altitude-unit').innerText = 'FT';
+            } else {
+                document.getElementById('altitude').innerText = Math.round(alt);
+                document.getElementById('altitude-unit').innerText = 'M';
+            }
+        } else {
+            document.getElementById('altitude').innerText = '--';
+        }
+
         document.getElementById('accuracy').innerText = acc ? Math.round(acc) + ' m' : '--';
+
+        // Update headwind/crosswind labels
+        if (!settings || settings["imperial-units"]) {
+            document.getElementById('headwind-label').innerText = 
+                document.getElementById('headwind-label').innerText.replace("(MPH)", "(MPH)");
+            document.querySelector('.stat-box:nth-child(4) .stat-label').innerText =
+                document.querySelector('.stat-box:nth-child(4) .stat-label').innerText.replace("(MPH)", "(MPH)");
+        } else {
+            document.getElementById('headwind-label').innerText =
+                document.getElementById('headwind-label').innerText.replace("(MPH)", "(M/S)");
+            document.querySelector('.stat-box:nth-child(4) .stat-label').innerText =
+                document.querySelector('.stat-box:nth-child(4) .stat-label').innerText.replace("(MPH)", "(M/S)");
+        }
     }
 
     // Short distance updates
-    if (shouldUpdateLocationData()) {
+    if (shouldUpdateShortRangeData()) {
         updateLocationData(lat, long);
+        lastUpdateLat = lat;
+        lastUpdateLong = long;
+        lastUpdate = Date.now();
     }
 
     // Long distance updates
-    if (shouldUpdateWeatherData()) {
+    if (shouldUpdateLongRangeData()) {
         fetchWeatherData(lat, long);
+        lastWxUpdate = Date.now();
+        lastWxUpdateLat = lat;
+        lastWxUpdateLong = long;
     }
 }
 
@@ -666,7 +455,7 @@ function updateGPS() {
             customLog('Geolocation is not supported by this browser.');
         }
     } else { // testing
-        handlePositionUpdate(getTestModePosition());
+        handlePositionUpdate(positionSimulator.getPosition());
     }
 }
 
@@ -699,31 +488,8 @@ function stopGPSUpdates() {
     }
 }
 
-// Function to pause news updates
-function pauseNewsUpdates() {
-    if (newsUpdateInterval) {
-        clearInterval(newsUpdateInterval);
-        newsUpdateInterval = null;
-        customLog('News updates paused');
-    }
-}
-
-// Function to resume news updates if they were active
-function resumeNewsUpdates() {
-    if (newsUpdatesActive && !newsUpdateInterval) {
-        updateNews(); // Call immediately
-        // Set interval based on test mode
-        if (testMode) {
-            newsUpdateInterval = setInterval(updateNews, 15000);
-        } else {
-            newsUpdateInterval = setInterval(updateNews, 60000 * NEWS_REFRESH_INTERVAL);
-        }
-        customLog('News updates resumed');
-    }
-}
-
-// Show a specific section and update URL
-function showSection(sectionId) {
+// Show a specific section and update URL - defined directly on window object
+window.showSection = function(sectionId) {
     // Log the clicked section
     customLog(`Showing section: ${sectionId}`);
 
@@ -742,7 +508,7 @@ function showSection(sectionId) {
 
     // If switching to news section, clear the notification dot
     if (sectionId === 'news') {
-        userHasSeenLatestNews = true;
+        setUserHasSeenLatestNews(true);
         const newsButton = document.querySelector('.section-button[onclick="showSection(\'news\')"]');
         if (newsButton) {
             newsButton.classList.remove('has-notification');
@@ -774,22 +540,6 @@ function showSection(sectionId) {
     if (section) {
         section.style.display = 'block';
 
-        // Original section-specific logic
-        if (sectionId === 'news') {
-            // Only update news if interval is not set (first visit)
-            if (!newsUpdateInterval) {
-                updateNews();
-                // Set newsUpdatesActive to true
-                newsUpdatesActive = true;
-                // if we're in test mode, set the interval to update every 15 seconds
-                if (testMode) {
-                    newsUpdateInterval = setInterval(updateNews, 15000);
-                } else {
-                    newsUpdateInterval = setInterval(updateNews, 60000 * NEWS_REFRESH_INTERVAL);
-                }
-            }
-        }
-
         if (sectionId === 'satellite') {
             // Load weather image when satellite section is shown
             const weatherImage = document.getElementById('weather-image');
@@ -804,36 +554,13 @@ function showSection(sectionId) {
 
         if (sectionId === 'network') {
             updateNetworkInfo();
-            
-            // Reinitialize the ping chart when showing the network section
-            if (pingData.length > 0 && pingChart) {
-                pingChart.data.labels = Array.from({ length: pingData.length }, (_, i) => i);
-                pingChart.update();
-            }
         }
         
         if (sectionId === 'landmarks') {
             if (lat !== null && long !== null) {
                 fetchWikipediaData(lat, long);
             } else {
-                customLog('Location not available to fetch Wikipedia data.');
-            }
-        }
-
-        if (sectionId === 'about') {
-            const versionElement = document.getElementById('version');
-            if (versionElement && !versionElement.dataset.loaded) {
-                fetch('vers.php')
-                    .then(response => response.json())
-                    .then(data => {
-                        const versionText = `${data.branch || 'unknown'}-${data.commit || 'unknown'}`;
-                        versionElement.innerHTML = versionText;
-                        versionElement.dataset.loaded = true; // Mark as loaded
-                    })
-                    .catch(error => {
-                        console.error('Error fetching version:', error);
-                        versionElement.innerHTML = 'Error loading version';
-                    });
+                customLog('Location not available for Wikipedia data.');
             }
         }
     }
@@ -843,13 +570,31 @@ function showSection(sectionId) {
     if (button) {
         button.classList.add('active');
     }
+};
+
+function updateVersion() {
+    const versionElement = document.getElementById('version');
+    if (versionElement) {
+        fetch('vers.php')
+            .then(response => response.json())
+            .then(data => {
+                const versionText = `${data.branch || 'unknown'}-${data.commit || 'unknown'}`;
+                versionElement.innerHTML = versionText;
+            })
+            .catch(error => {
+                console.error('Error fetching version:', error);
+                versionElement.innerHTML = 'Error loading version';
+            });
+    }
 }
 
 // ***** Main code *****
 
-// Check for parameters in URL
+// Console logging
+console.log('*** app.js top level code ***');
+
+// URL parameters
 const urlParams = new URLSearchParams(window.location.search);
-testMode = urlParams.has('test');
 const initialSection = urlParams.get('section') || 'news';
 
 // Update link click event listener
@@ -861,32 +606,59 @@ document.addEventListener('click', function(e) {
     }
 });
 
-// Handle page visibility changes
-document.addEventListener('visibilitychange', () => {
-    if (document.hidden) {
-        stopGPSUpdates();
-        pauseNewsUpdates();
-        stopPingTest(); // Add this line to stop ping testing when hidden
-    } else {
-        startGPSUpdates();
-        resumeNewsUpdates();
-        resumePingTest(); // Add this line to resume ping testing when visible
-    }
-});
-
-// Add click handler to close popup when clicking overlay
-document.querySelector('.overlay').addEventListener('click', closeHourlyForecast);
-
 // Handle browser back/forward buttons
 window.addEventListener('popstate', () => {
     showSection(getInitialSection());
 });
 
-// Initialize radar display
-initializeRadar();
+// Handle page visibility changes
+document.addEventListener('visibilitychange', () => {
+    if (document.hidden) {
+        stopGPSUpdates();
+        pauseNewsUpdates();
+        pausePingTest();
+    } else {
+        startGPSUpdates();
+        resumeNewsUpdates();
+        resumePingTest();
+    }
+});
 
-// Show the initial section from URL parameter
-showSection(initialSection);
+// Event listeners and initialization after DOM content is loaded
+document.addEventListener('DOMContentLoaded', async function () {
+    // Log
+    customLog('DOM fully loaded and parsed...');
 
-// Replace the direct GPS update calls at the end of your script with:
-startGPSUpdates();
+    // Attempt login from URL parameter or cookie
+    await attemptLogin();
+    updateLoginState();
+
+    // Initialize radar display
+    initializeRadar();
+
+    // Start location services
+    startGPSUpdates();
+
+    // Start news updates
+    resumeNewsUpdates();
+    
+    // Begin network sensing
+    startPingTest();
+
+    // Get version from vers.php asyncly
+    updateVersion();
+
+    // Add event listeners for login modal
+    document.getElementById('login-cancel').addEventListener('click', closeLoginModal);
+    document.getElementById('login-submit').addEventListener('click', handleLogin);
+
+    // Handle Enter key in login form
+    document.getElementById('user-id').addEventListener('keyup', function (event) {
+        if (event.key === 'Enter') {
+            handleLogin();
+        }
+    });
+
+    // Show the initial section from URL parameter
+    showSection(initialSection);
+});

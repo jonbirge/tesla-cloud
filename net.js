@@ -1,9 +1,13 @@
-// Global variables
-let pingChart = null;
-let pingInterval = null;
-let pingData = [];
+// Import the customLog function from app.js
+import { customLog } from './common.js';
 
-function updateNetworkInfo() {
+// Global variables
+let pingInterval = null;
+let pingChart = null;
+let pingData = [];
+const pingWait = 5000; // 5 seconds
+
+export function updateNetworkInfo() {
     // Write diagnostic information to the console
     customLog('Updating network info...');
 
@@ -25,7 +29,6 @@ function updateNetworkInfo() {
         .then(([ipData, dnsData]) => {
             // Get the PTR record if it exists
             const rdnsName = dnsData.Answer ? dnsData.Answer[0].data : ipData.ip;
-
             // Update the UI with the fetched data
             document.getElementById('rdns').innerText = rdnsName;
             document.getElementById('exitLocation').innerText = `${ipData.city || 'N/A'}, ${ipData.region || 'N/A'}, ${ipData.country_name || 'N/A'}`;
@@ -34,14 +37,14 @@ function updateNetworkInfo() {
         .catch(error => {
             console.error('Error fetching IP/DNS information: ', error);
             customLog('Error fetching IP/DNS information: ', error);
-            // Set default values in case of error
+            // Set N/A values in case of error
             document.getElementById('rdns').innerText = 'N/A';
             document.getElementById('exitLocation').innerText = 'N/A';
             document.getElementById('isp').innerText = 'N/A';
         });
 }
 
-function startPingTest() {
+export function startPingTest() {
     // Only initialize the chart if it doesn't exist yet
     if (!pingChart) {
         pingData = [];
@@ -50,14 +53,23 @@ function startPingTest() {
 
     // Start pinging every 5 seconds if not already running
     if (!pingInterval) {
-        pingInterval = setInterval(pingTestServer, 5000);
+        pingInterval = setInterval(pingTestServer, pingWait);
         
         // Run a ping immediately
         pingTestServer();
     }
 }
 
-function stopPingTest() {
+// Destroy the chart if it exists - needed for proper cleanup and reinitialization
+function destroyPingChart() {
+    if (pingChart) {
+        pingChart.destroy();
+        pingChart = null;
+        customLog('Ping chart destroyed');
+    }
+}
+
+window.pausePingTest = function() {
     if (pingInterval) {
         clearInterval(pingInterval);
         pingInterval = null;
@@ -65,16 +77,21 @@ function stopPingTest() {
     }
 }
 
-function resumePingTest() {
+window.resumePingTest = function() {
     if (!pingInterval) {
-        pingInterval = setInterval(pingTestServer, 5000);
+        pingInterval = setInterval(pingTestServer, pingWait);
         customLog('Network ping testing resumed');
     }
 }
 
 function initializePingChart() {
+    // First, ensure any existing chart is destroyed
+    destroyPingChart();
+    
     const chartCanvas = document.getElementById('pingChart');
     if (!chartCanvas) return;
+
+    // Get the 2D context for the chart
     const ctx = chartCanvas.getContext('2d');
 
     // Logging
@@ -167,9 +184,12 @@ function initializePingChart() {
     });
 
     updateChartAxisColors(); // Ensure initial colors are right
+
+    // Logging
+    customLog('Ping chart initialized');
 }
 
-function updateChartAxisColors() {
+export function updateChartAxisColors() {
     // Console log
     customLog('Updating chart axis colors...');
 
@@ -255,8 +275,3 @@ function updateNetworkStatus(pingTime) {
         networkStatus.setAttribute('title', `Network Status: Excellent (${Math.round(pingTime)}ms)`);
     }
 }
-
-// Start ping test automatically when page loads
-document.addEventListener('DOMContentLoaded', function() {
-    startPingTest();
-});

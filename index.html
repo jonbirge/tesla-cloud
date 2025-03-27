@@ -16,6 +16,7 @@
     <!-- Container for SVG sprites -->
     <div id="sprites" style="display: none;"></div>
     
+    <!-- Main container -->
     <div class="frame-container">
 
     <!-- Section menu -->
@@ -66,6 +67,11 @@
                 <svg class="button-icon"><use href="#icon-about"></use></svg>
                 About
             </button>
+            <button id="settings-section" class="section-button hidden" onclick="showSection('settings')">
+                <svg class="button-icon"><use href="#icon-settings"></use></svg>
+                Settings
+            </button>
+            <button id="login-button" class="login-button" onclick="showLoginModal()">Login</button>
         </div> <!-- End of section buttons -->
     </div> <!-- End of left frame -->
     
@@ -307,7 +313,7 @@
                 <li><a href="https://www.disneyplus.com"><img class="img-adaptive" src="https://cnbl-cdn.bamgrid.com/assets/e41a64255b8a5840df6162a10642ad98f42a80d3ca8aeb5ebcd70f74d096c0b0/original" loading="lazy">Disney+</a></li>
                 <li><a href="https://www.paramountplus.com"><img src="https://www.paramountplus.com/favicon.ico" loading="lazy">Paramount+</a></li>
                 <li><a href="https://www.mgmplus.com"><img src="https://www.mgmplus.com/favicon.svg" loading="lazy">MGM+</a></li>
-                <li><a href="https://www.discoveryplus.com"><img src="https://www.discoveryplus.com/img/dplus/favicon.ico" loading="lazy">Discovery+</a></li>
+                <li><a href="https://www.discoveryplus.com"><img class="img-white-transparent" src="https://www.discoveryplus.com/img/dplus/favicon.ico" loading="lazy">Discovery+</a></li>
                 <li><a href="https://www.amc.com"><img class="img-adaptive" src="https://cdn.amcnetworks.com/amc/theme/web/amc_logo_bk_bg.png" loading="lazy">AMC</a></li>
                 <li><a href="https://www.mlb.com/live-stream-games"><img src="https://www.mlb.com/favicon.ico" loading="lazy">MLB.tv</a></li>
                 <li><a href="https://www.siriusxm.com/player"><img src="https://www.siriusxm.com/favicon.ico" loading="lazy">SiriusXM</a></li>
@@ -382,24 +388,193 @@
         <div id="about" class="section">
             <h2>About</h2>
             <p>This service was created by <a href="https://www.mit.edu/~birge/">Jonathan Birge</a> and Alex Birge as an educational father-son project. It is in no way affiliated with Tesla, Inc. and no warranty is made for its utility.</p>
-            <p>For questions or feedback, please email <a href="mailto:admin@teslas.cloud">admin@teslas.cloud</a> or submit an issue to the <a href="https://github.com/jonbirge/Tesla/issues">GitHub repository</a>. Even a quick note letting us know you’re using this would be motivation to keep improving it.</p>
-            <p>Apologies to those outside of the US; right now some functionality is limited to CONUS, such as the weather satellite feed. If you’re using this from another region, please let us know where (via the contact email above) and we'll see what we can do to improve support for your region with news and weather maps.</p>
+            <p>For questions or feedback, please email <a href="mailto:admin@teslas.cloud">admin@teslas.cloud</a> or submit an issue to the <a href="https://github.com/jonbirge/Tesla/issues">GitHub repository</a>. Even a quick note letting us know you're using this would be motivation to keep improving it.</p>
+            <p>Apologies to those outside of the US; right now some functionality is limited to CONUS, such as the weather satellite feed. If you're using this from another region, please let us know where (via the contact email above) and we'll see what we can do to improve support for your region with news and weather maps.</p>
             
-            <h2>Quick Tips</h2>
+            <h2>Tips</h2>
             <ul>
-                <li>You can bookmark this page using the star in the browser menu.</li>
-                <li>You can make the browser easily available by dragging it to the left-hand side of the dock at the bottom of the screen.</li>
-                <li>Dark mode is turned on automatically based on sunset at your location. However, you can also toggle it manually via the button in the upper-right.</li>
+                <li>Bookmark this page using the star in the browser menu.</li>
+                <li>Make the browser easily available by dragging it to the left-hand side of the dock at the bottom of the screen.</li>
+                <li>Logging in with a user ID of your choosing (such as a phone number or user name) will allow settings to persist between uses.</li>
+                <li>Use anything you want for the user ID; it is only stored locally and is encrypted before sending to our servers.</li>
+                <li>As no personal information is contained in the settings there is no current need for a password</li>
             </ul>
 
             <h2>Version</h2>
-            <p id="version">N/A</p>
+            <p id="version">--</p>
+        </div>
+        
+        <div id="settings" class="section" style="display: none;">
+            <button id="logout-button" class="logout-button hidden" onclick="handleLogout()">Logout</button>
+            
+            <h2>General</h2>
+            <div class="settings-controls">
+                <div class="settings-toggle-item" data-setting="auto-dark-mode" onclick="this.querySelector('input').click()">
+                    <label>Auto Dark Mode</label>
+                    <input type="checkbox" onchange="toggleSettingFrom(this)">
+                    <span class="settings-toggle-slider"></span>
+                </div>
+
+                <div class="settings-toggle-item" data-setting="24-hour-time" onclick="this.querySelector('input').click()">
+                    <label>24-hour Time</label>
+                    <input type="checkbox" onchange="toggleSettingFrom(this)">
+                    <span class="settings-toggle-slider"></span>
+                </div>
+
+                <div class="settings-toggle-item" data-setting="imperial-units" onclick="this.querySelector('input').click()">
+                    <label>Imperial Units</label>
+                    <input type="checkbox" onchange="toggleSettingFrom(this)">
+                    <span class="settings-toggle-slider"></span>
+                </div>
+            </div>
+            
+            <h2>News Sources</h2>
+            <div class="settings-controls news-source-grid">
+                <!-- General News Sources -->
+                <div class="settings-toggle-item news-toggle-item" data-setting="rss-wsj" onclick="this.querySelector('input').click()">
+                    <label>Wall Street Journal</label>
+                    <input type="checkbox" onchange="toggleSettingFrom(this)">
+                    <span class="settings-toggle-slider"></span>
+                </div>
+
+                <div class="settings-toggle-item news-toggle-item" data-setting="rss-nyt" onclick="this.querySelector('input').click()">
+                    <label>New York Times</label>
+                    <input type="checkbox" onchange="toggleSettingFrom(this)" checked>
+                    <span class="settings-toggle-slider"></span>
+                </div>
+
+                <div class="settings-toggle-item news-toggle-item" data-setting="rss-wapo" onclick="this.querySelector('input').click()">
+                    <label>Washington Post</label>
+                    <input type="checkbox" onchange="toggleSettingFrom(this)" checked>
+                    <span class="settings-toggle-slider"></span>
+                </div>
+
+                <div class="settings-toggle-item news-toggle-item" data-setting="rss-latimes" onclick="this.querySelector('input').click()">
+                    <label>Los Angeles Times</label>
+                    <input type="checkbox" onchange="toggleSettingFrom(this)" checked>
+                    <span class="settings-toggle-slider"></span>
+                </div>
+
+                <div class="settings-toggle-item news-toggle-item" data-setting="rss-bos" onclick="this.querySelector('input').click()">
+                    <label>Boston Globe</label>
+                    <input type="checkbox" onchange="toggleSettingFrom(this)" checked>
+                    <span class="settings-toggle-slider"></span>
+                </div>
+
+                <div class="settings-toggle-item news-toggle-item" data-setting="rss-bloomberg" onclick="this.querySelector('input').click()">
+                    <label>Bloomberg</label>
+                    <input type="checkbox" onchange="toggleSettingFrom(this)" checked>
+                    <span class="settings-toggle-slider"></span>
+                </div>
+
+                <div class="settings-toggle-item news-toggle-item" data-setting="rss-bloomberg-tech" onclick="this.querySelector('input').click()">
+                    <label>Bloomberg Tech</label>
+                    <input type="checkbox" onchange="toggleSettingFrom(this)" checked>
+                    <span class="settings-toggle-slider"></span>
+                </div>
+
+                <div class="settings-toggle-item news-toggle-item" data-setting="rss-bbc" onclick="this.querySelector('input').click()">
+                    <label>BBC</label>
+                    <input type="checkbox" onchange="toggleSettingFrom(this)" checked>
+                    <span class="settings-toggle-slider"></span>
+                </div>
+
+                <div class="settings-toggle-item news-toggle-item" data-setting="rss-telegraph" onclick="this.querySelector('input').click()">
+                    <label>The Telegraph</label>
+                    <input type="checkbox" onchange="toggleSettingFrom(this)" checked>
+                    <span class="settings-toggle-slider"></span>
+                </div>
+
+                <div class="settings-toggle-item news-toggle-item" data-setting="rss-economist" onclick="this.querySelector('input').click()">
+                    <label>The Economist</label>
+                    <input type="checkbox" onchange="toggleSettingFrom(this)" checked>
+                    <span class="settings-toggle-slider"></span>
+                </div>
+
+                <div class="settings-toggle-item news-toggle-item" data-setting="rss-lemonde" onclick="this.querySelector('input').click()">
+                    <label>Le Monde</label>
+                    <input type="checkbox" onchange="toggleSettingFrom(this)" checked>
+                    <span class="settings-toggle-slider"></span>
+                </div>
+
+                <div class="settings-toggle-item news-toggle-item" data-setting="rss-derspiegel" onclick="this.querySelector('input').click()">
+                    <label>Der Spiegel</label>
+                    <input type="checkbox" onchange="toggleSettingFrom(this)" checked>
+                    <span class="settings-toggle-slider"></span>
+                </div>
+
+                <!-- Tesla/EV News Sources -->
+                <div class="settings-toggle-item news-toggle-item" data-setting="rss-notateslaapp" onclick="this.querySelector('input').click()">
+                    <label>Not A Tesla App</label>
+                    <input type="checkbox" onchange="toggleSettingFrom(this)" checked>
+                    <span class="settings-toggle-slider"></span>
+                </div>
+
+                <div class="settings-toggle-item news-toggle-item" data-setting="rss-teslarati" onclick="this.querySelector('input').click()">
+                    <label>Teslarati</label>
+                    <input type="checkbox" onchange="toggleSettingFrom(this)" checked>
+                    <span class="settings-toggle-slider"></span>
+                </div>
+
+                <div class="settings-toggle-item news-toggle-item" data-setting="rss-insideevs" onclick="this.querySelector('input').click()">
+                    <label>InsideEVs</label>
+                    <input type="checkbox" onchange="toggleSettingFrom(this)" checked>
+                    <span class="settings-toggle-slider"></span>
+                </div>
+
+                <div class="settings-toggle-item news-toggle-item" data-setting="rss-electrek" onclick="this.querySelector('input').click()">
+                    <label>Electrek</label>
+                    <input type="checkbox" onchange="toggleSettingFrom(this)" checked>
+                    <span class="settings-toggle-slider"></span>
+                </div>
+
+                <div class="settings-toggle-item news-toggle-item" data-setting="rss-thedrive" onclick="this.querySelector('input').click()">
+                    <label>The Drive</label>
+                    <input type="checkbox" onchange="toggleSettingFrom(this)" checked>
+                    <span class="settings-toggle-slider"></span>
+                </div>
+
+                <div class="settings-toggle-item news-toggle-item" data-setting="rss-techcrunch" onclick="this.querySelector('input').click()">
+                    <label>TechCrunch</label>
+                    <input type="checkbox" onchange="toggleSettingFrom(this)" checked>
+                    <span class="settings-toggle-slider"></span>
+                </div>
+
+                <div class="settings-toggle-item news-toggle-item" data-setting="rss-jalopnik" onclick="this.querySelector('input').click()">
+                    <label>Jalopnik</label>
+                    <input type="checkbox" onchange="toggleSettingFrom(this)" checked>
+                    <span class="settings-toggle-slider"></span>
+                </div>
+
+                <div class="settings-toggle-item news-toggle-item" data-setting="rss-theverge" onclick="this.querySelector('input').click()">
+                    <label>The Verge</label>
+                    <input type="checkbox" onchange="toggleSettingFrom(this)" checked>
+                    <span class="settings-toggle-slider"></span>
+                </div>
+            </div>
         </div>
 
         </div>
     </div> <!-- End of right frame -->
 
     </div> <!-- End of frame container -->
+
+    <!-- Login Modal -->
+    <div id="login-modal" class="modal">
+        <div class="modal-content">
+            <h2>Login</h2>
+            <p>Enter a user ID to login or create a new account.</p>
+            <div class="login-form">
+                <label for="user-id">User ID:</label>
+                <input type="text" id="user-id" placeholder="Enter user ID (minimum 9 characters)">
+                <div id="login-error" class="error-message"></div>
+                <div class="button-container">
+                    <button id="login-cancel" class="modal-button cancel">Cancel</button>
+                    <button id="login-submit" class="modal-button submit">Login</button>
+                </div>
+            </div>
+        </div>
+    </div>
 
     <!-- Indicators and dark mode toggle -->
     <div class="control-container">
@@ -442,9 +617,7 @@
 
     <!-- Load JavaScript -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script src="net.js?31"></script>
-    <script src="wx.js?5"></script>
-    <script src="app.js?9"></script>
+    <script src="app.js" type="module"></script>
 </body>
 
 </html>

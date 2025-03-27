@@ -1,11 +1,40 @@
+// Import required functions from app.js
+import { customLog, formatTime, highlightUpdate, testMode } from './common.js';
+import { autoDarkMode, settings } from './settings.js';
+
+// Constants
+const OPENWX_API_KEY = '6a1b1bcb03b5718a9b3a2b108ce3293d';
+
 // Global variables
-let lastWxUpdate = 0;
-let lastWxUpdateLat = null;
-let lastWxUpdateLong = null;
 let forecastData = null;
 let weatherData = null;
 let sunrise = null;
 let sunset = null;
+let moonPhaseData = null;
+
+// Export these variables for use in other modules
+export { sunrise, sunset };
+
+// Helper function to convert temperature based on user settings
+function formatTemperature(tempF) {
+    if (!settings || settings["imperial-units"]) {
+        return Math.round(tempF) + "°F";
+    } else {
+        // Convert F to C: (F - 32) * 5/9
+        return Math.round((tempF - 32) * 5/9) + "°C";
+    }
+}
+
+// Helper function to convert wind speed based on user settings
+function formatWindSpeed(speedMS) {
+    if (!settings || settings["imperial-units"]) {
+        // Convert m/s to mph
+        return Math.round(speedMS * 2.237) + " mph";
+    } else {
+        // Keep as m/s
+        return Math.round(speedMS) + " m/s";
+    }
+}
 
 // Convert numerical phase to human-readable name
 function getMoonPhaseName(phase) {
@@ -19,7 +48,7 @@ function getMoonPhaseName(phase) {
     return "Waning Crescent";
 }
 
-function switchWeatherImage(type) {
+window.switchWeatherImage = function (type) {
     const weatherImage = document.getElementById('weather-image');
     weatherImage.style.opacity = '0';
     
@@ -40,12 +69,7 @@ function switchWeatherImage(type) {
     weatherSwitch.style.setProperty('--slider-position', positions[type]);
 }
 
-function fetchWeatherData(lat, long, silentLoad = true) {
-    if (!lat || !long) {
-        customLog('No location data available for weather fetch');
-        return;
-    }
-
+export function fetchWeatherData(lat, long, silentLoad = true) {
     customLog('Fetching weather data...' + (silentLoad ? ' (background load)' : ''));
     
     // Show loading spinner, hide forecast container - only if not silent loading
@@ -59,7 +83,7 @@ function fetchWeatherData(lat, long, silentLoad = true) {
 
     // Fetch sunrise/sunset data
     fetchSunData(lat, long);
-    autoDarkMode();
+    autoDarkMode(lat, long);
 
     // Use fake data in test mode
     if (testMode) {
@@ -70,10 +94,6 @@ function fetchWeatherData(lat, long, silentLoad = true) {
 
         const mockForecastData = generateMockForecastData();
         updateForecastDisplay(mockForecastData);
-
-        lastWxUpdate = Date.now();
-        lastWxUpdateLat = lat;
-        lastWxUpdateLong = long;
         
         // Check for weather hazards after updating forecast data
         checkWeatherHazards();
@@ -94,31 +114,29 @@ function fetchWeatherData(lat, long, silentLoad = true) {
             currentResponse.json(),
             forecastResponse ? forecastResponse.json() : null
         ]))
-        .then(([currentData, forecastDataResponse]) => {
-            if (currentData) {
+        .then(([currentDataResponse, forecastDataResponse]) => {
+            
+            if (currentDataResponse) {
                 // check to see if wind direction is NaN
-                if (isNaN(currentData.weatherObservation.windDirection)) {
-                    currentData.weatherObservation.windDirection = null;
-                    currentData.weatherObservation.windSpeed = null;
+                if (isNaN(currentDataResponse.weatherObservation.windDirection)) {
+                    currentDataResponse.weatherObservation.windDirection = null;
+                    currentDataResponse.weatherObservation.windSpeed = null;
                 } else {
                     // take the reciprocal of the wind direction to get the wind vector
-                    currentData.weatherObservation.windDirection =
-                        (currentData.weatherObservation.windDirection + 180) % 360;
+                    currentDataResponse.weatherObservation.windDirection =
+                        (currentDataResponse.weatherObservation.windDirection + 180) % 360;
                 }
-                weatherData = currentData.weatherObservation;
+                weatherData = currentDataResponse.weatherObservation;
                 updateWeatherDisplay();
             }
 
             if (forecastDataResponse) {
-                updateForecastDisplay(forecastDataResponse);
+                forecastData = forecastDataResponse.list;
+                updateForecastDisplay();
             }
 
             // Call updateAQI after forecast is obtained
             updateAQI(lat, long, OPENWX_API_KEY);
-
-            lastWxUpdate = Date.now();
-            lastWxUpdateLat = lat;
-            lastWxUpdateLong = long;
             
             // Hide spinner and show forecast when data is loaded - only if not silent loading
             if (forecastContainer) forecastContainer.style.display = 'flex';
@@ -141,45 +159,35 @@ function fetchWeatherData(lat, long, silentLoad = true) {
 }
 
 function fetchSunData(lat, long) {
-    if (!lat || !long) {
-        customLog('No location data available for sun/moon fetch');
-        return;
-    }
-    
-    customLog('Fetching sunrise/sunset data...');
-    
-    // Fetch sunrise/sunset data from API
-    fetch(`https://api.sunrise-sunset.org/json?lat=${lat}&lng=${long}&formatted=0`)
-        .then(response => response.json())
-        .then(data => {
-            if (data && data.status === "OK") {
-                sunrise = new Date(data.results.sunrise);
-                sunset = new Date(data.results.sunset);
-                
-                // Update sun/moon info display
-                updateSunMoonDisplay();
-                
-                // Check if dark mode should be enabled based on new sun data
-                autoDarkMode();
-            }
+    Promise.all([
+        fetch(`https://api.sunrise-sunset.org/json?lat=${lat}&lng=${long}&formatted=0`),
+        fetch(`https://api.farmsense.net/v1/moonphases/?d=${Math.floor(Date.now() / 1000)}`)
+    ])
+        .then(([sunResponse, moonResponse]) => Promise.all([sunResponse.json(), moonResponse.json()]))
+        .then(([sunData, moonData]) => {
+            sunrise = sunData.results.sunrise;
+            sunset = sunData.results.sunset;
+            moonPhaseData = moonData[0];
+            updateSunMoonDisplay();
         })
         .catch(error => {
-            console.error('Error fetching sun data:', error);
+            console.error('Error fetching sun/moon data: ', error);
+            customLog('Error fetching sun/moon data: ', error);
         });
 }
 
-function dayHasHazards(forecastData) {
+function dayHasHazards(forecastList) {
     const hazardConditions = ['Rain', 'Snow', 'Sleet', 'Hail', 'Thunderstorm', 'Storm', 'Drizzle'];
-    return forecastData.weather.some(w => 
+    return forecastList.weather.some(w => 
         hazardConditions.some(condition => 
             w.main.includes(condition) || w.description.includes(condition.toLowerCase())
         )
     );
 }
 
-function updateForecastDisplay(data) {
+function updateForecastDisplay() {
     const forecastDays = document.querySelectorAll('.forecast-day');
-    const dailyData = extractDailyForecast(data.list);
+    const dailyData = extractDailyForecast(forecastData);
     
     dailyData.forEach((day, index) => {
         if (index < forecastDays.length) {
@@ -206,7 +214,7 @@ function updateForecastDisplay(data) {
             dayElement.innerHTML += `
             <div class="forecast-date">${date.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })}</div>
             <img class="forecast-icon" src="https://openweathermap.org/img/wn/${day.weather[0].icon}@2x.png" alt="${day.weather[0].description}">
-            <div class="forecast-temp">${Math.round(day.temp_min)}°/${Math.round(day.temp_max)}°</div>
+            <div class="forecast-temp">${formatTemperature(day.temp_min)}/${formatTemperature(day.temp_max)}</div>
             <div class="forecast-desc">${day.weather[0].main}</div>
             `;
         }
@@ -218,7 +226,6 @@ function updateForecastDisplay(data) {
 
 // Summarize forecast data into daily data
 function extractDailyForecast(forecastList) {
-    forecastData = forecastList;
     const dailyData = [];
     const dayMap = new Map();
     
@@ -246,8 +253,14 @@ function extractDailyForecast(forecastList) {
     return dailyData.slice(0, 5);
 }
 
-function showHourlyForecast(dayIndex) {
-    if (!forecastData) return;
+window.showHourlyForecast = function (dayIndex) {
+    // Logging
+    customLog(`Showing hourly forecast for day index: ${dayIndex}`);
+
+    if (!forecastData) {
+        customLog('No forecast data available for hourly forecast!');
+        return;
+    }
 
     const startDate = new Date(forecastData[0].dt * 1000).setHours(0, 0, 0, 0);
     const targetDate = new Date(startDate + dayIndex * 24 * 60 * 60 * 1000);
@@ -267,7 +280,8 @@ function showHourlyForecast(dayIndex) {
 
     const hourlyContainer = document.querySelector('.hourly-forecast');
     hourlyContainer.innerHTML = hourlyData.map(item => {
-        const time = new Date(item.dt * 1000).toLocaleTimeString('en-US', {
+        const itemDate = new Date(item.dt * 1000);
+        const time = formatTime(itemDate, {
             hour: 'numeric',
             minute: '2-digit'
         });
@@ -279,7 +293,7 @@ function showHourlyForecast(dayIndex) {
             <div class="hourly-item ${weatherCondition}">
                 <div class="hourly-time">${time}</div>
                 <img src="https://openweathermap.org/img/wn/${item.weather[0].icon}@2x.png" alt="${item.weather[0].description}" style="width: 50px; height: 50px;">
-                <div class="hourly-temp">${Math.round(item.main.temp)}°F</div>
+                <div class="hourly-temp">${formatTemperature(item.main.temp)}</div>
                 <div class="hourly-desc">${item.weather[0].main}</div>
             </div>
         `;
@@ -289,7 +303,7 @@ function showHourlyForecast(dayIndex) {
     document.querySelector('.forecast-popup').classList.add('show');
 }
 
-function closeHourlyForecast() {
+window.closeHourlyForecast = function () {
     document.querySelector('.overlay').classList.remove('show');
     document.querySelector('.forecast-popup').classList.remove('show');
 }
@@ -298,22 +312,20 @@ function updateWeatherDisplay() {
     if (!weatherData) return;
 
     const windSpeedMS = weatherData.windSpeed;
-    const windSpeedMPH = Math.min((windSpeedMS * 2.237), MAX_SPEED);
     const windDir = weatherData.windDirection;
     const humidity = weatherData.humidity;
 
     highlightUpdate('humidity', `${humidity}%`);
-    if (windDir && windSpeedMPH) {
+    if (windDir && windSpeedMS) {
         highlightUpdate('wind',
-            `${Math.round(windSpeedMPH)} mph at ${Math.round(windDir)}°`);
+            `${formatWindSpeed(windSpeedMS)} at ${Math.round(windDir)}°`);
     } else {
         highlightUpdate('wind', '--');
     }
 
-    const wxUpdateTime = new Date().toLocaleTimeString('en-US', {
+    const wxUpdateTime = formatTime(new Date(), {
         hour: '2-digit',
-        minute: '2-digit',
-        timeZone: locationTimeZone
+        minute: '2-digit'
     });
 
     // Get station name
@@ -324,74 +336,27 @@ function updateWeatherDisplay() {
     highlightUpdate('station-info', stationInfoStr);
 }
 
-function fetchSunData(lat, long) {
-    if (!lat || !long) {
-        customLog('No location data available for sun/moon fetch');
-        return;
-    }
-
-    Promise.all([
-        fetch(`https://api.sunrise-sunset.org/json?lat=${lat}&lng=${long}&formatted=0`),
-        fetch(`https://api.farmsense.net/v1/moonphases/?d=${Math.floor(Date.now() / 1000)}`)
-    ])
-        .then(([sunResponse, moonResponse]) => Promise.all([sunResponse.json(), moonResponse.json()]))
-        .then(([sunData, moonData]) => {
-            sunrise = sunData.results.sunrise;
-            sunset = sunData.results.sunset;
-            moonPhaseData = moonData[0];
-            
-            const sunriseTime = new Date(sunrise).toLocaleTimeString('en-US', {
-                timeZone: locationTimeZone,
-                timeZoneName: 'short'
-            });
-            highlightUpdate('sunrise', sunriseTime);
-
-            const sunsetTime = new Date(sunset).toLocaleTimeString('en-US', {
-                timeZone: locationTimeZone,
-                timeZoneName: 'short'
-            });
-            highlightUpdate('sunset', sunsetTime);
-
-            const moonPhase = getMoonPhaseName(moonPhaseData.Phase);
-            highlightUpdate('moonphase', moonPhase);
-            
-            autoDarkMode();
-        })
-        .catch(error => {
-            console.error('Error fetching sun/moon data: ', error);
-            customLog('Error fetching sun/moon data: ', error);
-        });
-}
-
-// Update Wx data if more than 30 minutes since the last update
-// OR if we've moved more than a certain distance since the last update
-function shouldUpdateWeatherData() {
-    // Check if we've never updated weather data
-    if (lastWxUpdate === 0 || lastWxUpdateLat === null || lastWxUpdateLong === null) {
-        return true;
-    }
+export function updateSunMoonDisplay() {
+    if (!sunrise || !sunset) return;
     
-    // Check time threshold using WX_TIME_THRESHOLD constant
-    const now = Date.now();
-    const timeSinceLastUpdate = now - lastWxUpdate;
-    if (timeSinceLastUpdate >= WX_TIME_THRESHOLD * 60 * 1000) { // Convert minutes to milliseconds
-        return true;
-    }
+    const sunriseTime = formatTime(new Date(sunrise), {
+        timeZoneName: 'short'
+    });
+    highlightUpdate('sunrise', sunriseTime);
+
+    const sunsetTime = formatTime(new Date(sunset), {
+        timeZoneName: 'short'
+    });
+    highlightUpdate('sunset', sunsetTime);
     
-    // Check distance threshold using WX_DISTANCE_THRESHOLD constant
-    if (lat !== null && long !== null) {
-        const distance = calculateDistance(lat, long, lastWxUpdateLat, lastWxUpdateLong);
-        if (distance >= WX_DISTANCE_THRESHOLD) { // Use constant for meters
-            return true;
-        }
+    if (moonPhaseData) {
+        const moonPhase = getMoonPhaseName(moonPhaseData.Phase);
+        highlightUpdate('moonphase', moonPhase);
     }
-    
-    // No need to update weather data
-    return false;
 }
 
 // Simplified function to check for hazardous weather in the next forecast periods
-function checkWeatherHazards() {
+export function checkWeatherHazards() {
     customLog('Checking for weather hazards in next forecast periods...');
     
     if (!forecastData || !Array.isArray(forecastData)) {
@@ -546,3 +511,6 @@ function updateAQI(lat, lon, apiKey) {
             document.getElementById('aqi-dot').style.backgroundColor = color;
         });
 }
+
+// Add click handler to close popup when clicking overlay
+document.querySelector('.overlay').addEventListener('click', closeHourlyForecast);

@@ -1,7 +1,7 @@
 /* Variables */
 :root {
     --bg-color: #efefef;
-    --text-color: #888888;
+    --text-color: #777777;
     --active-section-bg: white;
     --separator-color: #cccccc;
     --button-bg: #dddddd;
@@ -108,6 +108,25 @@ hr {
 /* Navigation */
 .hidden {
     display: none;
+}
+
+.logout-button {
+    color: var(--button-text);
+    background-color: var(--button-bg);
+    border-radius: var(--button-radius);
+    font-size: 16pt;
+    font-weight: 600;
+    padding: 16px 20px;
+    border: none;
+    cursor: pointer;
+    text-align: center;
+    margin-top: 15px;
+    width: auto;
+    transition: background-color 0.3s;
+}
+
+.logout-button:hover {
+    background-color: var(--active-section-bg);
 }
 
 .sections {
@@ -613,17 +632,17 @@ input:checked + .toggle-slider:before {
 
 .news-source {
     color: var(--tesla-blue);
-    font-weight: 650;
+    font-weight: 675;
     margin-right: 10px;
     font-size: 11.5pt;
 }
 
 .news-time, .news-date {
     color: var(--text-color);
-    font-size: 13pt;  /* Increased from 12pt */
+    font-size: 12.5pt;
     margin-left: 5px;
     display: inline-block;
-    font-weight: 400;
+    font-weight: 350;
 }
 
 .news-title {
@@ -631,7 +650,7 @@ input:checked + .toggle-slider:before {
     display: block;
     margin-top: 4px;
     font-size: 16pt;
-    font-weight: 500;
+    font-weight: 550;
 }
 
 .news-favicon {
@@ -654,6 +673,28 @@ input:checked + .toggle-slider:before {
     align-items: center;
     justify-content: center;
     transition: color 0.3s ease;
+}
+
+/* Spinner styling */
+.spinner-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    height: 200px; /* Provide adequate height for the spinner */
+}
+
+.spinner {
+    width: 50px;
+    height: 50px;
+    border: 5px solid rgba(0, 119, 255, 0.2); /* Tesla blue with opacity */
+    border-radius: 50%;
+    border-top-color: var(--tesla-blue);
+    animation: spin 1s ease-in-out infinite;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
 }
 
 .network-status svg {
@@ -727,4 +768,177 @@ input:checked + .toggle-slider:before {
 
 .gps-status.good {
     color: var(--status-good); /* Using the shared variable */
+}
+
+/* Login Styles */
+.login-button {
+    color: var(--button-text);
+    background-color: var(--button-bg);
+    border-radius: var(--button-radius);
+    font-size: 16pt;
+    font-weight: 600;
+    padding: 16px 20px;
+    border: none;
+    cursor: pointer;
+    text-align: center;
+    margin-top: 15px;
+    width: 100%;
+    transition: background-color 0.3s;
+}
+
+.login-button:hover {
+    background-color: var(--active-section-bg);
+}
+
+/* Modal Login Dialog */
+.modal {
+    display: none;
+    position: fixed;
+    z-index: 1000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.6);
+    justify-content: center;
+    align-items: center;
+}
+.modal-content {
+    background-color: var(--bg-color);
+    border-radius: var(--button-radius);
+    padding: 25px;
+    width: 400px;
+    max-width: 90%;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+}
+.login-form {
+    margin-top: 20px;
+}
+.login-form label {
+    display: block;
+    margin-bottom: 10px;
+    color: var(--button-text);
+    font-weight: 500;
+}
+.login-form input {
+    width: 100%;
+    padding: 12px 15px;
+    margin-bottom: 20px;
+    border: 2px solid var(--separator-color);
+    border-radius: 8px;
+    font-size: 16px;
+    background-color: var(--active-section-bg);
+    color: var(--button-text);
+    box-sizing: border-box; /* Add this to fix the width issue */
+}
+.button-container {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+}
+.modal-button {
+    padding: 12px 25px;
+    border: none;
+    border-radius: 8px;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+.modal-button.cancel {
+    background-color: var(--button-bg);
+    color: var(--button-text);
+}
+.modal-button.submit {
+    background-color: var(--tesla-blue);
+    color: white;
+}
+.error-message {
+    color: var(--tesla-red);
+    margin-bottom: 20px;
+    font-size: 14px;
+    min-height: 20px;
+}
+
+/* Settings Section Styles */
+.settings-controls {
+    margin-top: 12px;
+}
+.settings-toggle-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background-color: var(--button-bg);
+    border-radius: var(--button-radius);
+    padding: 15px;
+    margin-bottom: 9px;
+    width: auto;
+    font-weight: 550;
+    cursor: pointer; /* Add cursor pointer to indicate it's clickable */
+}
+.settings-toggle-item label {
+    flex-grow: 1; /* Make label take up all available space */
+    cursor: pointer; /* Add cursor pointer to label */
+}
+.settings-toggle-item input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+    position: absolute;
+}
+.settings-toggle-item span.settings-toggle-slider {
+    position: relative;
+    display: inline-block;
+    width: 60px;
+    height: 34px;
+    flex-shrink: 0; /* Prevent slider from shrinking */
+}
+.settings-toggle-slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: #ccc;
+    transition: .4s;
+    border-radius: 34px;
+}
+.settings-toggle-slider:before {
+    position: absolute;
+    content: "";
+    height: 26px;
+    width: 26px;
+    left: 4px;
+    bottom: 4px;
+    background-color: white;
+    transition: .4s;
+    border-radius: 50%;
+}
+input:checked + .settings-toggle-slider {
+    background-color: var(--tesla-blue);
+}
+input:focus + .settings-toggle-slider {
+    box-shadow: 0 0 1px var(--tesla-blue);
+}
+input:checked + .settings-toggle-slider:before {
+    transform: translateX(26px);
+}
+
+/* News Source Grid */
+.news-source-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 9px;
+    width: 100%;
+    max-width: 1200px;
+}
+.news-toggle-item {
+    padding: 12px 15px;
+    margin-bottom: 0;
+    max-width: none;
+    width: auto;
+}
+.news-toggle-item {
+    font-size: 15pt;
 }
