@@ -159,30 +159,20 @@ export function fetchWeatherData(lat, long, silentLoad = true) {
 }
 
 function fetchSunData(lat, long) {
-    if (!lat || !long) {
-        customLog('No location data available for sun/moon fetch');
-        return;
-    }
-    
-    customLog('Fetching sunrise/sunset data...');
-    
-    // Fetch sunrise/sunset data from API
-    fetch(`https://api.sunrise-sunset.org/json?lat=${lat}&lng=${long}&formatted=0`)
-        .then(response => response.json())
-        .then(data => {
-            if (data && data.status === "OK") {
-                sunrise = new Date(data.results.sunrise);
-                sunset = new Date(data.results.sunset);
-                
-                // Update sun/moon info display
-                updateSunMoonDisplay();
-                
-                // Check if dark mode should be enabled based on new sun data
-                autoDarkMode();
-            }
+    Promise.all([
+        fetch(`https://api.sunrise-sunset.org/json?lat=${lat}&lng=${long}&formatted=0`),
+        fetch(`https://api.farmsense.net/v1/moonphases/?d=${Math.floor(Date.now() / 1000)}`)
+    ])
+        .then(([sunResponse, moonResponse]) => Promise.all([sunResponse.json(), moonResponse.json()]))
+        .then(([sunData, moonData]) => {
+            sunrise = sunData.results.sunrise;
+            sunset = sunData.results.sunset;
+            moonPhaseData = moonData[0];
+            updateSunMoonDisplay();
         })
         .catch(error => {
-            console.error('Error fetching sun data:', error);
+            console.error('Error fetching sun/moon data: ', error);
+            customLog('Error fetching sun/moon data: ', error);
         });
 }
 
