@@ -1,6 +1,6 @@
 // Import required functions from app.js
 import { customLog, formatTime, highlightUpdate, testMode } from './common.js';
-import { autoDarkMode } from './settings.js';
+import { autoDarkMode, settings } from './settings.js';
 
 // Constants
 const OPENWX_API_KEY = '6a1b1bcb03b5718a9b3a2b108ce3293d';
@@ -14,6 +14,27 @@ let moonPhaseData = null;
 
 // Export these variables for use in other modules
 export { sunrise, sunset };
+
+// Helper function to convert temperature based on user settings
+function formatTemperature(tempF) {
+    if (!settings || settings["imperial-units"]) {
+        return Math.round(tempF) + "°F";
+    } else {
+        // Convert F to C: (F - 32) * 5/9
+        return Math.round((tempF - 32) * 5/9) + "°C";
+    }
+}
+
+// Helper function to convert wind speed based on user settings
+function formatWindSpeed(speedMS) {
+    if (!settings || settings["imperial-units"]) {
+        // Convert m/s to mph
+        return Math.round(speedMS * 2.237) + " mph";
+    } else {
+        // Keep as m/s
+        return Math.round(speedMS) + " m/s";
+    }
+}
 
 // Convert numerical phase to human-readable name
 function getMoonPhaseName(phase) {
@@ -203,7 +224,7 @@ function updateForecastDisplay() {
             dayElement.innerHTML += `
             <div class="forecast-date">${date.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })}</div>
             <img class="forecast-icon" src="https://openweathermap.org/img/wn/${day.weather[0].icon}@2x.png" alt="${day.weather[0].description}">
-            <div class="forecast-temp">${Math.round(day.temp_min)}°/${Math.round(day.temp_max)}°</div>
+            <div class="forecast-temp">${formatTemperature(day.temp_min)}/${formatTemperature(day.temp_max)}</div>
             <div class="forecast-desc">${day.weather[0].main}</div>
             `;
         }
@@ -282,7 +303,7 @@ window.showHourlyForecast = function (dayIndex) {
             <div class="hourly-item ${weatherCondition}">
                 <div class="hourly-time">${time}</div>
                 <img src="https://openweathermap.org/img/wn/${item.weather[0].icon}@2x.png" alt="${item.weather[0].description}" style="width: 50px; height: 50px;">
-                <div class="hourly-temp">${Math.round(item.main.temp)}°F</div>
+                <div class="hourly-temp">${formatTemperature(item.main.temp)}</div>
                 <div class="hourly-desc">${item.weather[0].main}</div>
             </div>
         `;
@@ -301,14 +322,13 @@ function updateWeatherDisplay() {
     if (!weatherData) return;
 
     const windSpeedMS = weatherData.windSpeed;
-    const windSpeedMPH = windSpeedMS * 2.237;
     const windDir = weatherData.windDirection;
     const humidity = weatherData.humidity;
 
     highlightUpdate('humidity', `${humidity}%`);
-    if (windDir && windSpeedMPH) {
+    if (windDir && windSpeedMS) {
         highlightUpdate('wind',
-            `${Math.round(windSpeedMPH)} mph at ${Math.round(windDir)}°`);
+            `${formatWindSpeed(windSpeedMS)} at ${Math.round(windDir)}°`);
     } else {
         highlightUpdate('wind', '--');
     }

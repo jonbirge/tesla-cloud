@@ -3,7 +3,7 @@ import { customLog, testMode, formatTime } from './common.js';
 import { settings, currentUser } from './settings.js';
 
 // Constants
-const NEWS_REFRESH_INTERVAL = 2.5; // minutes
+const NEWS_REFRESH_INTERVAL = 5; // minutes
 
 // Variables
 let newsUpdateInterval = null;

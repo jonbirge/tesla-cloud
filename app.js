@@ -15,7 +15,7 @@ const SAT_URLS = {
 // Imports
 import { customLog, highlightUpdate, testMode, GEONAMES_USERNAME } from './common.js';
 import { PositionSimulator } from './location.js';
-import { attemptLogin, updateLoginState } from './settings.js';
+import { attemptLogin, updateLoginState, settings } from './settings.js';
 import { fetchWeatherData } from './wx.js';
 import { updateNetworkInfo, startPingTest } from './net.js';
 import { setUserHasSeenLatestNews } from './news.js';
@@ -244,19 +244,39 @@ function updateWindage(vehicleSpeed, vehicleHeading, windSpeed, windDirection) {
         drawArrow(centerX, centerY, relativeWindXPlot, relativeWindYPlot, teslaBlue);
     }
 
-    // Update the wind component displays
+    // Update the wind component displays with proper units
     if (headWind !== null) {
-        document.getElementById('headwind').innerText = Math.abs(Math.round(headWind));
+        if (!settings || settings["imperial-units"]) {
+            document.getElementById('headwind').innerText = Math.abs(Math.round(headWind));
+        } else {
+            // Convert mph to m/s (1 mph ≈ 0.44704 m/s)
+            document.getElementById('headwind').innerText = Math.abs(Math.round(headWind * 0.44704));
+        }
         document.getElementById('headwind-arrow').innerHTML = (headWind > 0 ? '&#9660;' : '&#9650;'); // down/up filled triangles
-        // Change the label to TAILWIND when headWind is negative
-        document.getElementById('headwind-label').innerText = (headWind < 0) ? "TAILWIND (MPH)" : "HEADWIND (MPH)";
+        // Change the label to TAILWIND when headWind is negative and use appropriate units
+        if (!settings || settings["imperial-units"]) {
+            document.getElementById('headwind-label').innerText = (headWind < 0) ? "TAILWIND (MPH)" : "HEADWIND (MPH)";
+        } else {
+            document.getElementById('headwind-label').innerText = (headWind < 0) ? "TAILWIND (M/S)" : "HEADWIND (M/S)";
+        }
     } else {
         document.getElementById('headwind').innerText = '--';
         document.getElementById('headwind-arrow').innerHTML = '';
-        document.getElementById('headwind-label').innerText = "HEADWIND (MPH)";
+        // Set label with appropriate units
+        if (!settings || settings["imperial-units"]) {
+            document.getElementById('headwind-label').innerText = "HEADWIND (MPH)";
+        } else {
+            document.getElementById('headwind-label').innerText = "HEADWIND (M/S)";
+        }
     }
+    
     if (crossWind !== null) {
-        document.getElementById('crosswind').innerText = Math.abs(Math.round(crossWind));
+        if (!settings || settings["imperial-units"]) {
+            document.getElementById('crosswind').innerText = Math.abs(Math.round(crossWind));
+        } else {
+            // Convert mph to m/s
+            document.getElementById('crosswind').innerText = Math.abs(Math.round(crossWind * 0.44704));
+        }
         document.getElementById('crosswind-arrow').innerHTML = (crossWind >= 0 ? '&#9654;' : '&#9664;'); // right/left triangles
     } else {
         document.getElementById('crosswind').innerText = '--';
@@ -380,9 +400,34 @@ function handlePositionUpdate(position) {
             updateWindage(0, null, 0, 0);
         }
 
-        // Update display values
-        document.getElementById('altitude').innerText = alt ? Math.round(alt * 3.28084) : '--'; // Convert meters to feet
+        // Update display values with proper units
+        if (alt) {
+            if (!settings || settings["imperial-units"]) {
+                // Convert meters to feet
+                document.getElementById('altitude').innerText = Math.round(alt * 3.28084);
+                document.getElementById('altitude-unit').innerText = 'FT';
+            } else {
+                document.getElementById('altitude').innerText = Math.round(alt);
+                document.getElementById('altitude-unit').innerText = 'M';
+            }
+        } else {
+            document.getElementById('altitude').innerText = '--';
+        }
+
         document.getElementById('accuracy').innerText = acc ? Math.round(acc) + ' m' : '--';
+
+        // Update headwind/crosswind labels
+        if (!settings || settings["imperial-units"]) {
+            document.getElementById('headwind-label').innerText = 
+                document.getElementById('headwind-label').innerText.replace("(MPH)", "(MPH)");
+            document.querySelector('.stat-box:nth-child(4) .stat-label').innerText =
+                document.querySelector('.stat-box:nth-child(4) .stat-label').innerText.replace("(MPH)", "(MPH)");
+        } else {
+            document.getElementById('headwind-label').innerText =
+                document.getElementById('headwind-label').innerText.replace("(MPH)", "(M/S)");
+            document.querySelector('.stat-box:nth-child(4) .stat-label').innerText =
+                document.querySelector('.stat-box:nth-child(4) .stat-label').innerText.replace("(MPH)", "(M/S)");
+        }
     }
 
     // Short distance updates
