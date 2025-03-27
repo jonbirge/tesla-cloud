@@ -426,12 +426,6 @@
                     <input type="checkbox" onchange="toggleSettingFrom(this)">
                     <span class="settings-toggle-slider"></span>
                 </div>
-
-                <div class="settings-toggle-item" data-setting="small-fonts" onclick="this.querySelector('input').click()">
-                    <label>Smaller Fonts</label>
-                    <input type="checkbox" onchange="toggleSettingFrom(this)">
-                    <span class="settings-toggle-slider"></span>
-                </div>
             </div>
             
             <h2>News Sources</h2>
@@ -623,10 +617,7 @@
 
     <!-- Load JavaScript -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script src="settings.js?1"></script>
-    <script src="net.js?37"></script>
-    <script src="wx.js?9"></script>
-    <script src="app.js?15"></script>
+    <script src="app.js" type="module"></script>
 </body>
 
 </html>

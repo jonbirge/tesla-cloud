@@ -1,3 +1,6 @@
+// Import the customLog function from app.js
+import { customLog, updateNews } from './app.js';
+
 // Global variables
 let isLoggedIn = false;
 let currentUser = null;
@@ -70,7 +73,7 @@ function showLoginModal() {
 }
 
 // Function to hide the login modal
-function closeLoginModal() {
+export function closeLoginModal() {
     document.getElementById('login-modal').style.display = 'none';
 }
 
@@ -139,7 +142,7 @@ async function createNewUser(userId, hashedId = null) {
 }
 
 // Function to attempt login from URL parameter or cookie
-async function attemptLogin() {
+export async function attemptLogin() {
     const urlParams = new URLSearchParams(window.location.search);
     let userId = urlParams.get('user');
     
@@ -208,14 +211,14 @@ async function fetchSettings(userId) {
 }
 
 // Function to handle login from dialog
-async function handleLogin() {
+export async function handleLogin() {
     const userId = document.getElementById('user-id').value.trim();
     closeLoginModal();
     fetchSettings(userId);
 }
 
 // Function to handle logout
-function handleLogout() {
+window.handleLogout = function () {
     isLoggedIn = false;
     currentUser = null;
     hashedUser = null;
@@ -255,7 +258,7 @@ function removeUserIdFromUrl() {
 }
 
 // Update login/logout button visibility based on state
-function updateLoginState() {
+export function updateLoginState() {
     const loginButton = document.getElementById('login-button');
     const logoutButton = document.getElementById('logout-button');
 
@@ -271,7 +274,7 @@ function updateLoginState() {
 }
 
 // Function called by the toggle UI elements
-function toggleSettingFrom(element) {
+window.toggleSettingFrom = function(element) {
     const settingItem = element.closest('.settings-toggle-item');
     if (settingItem && settingItem.dataset.setting) {
         const key = settingItem.dataset.setting;
@@ -281,7 +284,7 @@ function toggleSettingFrom(element) {
 }
 
 // Function to toggle a setting (updates both local cache and server)
-async function toggleSetting(key, value) {
+export async function toggleSetting(key, value) {
     if (!isLoggedIn || !currentUser) {
         // Update the local settings cache with boolean value
         settings[key] = value;
@@ -396,3 +399,6 @@ function deleteCookie(name) {
     document.cookie = name + "=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
     customLog(`Cookie deleted: ${name}`);
 }
+
+// Export settings object so it's accessible to other modules
+export { settings, currentUser };

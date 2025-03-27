@@ -1,3 +1,10 @@
+// Import required functions from app.js
+import { customLog, autoDarkMode, formatTime, highlightUpdate, calculateDistance } from './app.js';
+
+// Import constants and variables needed from app.js
+import { SAT_URLS, MAX_SPEED, WX_DISTANCE_THRESHOLD, 
+         WX_TIME_THRESHOLD, OPENWX_API_KEY, lat, long, testMode } from './app.js';
+
 // Global variables
 let lastWxUpdate = 0;
 let lastWxUpdateLat = null;
@@ -6,6 +13,10 @@ let forecastData = null;
 let weatherData = null;
 let sunrise = null;
 let sunset = null;
+let moonPhaseData = null;
+
+// Export these variables for use in other modules
+export { weatherData, sunrise, sunset };
 
 // Convert numerical phase to human-readable name
 function getMoonPhaseName(phase) {
@@ -19,7 +30,7 @@ function getMoonPhaseName(phase) {
     return "Waning Crescent";
 }
 
-function switchWeatherImage(type) {
+window.switchWeatherImage = function (type) {
     const weatherImage = document.getElementById('weather-image');
     weatherImage.style.opacity = '0';
     
@@ -40,12 +51,7 @@ function switchWeatherImage(type) {
     weatherSwitch.style.setProperty('--slider-position', positions[type]);
 }
 
-function fetchWeatherData(lat, long, silentLoad = true) {
-    if (!lat || !long) {
-        customLog('No location data available for weather fetch');
-        return;
-    }
-
+export function fetchWeatherData(lat, long, silentLoad = true) {
     customLog('Fetching weather data...' + (silentLoad ? ' (background load)' : ''));
     
     // Show loading spinner, hide forecast container - only if not silent loading
@@ -94,23 +100,25 @@ function fetchWeatherData(lat, long, silentLoad = true) {
             currentResponse.json(),
             forecastResponse ? forecastResponse.json() : null
         ]))
-        .then(([currentData, forecastDataResponse]) => {
-            if (currentData) {
+        .then(([currentDataResponse, forecastDataResponse]) => {
+            
+            if (currentDataResponse) {
                 // check to see if wind direction is NaN
-                if (isNaN(currentData.weatherObservation.windDirection)) {
-                    currentData.weatherObservation.windDirection = null;
-                    currentData.weatherObservation.windSpeed = null;
+                if (isNaN(currentDataResponse.weatherObservation.windDirection)) {
+                    currentDataResponse.weatherObservation.windDirection = null;
+                    currentDataResponse.weatherObservation.windSpeed = null;
                 } else {
                     // take the reciprocal of the wind direction to get the wind vector
-                    currentData.weatherObservation.windDirection =
-                        (currentData.weatherObservation.windDirection + 180) % 360;
+                    currentDataResponse.weatherObservation.windDirection =
+                        (currentDataResponse.weatherObservation.windDirection + 180) % 360;
                 }
-                weatherData = currentData.weatherObservation;
+                weatherData = currentDataResponse.weatherObservation;
                 updateWeatherDisplay();
             }
 
             if (forecastDataResponse) {
-                updateForecastDisplay(forecastDataResponse);
+                forecastData = forecastDataResponse.list;
+                updateForecastDisplay();
             }
 
             // Call updateAQI after forecast is obtained
@@ -168,18 +176,18 @@ function fetchSunData(lat, long) {
         });
 }
 
-function dayHasHazards(forecastData) {
+function dayHasHazards(forecastList) {
     const hazardConditions = ['Rain', 'Snow', 'Sleet', 'Hail', 'Thunderstorm', 'Storm', 'Drizzle'];
-    return forecastData.weather.some(w => 
+    return forecastList.weather.some(w => 
         hazardConditions.some(condition => 
             w.main.includes(condition) || w.description.includes(condition.toLowerCase())
         )
     );
 }
 
-function updateForecastDisplay(data) {
+function updateForecastDisplay() {
     const forecastDays = document.querySelectorAll('.forecast-day');
-    const dailyData = extractDailyForecast(data.list);
+    const dailyData = extractDailyForecast(forecastData);
     
     dailyData.forEach((day, index) => {
         if (index < forecastDays.length) {
@@ -218,7 +226,6 @@ function updateForecastDisplay(data) {
 
 // Summarize forecast data into daily data
 function extractDailyForecast(forecastList) {
-    forecastData = forecastList;
     const dailyData = [];
     const dayMap = new Map();
     
@@ -246,8 +253,14 @@ function extractDailyForecast(forecastList) {
     return dailyData.slice(0, 5);
 }
 
-function showHourlyForecast(dayIndex) {
-    if (!forecastData) return;
+window.showHourlyForecast = function (dayIndex) {
+    // Logging
+    customLog(`Showing hourly forecast for day index: ${dayIndex}`);
+
+    if (!forecastData) {
+        customLog('No forecast data available for hourly forecast!');
+        return;
+    }
 
     const startDate = new Date(forecastData[0].dt * 1000).setHours(0, 0, 0, 0);
     const targetDate = new Date(startDate + dayIndex * 24 * 60 * 60 * 1000);
@@ -290,7 +303,7 @@ function showHourlyForecast(dayIndex) {
     document.querySelector('.forecast-popup').classList.add('show');
 }
 
-function closeHourlyForecast() {
+window.closeHourlyForecast = function () {
     document.querySelector('.overlay').classList.remove('show');
     document.querySelector('.forecast-popup').classList.remove('show');
 }
@@ -324,46 +337,28 @@ function updateWeatherDisplay() {
     highlightUpdate('station-info', stationInfoStr);
 }
 
-function fetchSunData(lat, long) {
-    if (!lat || !long) {
-        customLog('No location data available for sun/moon fetch');
-        return;
+export function updateSunMoonDisplay() {
+    if (!sunrise || !sunset) return;
+    
+    const sunriseTime = formatTime(new Date(sunrise), {
+        timeZoneName: 'short'
+    });
+    highlightUpdate('sunrise', sunriseTime);
+
+    const sunsetTime = formatTime(new Date(sunset), {
+        timeZoneName: 'short'
+    });
+    highlightUpdate('sunset', sunsetTime);
+    
+    if (moonPhaseData) {
+        const moonPhase = getMoonPhaseName(moonPhaseData.Phase);
+        highlightUpdate('moonphase', moonPhase);
     }
-
-    Promise.all([
-        fetch(`https://api.sunrise-sunset.org/json?lat=${lat}&lng=${long}&formatted=0`),
-        fetch(`https://api.farmsense.net/v1/moonphases/?d=${Math.floor(Date.now() / 1000)}`)
-    ])
-        .then(([sunResponse, moonResponse]) => Promise.all([sunResponse.json(), moonResponse.json()]))
-        .then(([sunData, moonData]) => {
-            sunrise = sunData.results.sunrise;
-            sunset = sunData.results.sunset;
-            moonPhaseData = moonData[0];
-            
-            const sunriseTime = formatTime(new Date(sunrise), {
-                timeZoneName: 'short'
-            });
-            highlightUpdate('sunrise', sunriseTime);
-
-            const sunsetTime = formatTime(new Date(sunset), {
-                timeZoneName: 'short'
-            });
-            highlightUpdate('sunset', sunsetTime);
-
-            const moonPhase = getMoonPhaseName(moonPhaseData.Phase);
-            highlightUpdate('moonphase', moonPhase);
-            
-            autoDarkMode();
-        })
-        .catch(error => {
-            console.error('Error fetching sun/moon data: ', error);
-            customLog('Error fetching sun/moon data: ', error);
-        });
 }
 
 // Update Wx data if more than 30 minutes since the last update
 // OR if we've moved more than a certain distance since the last update
-function shouldUpdateWeatherData() {
+export function shouldUpdateLongRangeData() {
     // Check if we've never updated weather data
     if (lastWxUpdate === 0 || lastWxUpdateLat === null || lastWxUpdateLong === null) {
         return true;
@@ -389,7 +384,7 @@ function shouldUpdateWeatherData() {
 }
 
 // Simplified function to check for hazardous weather in the next forecast periods
-function checkWeatherHazards() {
+export function checkWeatherHazards() {
     customLog('Checking for weather hazards in next forecast periods...');
     
     if (!forecastData || !Array.isArray(forecastData)) {

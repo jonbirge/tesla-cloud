@@ -6,13 +6,6 @@ const WX_DISTANCE_THRESHOLD = 25000; // meters
 const WX_TIME_THRESHOLD = 30; // minutes
 const NEWS_REFRESH_INTERVAL = 2.5; // minutes
 const MAX_SPEED = 50; // Maximum speed for radar display (mph)
-const TEST_CENTER_LAT = 39.7392; // Denver
-const TEST_CENTER_LONG = -104.9903; // Denver
-const TEST_CIRCLE_RADIUS = 10; // miles
-const TEST_MIN_SPEED = 75; // mph
-const TEST_MAX_SPEED = 95; // mph
-const TEST_MIN_ALT = 50;
-const TEST_MAX_ALT = 250;
 const GEONAMES_USERNAME = 'birgefuller';
 const OPENWX_API_KEY = '6a1b1bcb03b5718a9b3a2b108ce3293d';
 const MIN_GPS_UPDATE_INTERVAL = 1000; // ms - minimum time between updates
@@ -22,12 +15,23 @@ const SAT_URLS = {
     latest_ir: 'https://cdn.star.nesdis.noaa.gov/GOES16/ABI/CONUS/11/1250x750.jpg',
 };
 
+// Import the PositionSimulator class
+import { PositionSimulator } from './location.js';
+// Import functions from settings.js
+import { attemptLogin, updateLoginState, closeLoginModal, handleLogin, settings, currentUser, toggleSetting } from './settings.js';
+// Import functions from wx.js
+import { fetchWeatherData, shouldUpdateLongRangeData, weatherData, sunrise, sunset } from './wx.js';
+// Import functions and variables from net.js
+import { updateNetworkInfo, updateChartAxisColors, startPingTest } from './net.js';
+
 // Global variables
-let version = null;
 let testMode = false; // Set to true if test parameter exists
 let lastUpdate = 0; // Timestamp of last location update
 let lat = null;
 let long = null;
+let alt = null;
+let acc = null;
+let speed = null;
 let lastUpdateLat = null;
 let lastUpdateLong = null;
 let lastKnownHeading = null;
@@ -36,7 +40,10 @@ let darkOn = false;
 let radarContext = null;
 let gpsIntervalId = null;
 let lastGPSUpdate = 0;
-let locationTimeZone = browserTimeZone();
+let locationTimeZone = null;
+
+// Create position simulator instance
+const positionSimulator = new PositionSimulator();
 
 let newsUpdateInterval = null;
 let newsUpdatesActive = false; // Track if news updates should be active
@@ -44,21 +51,19 @@ let userHasSeenLatestNews = true; // Track if user has seen the latest news
 let lastNewsTimestamp = 0; // Track the latest news timestamp we've seen
 let seenNewsIds = new Set(); // Track news IDs we've already seen
 
-let testModeAngle = 0;
-let testModeSpeed = TEST_MIN_SPEED;
-let testModeAlt = TEST_MIN_ALT;
-let testModeSpeedIncreasing = true;
-let testModeAltIncreasing = true;
+// Export constants and global variables needed by other modules
+export { SAT_URLS, MAX_SPEED, WX_DISTANCE_THRESHOLD, WX_TIME_THRESHOLD, 
+         OPENWX_API_KEY, lat, long, alt, testMode, userHasSeenLatestNews, locationTimeZone };
 
 // Custom log function that prepends the current time
-function customLog(...args) {
+export function customLog(...args) {
     const now = new Date();
     const timeString = now.toLocaleTimeString();
     console.log(`[${timeString}] `, ...args);
 }
 
 // Update element with a change-dependent highlight effect
-function highlightUpdate(id, content = null) {
+export function highlightUpdate(id, content = null) {
     const element = document.getElementById(id);
     if (content !== null) {
         if (element.innerHTML === content) {
@@ -67,7 +72,7 @@ function highlightUpdate(id, content = null) {
         element.innerHTML = content;
     }
     const highlightColor = getComputedStyle(document.documentElement).getPropertyValue('--tesla-blue').trim();
-    const originalFontWeight = getComputedStyle(element).fontWeight;
+    // const originalFontWeight = getComputedStyle(element).fontWeight;
 
     element.style.transition = 'color 0.5s, font-weight 0.5s';
     element.style.color = highlightColor;
@@ -88,7 +93,11 @@ function browserTimeZone() {
 }
 
 // Helper function to format time according to user settings
-function formatTime(date, options = {}) {
+export function formatTime(date, options = {}) {
+    if (!locationTimeZone) {
+        error('formatTime: time zone not set.');
+    }
+
     // Default options
     const defaultOptions = {
         hour: 'numeric',
@@ -100,14 +109,14 @@ function formatTime(date, options = {}) {
     const timeOptions = {...defaultOptions, ...options};
     
     // Check if 24-hour format is enabled in settings
-    if (currentUser && settings && settings['24hr-time']) {
+    if (settings && settings['24hr-time']) {
         timeOptions.hour12 = false;
     }
     
     return date.toLocaleTimeString('en-US', timeOptions);
 }
 
-function calculateDistance(lat1, lon1, lat2, lon2) {
+export function calculateDistance(lat1, lon1, lat2, lon2) {
     const R = 6371e3; // Earth's radius in meters
     const φ1 = lat1 * Math.PI/180;
     const φ2 = lat2 * Math.PI/180;
@@ -155,22 +164,24 @@ async function updateTimeZone(lat, long) {
         console.error('Error fetching time zone: ', error);
         customLog('Error fetching time zone: ', error);
         const tz = Intl.DateTimeFormat().resolvedOptions().timeZone;
-        customLog('Using timezone: ', tz);
+        customLog('Fallback timezone: ', tz);
         return tz;
     }
 }
 
 // Manually set dark/light mode
-function toggleMode() {
+window.toggleMode = function() {
+    customLog('darkMode was: ', darkOn);
     toggleSetting('auto-dark-mode', false);
     document.body.classList.toggle('dark-mode');
     darkOn = document.body.classList.contains('dark-mode');
     document.getElementById('darkModeToggle').checked = darkOn;
     updateDarkModeDependants();
+    customLog('darkMode now: ', darkOn);
 }
 
 // Update the dark/light mode based on sunrise/sunset
-function autoDarkMode() {
+export function autoDarkMode() {
     if (settings && settings['auto-dark-mode'] && lat !== null && long !== null) {
         const now = new Date();
         const currentTime = now.getTime();
@@ -203,11 +214,6 @@ function updateDarkModeDependants() {
 }
 
 async function fetchWikipediaData(lat, long) {
-    if (!lat || !long) {
-        customLog('Location not available for Wikipedia data.');
-        return;
-    }
-
     customLog('Fetching Wikipedia data...');
     const url = `https://secure.geonames.org/findNearbyWikipediaJSON?lat=${lat}&lng=${long}&username=birgefuller`;
     try {
@@ -227,12 +233,11 @@ async function fetchWikipediaData(lat, long) {
         }
     } catch (error) {
         console.error('Error fetching Wikipedia data:', error);
-        customLog('Error fetching Wikipedia data:', error);
         document.getElementById('wikipediaInfo').innerHTML = '<p><em>Error loading Wikipedia data.</em></p>';
     }
 }
 
-function loadExternalUrl(url, inFrame = false) {
+window.loadExternalUrl = function (url, inFrame = false) {
     // Open external links in a new tab
     if (!inFrame) {
         window.open(url, '_blank');
@@ -262,7 +267,7 @@ function loadExternalUrl(url, inFrame = false) {
     }
 }
 
-async function updateNews(clear = false) {
+export async function updateNews(clear = false) {
     try {
         // Collect excluded RSS feeds from user settings
         const excludedFeeds = [];
@@ -569,11 +574,6 @@ function updateWindage(vehicleSpeed, vehicleHeading, windSpeed, windDirection) {
 }
 
 async function updateLocationData(lat, long) {
-    if (!lat || !long) {
-        customLog('Location not available for location data.');
-        return;
-    }
-
     customLog('Updating location dependent data for (', lat, ', ', long, ')');
     neverUpdatedLocation = false;
 
@@ -600,59 +600,7 @@ async function updateLocationData(lat, long) {
     lastUpdate = Date.now();
 }
 
-function getTestModePosition() {
-    // Calculate new position based on angle
-    const radiusInDegrees = TEST_CIRCLE_RADIUS / 69; // Rough conversion from miles to degrees
-    const testLat = TEST_CENTER_LAT + radiusInDegrees * Math.cos(testModeAngle);
-    const testLong = TEST_CENTER_LONG + radiusInDegrees * Math.sin(testModeAngle);
-    
-    // Update angle for next time (move about 1 degree per second at 40mph)
-    const angleIncrement = (testModeSpeed / (2 * Math.PI * TEST_CIRCLE_RADIUS)) * (2 * Math.PI) / (60 * 60);
-    testModeAngle = (testModeAngle + angleIncrement) % (2 * Math.PI);
-    
-    // Update speed (oscillate between min and max)
-    if (testModeSpeedIncreasing) {
-        testModeSpeed += 0.1;
-        if (testModeSpeed >= TEST_MAX_SPEED) {
-            testModeSpeedIncreasing = false;
-        }
-    } else {
-        testModeSpeed -= 0.1;
-        if (testModeSpeed <= TEST_MIN_SPEED) {
-            testModeSpeedIncreasing = true;
-        }
-    }
-    
-    // Update altitude (oscillate between min and max)
-    if (testModeAltIncreasing) {
-        testModeAlt += 0.5;
-        if (testModeAlt >= TEST_MAX_ALT) {
-            testModeAltIncreasing = false;
-        }
-    } else {
-        testModeAlt -= 0.5;
-        if (testModeAlt <= TEST_MIN_ALT) {
-            testModeAltIncreasing = true;
-        }
-    }
-
-    // Calculate heading based on movement around the circle
-    const heading = (((testModeAngle * 180 / Math.PI) + 90) % 360);
-
-    return {
-        coords: {
-            latitude: testLat,
-            longitude: testLong,
-            altitude: testModeAlt * 0.3048, // Convert feet to meters
-            speed: testModeSpeed * 0.44704, // Convert mph to m/s
-            heading: heading,
-            accuracy: 5, // Simulate a good GPS signal with 5m accuracy
-        },
-        timestamp: Date.now(),
-    };
-}
-
-function shouldUpdateLocationData() {
+function shouldUpdateShortRangeData() {
     if (neverUpdatedLocation || !lastUpdateLat || !lastUpdateLong) {
         return true;
     }
@@ -726,12 +674,12 @@ function handlePositionUpdate(position) {
     }
 
     // Short distance updates
-    if (shouldUpdateLocationData()) {
+    if (shouldUpdateShortRangeData()) {
         updateLocationData(lat, long);
     }
 
     // Long distance updates
-    if (shouldUpdateWeatherData()) {
+    if (shouldUpdateLongRangeData()) {
         fetchWeatherData(lat, long);
     }
 }
@@ -744,7 +692,7 @@ function updateGPS() {
             customLog('Geolocation is not supported by this browser.');
         }
     } else { // testing
-        handlePositionUpdate(getTestModePosition());
+        handlePositionUpdate(positionSimulator.getPosition());
     }
 }
 
@@ -800,8 +748,8 @@ function resumeNewsUpdates() {
     }
 }
 
-// Show a specific section and update URL
-function showSection(sectionId) {
+// Show a specific section and update URL - defined directly on window object
+window.showSection = function(sectionId) {
     // Log the clicked section
     customLog(`Showing section: ${sectionId}`);
 
@@ -882,19 +830,13 @@ function showSection(sectionId) {
 
         if (sectionId === 'network') {
             updateNetworkInfo();
-            
-            // Reinitialize the ping chart when showing the network section
-            if (pingData.length > 0 && pingChart) {
-                pingChart.data.labels = Array.from({ length: pingData.length }, (_, i) => i);
-                pingChart.update();
-            }
         }
         
         if (sectionId === 'landmarks') {
             if (lat !== null && long !== null) {
                 fetchWikipediaData(lat, long);
             } else {
-                customLog('Location not available to fetch Wikipedia data.');
+                customLog('Location not available for Wikipedia data.');
             }
         }
     }
@@ -904,9 +846,28 @@ function showSection(sectionId) {
     if (button) {
         button.classList.add('active');
     }
+};
+
+function updateVersion() {
+    const versionElement = document.getElementById('version');
+    if (versionElement) {
+        fetch('vers.php')
+            .then(response => response.json())
+            .then(data => {
+                const versionText = `${data.branch || 'unknown'}-${data.commit || 'unknown'}`;
+                versionElement.innerHTML = versionText;
+            })
+            .catch(error => {
+                console.error('Error fetching version:', error);
+                versionElement.innerHTML = 'Error loading version';
+            });
+    }
 }
 
 // ***** Main code *****
+
+// Console logging
+console.log('*** app.js top level code ***');
 
 // URL parameters
 const urlParams = new URLSearchParams(window.location.search);
@@ -929,10 +890,14 @@ window.addEventListener('popstate', () => {
 
 // Event listeners and initialization after DOM content is loaded
 document.addEventListener('DOMContentLoaded', async function () {
+    // Log
+    customLog('DOM fully loaded and parsed...');
+
+    // Initialize time zone
+    locationTimeZone = browserTimeZone();
+
     // Attempt login from URL parameter or cookie
     await attemptLogin();
-
-    // Initialize the login/logout button
     updateLoginState();
 
     // Initialize radar display
@@ -942,20 +907,10 @@ document.addEventListener('DOMContentLoaded', async function () {
     startGPSUpdates();
 
     // Get version from vers.php asyncly
-    const versionElement = document.getElementById('version');
-    if (versionElement) {
-        fetch('vers.php')
-            .then(response => response.json())
-            .then(data => {
-                const versionText = `${data.branch || 'unknown'}-${data.commit || 'unknown'}`;
-                versionElement.innerHTML = versionText;
-                version = versionText;
-            })
-            .catch(error => {
-                console.error('Error fetching version:', error);
-                versionElement.innerHTML = 'Error loading version';
-            });
-    }
+    updateVersion();
+
+    // Begin network sensing
+    startPingTest();
 
     // Handle page visibility changes
     document.addEventListener('visibilitychange', () => {
