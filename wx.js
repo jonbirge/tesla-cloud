@@ -1,14 +1,11 @@
 // Import required functions from app.js
-import { customLog, autoDarkMode, formatTime, highlightUpdate, calculateDistance } from './app.js';
+import { customLog, formatTime, highlightUpdate, testMode } from './common.js';
+import { autoDarkMode } from './settings.js';
 
-// Import constants and variables needed from app.js
-import { SAT_URLS, MAX_SPEED, WX_DISTANCE_THRESHOLD, 
-         WX_TIME_THRESHOLD, OPENWX_API_KEY, lat, long, testMode } from './app.js';
+// Constants
+const OPENWX_API_KEY = '6a1b1bcb03b5718a9b3a2b108ce3293d';
 
 // Global variables
-let lastWxUpdate = 0;
-let lastWxUpdateLat = null;
-let lastWxUpdateLong = null;
 let forecastData = null;
 let weatherData = null;
 let sunrise = null;
@@ -16,7 +13,7 @@ let sunset = null;
 let moonPhaseData = null;
 
 // Export these variables for use in other modules
-export { weatherData, sunrise, sunset };
+export { sunrise, sunset };
 
 // Convert numerical phase to human-readable name
 function getMoonPhaseName(phase) {
@@ -65,7 +62,7 @@ export function fetchWeatherData(lat, long, silentLoad = true) {
 
     // Fetch sunrise/sunset data
     fetchSunData(lat, long);
-    autoDarkMode();
+    autoDarkMode(lat, long);
 
     // Use fake data in test mode
     if (testMode) {
@@ -76,10 +73,6 @@ export function fetchWeatherData(lat, long, silentLoad = true) {
 
         const mockForecastData = generateMockForecastData();
         updateForecastDisplay(mockForecastData);
-
-        lastWxUpdate = Date.now();
-        lastWxUpdateLat = lat;
-        lastWxUpdateLong = long;
         
         // Check for weather hazards after updating forecast data
         checkWeatherHazards();
@@ -123,10 +116,6 @@ export function fetchWeatherData(lat, long, silentLoad = true) {
 
             // Call updateAQI after forecast is obtained
             updateAQI(lat, long, OPENWX_API_KEY);
-
-            lastWxUpdate = Date.now();
-            lastWxUpdateLat = lat;
-            lastWxUpdateLong = long;
             
             // Hide spinner and show forecast when data is loaded - only if not silent loading
             if (forecastContainer) forecastContainer.style.display = 'flex';
@@ -312,7 +301,7 @@ function updateWeatherDisplay() {
     if (!weatherData) return;
 
     const windSpeedMS = weatherData.windSpeed;
-    const windSpeedMPH = Math.min((windSpeedMS * 2.237), MAX_SPEED);
+    const windSpeedMPH = windSpeedMS * 2.237;
     const windDir = weatherData.windDirection;
     const humidity = weatherData.humidity;
 
@@ -354,33 +343,6 @@ export function updateSunMoonDisplay() {
         const moonPhase = getMoonPhaseName(moonPhaseData.Phase);
         highlightUpdate('moonphase', moonPhase);
     }
-}
-
-// Update Wx data if more than 30 minutes since the last update
-// OR if we've moved more than a certain distance since the last update
-export function shouldUpdateLongRangeData() {
-    // Check if we've never updated weather data
-    if (lastWxUpdate === 0 || lastWxUpdateLat === null || lastWxUpdateLong === null) {
-        return true;
-    }
-    
-    // Check time threshold using WX_TIME_THRESHOLD constant
-    const now = Date.now();
-    const timeSinceLastUpdate = now - lastWxUpdate;
-    if (timeSinceLastUpdate >= WX_TIME_THRESHOLD * 60 * 1000) { // Convert minutes to milliseconds
-        return true;
-    }
-    
-    // Check distance threshold using WX_DISTANCE_THRESHOLD constant
-    if (lat !== null && long !== null) {
-        const distance = calculateDistance(lat, long, lastWxUpdateLat, lastWxUpdateLong);
-        if (distance >= WX_DISTANCE_THRESHOLD) { // Use constant for meters
-            return true;
-        }
-    }
-    
-    // No need to update weather data
-    return false;
 }
 
 // Simplified function to check for hazardous weather in the next forecast periods

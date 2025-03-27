@@ -1,5 +1,5 @@
 // Import the customLog function from app.js
-import { customLog } from './app.js';
+import { customLog } from './common.js';
 
 // Global variables
 let pingInterval = null;
@@ -69,7 +69,7 @@ function destroyPingChart() {
     }
 }
 
-window.stopPingTest = function() {
+window.pausePingTest = function() {
     if (pingInterval) {
         clearInterval(pingInterval);
         pingInterval = null;

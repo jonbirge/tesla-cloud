@@ -1,7 +1,7 @@
 /* Variables */
 :root {
     --bg-color: #efefef;
-    --text-color: #888888;
+    --text-color: #777777;
     --active-section-bg: white;
     --separator-color: #cccccc;
     --button-bg: #dddddd;
@@ -803,7 +803,6 @@ input:checked + .toggle-slider:before {
     justify-content: center;
     align-items: center;
 }
-
 .modal-content {
     background-color: var(--bg-color);
     border-radius: var(--button-radius);
@@ -812,18 +811,15 @@ input:checked + .toggle-slider:before {
     max-width: 90%;
     box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
 }
-
 .login-form {
     margin-top: 20px;
 }
-
 .login-form label {
     display: block;
     margin-bottom: 10px;
     color: var(--button-text);
     font-weight: 500;
 }
-
 .login-form input {
     width: 100%;
     padding: 12px 15px;
@@ -835,13 +831,11 @@ input:checked + .toggle-slider:before {
     color: var(--button-text);
     box-sizing: border-box; /* Add this to fix the width issue */
 }
-
 .button-container {
     display: flex;
     justify-content: flex-end;
     gap: 10px;
 }
-
 .modal-button {
     padding: 12px 25px;
     border: none;
@@ -851,17 +845,14 @@ input:checked + .toggle-slider:before {
     cursor: pointer;
     transition: background-color 0.3s;
 }
-
 .modal-button.cancel {
     background-color: var(--button-bg);
     color: var(--button-text);
 }
-
 .modal-button.submit {
     background-color: var(--tesla-blue);
     color: white;
 }
-
 .error-message {
     color: var(--tesla-red);
     margin-bottom: 20px;

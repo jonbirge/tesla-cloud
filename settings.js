@@ -1,11 +1,18 @@
-// Import the customLog function from app.js
-import { customLog, updateNews } from './app.js';
+// Imports
+import { updateNews } from './news.js';
+import { customLog } from './common.js';
+import { sunrise, sunset } from './wx.js';
+import { updateChartAxisColors } from './net.js';
 
 // Global variables
 let isLoggedIn = false;
 let currentUser = null;
 let hashedUser = null; // Store the hashed version of the user ID
 let settings = {}; // Initialize settings object
+let darkOn = false;
+
+// Export settings object so it's accessible to other modules
+export { settings, currentUser, isLoggedIn, darkOn };
 
 // Default settings that will be used when no user is logged in
 const defaultSettings = {
@@ -14,29 +21,73 @@ const defaultSettings = {
     "24-hour-time": false,
     "imperial-units": true,
     "small-fonts": false,
-    
     // News source settings - default to most sources enabled
-    "rss-wsj": false,
+    "rss-wsj": true,
     "rss-nyt": true,
     "rss-wapo": true,
     "rss-latimes": true,
-    "rss-bos": true,
-    "rss-bloomberg": true,
-    "rss-bloomberg-tech": true,
+    "rss-bos": false,
+    "rss-bloomberg": false,
+    "rss-bloomberg-tech": false,
     "rss-bbc": true,
     "rss-telegraph": true,
     "rss-economist": true,
-    "rss-lemonde": true,
-    "rss-derspiegel": true,
+    "rss-lemonde": false,
+    "rss-derspiegel": false,
     "rss-notateslaapp": true,
     "rss-teslarati": true,
     "rss-insideevs": true,
-    "rss-electrek": true,
-    "rss-thedrive": true,
+    "rss-electrek": false,
+    "rss-thedrive": false,
     "rss-techcrunch": true,
-    "rss-jalopnik": true,
-    "rss-theverge": true
+    "rss-jalopnik": false,
+    "rss-theverge": true,
 };
+
+// Update the dark/light mode based on sunrise/sunset
+export function autoDarkMode(lat, long) {
+    customLog('Auto dark mode check for coordinates: ', lat, long);
+    if (settings && settings['auto-dark-mode'] && lat !== null && long !== null) {
+        const now = new Date();
+        const currentTime = now.getTime();
+        const sunriseTime = new Date(sunrise).getTime();
+        const sunsetTime = new Date(sunset).getTime();
+
+        if (currentTime >= sunsetTime || currentTime < sunriseTime) {
+            if (!darkOn) {
+                customLog('Applying dark mode based on sunset...');
+                document.body.classList.add('dark-mode');
+                darkOn = true;
+                document.getElementById('darkModeToggle').checked = true;
+                updateDarkModeDependants();
+            }
+        } else {
+            if (darkOn) {
+                customLog('Applying light mode based on sunrise...');
+                document.body.classList.remove('dark-mode');
+                darkOn = false;
+                document.getElementById('darkModeToggle').checked = false;
+                updateDarkModeDependants();
+            }
+        }
+    } else {
+        customLog('Auto dark mode disabled or coordinates not available.');
+    }
+}
+
+// Manually set dark/light mode
+window.toggleMode = function() {
+    toggleSetting('auto-dark-mode', false);
+    document.body.classList.toggle('dark-mode');
+    darkOn = document.body.classList.contains('dark-mode');
+    document.getElementById('darkModeToggle').checked = darkOn;
+    updateDarkModeDependants();
+}
+
+// Update things that depend on dark mode
+function updateDarkModeDependants() {
+    updateChartAxisColors();
+}
 
 // Function to initialize application with either user settings or defaults
 function initializeSettings() {
@@ -65,7 +116,7 @@ async function hashUserId(userId) {
 }
 
 // Function to show the login modal
-function showLoginModal() {
+window.showLoginModal = function () {
     const modal = document.getElementById('login-modal');
     modal.style.display = 'flex';
     document.getElementById('user-id').focus();
@@ -73,7 +124,7 @@ function showLoginModal() {
 }
 
 // Function to hide the login modal
-export function closeLoginModal() {
+window.closeLoginModal = function () {
     document.getElementById('login-modal').style.display = 'none';
 }
 
@@ -211,7 +262,7 @@ async function fetchSettings(userId) {
 }
 
 // Function to handle login from dialog
-export async function handleLogin() {
+window.handleLogin = async function () {
     const userId = document.getElementById('user-id').value.trim();
     closeLoginModal();
     fetchSettings(userId);
@@ -399,6 +450,3 @@ function deleteCookie(name) {
     document.cookie = name + "=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
     customLog(`Cookie deleted: ${name}`);
 }
-
-// Export settings object so it's accessible to other modules
-export { settings, currentUser };

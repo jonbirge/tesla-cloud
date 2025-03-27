@@ -4,10 +4,7 @@ const UPDATE_DISTANCE_THRESHOLD = 500; // meters
 const UPDATE_TIME_THRESHOLD = 10; // minutes
 const WX_DISTANCE_THRESHOLD = 25000; // meters
 const WX_TIME_THRESHOLD = 30; // minutes
-const NEWS_REFRESH_INTERVAL = 2.5; // minutes
 const MAX_SPEED = 50; // Maximum speed for radar display (mph)
-const GEONAMES_USERNAME = 'birgefuller';
-const OPENWX_API_KEY = '6a1b1bcb03b5718a9b3a2b108ce3293d';
 const MIN_GPS_UPDATE_INTERVAL = 1000; // ms - minimum time between updates
 const SAT_URLS = {
     latest: 'https://cdn.star.nesdis.noaa.gov/GOES16/GLM/CONUS/EXTENT3/1250x750.jpg',
@@ -15,17 +12,15 @@ const SAT_URLS = {
     latest_ir: 'https://cdn.star.nesdis.noaa.gov/GOES16/ABI/CONUS/11/1250x750.jpg',
 };
 
-// Import the PositionSimulator class
+// Imports
+import { customLog, highlightUpdate, testMode, GEONAMES_USERNAME } from './common.js';
 import { PositionSimulator } from './location.js';
-// Import functions from settings.js
-import { attemptLogin, updateLoginState, closeLoginModal, handleLogin, settings, currentUser, toggleSetting } from './settings.js';
-// Import functions from wx.js
-import { fetchWeatherData, shouldUpdateLongRangeData, weatherData, sunrise, sunset } from './wx.js';
-// Import functions and variables from net.js
-import { updateNetworkInfo, updateChartAxisColors, startPingTest } from './net.js';
+import { attemptLogin, updateLoginState } from './settings.js';
+import { fetchWeatherData } from './wx.js';
+import { updateNetworkInfo, startPingTest } from './net.js';
+import { setUserHasSeenLatestNews } from './news.js';
 
-// Global variables
-let testMode = false; // Set to true if test parameter exists
+// Variables
 let lastUpdate = 0; // Timestamp of last location update
 let lat = null;
 let long = null;
@@ -35,88 +30,16 @@ let speed = null;
 let lastUpdateLat = null;
 let lastUpdateLong = null;
 let lastKnownHeading = null;
+let lastWxUpdate = 0;
+let lastWxUpdateLat = null;
+let lastWxUpdateLong = null;
 let neverUpdatedLocation = true;
-let darkOn = false;
 let radarContext = null;
 let gpsIntervalId = null;
 let lastGPSUpdate = 0;
-let locationTimeZone = null;
-
-// Create position simulator instance
 const positionSimulator = new PositionSimulator();
 
-let newsUpdateInterval = null;
-let newsUpdatesActive = false; // Track if news updates should be active
-let userHasSeenLatestNews = true; // Track if user has seen the latest news
-let lastNewsTimestamp = 0; // Track the latest news timestamp we've seen
-let seenNewsIds = new Set(); // Track news IDs we've already seen
-
-// Export constants and global variables needed by other modules
-export { SAT_URLS, MAX_SPEED, WX_DISTANCE_THRESHOLD, WX_TIME_THRESHOLD, 
-         OPENWX_API_KEY, lat, long, alt, testMode, userHasSeenLatestNews, locationTimeZone };
-
-// Custom log function that prepends the current time
-export function customLog(...args) {
-    const now = new Date();
-    const timeString = now.toLocaleTimeString();
-    console.log(`[${timeString}] `, ...args);
-}
-
-// Update element with a change-dependent highlight effect
-export function highlightUpdate(id, content = null) {
-    const element = document.getElementById(id);
-    if (content !== null) {
-        if (element.innerHTML === content) {
-            return; // Exit if content is the same
-        }
-        element.innerHTML = content;
-    }
-    const highlightColor = getComputedStyle(document.documentElement).getPropertyValue('--tesla-blue').trim();
-    // const originalFontWeight = getComputedStyle(element).fontWeight;
-
-    element.style.transition = 'color 0.5s, font-weight 0.5s';
-    element.style.color = highlightColor;
-    // element.style.fontWeight = '800';
-
-    setTimeout(() => {
-        element.style.transition = 'color 2s, font-weight 2s';
-        element.style.color = ''; // Reset to default color
-        // element.style.fontWeight = ''; // Reset to original font weight
-    }, 2000);
-}
-
-// Return time zone based on browser settings
-function browserTimeZone() {
-    const tz = Intl.DateTimeFormat().resolvedOptions().timeZone;
-    customLog('Browser timezone: ', tz);
-    return tz;
-}
-
-// Helper function to format time according to user settings
-export function formatTime(date, options = {}) {
-    if (!locationTimeZone) {
-        error('formatTime: time zone not set.');
-    }
-
-    // Default options
-    const defaultOptions = {
-        hour: 'numeric',
-        minute: '2-digit',
-        timeZone: locationTimeZone
-    };
-    
-    // Merge provided options with defaults
-    const timeOptions = {...defaultOptions, ...options};
-    
-    // Check if 24-hour format is enabled in settings
-    if (settings && settings['24hr-time']) {
-        timeOptions.hour12 = false;
-    }
-    
-    return date.toLocaleTimeString('en-US', timeOptions);
-}
-
-export function calculateDistance(lat1, lon1, lat2, lon2) {
+function calculateDistance(lat1, lon1, lat2, lon2) {
     const R = 6371e3; // Earth's radius in meters
     const φ1 = lat1 * Math.PI/180;
     const φ2 = lat2 * Math.PI/180;
@@ -131,11 +54,6 @@ export function calculateDistance(lat1, lon1, lat2, lon2) {
 }
 
 function fetchCityData(lat, long) {
-    if (!lat || !long) {
-        customLog('Location not available for city data.');
-        return;
-    }
-
     fetch(`https://secure.geonames.org/findNearbyPlaceNameJSON?lat=${lat}&lng=${long}&username=${GEONAMES_USERNAME}`)
         .then(response => response.json())
         .then(cityData => {
@@ -148,74 +66,9 @@ function fetchCityData(lat, long) {
         });
 }
 
-async function updateTimeZone(lat, long) {
-    try {
-        if (!lat || !long) {
-            throw new Error('Location not available.');
-        }
-        const response = await fetch(`https://secure.geonames.org/timezoneJSON?lat=${lat}&lng=${long}&username=${GEONAMES_USERNAME}`);
-        const tzData = await response.json();
-        if (!tzData || !tzData.timezoneId) {
-            throw new Error('Timezone not returned from server.');
-        }
-        customLog('Timezone: ', tzData);
-        return tzData.timezoneId;
-    } catch (error) {
-        console.error('Error fetching time zone: ', error);
-        customLog('Error fetching time zone: ', error);
-        const tz = Intl.DateTimeFormat().resolvedOptions().timeZone;
-        customLog('Fallback timezone: ', tz);
-        return tz;
-    }
-}
-
-// Manually set dark/light mode
-window.toggleMode = function() {
-    customLog('darkMode was: ', darkOn);
-    toggleSetting('auto-dark-mode', false);
-    document.body.classList.toggle('dark-mode');
-    darkOn = document.body.classList.contains('dark-mode');
-    document.getElementById('darkModeToggle').checked = darkOn;
-    updateDarkModeDependants();
-    customLog('darkMode now: ', darkOn);
-}
-
-// Update the dark/light mode based on sunrise/sunset
-export function autoDarkMode() {
-    if (settings && settings['auto-dark-mode'] && lat !== null && long !== null) {
-        const now = new Date();
-        const currentTime = now.getTime();
-        const sunriseTime = new Date(sunrise).getTime();
-        const sunsetTime = new Date(sunset).getTime();
-
-        if (currentTime >= sunsetTime || currentTime < sunriseTime) {
-            if (!darkOn) {
-                customLog('Applying dark mode based on sunset...');
-                document.body.classList.add('dark-mode');
-                darkOn = true;
-                document.getElementById('darkModeToggle').checked = true;
-                updateDarkModeDependants();
-            }
-        } else {
-            if (darkOn) {
-                customLog('Applying light mode based on sunrise...');
-                document.body.classList.remove('dark-mode');
-                darkOn = false;
-                document.getElementById('darkModeToggle').checked = false;
-                updateDarkModeDependants();
-            }
-        }
-    }
-}
-
-function updateDarkModeDependants() {
-    // Update the network graph axis colors
-    updateChartAxisColors();
-}
-
 async function fetchWikipediaData(lat, long) {
     customLog('Fetching Wikipedia data...');
-    const url = `https://secure.geonames.org/findNearbyWikipediaJSON?lat=${lat}&lng=${long}&username=birgefuller`;
+    const url = `https://secure.geonames.org/findNearbyWikipediaJSON?lat=${lat}&lng=${long}&username=${GEONAMES_USERNAME}`;
     try {
         const response = await fetch(url);
         const data = await response.json();
@@ -264,168 +117,6 @@ window.loadExternalUrl = function (url, inFrame = false) {
     const activeButton = document.querySelector('.section-button.active');
     if (activeButton) {
         activeButton.classList.remove('active');
-    }
-}
-
-export async function updateNews(clear = false) {
-    try {
-        // Collect excluded RSS feeds from user settings
-        const excludedFeeds = [];
-        if (currentUser && settings) {
-            // Collect all RSS feed settings that are set to false
-            for (const key in settings) {
-                if (key.startsWith('rss-') && settings[key] === false) {
-                    // Extract feed ID after the "rss-" prefix
-                    const feedId = key.substring(4);
-                    excludedFeeds.push(feedId);
-                }
-            }
-        }
-        
-        // Use test parameter when in test mode
-        const baseUrl = testMode ? 'rss.php?test' : 'rss.php';
-        
-        // Get the news container element
-        const newsContainer = document.getElementById('newsHeadlines');
-        if (!newsContainer) return;
-
-        // Clear the news container if requested
-        if (clear) {
-            newsContainer.innerHTML = '';
-            lastNewsTimestamp = 0; // Reset last news timestamp
-            seenNewsIds.clear(); // Clear seen news IDs
-            userHasSeenLatestNews = true; // Reset user seen status
-        }
-        // TODO: Differentiate between loaded news and read news...
-
-        // Show loading spinner if no items are displayed yet or only showing a message
-        const isEmpty = !newsContainer.innerHTML || 
-                       newsContainer.innerHTML.includes('<em>') || 
-                       newsContainer.innerHTML.trim() === '';
-        
-        if (isEmpty) {
-            newsContainer.innerHTML = '<div class="spinner-container"><div class="spinner"></div></div>';
-        }
-        
-        customLog('Updating news headlines...' + (testMode ? ' (TEST MODE)' : ''));
-        if (excludedFeeds.length > 0) {
-            customLog('Excluding RSS feeds:', excludedFeeds);
-        }
-        
-        // Send the request with excluded feeds in the body
-        const response = await fetch(baseUrl, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({ excludedFeeds })
-        });
-        
-        const items = await response.json();
-        
-        // Make sure to remove the spinner when data arrives
-        const spinnerContainer = newsContainer.querySelector('.spinner-container');
-        if (spinnerContainer) {
-            spinnerContainer.remove();
-        }
-        
-        // Filter for new items only
-        let hasNewItems = false;
-        const newItems = [];
-        
-        if (items.length > 0) {
-            // Generate unique IDs for each news item 
-            items.forEach(item => {
-                // Create a unique ID based on title and source
-                const itemId = `${item.source}-${item.title.substring(0, 40)}`;
-                item.id = itemId;
-                
-                // Check if this is a new item
-                if (!seenNewsIds.has(itemId)) {
-                    hasNewItems = true;
-                    newItems.push(item);
-                    seenNewsIds.add(itemId);
-                }
-            });
-            
-            // If we have new items, update notification and add to container
-            if (hasNewItems) {
-                const newestTimestamp = Math.max(...items.map(item => item.date));
-                if (newestTimestamp > lastNewsTimestamp) {
-                    lastNewsTimestamp = newestTimestamp;
-                    userHasSeenLatestNews = false;
-                    
-                    // Only add notification dot if news section is not currently displayed
-                    const newsSection = document.getElementById('news');
-                    if (newsSection && newsSection.style.display !== 'block') {
-                        const newsButton = document.querySelector('.section-button[onclick="showSection(\'news\')"]');
-                        if (newsButton) {
-                            newsButton.classList.add('has-notification');
-                        }
-                    }
-                }
-                
-                // Create HTML for new items with blue dot indicator
-                let newItemsHtml = newItems.map(item => {
-                    const date = new Date(item.date * 1000);
-                    const dateString = date.toLocaleDateString('en-US', { 
-                        month: 'short', 
-                        day: 'numeric'
-                    });
-                    const timeString = formatTime(date, { 
-                        timeZoneName: 'short'
-                    });
-                    
-                    // Extract domain for favicon
-                    let faviconUrl = '';
-                    try {
-                        const url = new URL(item.link);
-                        faviconUrl = `https://www.google.com/s2/favicons?domain=${url.hostname}&sz=32`;
-                    } catch (e) {
-                        console.error('Error parsing URL for favicon:', e);
-                    }
-                    
-                    return `
-                        <button class="news-item news-new" data-id="${item.id}" onclick="loadExternalUrl('${item.link}')">
-                            <img src="${faviconUrl}" class="news-favicon" onerror="this.style.display='none'">
-                            <div>
-                                <span class="news-source">${item.source.toUpperCase()}</span>
-                                <span class="news-date">${dateString}</span>
-                                <span class="news-time">${timeString}</span>
-                            </div>
-                            <div class="news-title">${item.title}</div>
-                        </button>`;
-                }).join('');
-                
-                // Prepend new items to existing content or initialize if empty
-                if (newsContainer.innerHTML && !newsContainer.innerHTML.includes('<em>') && !newsContainer.innerHTML.includes('spinner-container')) {
-                    newsContainer.innerHTML = newItemsHtml + newsContainer.innerHTML;
-                } else {
-                    newsContainer.innerHTML = newItemsHtml || '<p><em>No headlines available</em></p>';
-                }
-            }
-        }
-        
-        // If there were no new items and the container is empty or only contains a spinner, show a message
-        if (!hasNewItems && (!newsContainer.innerHTML || 
-                            newsContainer.innerHTML.includes('<em>') || 
-                            newsContainer.innerHTML.includes('spinner-container'))) {
-            newsContainer.innerHTML = '<p><em>No new headlines available</em></p>';
-        }
-        
-    } catch (error) {
-        console.error('Error fetching news:', error);
-        customLog('Error fetching news:', error);
-        
-        const newsContainer = document.getElementById('newsHeadlines');
-        // Make sure to remove the spinner even in case of an error
-        if (newsContainer) {
-            const spinnerContainer = newsContainer.querySelector('.spinner-container');
-            if (spinnerContainer) {
-                spinnerContainer.remove();
-            }
-            newsContainer.innerHTML = '<p><em>Error loading headlines</em></p>';
-        }
     }
 }
 
@@ -578,7 +269,7 @@ async function updateLocationData(lat, long) {
     neverUpdatedLocation = false;
 
     // Fire off API requests for external data
-    locationTimeZone = await updateTimeZone(lat, long);  // TODO: this should be done more rarely
+    // updateTimeZone(lat, long);
     fetchCityData(lat, long);
 
     // Update connectivity data iff the Network section is visible
@@ -594,10 +285,6 @@ async function updateLocationData(lat, long) {
         customLog('Updating Wikipedia data...');
         fetchWikipediaData(lat, long);
     }
-
-    lastUpdateLat = lat;
-    lastUpdateLong = long;
-    lastUpdate = Date.now();
 }
 
 function shouldUpdateShortRangeData() {
@@ -610,6 +297,31 @@ function shouldUpdateShortRangeData() {
     const distance = calculateDistance(lat, long, lastUpdateLat, lastUpdateLong);
     
     return distance >= UPDATE_DISTANCE_THRESHOLD || timeSinceLastUpdate >= UPDATE_TIME_THRESHOLD;
+}
+
+function shouldUpdateLongRangeData() {
+    // Check if we've never updated weather data
+    if (lastWxUpdate === 0 || lastWxUpdateLat === null || lastWxUpdateLong === null) {
+        return true;
+    }
+    
+    // Check time threshold using WX_TIME_THRESHOLD constant
+    const now = Date.now();
+    const timeSinceLastUpdate = now - lastWxUpdate;
+    if (timeSinceLastUpdate >= WX_TIME_THRESHOLD * 60 * 1000) { // Convert minutes to milliseconds
+        return true;
+    }
+    
+    // Check distance threshold using WX_DISTANCE_THRESHOLD constant
+    if (lat !== null && long !== null) {
+        const distance = calculateDistance(lat, long, lastWxUpdateLat, lastWxUpdateLong);
+        if (distance >= WX_DISTANCE_THRESHOLD) { // Use constant for meters
+            return true;
+        }
+    }
+    
+    // No need to update weather data
+    return false;
 }
 
 function handlePositionUpdate(position) {
@@ -676,11 +388,17 @@ function handlePositionUpdate(position) {
     // Short distance updates
     if (shouldUpdateShortRangeData()) {
         updateLocationData(lat, long);
+        lastUpdateLat = lat;
+        lastUpdateLong = long;
+        lastUpdate = Date.now();
     }
 
     // Long distance updates
     if (shouldUpdateLongRangeData()) {
         fetchWeatherData(lat, long);
+        lastWxUpdate = Date.now();
+        lastWxUpdateLat = lat;
+        lastWxUpdateLong = long;
     }
 }
 
@@ -725,29 +443,6 @@ function stopGPSUpdates() {
     }
 }
 
-// Function to pause news updates
-function pauseNewsUpdates() {
-    if (newsUpdateInterval) {
-        clearInterval(newsUpdateInterval);
-        newsUpdateInterval = null;
-        customLog('News updates paused');
-    }
-}
-
-// Function to resume news updates if they were active
-function resumeNewsUpdates() {
-    if (newsUpdatesActive && !newsUpdateInterval) {
-        updateNews(); // Call immediately
-        // Set interval based on test mode
-        if (testMode) {
-            newsUpdateInterval = setInterval(updateNews, 15000);
-        } else {
-            newsUpdateInterval = setInterval(updateNews, 60000 * NEWS_REFRESH_INTERVAL);
-        }
-        customLog('News updates resumed');
-    }
-}
-
 // Show a specific section and update URL - defined directly on window object
 window.showSection = function(sectionId) {
     // Log the clicked section
@@ -768,7 +463,7 @@ window.showSection = function(sectionId) {
 
     // If switching to news section, clear the notification dot
     if (sectionId === 'news') {
-        userHasSeenLatestNews = true;
+        setUserHasSeenLatestNews(true);
         const newsButton = document.querySelector('.section-button[onclick="showSection(\'news\')"]');
         if (newsButton) {
             newsButton.classList.remove('has-notification');
@@ -799,22 +494,6 @@ window.showSection = function(sectionId) {
     const section = document.getElementById(sectionId);
     if (section) {
         section.style.display = 'block';
-
-        // Original section-specific logic
-        if (sectionId === 'news') {
-            // Only update news if interval is not set (first visit)
-            if (!newsUpdateInterval) {
-                updateNews();
-                // Set newsUpdatesActive to true
-                newsUpdatesActive = true;
-                // if we're in test mode, set the interval to update every 15 seconds
-                if (testMode) {
-                    newsUpdateInterval = setInterval(updateNews, 15000);
-                } else {
-                    newsUpdateInterval = setInterval(updateNews, 60000 * NEWS_REFRESH_INTERVAL);
-                }
-            }
-        }
 
         if (sectionId === 'satellite') {
             // Load weather image when satellite section is shown
@@ -872,7 +551,6 @@ console.log('*** app.js top level code ***');
 // URL parameters
 const urlParams = new URLSearchParams(window.location.search);
 const initialSection = urlParams.get('section') || 'news';
-testMode = urlParams.has('test');
 
 // Update link click event listener
 document.addEventListener('click', function(e) {
@@ -888,13 +566,23 @@ window.addEventListener('popstate', () => {
     showSection(getInitialSection());
 });
 
+// Handle page visibility changes
+document.addEventListener('visibilitychange', () => {
+    if (document.hidden) {
+        stopGPSUpdates();
+        pauseNewsUpdates();
+        pausePingTest();
+    } else {
+        startGPSUpdates();
+        resumeNewsUpdates();
+        resumePingTest();
+    }
+});
+
 // Event listeners and initialization after DOM content is loaded
 document.addEventListener('DOMContentLoaded', async function () {
     // Log
     customLog('DOM fully loaded and parsed...');
-
-    // Initialize time zone
-    locationTimeZone = browserTimeZone();
 
     // Attempt login from URL parameter or cookie
     await attemptLogin();
@@ -906,24 +594,14 @@ document.addEventListener('DOMContentLoaded', async function () {
     // Start location services
     startGPSUpdates();
 
-    // Get version from vers.php asyncly
-    updateVersion();
-
+    // Start news updates
+    resumeNewsUpdates();
+    
     // Begin network sensing
     startPingTest();
 
-    // Handle page visibility changes
-    document.addEventListener('visibilitychange', () => {
-        if (document.hidden) {
-            stopGPSUpdates();
-            pauseNewsUpdates();
-            stopPingTest();
-        } else {
-            startGPSUpdates();
-            resumeNewsUpdates();
-            resumePingTest();
-        }
-    });
+    // Get version from vers.php asyncly
+    updateVersion();
 
     // Add event listeners for login modal
     document.getElementById('login-cancel').addEventListener('click', closeLoginModal);
