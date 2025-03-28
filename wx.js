@@ -1,5 +1,5 @@
 // Import required functions from app.js
-import { customLog, formatTime, highlightUpdate, testMode } from './common.js';
+import { customLog, formatTime, highlightUpdate } from './common.js';
 import { autoDarkMode, settings } from './settings.js';
 
 // Constants
@@ -84,26 +84,6 @@ export function fetchWeatherData(lat, long, silentLoad = true) {
     // Fetch sunrise/sunset data
     fetchSunData(lat, long);
     autoDarkMode(lat, long);
-
-    // Use fake data in test mode
-    if (testMode) {
-        // Use mock data in test mode
-        customLog('Using mock weather data (test mode)');
-        weatherData = generateMockWeatherData();
-        updateWeatherDisplay();
-
-        const mockForecastData = generateMockForecastData();
-        updateForecastDisplay(mockForecastData);
-        
-        // Check for weather hazards after updating forecast data
-        checkWeatherHazards();
-        
-        // Hide spinner and show forecast after mock data is processed - only if not silent loading
-        if (forecastContainer) forecastContainer.style.display = 'flex';
-        if (loadingSpinner) loadingSpinner.style.display = 'none';
-        
-        return;
-    }
 
     // Fetch weather data from APIs
     Promise.all([

@@ -1,5 +1,5 @@
 // Imports
-import { customLog, testMode, formatTime } from './common.js';
+import { customLog, formatTime } from './common.js';
 import { settings, currentUser } from './settings.js';
 
 // Constants
@@ -33,8 +33,8 @@ export async function updateNews(clear = false) {
             }
         }
         
-        // Use test parameter when in test mode
-        const baseUrl = testMode ? 'rss.php?test' : 'rss.php';
+        // Allows for adding options to the URL for future use
+        const baseUrl = 'rss.php';
         
         // Get the news container element
         const newsContainer = document.getElementById('newsHeadlines');
@@ -58,7 +58,7 @@ export async function updateNews(clear = false) {
             newsContainer.innerHTML = '<div class="spinner-container"><div class="spinner"></div></div>';
         }
         
-        customLog('Updating news headlines...' + (testMode ? ' (TEST MODE)' : ''));
+        customLog('Updating news headlines...');
         if (excludedFeeds.length > 0) {
             customLog('Excluding RSS feeds:', excludedFeeds);
         }
@@ -193,12 +193,7 @@ window.pauseNewsUpdates = function () {
 window.resumeNewsUpdates = function () {
     if (!newsUpdateInterval) {
         updateNews(); // Call immediately
-        // Set interval based on test mode
-        if (testMode) {
-            newsUpdateInterval = setInterval(updateNews, 15000);
-        } else {
-            newsUpdateInterval = setInterval(updateNews, 60000 * NEWS_REFRESH_INTERVAL);
-        }
+        newsUpdateInterval = setInterval(updateNews, 60000 * NEWS_REFRESH_INTERVAL);
         customLog('News updates resumed');
     }
 }
