@@ -37,7 +37,7 @@ let neverUpdatedLocation = true;
 let radarContext = null;
 let gpsIntervalId = null;
 let lastGPSUpdate = 0;
-const positionSimulator = new PositionSimulator();
+const positionSimulator = new PositionSimulator(); // TODO: only create if needed
 
 function calculateDistance(lat1, lon1, lat2, lon2) {
     const R = 6371e3; // Earth's radius in meters
@@ -514,6 +514,14 @@ window.showSection = function(sectionId) {
             newsButton.classList.remove('has-notification');
         }
     }
+    
+    // If switching to about section, clear the notification dot
+    if (sectionId === 'about') {
+        const aboutButton = document.querySelector('.section-button[onclick="showSection(\'about\')"]');
+        if (aboutButton) {
+            aboutButton.classList.remove('has-notification');
+        }
+    }
 
     // Clear "new" markers from news items when switching to a different section
     if (sectionId !== 'news') {
@@ -625,10 +633,6 @@ function updateVersion() {
 // Console logging
 console.log('*** app.js top level code ***');
 
-// URL parameters
-const urlParams = new URLSearchParams(window.location.search);
-const initialSection = urlParams.get('section') || 'news';
-
 // Update link click event listener
 document.addEventListener('click', function(e) {
     if (e.target.tagName === 'A' && !e.target.closest('.section-buttons')) {
@@ -665,6 +669,42 @@ document.addEventListener('DOMContentLoaded', async function () {
     await attemptLogin();
     updateLoginState();
 
+    // Check for NOTE file and display if present
+    fetch('NOTE')
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('NOTE file not found');
+            }
+            return response.text();
+        })
+        .then(content => {
+            // Sanitize the content to prevent XSS
+            const sanitizedContent = document.createElement('div');
+            sanitizedContent.textContent = content;
+            
+            // Update the note paragraph with the sanitized content in italic
+            const noteElement = document.getElementById('note');
+            noteElement.innerHTML = `<em>${sanitizedContent.innerHTML}</em>`;
+            
+            // Show the announcement section
+            const announcementSection = document.getElementById('announcement');
+            if (announcementSection) {
+                announcementSection.style.display = 'block';
+            }
+            
+            // Add notification dot to About section if it's not the current section
+            const aboutSection = document.getElementById('about');
+            if (aboutSection && aboutSection.style.display !== 'block') {
+                const aboutButton = document.querySelector('.section-button[onclick="showSection(\'about\')"]');
+                if (aboutButton) {
+                    aboutButton.classList.add('has-notification');
+                }
+            }
+        })
+        .catch(error => {
+            customLog('No NOTE file found or error reading it:', error);
+        });
+
     // Initialize radar display
     initializeRadar();
 
@@ -692,5 +732,7 @@ document.addEventListener('DOMContentLoaded', async function () {
     });
 
     // Show the initial section from URL parameter
+    const urlParams = new URLSearchParams(window.location.search);
+    const initialSection = urlParams.get('section') || 'news';
     showSection(initialSection);
 });
