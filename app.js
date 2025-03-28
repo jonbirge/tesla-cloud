@@ -16,7 +16,7 @@ const SAT_URLS = {
 import { customLog, highlightUpdate, testMode, GEONAMES_USERNAME } from './common.js';
 import { PositionSimulator } from './location.js';
 import { attemptLogin, updateLoginState, settings } from './settings.js';
-import { fetchWeatherData } from './wx.js';
+import { fetchWeatherData, weatherData } from './wx.js';
 import { updateNetworkInfo, startPingTest } from './net.js';
 import { setUserHasSeenLatestNews } from './news.js';
 
@@ -540,7 +540,39 @@ window.showSection = function(sectionId) {
     if (section) {
         section.style.display = 'block';
 
-        if (sectionId === 'satellite') {
+        if (sectionId === 'navigation' && testMode) {
+            // In test mode, replace TeslaWaze iframe with "TESTING MODE" message
+            const teslaWazeContainer = document.querySelector('.teslawaze-container');
+            if (teslaWazeContainer) {
+                const iframe = teslaWazeContainer.querySelector('iframe');
+                if (iframe) {
+                    iframe.style.display = 'none';
+                    
+                    // Check if our test mode message already exists
+                    let testModeMsg = teslaWazeContainer.querySelector('.test-mode-message');
+                    if (!testModeMsg) {
+                        // Create and add the test mode message
+                        testModeMsg = document.createElement('div');
+                        testModeMsg.className = 'test-mode-message';
+                        testModeMsg.style.cssText = 'display: flex; justify-content: center; align-items: center; height: 100%; font-size: 32px; font-weight: bold;';
+                        testModeMsg.textContent = 'TESTING MODE';
+                        teslaWazeContainer.appendChild(testModeMsg);
+                    } else {
+                        testModeMsg.style.display = 'flex';
+                    }
+                }
+            }
+        } else if (sectionId === 'navigation') {
+            // Normal mode - ensure iframe is visible and test mode message is hidden
+            const teslaWazeContainer = document.querySelector('.teslawaze-container');
+            if (teslaWazeContainer) {
+                const iframe = teslaWazeContainer.querySelector('iframe');
+                const testModeMsg = teslaWazeContainer.querySelector('.test-mode-message');
+                
+                if (iframe) iframe.style.display = '';
+                if (testModeMsg) testModeMsg.style.display = 'none';
+            }
+        } else if (sectionId === 'satellite') {
             // Load weather image when satellite section is shown
             const weatherImage = document.getElementById('weather-image');
             weatherImage.src = SAT_URLS.latest;

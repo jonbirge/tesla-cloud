@@ -38,33 +38,6 @@ $feeds = [
     'jalopnik' => 'https://jalopnik.com/rss',
 ];
 
-// Check if we're in test mode
-$testMode = isset($_GET['test']);
-
-// If in test mode, return fake news items with timestamps 1-5 seconds ago
-if ($testMode) {
-    header('Content-Type: application/json');
-    
-    $testItems = [];
-    $now = time();
-    
-    // Test sources for variety
-    $testSources = ['testnews', 'testlert', 'testrati', 'insidetest', 'testrek'];
-    
-    // Generate 5 fake news items with timestamps from 1-5 seconds ago
-    for ($i = 1; $i <= 5; $i++) {
-        $testItems[] = [
-            'title' => "Test Breaking News Headline #$i - " . date('H:i:s'),
-            'link' => "https://example.com/news/$i",
-            'date' => $now - $i, // 1 to 5 seconds ago
-            'source' => $testSources[$i-1]
-        ];
-    }
-    
-    echo json_encode($testItems);
-    exit;
-}
-
 // Set up error logging - clear log file on each run
 file_put_contents('/tmp/rss-php-errors.log', ''); // Empty the file
 ini_set('log_errors', 1);

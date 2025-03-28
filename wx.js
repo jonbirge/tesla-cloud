@@ -6,14 +6,14 @@ import { autoDarkMode, settings } from './settings.js';
 const OPENWX_API_KEY = '6a1b1bcb03b5718a9b3a2b108ce3293d';
 
 // Global variables
-let forecastData = null;
 let weatherData = null;
 let sunrise = null;
 let sunset = null;
+let forecastData = null;
 let moonPhaseData = null;
 
 // Export these variables for use in other modules
-export { sunrise, sunset };
+export { sunrise, sunset, weatherData };
 
 // Helper function to convert temperature based on user settings
 function formatTemperature(tempF) {

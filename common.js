@@ -84,6 +84,12 @@ function browserTimeZone() {
     return tz;
 }
 
+// ***** Initialization *****
+
 // URL parameters
 const urlParams = new URLSearchParams(window.location.search);
-testMode = urlParams.has('test');
+const testParam = urlParams.get('test');
+testMode = testParam === 'true';
+if (testMode) {
+    customLog('##### TEST MODE #####');
+}
