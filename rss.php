@@ -33,9 +33,12 @@ $feeds = [
     'insideevs' => 'https://insideevs.com/rss/articles/all/',
     'electrek' => 'https://electrek.co/feed/',
     'thedrive' => 'https://www.thedrive.com/feed',
-    'techcrunch' => 'https://techcrunch.com/feed/',
-    'theverge' => 'https://www.theverge.com/rss/index.xml',
     'jalopnik' => 'https://jalopnik.com/rss',
+    'arstechnica' => 'https://feeds.arstechnica.com/arstechnica/index',
+    'engadget' => 'https://www.engadget.com/rss.xml',
+    'gizmodo' => 'https://gizmodo.com/rss',
+    'theverge' => 'https://www.theverge.com/rss/index.xml',
+    'defensenews' => 'https://www.defensenews.com/arc/outboundfeeds/rss/?outputType=xml'
 ];
 
 // Set up error logging - clear log file on each run

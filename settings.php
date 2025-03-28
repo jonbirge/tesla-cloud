@@ -19,29 +19,7 @@ $maxValueLength = 1024;  // Maximum length for setting values
 $defaultSettings = [
     "auto-dark-mode" => true,
     "24-hour-time" => false,
-    "imperial-units" => true,
-    "always-dark" => false,
-    "small-fonts" => false,
-    "rss-wsj" => true,
-    "rss-nyt" => true,
-    "rss-wapo" => true,
-    "rss-latimes" => true,
-    "rss-bloomberg" => false,
-    "rss-bos" => false,
-    "rss-bloomberg-tech" => false,
-    "rss-bbc" => true,
-    "rss-economist" => true,
-    "rss-telegraph" => false,
-    "rss-lemonde" => false,
-    "rss-derspiegel" => true,
-    "rss-teslarati" => true,
-    "rss-notateslaapp" => true,
-    "rss-insideevs" => true,
-    "rss-electrek" => false,
-    "rss-techcrunch" => true,
-    "rss-theverge" => false,
-    "rss-jalopnik" => false,
-    "rss-thedrive" => false,
+    "imperial-units" => true
 ];
 
 // Load .env variables from a JSON file

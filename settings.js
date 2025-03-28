@@ -20,7 +20,6 @@ const defaultSettings = {
     "auto-dark-mode": true,
     "24-hour-time": false,
     "imperial-units": true,
-    "small-fonts": false,
     // News source settings - default to most sources enabled
     "rss-wsj": true,
     "rss-nyt": true,
@@ -42,6 +41,10 @@ const defaultSettings = {
     "rss-techcrunch": true,
     "rss-jalopnik": false,
     "rss-theverge": true,
+    "rss-arstechnica": true,
+    "rss-engadget": false,
+    "rss-gizmodo": false,
+    "rss-defensenews": false,
 };
 
 // Update the dark/light mode based on sunrise/sunset
