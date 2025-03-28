@@ -101,11 +101,24 @@ hr {
     margin-bottom: 28px;
 }
 
+/* About */
+
 #about {
     font-variant-ligatures: all;
 }
 
+.announcement p {
+    background-color: #03a9f44d;
+    color: var(--button-text);
+    border-radius: var(--button-radius);
+    padding: 18px;
+    font-style: none;
+    font-weight: 600;
+}
+
+
 /* Navigation */
+
 .hidden {
     display: none;
 }

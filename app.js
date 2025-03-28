@@ -612,6 +612,45 @@ window.showSection = function(sectionId) {
     }
 };
 
+// Check for NOTE file and display if present
+function updateServerNote() {
+    fetch('NOTE')
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('NOTE file not found');
+            }
+            return response.text();
+        })
+        .then(content => {
+            // Sanitize the content to prevent XSS
+            const sanitizedContent = document.createElement('div');
+            sanitizedContent.textContent = content;
+            
+            // Update the note paragraph with the sanitized content in italic
+            const noteElement = document.getElementById('note');
+            noteElement.innerHTML = sanitizedContent.innerHTML;
+            
+            // Show the announcement section
+            const announcementSection = document.getElementById('announcement');
+            if (announcementSection) {
+                announcementSection.style.display = 'block';
+            }
+            
+            // Add notification dot to About section if it's not the current section
+            const aboutSection = document.getElementById('about');
+            if (aboutSection && aboutSection.style.display !== 'block') {
+                const aboutButton = document.querySelector('.section-button[onclick="showSection(\'about\')"]');
+                if (aboutButton) {
+                    aboutButton.classList.add('has-notification');
+                }
+            }
+        })
+        .catch(error => {
+            customLog('No NOTE file found or error reading it:', error);
+        });
+}
+
+// Show git version from vers.php
 function updateVersion() {
     const versionElement = document.getElementById('version');
     if (versionElement) {
@@ -670,40 +709,7 @@ document.addEventListener('DOMContentLoaded', async function () {
     updateLoginState();
 
     // Check for NOTE file and display if present
-    fetch('NOTE')
-        .then(response => {
-            if (!response.ok) {
-                throw new Error('NOTE file not found');
-            }
-            return response.text();
-        })
-        .then(content => {
-            // Sanitize the content to prevent XSS
-            const sanitizedContent = document.createElement('div');
-            sanitizedContent.textContent = content;
-            
-            // Update the note paragraph with the sanitized content in italic
-            const noteElement = document.getElementById('note');
-            noteElement.innerHTML = `<em>${sanitizedContent.innerHTML}</em>`;
-            
-            // Show the announcement section
-            const announcementSection = document.getElementById('announcement');
-            if (announcementSection) {
-                announcementSection.style.display = 'block';
-            }
-            
-            // Add notification dot to About section if it's not the current section
-            const aboutSection = document.getElementById('about');
-            if (aboutSection && aboutSection.style.display !== 'block') {
-                const aboutButton = document.querySelector('.section-button[onclick="showSection(\'about\')"]');
-                if (aboutButton) {
-                    aboutButton.classList.add('has-notification');
-                }
-            }
-        })
-        .catch(error => {
-            customLog('No NOTE file found or error reading it:', error);
-        });
+    updateServerNote();
 
     // Initialize radar display
     initializeRadar();
