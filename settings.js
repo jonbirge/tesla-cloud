@@ -92,9 +92,8 @@ function updateDarkModeDependants() {
     updateChartAxisColors();
 }
 
-// Function to initialize application with either user settings or defaults
+// Function to initialize with defaults
 function initializeSettings() {
-    // If no login has happened yet, use default settings
     if (!isLoggedIn) {
         settings = { ...defaultSettings };
         initializeToggleStates();
@@ -131,146 +130,6 @@ window.closeLoginModal = function () {
     document.getElementById('login-modal').style.display = 'none';
 }
 
-// Function to validate user ID
-async function validateUserId(userId) {
-    // Check for minimum length (9 characters)
-    if (userId.length < 9) {
-        return { valid: false, message: 'User ID must be at least 9 characters long.' };
-    }
-    
-    // Check for standard characters (letters, numbers, underscore, hyphen)
-    const validFormat = /^[a-zA-Z0-9_-]+$/;
-    if (!validFormat.test(userId)) {
-        return { valid: false, message: 'User ID can only contain letters, numbers, underscore, and hyphen.' };
-    }
-    
-    try {
-        // Hash the user ID before sending to the server
-        const hashedId = await hashUserId(userId);
-        
-        // Use HEAD request to check if the user exists
-        const response = await fetch(`settings.php/${encodeURIComponent(hashedId)}`, {
-            method: 'HEAD'
-        });
-        
-        if (response.status === 404) {
-            // User doesn't exist, create default settings
-            const created = await createNewUser(userId, hashedId);
-            if (!created) {
-                return { valid: false, message: 'Failed to create new user.' };
-            }
-        } else if (!response.ok) {
-            return { valid: false, message: 'Error checking user existence.' };
-        }
-        
-        return { valid: true };
-    } catch (error) {
-        console.error('Error validating user ID:', error);
-        return { valid: false, message: 'Network error during validation.' };
-    }
-}
-
-// Function to create a new user with default settings
-async function createNewUser(userId, hashedId = null) {
-    try {
-        // If hashedId wasn't provided, generate it
-        if (!hashedId) {
-            hashedId = await hashUserId(userId);
-        }
-        
-        const response = await fetch(`settings.php/${encodeURIComponent(hashedId)}`, {
-            method: 'POST'
-        });
-        
-        if (response.ok) {
-            customLog('Created new user with default settings:', userId);
-            return true;
-        } else {
-            customLog('Failed to create new user:', userId);
-            return false;
-        }
-    } catch (error) {
-        console.error('Error creating new user:', error);
-        return false;
-    }
-}
-
-// Function to attempt login from URL parameter or cookie
-export async function attemptLogin() {
-    const urlParams = new URLSearchParams(window.location.search);
-    let userId = urlParams.get('user');
-    
-    // If no userid in URL, try to get from cookie
-    if (!userId) {
-        userId = getCookie('userid');
-        customLog('Checking for userid cookie:', userId ? 'found' : 'not found');
-    }
-
-    if (userId) {
-        await fetchSettings(userId);
-    } else {
-        initializeSettings();
-    }
-}
-
-async function fetchSettings(userId) {
-    const validation = await validateUserId(userId);
-    if (validation.valid) {
-        try {
-            // Hash the user ID before sending to the server
-            hashedUser = await hashUserId(userId);
-            
-            // Check if user exists and fetch settings using RESTful API
-            const response = await fetch(`settings.php/${encodeURIComponent(hashedUser)}`, {
-                method: 'GET'
-            });
-            
-            if (response.ok) {
-                // Login successful
-                isLoggedIn = true;
-                currentUser = userId;
-        
-                // Update UI
-                updateLoginState();
-                
-                // Activate the settings section button
-                document.getElementById('settings-section').classList.remove('hidden');
-                
-                // Update URL with userid parameter
-                updateUrlWithUserId(userId);
-        
-                // Save user ID in a cookie
-                setCookie('userid', userId);
-
-                // Load settings
-                settings = await response.json();
-                customLog('Settings loaded: ', settings);
-        
-                // Initialize toggle states based on settings
-                initializeToggleStates();
-
-                // Update news feed
-                updateNews(true);
-
-                // TODO: Update weather data
-            } else {
-                console.error('Error authenticating with user ID');
-            }
-        } catch (error) {
-            console.error('Login error: ', error);
-        }
-    } else {
-        console.error('Invalid user ID: ', validation.message);
-    }
-}
-
-// Function to handle login from dialog
-window.handleLogin = async function () {
-    const userId = document.getElementById('user-id').value.trim();
-    closeLoginModal();
-    fetchSettings(userId);
-}
-
 // Function to handle logout
 window.handleLogout = function () {
     isLoggedIn = false;
@@ -290,25 +149,153 @@ window.handleLogout = function () {
         showSection('news');
     }
     
-    // Remove userid from URL
-    removeUserIdFromUrl();
-    
     // Remove the userid cookie
     deleteCookie('userid');
 }
 
-// Function to update URL with userId
-function updateUrlWithUserId(userId) {
-    const url = new URL(window.location);
-    url.searchParams.set('user', userId);
-    window.history.pushState({}, '', url);
+// Function to handle login from dialog
+window.handleLogin = async function () {
+    const userId = document.getElementById('user-id').value.trim();
+    closeLoginModal();
+    fetchSettings(userId);
 }
 
-// Function to remove userId from URL
-function removeUserIdFromUrl() {
-    const url = new URL(window.location);
-    url.searchParams.delete('user');
-    window.history.pushState({}, '', url);
+// Function to validate user ID, and if valid, set environment variables
+async function validateUserId(userId) {
+    // Check for minimum length (9 characters)
+    if (userId.length < 9) {
+        return { valid: false, message: 'User ID must be at least 9 characters long.' };
+    }
+    
+    // Check for standard characters (letters, numbers, underscore, hyphen)
+    const validFormat = /^[a-zA-Z0-9_-]+$/;
+    if (!validFormat.test(userId)) {
+        return { valid: false, message: 'User ID can only contain letters, numbers, underscore, and hyphen.' };
+    }
+    
+    try {
+        
+        // Hash the user ID before sending to the server
+        const hashedId = await hashUserId(userId);
+        
+        // Use HEAD request to check if the user exists
+        const response = await fetch(`settings.php/${encodeURIComponent(hashedId)}`, {
+            method: 'HEAD'
+        });
+        
+        if (response.status === 404) {
+            // User doesn't exist, create default settings
+            const created = await createNewUser(userId, hashedId);
+            if (!created) {
+                return { valid: false, message: 'Failed to create new user.' };
+            }
+        } else if (!response.ok) {
+            return { valid: false, message: 'Error checking user existence.' };
+        }
+        
+        // User exists, set environment variables
+        isLoggedIn = true;
+        currentUser = userId;
+        hashedUser = hashedId;
+        customLog('User ID validated and logged in: ', userId, '(hashed: ', hashedId, ')');
+        return { valid: true };
+
+    } catch (error) {
+        console.error('Error validating user ID:', error);
+        return { valid: false, message: 'Network error during validation.' };
+    }
+}
+
+// Update the settings from REST server or create new user with defaults
+async function fetchSettings(userId) {
+    const validation = await validateUserId(userId);
+    if (validation.valid) {
+        try {
+            // Check if user exists and fetch settings using RESTful API
+            const response = await fetch(`settings.php/${encodeURIComponent(hashedUser)}`, {
+                method: 'GET'
+            });
+            
+            if (response.ok) {
+                // Load settings
+                settings = await response.json();
+                customLog('Settings loaded: ', settings);
+        
+                // Update UI
+                updateLoginState();
+                
+                // Activate the settings section button
+                document.getElementById('settings-section').classList.remove('hidden');
+        
+                // Save user ID in a cookie
+                setCookie('userid', userId);
+
+                // Initialize toggle states based on settings
+                initializeToggleStates();
+
+                // Update news feed
+                updateNews(true);
+
+                // TODO: Update weather and other data
+            } else {
+                console.error('Error fetching settings: ', response.statusText);
+            }
+        } catch (error) {
+            console.error('Error fetching settings: ', error);
+        }
+    } else {
+        console.error('Invalid user ID: ', validation.message);
+    }
+}
+
+// Function to create a new user with default settings
+async function createNewUser(userId, hashedId = null) {
+    try {
+        // If hashedId wasn't provided, generate it
+        if (!hashedId) {
+            hashedId = await hashUserId(userId);
+        }
+        
+        const response = await fetch(`settings.php/${encodeURIComponent(hashedId)}`, {
+            method: 'POST'
+        });
+        
+        if (response.ok) {
+            customLog('Created new user with default settings:', userId);
+            isLoggedIn = true;
+            currentUser = userId;
+            hashedUser = hashedId;
+            // Go through all values in the settings object and set them to the server
+            for (const [key, value] of Object.entries(settings)) {
+                await toggleSetting(key, value);
+            }
+            return true;
+        } else {
+            customLog('Failed to create new user:', userId);
+            return false;
+        }
+    } catch (error) {
+        console.error('Error creating new user:', error);
+        return false;
+    }
+}
+
+// Function to attempt login from cookie
+export async function attemptLogin() {
+    const urlParams = new URLSearchParams(window.location.search);
+    let userId = urlParams.get('user');
+    
+    // If no userid in URL, try to get from cookie
+    if (!userId) {
+        userId = getCookie('userid');
+        customLog('Checking for userid cookie:', userId ? 'found' : 'not found');
+    }
+
+    if (userId) {
+        await fetchSettings(userId);
+    } else {
+        initializeSettings();
+    }
 }
 
 // Update login/logout button visibility based on state
@@ -329,11 +316,16 @@ export function updateLoginState() {
 
 // Function called by the toggle UI elements
 window.toggleSettingFrom = function(element) {
+    customLog('Toggle setting from UI element:', element);
     const settingItem = element.closest('.settings-toggle-item');
     if (settingItem && settingItem.dataset.setting) {
         const key = settingItem.dataset.setting;
         const value = element.checked;
         toggleSetting(key, value);
+        // If the setting is RSS-related, update the news feed
+        if (key.startsWith('rss-')) {
+            updateNews(true);
+        }
     }
 }
 
@@ -345,11 +337,6 @@ export async function toggleSetting(key, value) {
         
         // Update toggle state visually
         updateToggleVisualState(key, value);
-        
-        // If the setting is RSS-related, update the news feed
-        if (key.startsWith('rss-')) {
-            updateNews(true);
-        }
 
         customLog(`Setting "${key}" updated to ${value} (local only)`);
         return;
@@ -372,11 +359,6 @@ export async function toggleSetting(key, value) {
                 value: value
             })
         });
-        
-        // If the setting is RSS-related, update the news feed
-        if (key.startsWith('rss-')) {
-            updateNews(true);
-        }
 
         if (response.ok) {
             customLog(`Setting "${key}" updated to ${value}`);

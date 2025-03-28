@@ -17,9 +17,8 @@ $maxValueLength = 1024;  // Maximum length for setting values
 
 // Define default settings
 $defaultSettings = [
-    "auto-dark-mode" => true,
-    "24-hour-time" => false,
-    "imperial-units" => true
+    "creation-date" => date('Y-m-d H:i:s'),
+    "version" => "1"
 ];
 
 // Load .env variables from a JSON file
