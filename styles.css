@@ -108,12 +108,13 @@ hr {
 }
 
 .announcement p {
-    background-color: #03a9f44d;
+    background-color: #03a8f433;
     color: var(--button-text);
     border-radius: var(--button-radius);
     padding: 18px;
     font-style: none;
     font-weight: 600;
+    text-align: left;
 }
 
 
