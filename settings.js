@@ -51,7 +51,7 @@ function initializeSettings() {
     customLog('Using default settings (no login)');
     settings = { ...defaultSettings };
     initializeToggleStates();
-    updateNews(true);
+    customLog('Settings initialized: ', settings);
 }
 
 // Turn on dark mode
@@ -170,11 +170,6 @@ async function fetchSettings(userId) {
                 } else {
                     turnOffDarkMode();
                 }
-
-                // Update news feed
-                updateNews(true);
-
-                // TODO: Update weather and other data
             } else {
                 console.error('Error fetching settings: ', response.statusText);
             }
@@ -230,9 +225,9 @@ export async function attemptLogin() {
     }
 
     if (userId) {
-        await fetchSettings(userId);
+        await fetchSettings(userId); // Fetch settings for the user
     } else {
-        initializeSettings();
+        initializeSettings(); // No user ID found, use default settings
     }
 }
 
