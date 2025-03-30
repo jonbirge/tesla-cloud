@@ -18,10 +18,10 @@ export { sunrise, sunset, weatherData };
 // Helper function to convert temperature based on user settings
 function formatTemperature(tempF) {
     if (!settings || settings["imperial-units"]) {
-        return Math.round(tempF) + "°F";
+        return Math.round(tempF) + "°";
     } else {
         // Convert F to C: (F - 32) * 5/9
-        return Math.round((tempF - 32) * 5/9) + "°C";
+        return Math.round((tempF - 32) * 5/9) + "°";
     }
 }
 
@@ -29,7 +29,7 @@ function formatTemperature(tempF) {
 function formatWindSpeed(speedMS) {
     if (!settings || settings["imperial-units"]) {
         // Convert m/s to mph
-        return Math.round(speedMS * 2.237) + " mph";
+        return Math.round(speedMS * 2.237) + " MPH";
     } else {
         // Keep as m/s
         return Math.round(speedMS) + " m/s";
