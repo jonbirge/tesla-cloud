@@ -8,15 +8,15 @@ let isLoggedIn = false;
 let currentUser = null;
 let hashedUser = null; // Store the hashed version of the user ID
 let settings = {}; // Initialize settings object
-let darkOn = false; // TODO: Make persistent setting
 
 // Export settings object so it's accessible to other modules
-export { settings, currentUser, isLoggedIn, darkOn };
+export { settings, currentUser, isLoggedIn };
 
 // Default settings that will be used when no user is logged in
 const defaultSettings = {
     // General settings
     "auto-dark-mode": true,
+    "dark-mode": false,
     "24-hour-time": false,
     "imperial-units": true,
     // News source settings
@@ -48,32 +48,26 @@ const defaultSettings = {
 
 // Function to initialize with defaults
 function initializeSettings() {
-    if (!isLoggedIn) {
-        settings = { ...defaultSettings };
-        initializeToggleStates();
-        updateNews(true);
-        customLog('Using default settings (no login)');
-    }
+    customLog('Using default settings (no login)');
+    settings = { ...defaultSettings };
+    initializeToggleStates();
+    updateNews(true);
 }
 
 // Turn on dark mode
 export function turnOnDarkMode() {
-    if (!darkOn) {
-        document.body.classList.add('dark-mode');
-        darkOn = true;
-        document.getElementById('darkModeToggle').checked = true;
-        updateDarkModeDependants();
-    }
+    document.body.classList.add('dark-mode');
+    document.getElementById('darkModeToggle').checked = true;
+    toggleSetting('dark-mode', true);
+    updateDarkModeDependants();
 }
 
 // Turn off dark mode
 export function turnOffDarkMode() {
-    if (darkOn) {
-        document.body.classList.remove('dark-mode');
-        darkOn = false;
-        document.getElementById('darkModeToggle').checked = false;
-        updateDarkModeDependants();
-    }
+    document.body.classList.remove('dark-mode');
+    document.getElementById('darkModeToggle').checked = false;
+    toggleSetting('dark-mode', false);
+    updateDarkModeDependants();
 }
 
 // Update things that depend on dark mode
@@ -142,12 +136,13 @@ async function validateUserId(userId) {
     }
 }
 
-// Update the settings from REST server or create new user with defaults
+// Pull all settings for a given user from REST server, creating user account with defaults if needed
 async function fetchSettings(userId) {
-    const validation = await validateUserId(userId);
+    const validation = await validateUserId(userId); // returns true if valid user existed or was created
     if (validation.valid) {
         try {
-            // Check if user exists and fetch settings using RESTful API
+            // Fetch settings using RESTful API
+            customLog('Fetching settings for user: ', hashedUser);
             const response = await fetch(`settings.php/${encodeURIComponent(hashedUser)}`, {
                 method: 'GET'
             });
@@ -168,6 +163,13 @@ async function fetchSettings(userId) {
 
                 // Initialize toggle states based on settings
                 initializeToggleStates();
+
+                // Handle dark mode
+                if (settings['dark-mode']) {
+                    turnOnDarkMode();
+                } else {
+                    turnOffDarkMode();
+                }
 
                 // Update news feed
                 updateNews(true);
@@ -252,42 +254,42 @@ export function updateLoginState() {
 
 // Function to toggle a setting (updates both local cache and server)
 export async function toggleSetting(key, value) {
-    if (!isLoggedIn || !currentUser) {
-        // Update the local settings cache with boolean value
-        settings[key] = value;
-        
-        // Update toggle state visually
-        updateToggleVisualState(key, value);
+    // Handle local settings
+    settings[key] = value;
 
-        customLog(`Setting "${key}" updated to ${value} (local only)`);
-        return;
-    }
-    
-    try {
-        // Update the local settings cache with boolean value
-        settings[key] = value;
-        
-        // Update toggle state visually
-        updateToggleVisualState(key, value);
-        
-        // Update the server with the boolean value using the RESTful API
-        const response = await fetch(`settings.php/${encodeURIComponent(hashedUser)}/${encodeURIComponent(key)}`, {
-            method: 'PUT',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({
-                value: value
-            })
-        });
+    // Update toggle state visually
+    updateToggleVisualState(key, value);
 
-        if (response.ok) {
-            customLog(`Setting "${key}" updated to ${value}`);
-        } else {
-            customLog(`Failed to update setting "${key}" on server`);
+    customLog(`Setting "${key}" updated to ${value} (local)`);
+
+    // Update server if logged in
+    if (isLoggedIn && currentUser) {
+        try {
+            // Update the local settings cache with boolean value
+            settings[key] = value;
+
+            // Update toggle state visually
+            updateToggleVisualState(key, value);
+
+            // Update the server with the boolean value using the RESTful API
+            const response = await fetch(`settings.php/${encodeURIComponent(hashedUser)}/${encodeURIComponent(key)}`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    value: value
+                })
+            });
+
+            if (response.ok) {
+                customLog(`Setting "${key}" updated to ${value} (server)`);
+            } else {
+                customLog(`Failed to update setting "${key}" on server`);
+            }
+        } catch (error) {
+            customLog('Error toggling setting:', error);
         }
-    } catch (error) {
-        customLog('Error toggling setting:', error);
     }
 }
 
@@ -404,14 +406,15 @@ window.handleLogin = async function () {
 window.toggleMode = function () {
     toggleSetting('auto-dark-mode', false);
     document.body.classList.toggle('dark-mode');
-    darkOn = document.body.classList.contains('dark-mode');
-    document.getElementById('darkModeToggle').checked = darkOn;
+    const darkMode = document.body.classList.contains('dark-mode');
+    document.getElementById('darkModeToggle').checked = darkMode;
+    toggleSetting('dark-mode', darkMode);
     updateDarkModeDependants();
 }
 
 // Function called by the toggle UI elements
 window.toggleSettingFrom = function(element) {
-    customLog('Toggle setting from UI element:', element);
+    customLog('Toggle setting from UI element.');
     const settingItem = element.closest('.settings-toggle-item');
     if (settingItem && settingItem.dataset.setting) {
         const key = settingItem.dataset.setting;

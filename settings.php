@@ -1,6 +1,6 @@
 <?php
 // Settings management API
-// Provides a simple key-value store for user settings
+// Provides a simple RESTful key-value store for user settings
 // Format: settings.php/{userId}[/{key}]
 header('Content-Type: application/json');
 
