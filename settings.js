@@ -395,6 +395,7 @@ window.handleLogin = async function () {
     const userId = document.getElementById('user-id').value.trim();
     closeLoginModal();
     fetchSettings(userId);
+    updateNews(true); // Update news feed after login
 }
 
 // Manually swap dark/light mode
