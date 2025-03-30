@@ -7,7 +7,7 @@ $gitInfo = getGitInfo();
 $version = isset($gitInfo['commit']) ? $gitInfo['commit'] : 'unknown';
 
 // Settings
-$cacheDuration = 600; // 10 minutes
+$cacheDuration = 15*10; // 15 minutes
 $cacheFile = '/tmp/rss_cache_' . $version . '.json';
 $cacheTimestampFile = '/tmp/rss_cache_timestamp_' . $version;
 $logFile = '/tmp/rss_php_' . $version . '.log';

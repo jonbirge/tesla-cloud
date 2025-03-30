@@ -14,15 +14,17 @@ let seenNewsIds = new Set(); // Track news IDs we've already seen
 // Exports
 export { userHasSeenLatestNews };
 
+// Sets whether the user has seen the latest news
 export function setUserHasSeenLatestNews(value) {
     userHasSeenLatestNews = value;
 }
 
+// Updates the news headlines, optionally clearing existing ones
 export async function updateNews(clear = false) {
     try {
         // Collect excluded RSS feeds from user settings
         const excludedFeeds = [];
-        if (currentUser && settings) {
+        if (settings) {
             // Collect all RSS feed settings that are set to false
             for (const key in settings) {
                 if (key.startsWith('rss-') && settings[key] === false) {
@@ -180,7 +182,7 @@ export async function updateNews(clear = false) {
     }
 }
 
-// Function to pause news updates
+// Pauses the automatic news updates
 window.pauseNewsUpdates = function () {
     if (newsUpdateInterval) {
         clearInterval(newsUpdateInterval);
@@ -189,7 +191,7 @@ window.pauseNewsUpdates = function () {
     }
 }
 
-// Function to resume news updates if they were active
+// Resumes the automatic news updates if paused
 window.resumeNewsUpdates = function () {
     if (!newsUpdateInterval) {
         updateNews(); // Call immediately
