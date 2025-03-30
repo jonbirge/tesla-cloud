@@ -48,27 +48,7 @@ function getMoonPhaseName(phase) {
     return "Waning Crescent";
 }
 
-window.switchWeatherImage = function (type) {
-    const weatherImage = document.getElementById('weather-image');
-    weatherImage.style.opacity = '0';
-    
-    setTimeout(() => {
-        weatherImage.src = SAT_URLS[type];
-        weatherImage.style.opacity = '1';
-    }, 300);
-    
-    // Update buttons and slider position
-    const weatherSwitch = document.querySelector('.weather-switch');
-    const buttons = weatherSwitch.getElementsByTagName('button');
-    buttons[0].classList.toggle('active', type === 'latest');
-    buttons[1].classList.toggle('active', type === 'loop');
-    buttons[2].classList.toggle('active', type === 'latest_ir');
-    
-    // Update slider position for three states
-    const positions = { 'latest': 0, 'loop': 1, 'latest_ir': 2 };
-    weatherSwitch.style.setProperty('--slider-position', positions[type]);
-}
-
+// Fetches weather data and updates the display
 export function fetchWeatherData(lat, long, silentLoad = true) {
     customLog('Fetching weather data...' + (silentLoad ? ' (background load)' : ''));
     
@@ -137,6 +117,7 @@ export function fetchWeatherData(lat, long, silentLoad = true) {
         });
 }
 
+// Fetches sunrise and moon phase data
 function fetchSunData(lat, long) {
     // Log the lat/long for debugging
     customLog(`Fetching sun data for lat: ${lat}, long: ${long}`);
@@ -158,6 +139,7 @@ function fetchSunData(lat, long) {
         });
 }
 
+// Updates the display for sunrise, sunset, and moon phase
 function updateSunMoonDisplay() {
     const sunriseTime = formatTime(new Date(sunrise), {
         timeZoneName: 'short'
@@ -175,7 +157,7 @@ function updateSunMoonDisplay() {
     }
 }
 
-// Update the dark/light mode based on sunrise/sunset
+// Automatically toggles dark mode based on sunrise and sunset times
 export function autoDarkMode(lat, long) {
     customLog('Auto dark mode check for coordinates: ', lat, long);
     if (!sunrise || !sunset) {
@@ -201,6 +183,7 @@ export function autoDarkMode(lat, long) {
     }
 }
 
+// Checks if a day has hazardous weather conditions
 function dayHasHazards(forecastList) {
     const hazardConditions = ['Rain', 'Snow', 'Sleet', 'Hail', 'Thunderstorm', 'Storm', 'Drizzle'];
     return forecastList.weather.some(w => 
@@ -210,6 +193,7 @@ function dayHasHazards(forecastList) {
     );
 }
 
+// Updates the forecast display with daily data
 function updateForecastDisplay() {
     const forecastDays = document.querySelectorAll('.forecast-day');
     const dailyData = extractDailyForecast(forecastData);
@@ -249,7 +233,7 @@ function updateForecastDisplay() {
     checkWeatherHazards();
 }
 
-// Summarize forecast data into daily data
+// Summarizes forecast data into daily data
 function extractDailyForecast(forecastList) {
     const dailyData = [];
     const dayMap = new Map();
@@ -278,61 +262,7 @@ function extractDailyForecast(forecastList) {
     return dailyData.slice(0, 5);
 }
 
-window.showHourlyForecast = function (dayIndex) {
-    // Logging
-    customLog(`Showing hourly forecast for day index: ${dayIndex}`);
-
-    if (!forecastData) {
-        customLog('No forecast data available for hourly forecast!');
-        return;
-    }
-
-    const startDate = new Date(forecastData[0].dt * 1000).setHours(0, 0, 0, 0);
-    const targetDate = new Date(startDate + dayIndex * 24 * 60 * 60 * 1000);
-    const endDate = new Date(targetDate).setHours(23, 59, 59, 999);
-
-    const hourlyData = forecastData.filter(item => {
-        const itemDate = new Date(item.dt * 1000);
-        return itemDate >= targetDate && itemDate <= endDate;
-    });
-
-    const popupDate = document.getElementById('popup-date');
-    popupDate.textContent = targetDate.toLocaleDateString('en-US', {
-        weekday: 'long',
-        month: 'long',
-        day: 'numeric'
-    });
-
-    const hourlyContainer = document.querySelector('.hourly-forecast');
-    hourlyContainer.innerHTML = hourlyData.map(item => {
-        const itemDate = new Date(item.dt * 1000);
-        const time = formatTime(itemDate, {
-            hour: 'numeric',
-            minute: '2-digit'
-        });
-        
-        // Get weather condition class
-        const weatherCondition = item.weather[0].main.toLowerCase();
-        
-        return `
-            <div class="hourly-item ${weatherCondition}">
-                <div class="hourly-time">${time}</div>
-                <img src="https://openweathermap.org/img/wn/${item.weather[0].icon}@2x.png" alt="${item.weather[0].description}" style="width: 50px; height: 50px;">
-                <div class="hourly-temp">${formatTemperature(item.main.temp)}</div>
-                <div class="hourly-desc">${item.weather[0].main}</div>
-            </div>
-        `;
-    }).join('');
-
-    document.querySelector('.overlay').classList.add('show');
-    document.querySelector('.forecast-popup').classList.add('show');
-}
-
-window.closeHourlyForecast = function () {
-    document.querySelector('.overlay').classList.remove('show');
-    document.querySelector('.forecast-popup').classList.remove('show');
-}
-
+// Updates the weather display with current data
 function updateWeatherDisplay() {
     if (!weatherData) return;
 
@@ -361,7 +291,7 @@ function updateWeatherDisplay() {
     highlightUpdate('station-info', stationInfoStr);
 }
 
-// Simplified function to check for hazardous weather in the next forecast periods
+// Checks for hazardous weather in the upcoming forecast periods
 export function checkWeatherHazards() {
     customLog('Checking for weather hazards in next forecast periods...');
     
@@ -412,6 +342,7 @@ export function checkWeatherHazards() {
     return hasHazardousWeather;
 }
 
+// Fetches and updates the Air Quality Index (AQI)
 function updateAQI(lat, lon, apiKey) {
     fetch(`https://api.openweathermap.org/data/2.5/air_pollution?lat=${lat}&lon=${lon}&appid=${apiKey}`)
         .then(response => response.json())
@@ -449,6 +380,85 @@ function updateAQI(lat, lon, apiKey) {
             highlightUpdate('aqi', aqiText);
             document.getElementById('aqi-dot').style.backgroundColor = color;
         });
+}
+
+// Switches the weather image based on the type provided
+window.switchWeatherImage = function (type) {
+    const weatherImage = document.getElementById('weather-image');
+    weatherImage.style.opacity = '0';
+    
+    setTimeout(() => {
+        weatherImage.src = SAT_URLS[type];
+        weatherImage.style.opacity = '1';
+    }, 300);
+    
+    // Update buttons and slider position
+    const weatherSwitch = document.querySelector('.weather-switch');
+    const buttons = weatherSwitch.getElementsByTagName('button');
+    buttons[0].classList.toggle('active', type === 'latest');
+    buttons[1].classList.toggle('active', type === 'loop');
+    buttons[2].classList.toggle('active', type === 'latest_ir');
+    
+    // Update slider position for three states
+    const positions = { 'latest': 0, 'loop': 1, 'latest_ir': 2 };
+    weatherSwitch.style.setProperty('--slider-position', positions[type]);
+}
+
+// Displays the hourly forecast for a specific day
+window.showHourlyForecast = function (dayIndex) {
+    // Logging
+    customLog(`Showing hourly forecast for day index: ${dayIndex}`);
+
+    if (!forecastData) {
+        customLog('No forecast data available for hourly forecast!');
+        return;
+    }
+
+    const startDate = new Date(forecastData[0].dt * 1000).setHours(0, 0, 0, 0);
+    const targetDate = new Date(startDate + dayIndex * 24 * 60 * 60 * 1000);
+    const endDate = new Date(targetDate).setHours(23, 59, 59, 999);
+
+    const hourlyData = forecastData.filter(item => {
+        const itemDate = new Date(item.dt * 1000);
+        return itemDate >= targetDate && itemDate <= endDate;
+    });
+
+    const popupDate = document.getElementById('popup-date');
+    popupDate.textContent = targetDate.toLocaleDateString('en-US', {
+        weekday: 'long',
+        month: 'long',
+        day: 'numeric'
+    });
+
+    const hourlyContainer = document.querySelector('.hourly-forecast');
+    hourlyContainer.innerHTML = hourlyData.map(item => {
+        const itemDate = new Date(item.dt * 1000);
+        const time = formatTime(itemDate, {
+            hour: 'numeric',
+            minute: '2-digit'
+        });
+        
+        // Get weather condition class
+        const weatherCondition = item.weather[0].main.toLowerCase();
+        
+        return `
+            <div class="hourly-item ${weatherCondition}">
+                <div class="hourly-time">${time}</div>
+                <img src="https://openweathermap.org/img/wn/${item.weather[0].icon}@2x.png" alt="${item.weather[0].description}" style="width: 50px; height: 50px;">
+                <div class="hourly-temp">${formatTemperature(item.main.temp)}</div>
+                <div class="hourly-desc">${item.weather[0].main}</div>
+            </div>
+        `;
+    }).join('');
+
+    document.querySelector('.overlay').classList.add('show');
+    document.querySelector('.forecast-popup').classList.add('show');
+}
+
+// Closes the hourly forecast popup
+window.closeHourlyForecast = function () {
+    document.querySelector('.overlay').classList.remove('show');
+    document.querySelector('.forecast-popup').classList.remove('show');
 }
 
 // Add click handler to close popup when clicking overlay

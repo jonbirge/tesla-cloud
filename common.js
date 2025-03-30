@@ -1,3 +1,6 @@
+// Imports
+import { settings } from './settings.js';
+
 // Global variables
 const GEONAMES_USERNAME = 'birgefuller';
 let locationTimeZone = browserTimeZone();
@@ -67,7 +70,7 @@ export function formatTime(date, options = {}) {
     const timeOptions = {...defaultOptions, ...options};
     
     // Check if 24-hour format is enabled in settings
-    if (settings && settings['24hr-time']) {
+    if (settings && settings['24-hour-time']) {
         timeOptions.hour12 = false;
     }
     
