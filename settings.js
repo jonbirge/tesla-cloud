@@ -1,7 +1,6 @@
 // Imports
 import { updateNews } from './news.js';
 import { customLog } from './common.js';
-import { sunrise, sunset } from './wx.js';
 import { updateChartAxisColors } from './net.js';
 
 // Global variables
@@ -9,7 +8,7 @@ let isLoggedIn = false;
 let currentUser = null;
 let hashedUser = null; // Store the hashed version of the user ID
 let settings = {}; // Initialize settings object
-let darkOn = false;
+let darkOn = false; // TODO: Make persistent setting
 
 // Export settings object so it's accessible to other modules
 export { settings, currentUser, isLoggedIn, darkOn };
@@ -47,51 +46,6 @@ const defaultSettings = {
     "rss-defensenews": false,
 };
 
-// Update the dark/light mode based on sunrise/sunset
-export function autoDarkMode(lat, long) {
-    customLog('Auto dark mode check for coordinates: ', lat, long);
-    if (settings && settings['auto-dark-mode'] && lat !== null && long !== null) {
-        const now = new Date();
-        const currentTime = now.getTime();
-        const sunriseTime = new Date(sunrise).getTime();
-        const sunsetTime = new Date(sunset).getTime();
-
-        if (currentTime >= sunsetTime || currentTime < sunriseTime) {
-            if (!darkOn) {
-                customLog('Applying dark mode based on sunset...');
-                document.body.classList.add('dark-mode');
-                darkOn = true;
-                document.getElementById('darkModeToggle').checked = true;
-                updateDarkModeDependants();
-            }
-        } else {
-            if (darkOn) {
-                customLog('Applying light mode based on sunrise...');
-                document.body.classList.remove('dark-mode');
-                darkOn = false;
-                document.getElementById('darkModeToggle').checked = false;
-                updateDarkModeDependants();
-            }
-        }
-    } else {
-        customLog('Auto dark mode disabled or coordinates not available.');
-    }
-}
-
-// Manually set dark/light mode
-window.toggleMode = function() {
-    toggleSetting('auto-dark-mode', false);
-    document.body.classList.toggle('dark-mode');
-    darkOn = document.body.classList.contains('dark-mode');
-    document.getElementById('darkModeToggle').checked = darkOn;
-    updateDarkModeDependants();
-}
-
-// Update things that depend on dark mode
-function updateDarkModeDependants() {
-    updateChartAxisColors();
-}
-
 // Function to initialize with defaults
 function initializeSettings() {
     if (!isLoggedIn) {
@@ -100,6 +54,31 @@ function initializeSettings() {
         updateNews(true);
         customLog('Using default settings (no login)');
     }
+}
+
+// Turn on dark mode
+export function turnOnDarkMode() {
+    if (!darkOn) {
+        document.body.classList.add('dark-mode');
+        darkOn = true;
+        document.getElementById('darkModeToggle').checked = true;
+        updateDarkModeDependants();
+    }
+}
+
+// Turn off dark mode
+export function turnOffDarkMode() {
+    if (darkOn) {
+        document.body.classList.remove('dark-mode');
+        darkOn = false;
+        document.getElementById('darkModeToggle').checked = false;
+        updateDarkModeDependants();
+    }
+}
+
+// Update things that depend on dark mode
+function updateDarkModeDependants() {
+    updateChartAxisColors();
 }
 
 // Function to hash a user ID using SHA-256
@@ -115,49 +94,6 @@ async function hashUserId(userId) {
     
     // Return only the first 16 characters (64 bits) of the hash
     return hashHex.substring(0, 16);
-}
-
-// Function to show the login modal
-window.showLoginModal = function () {
-    const modal = document.getElementById('login-modal');
-    modal.style.display = 'flex';
-    document.getElementById('user-id').focus();
-    document.getElementById('login-error').textContent = ''; // Clear previous errors
-}
-
-// Function to hide the login modal
-window.closeLoginModal = function () {
-    document.getElementById('login-modal').style.display = 'none';
-}
-
-// Function to handle logout
-window.handleLogout = function () {
-    isLoggedIn = false;
-    currentUser = null;
-    hashedUser = null;
-    
-    // Update UI
-    updateLoginState();
-    
-    // Hide settings section
-    document.getElementById('settings-section').classList.add('hidden');
-    
-    // If currently in settings section, redirect to news
-    const sections = document.querySelectorAll('.section');
-    const settingsSection = document.getElementById('settings');
-    if (settingsSection.style.display === 'block') {
-        showSection('news');
-    }
-    
-    // Remove the userid cookie
-    deleteCookie('userid');
-}
-
-// Function to handle login from dialog
-window.handleLogin = async function () {
-    const userId = document.getElementById('user-id').value.trim();
-    closeLoginModal();
-    fetchSettings(userId);
 }
 
 // Function to validate user ID, and if valid, set environment variables
@@ -314,21 +250,6 @@ export function updateLoginState() {
     }
 }
 
-// Function called by the toggle UI elements
-window.toggleSettingFrom = function(element) {
-    customLog('Toggle setting from UI element:', element);
-    const settingItem = element.closest('.settings-toggle-item');
-    if (settingItem && settingItem.dataset.setting) {
-        const key = settingItem.dataset.setting;
-        const value = element.checked;
-        toggleSetting(key, value);
-        // If the setting is RSS-related, update the news feed
-        if (key.startsWith('rss-')) {
-            updateNews(true);
-        }
-    }
-}
-
 // Function to toggle a setting (updates both local cache and server)
 export async function toggleSetting(key, value) {
     if (!isLoggedIn || !currentUser) {
@@ -434,4 +355,71 @@ function getCookie(name) {
 function deleteCookie(name) {
     document.cookie = name + "=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
     customLog(`Cookie deleted: ${name}`);
+}
+
+// Function to show the login modal
+window.showLoginModal = function () {
+    const modal = document.getElementById('login-modal');
+    modal.style.display = 'flex';
+    document.getElementById('user-id').focus();
+    document.getElementById('login-error').textContent = ''; // Clear previous errors
+}
+
+// Function to hide the login modal
+window.closeLoginModal = function () {
+    document.getElementById('login-modal').style.display = 'none';
+}
+
+// Function to handle logout
+window.handleLogout = function () {
+    isLoggedIn = false;
+    currentUser = null;
+    hashedUser = null;
+    
+    // Update UI
+    updateLoginState();
+    
+    // Hide settings section
+    document.getElementById('settings-section').classList.add('hidden');
+    
+    // If currently in settings section, redirect to news
+    const sections = document.querySelectorAll('.section');
+    const settingsSection = document.getElementById('settings');
+    if (settingsSection.style.display === 'block') {
+        showSection('news');
+    }
+    
+    // Remove the userid cookie
+    deleteCookie('userid');
+}
+
+// Function to handle login from dialog
+window.handleLogin = async function () {
+    const userId = document.getElementById('user-id').value.trim();
+    closeLoginModal();
+    fetchSettings(userId);
+}
+
+// Manually swap dark/light mode
+window.toggleMode = function () {
+    toggleSetting('auto-dark-mode', false);
+    document.body.classList.toggle('dark-mode');
+    darkOn = document.body.classList.contains('dark-mode');
+    document.getElementById('darkModeToggle').checked = darkOn;
+    updateDarkModeDependants();
+}
+
+// Function called by the toggle UI elements
+window.toggleSettingFrom = function(element) {
+    customLog('Toggle setting from UI element:', element);
+    const settingItem = element.closest('.settings-toggle-item');
+    if (settingItem && settingItem.dataset.setting) {
+        const key = settingItem.dataset.setting;
+        const value = element.checked;
+        toggleSetting(key, value);
+        // If the setting is RSS-related, update the news feed
+        if (key.startsWith('rss-')) {
+            updateNews(true);
+        }
+    }
 }

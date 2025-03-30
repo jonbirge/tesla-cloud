@@ -2,7 +2,7 @@
 
 ## About
 
-Fast JavaScript-based site with information and links intended for use on an in-car browser.
+JavaScript-based site with information and links intended for use on an in-car browser. Currently focused on Tesla vehicles, but could eventually be adapted for other vehicles with a browser.
 
 ## Demo
 
