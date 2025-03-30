@@ -178,10 +178,12 @@ body.dark-mode .forecast-day.rain img.forecast-icon {
 
 .forecast-alert {
     position: absolute;
-    top: 5px;
-    left: 7px;
+    top: 3px;
+    left: 5px;
     color: #ff9900;
-    font-size: 17px;
+    font-size: 18px;
+    font-family: "Inter", sans-serif !important;
+    font-weight: 700;
 }
 
 .forecast-date {

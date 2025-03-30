@@ -257,6 +257,12 @@ function updateWindage(vehicleSpeed, vehicleHeading, windSpeed, windDirection) {
         document.getElementById('crosswind').innerText = '--';
         document.getElementById('crosswind-arrow').innerHTML = '';
     }
+    // Set label with appropriate units
+    if (!settings || settings["imperial-units"]) {
+        document.getElementById('crosswind-label').innerText = "CROSSWIND (MPH)";
+    } else {
+        document.getElementById('crosswind-label').innerText = "CROSSWIND (M/S)";
+    }
 }
 
 // Function to update location-dependent data

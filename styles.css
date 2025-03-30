@@ -101,6 +101,7 @@ hr {
     margin-bottom: 28px;
 }
 
+
 /* About */
 
 #about {
@@ -804,7 +805,9 @@ input:checked + .toggle-slider:before {
     background-color: var(--active-section-bg);
 }
 
+
 /* Modal Login Dialog */
+
 .modal {
     display: none;
     position: fixed;
@@ -817,6 +820,7 @@ input:checked + .toggle-slider:before {
     justify-content: center;
     align-items: center;
 }
+
 .modal-content {
     background-color: var(--bg-color);
     border-radius: var(--button-radius);
@@ -825,15 +829,18 @@ input:checked + .toggle-slider:before {
     max-width: 90%;
     box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
 }
+
 .login-form {
     margin-top: 20px;
 }
+
 .login-form label {
     display: block;
     margin-bottom: 10px;
     color: var(--button-text);
     font-weight: 500;
 }
+
 .login-form input {
     width: 100%;
     padding: 12px 15px;
@@ -845,11 +852,13 @@ input:checked + .toggle-slider:before {
     color: var(--button-text);
     box-sizing: border-box; /* Add this to fix the width issue */
 }
+
 .button-container {
     display: flex;
     justify-content: flex-end;
     gap: 10px;
 }
+
 .modal-button {
     padding: 12px 25px;
     border: none;
@@ -859,14 +868,17 @@ input:checked + .toggle-slider:before {
     cursor: pointer;
     transition: background-color 0.3s;
 }
+
 .modal-button.cancel {
     background-color: var(--button-bg);
     color: var(--button-text);
 }
+
 .modal-button.submit {
     background-color: var(--tesla-blue);
     color: white;
 }
+
 .error-message {
     color: var(--tesla-red);
     margin-bottom: 20px;
@@ -874,10 +886,13 @@ input:checked + .toggle-slider:before {
     min-height: 20px;
 }
 
+
 /* Settings Section Styles */
+
 .settings-controls {
     margin-top: 12px;
 }
+
 .settings-toggle-item {
     display: flex;
     align-items: center;
@@ -890,16 +905,19 @@ input:checked + .toggle-slider:before {
     font-weight: 550;
     cursor: pointer; /* Add cursor pointer to indicate it's clickable */
 }
+
 .settings-toggle-item label {
     flex-grow: 1; /* Make label take up all available space */
     cursor: pointer; /* Add cursor pointer to label */
 }
+
 .settings-toggle-item input {
     opacity: 0;
     width: 0;
     height: 0;
     position: absolute;
 }
+
 .settings-toggle-item span.settings-toggle-slider {
     position: relative;
     display: inline-block;
@@ -907,6 +925,7 @@ input:checked + .toggle-slider:before {
     height: 34px;
     flex-shrink: 0; /* Prevent slider from shrinking */
 }
+
 .settings-toggle-slider {
     position: absolute;
     cursor: pointer;
@@ -918,6 +937,7 @@ input:checked + .toggle-slider:before {
     transition: .4s;
     border-radius: 34px;
 }
+
 .settings-toggle-slider:before {
     position: absolute;
     content: "";
@@ -929,17 +949,22 @@ input:checked + .toggle-slider:before {
     transition: .4s;
     border-radius: 50%;
 }
+
 input:checked + .settings-toggle-slider {
     background-color: var(--tesla-blue);
 }
+
 input:focus + .settings-toggle-slider {
     box-shadow: 0 0 1px var(--tesla-blue);
 }
+
 input:checked + .settings-toggle-slider:before {
     transform: translateX(26px);
 }
 
+
 /* News Source Grid */
+
 .news-source-grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
@@ -947,12 +972,14 @@ input:checked + .settings-toggle-slider:before {
     width: 100%;
     max-width: 1200px;
 }
+
 .news-toggle-item {
     padding: 12px 15px;
     margin-bottom: 0;
     max-width: none;
     width: auto;
 }
+
 .news-toggle-item {
     font-size: 15pt;
 }
