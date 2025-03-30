@@ -1,6 +1,6 @@
 // Import required functions from app.js
 import { customLog, formatTime, highlightUpdate } from './common.js';
-import { autoDarkMode, settings } from './settings.js';
+import { settings, turnOffDarkMode, turnOnDarkMode } from './settings.js';
 
 // Constants
 const OPENWX_API_KEY = '6a1b1bcb03b5718a9b3a2b108ce3293d';
@@ -81,11 +81,10 @@ export function fetchWeatherData(lat, long, silentLoad = true) {
         if (loadingSpinner) loadingSpinner.style.display = 'flex';
     }
 
-    // Fetch sunrise/sunset data
+    // Fetch and update sunrise/sunset data
     fetchSunData(lat, long);
-    autoDarkMode(lat, long);
 
-    // Fetch weather data from APIs
+    // Fetch and update weather data
     Promise.all([
         fetch(`https://secure.geonames.org/findNearByWeatherJSON?lat=${lat}&lng=${long}&username=birgefuller`),
         fetch(`https://api.openweathermap.org/data/2.5/forecast?lat=${lat}&lon=${long}&appid=${OPENWX_API_KEY}&units=imperial`)
@@ -139,6 +138,8 @@ export function fetchWeatherData(lat, long, silentLoad = true) {
 }
 
 function fetchSunData(lat, long) {
+    // Log the lat/long for debugging
+    customLog(`Fetching sun data for lat: ${lat}, long: ${long}`);
     Promise.all([
         fetch(`https://api.sunrise-sunset.org/json?lat=${lat}&lng=${long}&formatted=0`),
         fetch(`https://api.farmsense.net/v1/moonphases/?d=${Math.floor(Date.now() / 1000)}`)
@@ -149,11 +150,55 @@ function fetchSunData(lat, long) {
             sunset = sunData.results.sunset;
             moonPhaseData = moonData[0];
             updateSunMoonDisplay();
+            autoDarkMode(lat, long);
         })
         .catch(error => {
             console.error('Error fetching sun/moon data: ', error);
             customLog('Error fetching sun/moon data: ', error);
         });
+}
+
+function updateSunMoonDisplay() {
+    const sunriseTime = formatTime(new Date(sunrise), {
+        timeZoneName: 'short'
+    });
+    highlightUpdate('sunrise', sunriseTime);
+
+    const sunsetTime = formatTime(new Date(sunset), {
+        timeZoneName: 'short'
+    });
+    highlightUpdate('sunset', sunsetTime);
+    
+    if (moonPhaseData) {
+        const moonPhase = getMoonPhaseName(moonPhaseData.Phase);
+        highlightUpdate('moonphase', moonPhase);
+    }
+}
+
+// Update the dark/light mode based on sunrise/sunset
+export function autoDarkMode(lat, long) {
+    customLog('Auto dark mode check for coordinates: ', lat, long);
+    if (!sunrise || !sunset) {
+        customLog('autoDarkMode: sunrise/sunset data not available.');
+        return;
+    }
+
+    if (settings && settings['auto-dark-mode']) {
+        const now = new Date();
+        const currentTime = now.getTime();
+        const sunriseTime = new Date(sunrise).getTime();
+        const sunsetTime = new Date(sunset).getTime();
+
+        if (currentTime >= sunsetTime || currentTime < sunriseTime) {
+            customLog('Applying dark mode based on sunset...');
+            turnOnDarkMode();
+        } else {
+            customLog('Applying light mode based on sunrise...');
+            turnOffDarkMode();
+        }
+    } else {
+        customLog('Auto dark mode disabled or coordinates not available.');
+    }
 }
 
 function dayHasHazards(forecastList) {
@@ -316,25 +361,6 @@ function updateWeatherDisplay() {
     highlightUpdate('station-info', stationInfoStr);
 }
 
-export function updateSunMoonDisplay() {
-    if (!sunrise || !sunset) return;
-    
-    const sunriseTime = formatTime(new Date(sunrise), {
-        timeZoneName: 'short'
-    });
-    highlightUpdate('sunrise', sunriseTime);
-
-    const sunsetTime = formatTime(new Date(sunset), {
-        timeZoneName: 'short'
-    });
-    highlightUpdate('sunset', sunsetTime);
-    
-    if (moonPhaseData) {
-        const moonPhase = getMoonPhaseName(moonPhaseData.Phase);
-        highlightUpdate('moonphase', moonPhase);
-    }
-}
-
 // Simplified function to check for hazardous weather in the next forecast periods
 export function checkWeatherHazards() {
     customLog('Checking for weather hazards in next forecast periods...');
@@ -384,73 +410,6 @@ export function checkWeatherHazards() {
     }
     
     return hasHazardousWeather;
-}
-
-// Mock weather data for test mode
-function generateMockWeatherData() {
-    return {
-        temperature: 72,
-        windSpeed: 6.7, // ~15 MPH when converted
-        windDirection: 180, // From the north (will be flipped by 180° in updateWeatherDisplay)
-        humidity: 45,
-        weatherCondition: "Clear",
-        stationName: "MOCK-STATION",
-        datetime: new Date().toISOString()
-    };
-}
-
-function generateMockForecastData() {
-    const now = Date.now();
-    const oneDayMs = 24 * 60 * 60 * 1000;
-    
-    // Create 5 days with different weather types
-    // Modified to make the first day rainy
-    const weatherTypes = [
-        { main: "Rain", description: "moderate rain", icon: "10d" },
-        { main: "Clear", description: "clear sky", icon: "01d" },
-        { main: "Thunderstorm", description: "thunderstorm", icon: "11d" },
-        { main: "Snow", description: "light snow", icon: "13d" },
-        { main: "Clouds", description: "overcast clouds", icon: "04d" }
-    ];
-    
-    const mockList = [];
-    
-    // For each day, create entries at 3-hour intervals
-    for (let day = 0; day < 5; day++) {
-        const dayType = weatherTypes[day];
-        
-        // Create 8 entries per day (3-hour intervals)
-        for (let hour = 0; hour < 24; hour += 3) {
-            const entryTime = now + (day * oneDayMs) + (hour * 60 * 60 * 1000);
-            const tempVariation = Math.sin((hour / 24) * Math.PI) * 10;
-            const baseTemp = 65 + (day * 2); // Slight temperature increase each day
-            
-            mockList.push({
-                dt: Math.floor(entryTime / 1000),
-                main: {
-                    temp: baseTemp + tempVariation,
-                    temp_min: baseTemp - 5 + tempVariation,
-                    temp_max: baseTemp + 5 + tempVariation,
-                    humidity: 45 + (day * 5)
-                },
-                weather: [{ 
-                    id: 800 + (day * 100),
-                    main: dayType.main, 
-                    description: dayType.description,
-                    icon: dayType.icon
-                }]
-            });
-        }
-    }
-    
-    customLog('Mock forecast data generated with rain on day 1');
-    return {
-        list: mockList,
-        city: {
-            name: "Test City",
-            country: "TC"
-        }
-    };
 }
 
 function updateAQI(lat, lon, apiKey) {

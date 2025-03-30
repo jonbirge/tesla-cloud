@@ -1,6 +1,3 @@
-// Import necessary modules and constants
-import { updateChartAxisColors } from './net.js';
-
 // Global variables
 const GEONAMES_USERNAME = 'birgefuller';
 let locationTimeZone = browserTimeZone();
@@ -17,10 +14,10 @@ export async function updateTimeZone(lat, long) {
         if (!tzData || !tzData.timezoneId) {
             throw new Error('Timezone not returned from server.');
         }
-        customLog('Timezone: ', tzData);
+        customLog('Timezone: ', tzData.timezoneId);
         return tzData.timezoneId;
     } catch (error) {
-        console.error('Error fetching time zone: ', error);
+        console.error('Error fetching timezone: ', error);
         const tz = Intl.DateTimeFormat().resolvedOptions().timeZone;
         customLog('Fallback timezone: ', tz);
         return tz;
