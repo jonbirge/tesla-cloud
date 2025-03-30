@@ -75,7 +75,7 @@ async function fetchWikipediaData(lat, long) {
     try {
         const response = await fetch(url);
         const data = await response.json();
-        const wikiDiv = document.getElementById('wikipediaInfo');
+        const landmarkDiv = document.getElementById('landmark-items');
         if (data.geonames && data.geonames.length > 0) {
             let html = '<ul>';
             data.geonames.forEach(article => {
@@ -83,13 +83,13 @@ async function fetchWikipediaData(lat, long) {
                 html += `<li><a href="${pageUrl}" target="_blank">${article.title}</a>: ${article.summary}</li>`;
             });
             html += '</ul>';
-            wikiDiv.innerHTML = html;
+            landmarkDiv.innerHTML = html;
         } else {
-            wikiDiv.innerHTML = '<p><em>No nearby Wikipedia articles found.</em></p>';
+            landmarkDiv.innerHTML = '<p><em>No nearby landmarks found.</em></p>';
         }
     } catch (error) {
         console.error('Error fetching Wikipedia data:', error);
-        document.getElementById('wikipediaInfo').innerHTML = '<p><em>Error loading Wikipedia data.</em></p>';
+        document.getElementById('landmark-items').innerHTML = '<p><em>Error loading landmark data.</em></p>';
     }
 }
 

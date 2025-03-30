@@ -36,7 +36,9 @@ body.dark-mode {
 
 /* Basic HTML Elements */
 * {
-    font-family: "Inter", sans-serif !important;
+    font-family: "Inter";
+    font-optical-sizing: auto;
+    font-variant-ligatures: all;
 }
 
 body {
@@ -45,10 +47,7 @@ body {
     font-size: 16pt;
     padding: 0;
     text-align: left;
-    word-spacing: normal;
     font-weight: 500;
-    font-optical-sizing: auto;
-    font-variant-ligatures: auto;
 }
 
 a {
@@ -68,11 +67,9 @@ h1 {
 h2 {
     color: var(--button-text);
     font-size: var(--heading-font-size);
-    font-weight: var(--heading-font-weight);
-    letter-spacing: 0.01em;
     margin-bottom: 9px;
     margin-top: 28px;
-    text-align: left;
+    font-weight: bolder;
 }
 
 p {
@@ -88,15 +85,14 @@ ul {
 }
 
 li {
-    margin: 9px 0;
-    line-height: 1.4;
+    margin: 11px 0;
     padding-left: 0px;
     margin-left: 0px;
 }
 
 hr {
     border: 0;
-    border-top: 2px solid var(--separator-color);
+    border-top: 1px solid var(--separator-color);
     margin-top: 28px;
     margin-bottom: 28px;
 }
@@ -116,6 +112,13 @@ hr {
     font-style: none;
     font-weight: 600;
     text-align: left;
+}
+
+
+/* Landmarks */
+
+#landmark-items {
+    text-align: justify;
 }
 
 
@@ -151,7 +154,7 @@ hr {
 .section {
     display: none;
     padding-bottom: 30px; /* Add padding to the bottom of each section */
-    max-width: 940px;
+    /* max-width: 940px; */
 }
 
 .section-buttons {
@@ -252,7 +255,9 @@ hr {
   }
 }
 
+
 /* Layout */
+
 .frame-container {
     display: flex;
     height: 100vh;
@@ -294,16 +299,18 @@ hr {
     display: block;
 }
 
+
 /* Link Button Lists */
+
 .button-list {
     list-style: none;
     padding: 0;
     margin-top: 0;
     display: grid;
-    grid-template-columns: repeat(auto-fill, 280px);
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
     gap: 16px;
     justify-content: start;
-    max-width: 1200px;
+    max-width: calc(280px * 5 + 16px * 4); /* Limit to 5 columns */
 }
 
 .button-list li {
@@ -319,7 +326,7 @@ hr {
     padding-bottom: 24px;
     padding-left: 9px;
     padding-right: 9px;
-    text-decoration: none;
+    /* text-decoration: none; */
     transition: background-color 0.3s;
     width: auto;
     font-weight: 600;
@@ -327,15 +334,17 @@ hr {
     align-items: center;
     justify-content: center;
     gap: 10px;
-    text-align: center; /* Add this line to center the text */
+    /* text-align: center; /* Add this line to center the text */
 }
 
 .button-list a img {
-    height: 32px;
+    height: 36px;
     width: auto;
 }
 
+
 /* Enhanced Image Visibility Classes */
+
 .img-adaptive,
 .img-adaptive-light-invert,
 .img-adaptive-dark-invert {
@@ -368,7 +377,9 @@ body.dark-mode .img-white-transparent {
     filter: invert(100%) brightness(125%); /* Invert colors and slightly increase brightness for better visibility */
 }
 
+
 /* Indicator container and dark-mode toggle */
+
 .control-container {
     position: fixed;
     top: -5px; /* Changed from 10px to -5px to move above screen edge */
@@ -409,7 +420,7 @@ body.dark-mode .img-white-transparent {
     left: 0;
     right: 0;
     bottom: 0;
-    background-color: #ccc;
+    background-color: #bbb;
     transition: .4s;
     border-radius: 34px;
 }
@@ -438,17 +449,19 @@ input:checked + .toggle-slider:before {
     transform: translateX(21px); /* Reduced by 20% from 26px */
 }
 
+
 /* Data Display */
+
 .data-info, .data-info-column {
     row-gap: 18px;
-    max-width: 1024px;
-    width: 100%; /* Ensure it spans full width */
+    /* max-width: 1080px; */
+    width: auto; /* Ensure it spans full width */
 }
 
 .data-info {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
-    column-gap: 12px;
+    grid-template-columns: repeat(auto-fill, 240px);
+    column-gap: 28px;
 }
 
 .data-info-column {
@@ -459,7 +472,7 @@ input:checked + .toggle-slider:before {
 
 .data-info-column .data-item {
     margin-right: 0; /* Ensure no extra margin */
-    width: 100%; /* Ensure items span full width */
+    width: auto; /* Ensure items span full width */
 }
 
 .data-item {
@@ -482,7 +495,9 @@ input:checked + .toggle-slider:before {
     margin-bottom: 4px;
 }
 
+
 /* Stats Display */
+
 .nav-container {
     display: flex;
     gap: 50px;
@@ -537,7 +552,9 @@ input:checked + .toggle-slider:before {
     clear: both; /* Clear the float to ensure it appears below */
 }
 
+
 /* Dashboard Display */
+
 .radar-container {
     position: relative;
     padding-top: 30px; /* Added padding to push radar down */
@@ -561,7 +578,9 @@ input:checked + .toggle-slider:before {
     background-color: rgba(255, 255, 255, 0.1);
 }
 
+
 /* Waze frame */
+
 .teslawaze-container {
     height: calc(100vh - 380px);
     min-height: 280px;
@@ -584,10 +603,12 @@ input:checked + .toggle-slider:before {
     right: 0;
 }
 
+
 /* News Elements */
+
 .news-headlines {
     margin: 24px 0;
-    max-width: 900px;
+    /* max-width: 100%; */
 }
 
 .news-item {
@@ -657,7 +678,7 @@ input:checked + .toggle-slider:before {
     font-size: 12.5pt;
     margin-left: 5px;
     display: inline-block;
-    font-weight: 350;
+    font-weight: 400;
 }
 
 .news-title {
@@ -690,7 +711,9 @@ input:checked + .toggle-slider:before {
     transition: color 0.3s ease;
 }
 
+
 /* Spinner styling */
+
 .spinner-container {
     display: flex;
     justify-content: center;
@@ -762,7 +785,9 @@ input:checked + .toggle-slider:before {
     fill: var(--status-good);
 }
 
+
 /* GPS Status Indicator */
+
 .gps-status {
     margin-right: 22px; /* Good separation from the Dark Mode text */
     width: 24px;
@@ -785,7 +810,9 @@ input:checked + .toggle-slider:before {
     color: var(--status-good); /* Using the shared variable */
 }
 
+
 /* Login Styles */
+
 .login-button {
     color: var(--button-text);
     background-color: var(--button-bg);
@@ -896,7 +923,6 @@ input:checked + .toggle-slider:before {
 .settings-toggle-item {
     display: flex;
     align-items: center;
-    justify-content: space-between;
     background-color: var(--button-bg);
     border-radius: var(--button-radius);
     padding: 15px;
@@ -922,7 +948,7 @@ input:checked + .toggle-slider:before {
     position: relative;
     display: inline-block;
     width: 60px;
-    height: 34px;
+    height: 32px;
     flex-shrink: 0; /* Prevent slider from shrinking */
 }
 
@@ -933,9 +959,9 @@ input:checked + .toggle-slider:before {
     left: 0;
     right: 0;
     bottom: 0;
-    background-color: #ccc;
+    background-color: #aaa;
     transition: .4s;
-    border-radius: 34px;
+    border-radius: 30px;
 }
 
 .settings-toggle-slider:before {
@@ -944,7 +970,7 @@ input:checked + .toggle-slider:before {
     height: 26px;
     width: 26px;
     left: 4px;
-    bottom: 4px;
+    bottom: 3px;
     background-color: white;
     transition: .4s;
     border-radius: 50%;
@@ -969,8 +995,7 @@ input:checked + .settings-toggle-slider:before {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
     gap: 9px;
-    width: 100%;
-    max-width: 1200px;
+    width: auto;
 }
 
 .news-toggle-item {
