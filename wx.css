@@ -336,3 +336,21 @@ body.dark-mode .forecast-day.rain img.forecast-icon {
     margin-left: 10px;
     color: var(--text-color);
 }
+
+/* Moon phase icon */
+.moon-phase-icon {
+    display: inline-block;
+    width: 18px;
+    height: 18px;
+    margin-left: 8px;
+    vertical-align: middle;
+    background-color: #ccc;
+    border-radius: 50%;
+    position: relative;
+    overflow: hidden;
+}
+
+/* Dark mode styles for moon icon */
+body.dark-mode .moon-phase-icon {
+    background-color: #555;
+}
