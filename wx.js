@@ -320,8 +320,8 @@ export function checkWeatherHazards() {
     // Log forecast data structure for debugging
     customLog(`Forecast data: ${forecastData.length} entries available`);
     
-    // Take just the first two forecast entries
-    const upcomingForecasts = forecastData.slice(0, 2);
+    // Take just the first n forecast entries
+    const upcomingForecasts = forecastData.slice(0, 1);
     
     customLog(`Looking at ${upcomingForecasts.length} upcoming forecast periods`);
     
