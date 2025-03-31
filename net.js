@@ -1,15 +1,46 @@
 // Import the customLog function from app.js
 import { customLog } from './common.js';
+import { hashedUser } from './settings.js';
 
 // Global variables
+const pingWait = 10*1000; // 10 seconds
 let pingInterval = null;
 let pingChart = null;
 let pingData = [];
-const pingWait = 5000; // 5 seconds
+let userLocation = {
+    latitude: null,
+    longitude: null,
+    altitude: null
+};
+
+// Get user's location
+function getUserLocation() {
+    if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(
+            (position) => {
+                userLocation.latitude = position.coords.latitude;
+                userLocation.longitude = position.coords.longitude;
+                userLocation.altitude = position.coords.altitude || null;
+                // customLog('Got user location: ', 
+                //     userLocation.latitude.toFixed(4) + ', ' + 
+                //     userLocation.longitude.toFixed(4) + 
+                //     (userLocation.altitude ? ', alt: ' + userLocation.altitude.toFixed(1) + 'm' : ''));
+            },
+            (error) => {
+                customLog('Error getting location: ', error.message);
+            }
+        );
+    } else {
+        customLog('Geolocation is not supported by this browser');
+    }
+}
 
 export function updateNetworkInfo() {
     // Write diagnostic information to the console
     customLog('Updating network info...');
+
+    // Get updated location info
+    getUserLocation();
 
     // Get detailed IP info from ipapi.co
     fetch('https://ipapi.co/json/')
@@ -45,6 +76,9 @@ export function updateNetworkInfo() {
 }
 
 export function startPingTest() {
+    // Get initial location
+    getUserLocation();
+
     // Only initialize the chart if it doesn't exist yet
     if (!pingChart) {
         pingData = [];
@@ -66,21 +100,6 @@ function destroyPingChart() {
         pingChart.destroy();
         pingChart = null;
         customLog('Ping chart destroyed');
-    }
-}
-
-window.pausePingTest = function() {
-    if (pingInterval) {
-        clearInterval(pingInterval);
-        pingInterval = null;
-        customLog('Network ping testing paused');
-    }
-}
-
-window.resumePingTest = function() {
-    if (!pingInterval) {
-        pingInterval = setInterval(pingTestServer, pingWait);
-        customLog('Network ping testing resumed');
     }
 }
 
@@ -212,9 +231,29 @@ export function updateChartAxisColors() {
 
 function pingTestServer() {
     const startTime = performance.now();
+    
+    // Prepare form data with user and location information
+    const formData = new FormData();
+    formData.append('user_id', hashedUser || 'anonymous');
+    
+    // Add location data if available
+    if (userLocation.latitude !== null) {
+        formData.append('latitude', userLocation.latitude);
+    }
+    if (userLocation.longitude !== null) {
+        formData.append('longitude', userLocation.longitude);
+    }
+    if (userLocation.altitude !== null) {
+        formData.append('altitude', userLocation.altitude);
+    }
+    
+    // Get updated location data for next ping
+    getUserLocation();
+    
     fetch('ping.php', {
-        cache: 'no-store',
-        method: 'HEAD'  // reduce timing bias
+        method: 'POST',
+        body: formData,
+        cache: 'no-store'
     })
         .then(() => {
             const pingTime = performance.now() - startTime; // ms
@@ -247,9 +286,6 @@ function pingTestServer() {
         });
 }
 
-// Initialize the firstPingDiscarded flag
-pingTestServer.firstPingDiscarded = false;
-
 function updateNetworkStatus(pingTime) {
     const networkStatus = document.getElementById('network-status');
     if (!networkStatus) return;
@@ -275,3 +311,21 @@ function updateNetworkStatus(pingTime) {
         networkStatus.setAttribute('title', `Network Status: Excellent (${Math.round(pingTime)}ms)`);
     }
 }
+
+window.pausePingTest = function() {
+    if (pingInterval) {
+        clearInterval(pingInterval);
+        pingInterval = null;
+        customLog('Network ping testing paused');
+    }
+}
+
+window.resumePingTest = function() {
+    if (!pingInterval) {
+        pingInterval = setInterval(pingTestServer, pingWait);
+        customLog('Network ping testing resumed');
+    }
+}
+
+// Initialize the firstPingDiscarded flag
+pingTestServer.firstPingDiscarded = false;

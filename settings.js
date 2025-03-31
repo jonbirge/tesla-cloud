@@ -11,7 +11,7 @@ let hashedUser = null; // Store the hashed version of the user ID
 let settings = {}; // Initialize settings object
 
 // Export settings object so it's accessible to other modules
-export { settings, currentUser, isLoggedIn };
+export { settings, currentUser, isLoggedIn, hashedUser };
 
 // Default settings that will be used when no user is logged in
 const defaultSettings = {
