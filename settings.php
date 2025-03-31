@@ -76,6 +76,20 @@ try {
         )";
         $dbConnection->exec($sql);
     }
+    
+    // Check if user_ids table exists, create it if not
+    $userIdsTableCheck = $dbConnection->query("SHOW TABLES LIKE 'user_ids'");
+    if ($userIdsTableCheck->rowCount() == 0) {
+        $sql = "CREATE TABLE user_ids (
+            user_id VARCHAR(255) NOT NULL,
+            initial_login TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            last_login TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            login_count INT DEFAULT 0,
+            PRIMARY KEY (user_id)
+        )";
+        $dbConnection->exec($sql);
+        logMessage("Created user_ids table");
+    }
 } catch (PDOException $e) {
     $errorMessage = "Database connection failed: " . $e->getMessage();
     logMessage($errorMessage, "ERROR");
@@ -128,6 +142,9 @@ switch ($method) {
         
         // Save the default settings
         if (saveUserSettings($userId, $defaultSettings)) {
+            // Add entry to user_ids table
+            initializeUserIdEntry($userId);
+            
             logMessage("User settings created successfully for $userId");
             http_response_code(201); // Created
             echo json_encode([
@@ -155,6 +172,9 @@ switch ($method) {
             http_response_code(404);
             exit;
         }
+        
+        // Update user_ids table - update last_login timestamp and increment login_count
+        initializeUserIdEntry($userId);
         
         // Resource exists, return 200 OK (with no body)
         http_response_code(200);
@@ -278,6 +298,46 @@ switch ($method) {
 
 
 // ***** Utility Functions *****
+
+// Helper function to initialize or update a user entry in the user_ids table
+function initializeUserIdEntry($userId) {
+    global $dbConnection;
+    logMessage("Initializing or updating user_ids entry for user $userId");
+    
+    try {
+        $currentTime = date('Y-m-d H:i:s');
+        
+        // First check if the user already exists in the user_ids table
+        $checkStmt = $dbConnection->prepare("SELECT 1 FROM user_ids WHERE user_id = ? LIMIT 1");
+        $checkStmt->execute([$userId]);
+        $userExists = $checkStmt->rowCount() > 0;
+        
+        if ($userExists) {
+            // Update existing user's last_login and increment login_count
+            $updateStmt = $dbConnection->prepare("
+                UPDATE user_ids 
+                SET last_login = ?, login_count = login_count + 1 
+                WHERE user_id = ?
+            ");
+            $updateStmt->execute([$currentTime, $userId]);
+            logMessage("Updated login statistics for user $userId");
+        } else {
+            // Create new user entry with initial values
+            $insertStmt = $dbConnection->prepare("
+                INSERT INTO user_ids (user_id, initial_login, last_login, login_count) 
+                VALUES (?, ?, ?, 1)
+            ");
+            $insertStmt->execute([$userId, $currentTime, $currentTime]);
+            logMessage("Added user $userId to user_ids table with initial login at $currentTime");
+        }
+        
+        return true;
+    } catch (PDOException $e) {
+        logMessage("Failed to initialize user_ids entry: " . $e->getMessage(), "WARNING");
+        // Non-fatal error
+        return false;
+    }
+}
 
 // Helper function to update a single setting
 function updateSingleSetting($userId, $key, $value) {

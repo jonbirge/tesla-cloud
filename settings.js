@@ -396,13 +396,12 @@ window.handleLogin = async function () {
     const userId = document.getElementById('user-id').value.trim();
     closeLoginModal();
     customLog('Attempting login with user ID: ', userId);
-    await fetchSettings(userId);
-    customLog('Login done, updating news feed with new settings...');
     try {
         await fetchSettings(userId);
+        customLog('Login successful, updating news feed...');
         updateNews(true); // Update news feed after login
     } catch (error) {
-        console.error('Error during login or fetching settings:', error);
+        console.error('Error fetching settings: ', error);
     }
 }
 
