@@ -38,6 +38,7 @@ let radarContext = null;
 let gpsIntervalId = null;
 let lastGPSUpdate = 0;
 const positionSimulator = new PositionSimulator(); // TODO: only create if needed
+let networkInfoUpdated = false; // Track if network info has been updated
 
 // Function to calculate the distance between two coordinates
 function calculateDistance(lat1, lon1, lat2, lon2) {
@@ -69,7 +70,7 @@ function fetchCityData(lat, long) {
 }
 
 // Function to fetch nearby Wikipedia data based on coordinates
-async function fetchWikipediaData(lat, long) {
+async function fetchLandmarkData(lat, long) {
     customLog('Fetching Wikipedia data...');
     const url = `https://secure.geonames.org/findNearbyWikipediaJSON?lat=${lat}&lng=${long}&username=${GEONAMES_USERNAME}`;
     try {
@@ -285,7 +286,7 @@ async function updateLocationData(lat, long) {
     const locationSection = document.getElementById("landmarks");
     if (locationSection.style.display === "block") {
         customLog('Updating Wikipedia data...');
-        fetchWikipediaData(lat, long);
+        fetchLandmarkData(lat, long);
     }
 }
 
@@ -619,7 +620,14 @@ window.showSection = function (sectionId) {
         button.classList.remove('active');
     });
 
-    // Show the selected section
+    // Activate the clicked button
+    const button = document.querySelector(`.section-button[onclick="showSection('${sectionId}')"]`);
+    if (button) {
+        button.classList.add('active');
+    }
+
+    // Handle initialization of the selected section
+    // TODO: Have a set of functions to run when a section loads and when it leaves
     const section = document.getElementById(sectionId);
     if (section) {
         section.style.display = 'block';
@@ -656,7 +664,9 @@ window.showSection = function (sectionId) {
                 if (iframe) iframe.style.display = '';
                 if (testModeMsg) testModeMsg.style.display = 'none';
             }
-        } else if (sectionId === 'satellite') {
+        }
+        
+        if (sectionId === 'satellite') {
             // Load weather image when satellite section is shown
             const weatherImage = document.getElementById('weather-image');
             weatherImage.src = SAT_URLS.latest;
@@ -669,22 +679,19 @@ window.showSection = function (sectionId) {
         }
 
         if (sectionId === 'network') {
-            updateNetworkInfo();
+            if (!networkInfoUpdated) {
+                updateNetworkInfo();
+                networkInfoUpdated = true;
+            }
         }
 
         if (sectionId === 'landmarks') {
             if (lat !== null && long !== null) {
-                fetchWikipediaData(lat, long);
+                fetchLandmarkData(lat, long);
             } else {
                 customLog('Location not available for Wikipedia data.');
             }
         }
-    }
-
-    // Activate the clicked button
-    const button = document.querySelector(`.section-button[onclick="showSection('${sectionId}')"]`);
-    if (button) {
-        button.classList.add('active');
     }
 };
 
