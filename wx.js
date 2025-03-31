@@ -50,6 +50,34 @@ function getMoonPhaseName(phase) {
     return "Waning Crescent";
 }
 
+// Generate a CSS styling for the moon phase icon based on phase value
+function getMoonPhaseIcon(phase) {
+    // Create CSS for the moon icon based on the phase value (0 to 1)
+    // 0 = new moon (fully dark), 0.5 = full moon (fully light), 1 = new moon again
+    
+    let style = '';
+    
+    if (phase === 0 || phase === 1) {
+        // New moon - completely dark circle
+        style = 'background-color: #000;';
+    } else if (phase === 0.5) {
+        // Full moon - completely light circle
+        style = 'background-color: #fff; box-shadow: inset 0 0 4px rgba(0,0,0,0.2);';
+    } else if (phase < 0.5) {
+        // Waxing moon - illuminated from right
+        const percentageVisible = phase * 2; // 0 to 1
+        style = `background-color: #000;
+                 box-shadow: inset ${12 * percentageVisible}px 0 0 0 #fff;`;
+    } else {
+        // Waning moon - illuminated from left
+        const percentageVisible = (1 - phase) * 2; // 1 to 0
+        style = `background-color: #000;
+                 box-shadow: inset -${12 * percentageVisible}px 0 0 0 #fff;`;
+    }
+    
+    return style;
+}
+
 // Fetches weather data and updates the display
 export function fetchWeatherData(lat, long, silentLoad = true) {
     customLog('Fetching weather data...' + (silentLoad ? ' (background load)' : ''));
@@ -160,6 +188,12 @@ function updateSunMoonDisplay() {
     if (moonPhaseData) {
         const moonPhase = getMoonPhaseName(moonPhaseData.Phase);
         highlightUpdate('moonphase', moonPhase);
+        
+        // Update the moon icon
+        const moonIcon = document.getElementById('moon-icon');
+        if (moonIcon) {
+            moonIcon.setAttribute('style', getMoonPhaseIcon(moonPhaseData.Phase));
+        }
     }
 }
 
