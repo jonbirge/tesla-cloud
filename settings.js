@@ -2,6 +2,7 @@
 import { updateNews } from './news.js';
 import { customLog } from './common.js';
 import { updateChartAxisColors } from './net.js';
+import { autoDarkMode } from './wx.js';
 
 // Global variables
 let isLoggedIn = false;
@@ -409,6 +410,7 @@ window.toggleMode = function () {
 }
 
 // Function called by the toggle UI elements
+// TODO: Handle special cases in toggleSetting(), and deal with RSS by setting "dirty" flag triggering update the next time news is selected.
 window.toggleSettingFrom = function(element) {
     customLog('Toggle setting from UI element.');
     const settingItem = element.closest('.settings-toggle-item');
@@ -416,9 +418,17 @@ window.toggleSettingFrom = function(element) {
         const key = settingItem.dataset.setting;
         const value = element.checked;
         toggleSetting(key, value);
+
         // If the setting is RSS-related, update the news feed
         if (key.startsWith('rss-')) {
             updateNews(true);
+        }
+
+        // If the setting is dark mode related, update the dark mode
+        if (key === 'auto-dark-mode') {
+            if (value) {
+                autoDarkMode();
+            }
         }
     }
 }

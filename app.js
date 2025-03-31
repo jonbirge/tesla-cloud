@@ -37,8 +37,8 @@ let neverUpdatedLocation = true;
 let radarContext = null;
 let gpsIntervalId = null;
 let lastGPSUpdate = 0;
-const positionSimulator = new PositionSimulator(); // TODO: only create if needed
 let networkInfoUpdated = false; // Track if network info has been updated
+const positionSimulator = new PositionSimulator(); // TODO: only create if needed
 
 // Function to calculate the distance between two coordinates
 function calculateDistance(lat1, lon1, lat2, lon2) {
