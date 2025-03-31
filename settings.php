@@ -176,22 +176,27 @@ switch ($method) {
             exit;
         }
 
-        $settings = loadUserSettings($userId);
-
         if ($key) {
-            // Return settings where the key starts with the given prefix
-            $filteredSettings = array_filter($settings, function ($k) use ($key) {
-                return strpos($k, $key) === 0; // Check if the key starts with the prefix
-            }, ARRAY_FILTER_USE_KEY);
-
-            if (!empty($filteredSettings)) {
-                echo json_encode($filteredSettings);
+            // Check if there's an exact match for the key
+            $exactValue = getSingleSetting($userId, $key);
+            
+            if ($exactValue !== null) {
+                // Key exists, return just this value
+                echo json_encode([$key => $exactValue]);
             } else {
-                logMessage("No settings found with prefix '$key' for user $userId", "WARNING");
-                http_response_code(404);
+                // No exact match, try to get settings with this prefix
+                $settingsWithPrefix = getSettingsWithPrefix($userId, $key);
+                
+                if (!empty($settingsWithPrefix)) {
+                    echo json_encode($settingsWithPrefix);
+                } else {
+                    logMessage("No settings found with key or prefix '$key' for user $userId", "WARNING");
+                    http_response_code(404);
+                }
             }
         } else {
-            // Return all settings if no key is provided
+            // No key provided, return all settings
+            $settings = loadUserSettings($userId);
             echo json_encode($settings);
         }
         break;
@@ -246,17 +251,11 @@ switch ($method) {
             // Keep other string values as is - this handles non-boolean settings
         }
         
-        // Load current settings
-        $settings = loadUserSettings($userId);
-        
-        // Track if this is a creation operation
+        // Check if this is a new resource creation
         $isCreatingResource = !userSettingsExist($userId);
         
-        // Update the setting
-        $settings[$key] = $value;
-        
-        // Save updated settings
-        if (saveUserSettings($userId, $settings)) {
+        // Update the single setting instead of all settings
+        if (updateSingleSetting($userId, $key, $value)) {
             // Return 201 Created if this was a new resource, otherwise 200 OK
             if ($isCreatingResource) {
                 http_response_code(201);
@@ -279,6 +278,90 @@ switch ($method) {
 
 
 // ***** Utility Functions *****
+
+// Helper function to update a single setting
+function updateSingleSetting($userId, $key, $value) {
+    global $dbConnection;
+    logMessage("Updating single setting for user $userId, key: $key");
+    
+    try {
+        $jsonValue = json_encode($value);
+        
+        // Check if this key already exists for the user
+        $checkStmt = $dbConnection->prepare("SELECT 1 FROM user_settings WHERE user_id = ? AND setting_key = ? LIMIT 1");
+        $checkStmt->execute([$userId, $key]);
+        $exists = $checkStmt->rowCount() > 0;
+        
+        if ($exists) {
+            // Update existing key
+            logMessage("Key $key exists, updating it");
+            $updateStmt = $dbConnection->prepare("UPDATE user_settings SET setting_value = ? WHERE user_id = ? AND setting_key = ?");
+            $updateStmt->execute([$jsonValue, $userId, $key]);
+        } else {
+            // Insert new key
+            logMessage("Key $key does not exist, inserting it");
+            $insertStmt = $dbConnection->prepare("INSERT INTO user_settings (user_id, setting_key, setting_value) VALUES (?, ?, ?)");
+            $insertStmt->execute([$userId, $key, $jsonValue]);
+        }
+        
+        logMessage("Successfully saved setting $key for user $userId");
+        return true;
+    } catch (PDOException $e) {
+        $errorMsg = "Database error updating setting: " . $e->getMessage();
+        logMessage($errorMsg, "ERROR");
+        return false;
+    }
+}
+
+// Helper function to get a single setting value
+function getSingleSetting($userId, $key) {
+    global $dbConnection;
+    logMessage("Getting single setting for user $userId, key: $key");
+    
+    try {
+        // Get the specific key value
+        $stmt = $dbConnection->prepare("SELECT setting_value FROM user_settings WHERE user_id = ? AND setting_key = ?");
+        $stmt->execute([$userId, $key]);
+        
+        if ($stmt->rowCount() > 0) {
+            $row = $stmt->fetch();
+            $value = json_decode($row['setting_value'], true);
+            logMessage("Found setting $key for user $userId");
+            return $value !== null ? $value : $row['setting_value'];
+        } else {
+            logMessage("Setting $key not found for user $userId", "WARNING");
+            return null;
+        }
+    } catch (PDOException $e) {
+        $errorMsg = "Database error getting setting: " . $e->getMessage();
+        logMessage($errorMsg, "ERROR");
+        throw $e;
+    }
+}
+
+// Helper function to get settings with a prefix
+function getSettingsWithPrefix($userId, $keyPrefix) {
+    global $dbConnection;
+    logMessage("Getting settings with prefix '$keyPrefix' for user $userId");
+    
+    try {
+        $stmt = $dbConnection->prepare("SELECT setting_key, setting_value FROM user_settings WHERE user_id = ? AND setting_key LIKE ?");
+        $stmt->execute([$userId, $keyPrefix . '%']);
+        
+        $settings = [];
+        while ($row = $stmt->fetch()) {
+            $value = json_decode($row['setting_value'], true);
+            $settings[$row['setting_key']] = $value !== null ? $value : $row['setting_value'];
+        }
+        
+        logMessage("Found " . count($settings) . " setting(s) with prefix '$keyPrefix' for user $userId");
+        return $settings;
+    } catch (PDOException $e) {
+        $errorMsg = "Database error getting settings with prefix: " . $e->getMessage();
+        logMessage($errorMsg, "ERROR");
+        throw $e;
+    }
+}
 
 // Helper function to validate user ID
 function validateUserId($userId) {

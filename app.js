@@ -15,7 +15,7 @@ const SAT_URLS = {
 // Imports
 import { customLog, highlightUpdate, testMode, updateTimeZone, GEONAMES_USERNAME } from './common.js';
 import { PositionSimulator } from './location.js';
-import { attemptLogin, updateLoginState, settings } from './settings.js';
+import { attemptLogin, settings } from './settings.js';
 import { fetchWeatherData, weatherData } from './wx.js';
 import { updateNetworkInfo, startPingTest } from './net.js';
 import { setUserHasSeenLatestNews } from './news.js';
@@ -735,7 +735,6 @@ document.addEventListener('DOMContentLoaded', async function () {
 
     // Attempt login from URL parameter or cookie
     await attemptLogin();
-    updateLoginState();
 
     // Check for NOTE file and display if present
     updateServerNote();

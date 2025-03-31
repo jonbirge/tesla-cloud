@@ -233,7 +233,7 @@ export async function attemptLogin() {
 }
 
 // Update login/logout button visibility based on state
-export function updateLoginState() {
+function updateLoginState() {
     const loginButton = document.getElementById('login-button');
     const logoutButton = document.getElementById('logout-button');
 
@@ -395,8 +395,15 @@ window.handleLogout = function () {
 window.handleLogin = async function () {
     const userId = document.getElementById('user-id').value.trim();
     closeLoginModal();
-    fetchSettings(userId);
-    updateNews(true); // Update news feed after login
+    customLog('Attempting login with user ID: ', userId);
+    await fetchSettings(userId);
+    customLog('Login done, updating news feed with new settings...');
+    try {
+        await fetchSettings(userId);
+        updateNews(true); // Update news feed after login
+    } catch (error) {
+        console.error('Error during login or fetching settings:', error);
+    }
 }
 
 // Manually swap dark/light mode
