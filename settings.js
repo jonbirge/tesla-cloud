@@ -398,7 +398,12 @@ window.handleLogin = async function () {
     customLog('Attempting login with user ID: ', userId);
     await fetchSettings(userId);
     customLog('Login done, updating news feed with new settings...');
-    updateNews(true); // Update news feed after login
+    try {
+        await fetchSettings(userId);
+        updateNews(true); // Update news feed after login
+    } catch (error) {
+        console.error('Error during login or fetching settings:', error);
+    }
 }
 
 // Manually swap dark/light mode
