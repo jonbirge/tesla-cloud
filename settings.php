@@ -38,6 +38,19 @@ if (file_exists($envFilePath)) {
     error_log(".env file not found at $envFilePath");
 }
 
+// Function to get client IP address accounting for proxies
+function getClientIP() {
+    if (!empty($_SERVER['HTTP_X_FORWARDED_FOR'])) {
+        // If the site is behind a proxy, get the real client IP
+        $ip = explode(',', $_SERVER['HTTP_X_FORWARDED_FOR'])[0];
+    } elseif (!empty($_SERVER['HTTP_CLIENT_IP'])) {
+        $ip = $_SERVER['HTTP_CLIENT_IP'];
+    } else {
+        $ip = $_SERVER['REMOTE_ADDR'];
+    }
+    return filter_var($ip, FILTER_VALIDATE_IP) ? $ip : 'unknown';
+}
+
 // SQL database configuration
 $dbName = $_ENV['SQL_DB_NAME'] ?? 'teslacloud';
 $dbHost = $_ENV['SQL_HOST'] ?? null;
@@ -89,6 +102,19 @@ try {
         )";
         $dbConnection->exec($sql);
         logMessage("Created user_ids table");
+    }
+    
+    // Check if login_hist table exists, create it if not
+    $loginHistTableCheck = $dbConnection->query("SHOW TABLES LIKE 'login_hist'");
+    if ($loginHistTableCheck->rowCount() == 0) {
+        $sql = "CREATE TABLE login_hist (
+            id INT AUTO_INCREMENT PRIMARY KEY,
+            user_id VARCHAR(255) NOT NULL,
+            login_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            ip_address VARCHAR(45) NOT NULL
+        )";
+        $dbConnection->exec($sql);
+        logMessage("Created login_hist table");
     }
 } catch (PDOException $e) {
     $errorMessage = "Database connection failed: " . $e->getMessage();
@@ -175,6 +201,9 @@ switch ($method) {
         
         // Update user_ids table - update last_login timestamp and increment login_count
         initializeUserIdEntry($userId);
+
+        // Record login in login_hist table
+        recordLogin($userId);
         
         // Resource exists, return 200 OK (with no body)
         http_response_code(200);
@@ -516,6 +545,21 @@ function saveUserSettings($userId, $settings) {
         $errorMsg = "Database error saving user settings: " . $e->getMessage();
         logMessage($errorMsg, "ERROR");
         return false;
+    }
+}
+
+// Helper function to record login attempts
+function recordLogin($userId) {
+    global $dbConnection;
+    logMessage("Recording login for user $userId");
+    
+    try {
+        $stmt = $dbConnection->prepare("INSERT INTO login_hist (user_id, login_time, ip_address) VALUES (?, ?, ?)");
+        $stmt->execute([$userId, date('Y-m-d H:i:s'), getClientIP()]);
+        logMessage("Recorded login for user $userId");
+    } catch (PDOException $e) {
+        logMessage("Failed to record login for user $userId: " . $e->getMessage(), "WARNING");
+        // Non-fatal error
     }
 }
 
