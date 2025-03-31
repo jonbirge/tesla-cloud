@@ -246,17 +246,11 @@ switch ($method) {
             // Keep other string values as is - this handles non-boolean settings
         }
         
-        // Load current settings
-        $settings = loadUserSettings($userId);
-        
-        // Track if this is a creation operation
+        // Check if this is a new resource creation
         $isCreatingResource = !userSettingsExist($userId);
         
-        // Update the setting
-        $settings[$key] = $value;
-        
-        // Save updated settings
-        if (saveUserSettings($userId, $settings)) {
+        // Update the single setting instead of all settings
+        if (updateSingleSetting($userId, $key, $value)) {
             // Return 201 Created if this was a new resource, otherwise 200 OK
             if ($isCreatingResource) {
                 http_response_code(201);
@@ -279,6 +273,40 @@ switch ($method) {
 
 
 // ***** Utility Functions *****
+
+// Helper function to update a single setting
+function updateSingleSetting($userId, $key, $value) {
+    global $dbConnection;
+    logMessage("Updating single setting for user $userId, key: $key");
+    
+    try {
+        $jsonValue = json_encode($value);
+        
+        // Check if this key already exists for the user
+        $checkStmt = $dbConnection->prepare("SELECT 1 FROM user_settings WHERE user_id = ? AND setting_key = ? LIMIT 1");
+        $checkStmt->execute([$userId, $key]);
+        $exists = $checkStmt->rowCount() > 0;
+        
+        if ($exists) {
+            // Update existing key
+            logMessage("Key $key exists, updating it");
+            $updateStmt = $dbConnection->prepare("UPDATE user_settings SET setting_value = ? WHERE user_id = ? AND setting_key = ?");
+            $updateStmt->execute([$jsonValue, $userId, $key]);
+        } else {
+            // Insert new key
+            logMessage("Key $key does not exist, inserting it");
+            $insertStmt = $dbConnection->prepare("INSERT INTO user_settings (user_id, setting_key, setting_value) VALUES (?, ?, ?)");
+            $insertStmt->execute([$userId, $key, $jsonValue]);
+        }
+        
+        logMessage("Successfully saved setting $key for user $userId");
+        return true;
+    } catch (PDOException $e) {
+        $errorMsg = "Database error updating setting: " . $e->getMessage();
+        logMessage($errorMsg, "ERROR");
+        return false;
+    }
+}
 
 // Helper function to validate user ID
 function validateUserId($userId) {
