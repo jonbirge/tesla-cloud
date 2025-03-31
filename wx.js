@@ -11,6 +11,8 @@ let sunrise = null;
 let sunset = null;
 let forecastData = null;
 let moonPhaseData = null;
+let lastLat = null;
+let lastLong = null;
 
 // Export these variables for use in other modules
 export { sunrise, sunset, weatherData };
@@ -52,6 +54,10 @@ function getMoonPhaseName(phase) {
 export function fetchWeatherData(lat, long, silentLoad = true) {
     customLog('Fetching weather data...' + (silentLoad ? ' (background load)' : ''));
     
+    // Save so we can call functions later outside GPS update loop, if needed
+    lastLat = lat;
+    lastLong = long;
+
     // Show loading spinner, hide forecast container - only if not silent loading
     const forecastContainer = document.getElementById('forecast-container');
     const loadingSpinner = document.getElementById('forecast-loading');
@@ -159,6 +165,17 @@ function updateSunMoonDisplay() {
 
 // Automatically toggles dark mode based on sunrise and sunset times
 export function autoDarkMode(lat, long) {
+    // if lat or long are null, then replace with last known values
+    if (lat == null || long == null) {
+        if (lastLat && lastLong) {
+            lat = lastLat;
+            long = lastLong;
+        } else {
+            customLog('autoDarkMode: No coordinates available.');
+            return;
+        }
+    }
+
     customLog('Auto dark mode check for coordinates: ', lat, long);
     if (!sunrise || !sunset) {
         customLog('autoDarkMode: sunrise/sunset data not available.');
