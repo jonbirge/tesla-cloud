@@ -322,6 +322,9 @@ window.pausePingTest = function() {
 
 window.resumePingTest = function() {
     if (!pingInterval) {
+        // Ping the server immediately
+        pingTestServer();
+        // Resume pinging every 10 seconds
         pingInterval = setInterval(pingTestServer, pingWait);
         customLog('Network ping testing resumed');
     }
