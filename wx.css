@@ -237,7 +237,7 @@ body.dark-mode .forecast-day.rain img.forecast-icon {
     width: 600px;
     max-height: 80vh;
     overflow-y: auto;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+    box-shadow: 5px 5px 15px rgba(0, 0, 0, 0.5);
 }
 
 .forecast-popup.show {
@@ -248,7 +248,7 @@ body.dark-mode .forecast-day.rain img.forecast-icon {
     position: absolute;
     right: 10px;
     top: 10px;
-    background: rgba(0, 0, 0, 0.1);
+    background: rgb(205 205 205 / 50%);
     border: none;
     width: 30px;
     height: 30px;
@@ -257,11 +257,13 @@ body.dark-mode .forecast-day.rain img.forecast-icon {
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 22px;
+    font-size: 24px;
+    font-weight: 600;
     line-height: 1;
-    font-family: monospace;
+    /* font-family: monospace; */
     padding-bottom: 4px;
-    color: #666;
+    padding-left: 7px;
+    color: var(--button-text);
     transition: all 0.2s ease;
 }
 
@@ -282,7 +284,7 @@ body.dark-mode .forecast-day.rain img.forecast-icon {
     padding: 15px;
     border-radius: var(--button-radius);
     text-align: center;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    /* box-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1); */
     transition: background 0.3s ease;
 }
 
