@@ -132,7 +132,7 @@ export function fetchWeatherData(lat, long, silentLoad = true) {
             updateAQI(lat, long, OPENWX_API_KEY);
             
             // Hide spinner and show forecast when data is loaded - only if not silent loading
-            if (forecastContainer) forecastContainer.style.display = 'flex';
+            if (forecastContainer) forecastContainer.style.display = 'grid';
             if (loadingSpinner) loadingSpinner.style.display = 'none';
         })
         .catch(error => {

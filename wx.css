@@ -95,24 +95,24 @@ body.dark-mode {
 /* Weather Forecast */
 
 .forecast-container {
-    display: none; /* Initially hidden */
-    justify-content: space-between;
-    gap: 15px;
-    margin: 20px 0;
-    max-width: 1200px;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, 180px);
+    /* justify-content: space-between; */
+    gap: 10px;
+    margin: 15px 0;
+    /* max-width: 1200px; */
 }
 
 .forecast-day {
-    flex: 1;
-    background: linear-gradient(to bottom, var(--sky-gradient-top), var(--sky-gradient-bottom));
     border-radius: var(--button-radius);
     padding: 15px;
     text-align: center;
-    min-width: 100px;
     position: relative;
     /* box-shadow: 2px 2px 4px rgba(0, 0, 0, 0.15); */
-    transition: background 0.3s ease;
+    /* transition: background 0.3s ease; */
     cursor: pointer;
+    min-width: 100px;
+    max-width: 180px;
 }
 
 #wx-data {
