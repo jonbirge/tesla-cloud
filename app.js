@@ -481,7 +481,7 @@ function stopGPSUpdates() {
 
 // Check for NOTE file and display if present
 function updateServerNote() {
-    fetch('NOTE')
+    fetch('NOTE', { cache: 'no-store' })
         .then(response => {
             if (!response.ok) {
                 throw new Error('NOTE file not found');

@@ -111,7 +111,7 @@ hr {
     font-style: none;
     font-weight: 700;
     text-align: center;
-    text-transform: uppercase;
+    /* text-transform: uppercase; */
     max-width: 840px;
     place-self: left;
 }
