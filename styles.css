@@ -34,7 +34,9 @@ body.dark-mode {
     --status-unavailable: #888888;  /* Gray for unavailable/bad connection */
 }
 
+
 /* Basic HTML Elements */
+
 * {
     font-family: "Inter";
     font-optical-sizing: auto;
@@ -75,13 +77,16 @@ h2 {
 p {
     margin-top: 12px;
     margin-bottom: 0px;
-    text-align: justify
+    text-align: justify;
+    max-width: 1000px;
 }
 
 ul {
     padding-left: 20px;
     margin-top: 0px;
     margin-bottom: 0px;
+    text-align: justify;
+    max-width: 960px;
 }
 
 li {
@@ -108,7 +113,7 @@ hr {
     text-align: center;
     text-transform: uppercase;
     max-width: 840px;
-    place-self: center;
+    place-self: left;
 }
 
 /* Landmarks */
@@ -145,7 +150,7 @@ hr {
     flex-grow: 1;
     height: 100%; /* Ensure it spans the full height of the container */
     overflow-y: auto; /* Enable scrolling for the right frame */
-    padding: 20px 3.5% 20px 15px;
+    padding: 20px 40px 20px 15px;
     box-sizing: border-box; /* Include padding in the height calculation */
     scrollbar-gutter: stable; /* Ensure consistent scrollbar spacing */
     scrollbar-width: thin; /* Use a thin scrollbar */
@@ -222,7 +227,6 @@ hr {
 .logout-button:hover {
     background-color: var(--active-section-bg);
 }
-
 
 .button-icon {
     width: 20px;
@@ -490,7 +494,7 @@ input:checked + .toggle-slider:before {
 }
 
 
-/* Stats Display */
+/* Stats  */
 
 .nav-container {
     display: flex;
@@ -613,6 +617,7 @@ input:checked + .toggle-slider:before {
     transition: background-color 0.3s;
     border: none;
     width: 100%;
+    max-width: 1200px;
     text-align: left;
     cursor: pointer;
     position: relative;  /* Added for absolute positioning of the favicon */
@@ -672,7 +677,7 @@ input:checked + .toggle-slider:before {
     font-size: 12.5pt;
     margin-left: 5px;
     display: inline-block;
-    font-weight: 400;
+    font-weight: 500;
 }
 
 .news-title {
@@ -694,7 +699,9 @@ input:checked + .toggle-slider:before {
     opacity: 0.8;
 }
 
+
 /* Network Status Indicator */
+
 .network-status {
     margin-right: 22px;
     width: 24px;
@@ -926,7 +933,7 @@ input:checked + .toggle-slider:before {
     border-radius: var(--button-radius);
     padding: 15px;
     margin-bottom: 9px;
-    width: auto;
+    max-width: 380px;
     font-weight: 550;
     cursor: pointer; /* Add cursor pointer to indicate it's clickable */
 }
@@ -1002,6 +1009,7 @@ input:checked + .settings-toggle-slider:before {
     margin-bottom: 0;
     max-width: none;
     width: auto;
+    border-radius: 9px;
 }
 
 .news-toggle-item {
