@@ -684,6 +684,7 @@ input:checked + .toggle-slider:before {
     color: var(--button-text);
     display: block;
     margin-top: 4px;
+    margin-right: 24px; /* avoid indicator */
     font-size: 16pt;
     font-weight: 550;
 }

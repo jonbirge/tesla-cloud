@@ -11,15 +11,15 @@ $cacheDuration = 15*10; // 15 minutes
 $cacheFile = '/tmp/rss_cache_' . $version . '.json';
 $cacheTimestampFile = '/tmp/rss_cache_timestamp_' . $version;
 $logFile = '/tmp/rss_php_' . $version . '.log';
-$maxStories = 128; // Maximum number of stories to send to client
-$maxSingleSource = 9; // Maximum number of stories to keep from a single source
+$maxStories = 180; // Maximum number of stories to send to client
+$maxSingleSource = 40; // Maximum number of stories to keep from a single source
 
 // List of RSS feeds to fetch
 $feeds = [
     'wsj' => 'https://feeds.content.dowjones.io/public/rss/RSSWorldNews',
     'nyt' => 'https://rss.nytimes.com/services/xml/rss/nyt/HomePage.xml',
     'wapo' => 'https://feeds.washingtonpost.com/rss/national',
-    'latimes' => 'https://www.latimes.com/business/rss2.0.xml',
+    'latimes' => 'https://www.latimes.com/rss2.0.xml',
     'bos' => 'https://www.boston.com/tag/local-news/feed',
     'bloomberg' => 'https://feeds.bloomberg.com/news.rss',
     'bloomberg-tech' => 'https://feeds.bloomberg.com/technology/news.rss',
