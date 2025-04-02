@@ -79,7 +79,7 @@ function getMoonPhaseIcon(phase) {
 }
 
 // Fetches weather data and updates the display
-export function fetchWeatherData(lat, long, silentLoad = true) {
+export function fetchWeatherData(lat, long, silentLoad = false) {
     customLog('Fetching weather data...' + (silentLoad ? ' (background load)' : ''));
     
     // Save so we can call functions later outside GPS update loop, if needed
@@ -90,6 +90,8 @@ export function fetchWeatherData(lat, long, silentLoad = true) {
     const forecastContainer = document.getElementById('forecast-container');
     const loadingSpinner = document.getElementById('forecast-loading');
     
+    // Remember display style of forecast container
+    let lastDisplayStyle = forecastContainer.style.display;
     if (!silentLoad) {
         if (forecastContainer) forecastContainer.style.display = 'none';
         if (loadingSpinner) loadingSpinner.style.display = 'flex';
@@ -132,7 +134,7 @@ export function fetchWeatherData(lat, long, silentLoad = true) {
             updateAQI(lat, long, OPENWX_API_KEY);
             
             // Hide spinner and show forecast when data is loaded - only if not silent loading
-            if (forecastContainer) forecastContainer.style.display = 'grid';
+            if (forecastContainer) forecastContainer.style.display = lastDisplayStyle;
             if (loadingSpinner) loadingSpinner.style.display = 'none';
         })
         .catch(error => {
@@ -145,7 +147,7 @@ export function fetchWeatherData(lat, long, silentLoad = true) {
                 if (forecastContainer) {
                     forecastContainer.style.display = 'flex';
                     // Show error message in the forecast container
-                    forecastContainer.innerHTML = '<div class="error-message">Unable to load weather data</div>';
+                    forecastContainer.innerHTML = '<div class="error-message">Unable to load weather data!</div>';
                 }
             }
         });

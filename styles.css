@@ -459,7 +459,7 @@ input:checked + .toggle-slider:before {
 }
 
 .data-info-column {
-    margin-top: 16px;
+    margin-top: 12px;
     display: flex;
     flex-direction: column;
 }
