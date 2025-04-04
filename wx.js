@@ -285,17 +285,12 @@ function updateForecastDisplay() {
                 descElement.textContent = day.weather[0].main;
             }
 
-            // Add or remove hazard alert
-            const existingAlert = dayElement.querySelector('.forecast-alert');
+            // Show or hide hazard alert
+            const alertIcon = dayElement.querySelector('.forecast-alert');
             if (dayHasHazards(day)) {
-                if (!existingAlert) {
-                    const alert = document.createElement('div');
-                    alert.className = 'forecast-alert';
-                    alert.innerHTML = '⚠️';
-                    dayElement.appendChild(alert);
-                }
-            } else if (existingAlert) {
-                existingAlert.remove();
+                alertIcon.classList.remove('hidden');
+            } else {
+                alertIcon.classList.add('hidden');
             }
         }
     });
