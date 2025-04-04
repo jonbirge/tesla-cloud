@@ -435,28 +435,6 @@ function updateAQI(lat, lon, apiKey) {
         });
 }
 
-// Switches the weather image based on the type provided
-window.switchWeatherImage = function (type) {
-    const weatherImage = document.getElementById('weather-image');
-    weatherImage.style.opacity = '0';
-    
-    setTimeout(() => {
-        weatherImage.src = SAT_URLS[type];
-        weatherImage.style.opacity = '1';
-    }, 300);
-    
-    // Update buttons and slider position
-    const weatherSwitch = document.querySelector('.weather-switch');
-    const buttons = weatherSwitch.getElementsByTagName('button');
-    buttons[0].classList.toggle('active', type === 'latest');
-    buttons[1].classList.toggle('active', type === 'loop');
-    buttons[2].classList.toggle('active', type === 'latest_ir');
-    
-    // Update slider position for three states
-    const positions = { 'latest': 0, 'loop': 1, 'latest_ir': 2 };
-    weatherSwitch.style.setProperty('--slider-position', positions[type]);
-}
-
 // Displays the hourly forecast for a specific day
 window.showHourlyForecast = function (dayIndex) {
     // Logging
