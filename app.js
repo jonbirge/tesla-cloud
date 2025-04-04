@@ -1,3 +1,11 @@
+// Imports
+import { customLog, highlightUpdate, testMode, updateTimeZone, GEONAMES_USERNAME } from './common.js';
+import { PositionSimulator } from './location.js';
+import { attemptLogin, settings } from './settings.js';
+import { fetchWeatherData, weatherData } from './wx.js';
+import { updateNetworkInfo, startPingTest } from './net.js';
+import { markAllNewsAsRead } from './news.js';
+
 // Settings
 const LATLON_UPDATE_INTERVAL = 2; // seconds
 const UPDATE_DISTANCE_THRESHOLD = 500; // meters
@@ -11,14 +19,6 @@ const SAT_URLS = {
     loop: 'https://cdn.star.nesdis.noaa.gov/GOES16/GLM/CONUS/EXTENT3/GOES16-CONUS-EXTENT3-625x375.gif',
     latest_ir: 'https://cdn.star.nesdis.noaa.gov/GOES16/ABI/CONUS/11/1250x750.jpg',
 };
-
-// Imports
-import { customLog, highlightUpdate, testMode, updateTimeZone, GEONAMES_USERNAME } from './common.js';
-import { PositionSimulator } from './location.js';
-import { attemptLogin, settings } from './settings.js';
-import { fetchWeatherData, weatherData } from './wx.js';
-import { updateNetworkInfo, startPingTest } from './net.js';
-import { setUserHasSeenLatestNews } from './news.js';
 
 // Variables
 let lastUpdate = 0; // Timestamp of last location update
@@ -585,7 +585,6 @@ window.showSection = function (sectionId) {
 
     // If switching to news section, clear the notification dot
     if (sectionId === 'news') {
-        setUserHasSeenLatestNews(true);
         const newsButton = document.querySelector('.section-button[onclick="showSection(\'news\')"]');
         if (newsButton) {
             newsButton.classList.remove('has-notification');
@@ -600,15 +599,83 @@ window.showSection = function (sectionId) {
         }
     }
 
-    // Clear "new" markers from news items when switching to a different section
+    // Clear "new" markers from news items and clear unread flags from data
     if (sectionId !== 'news') {
         const newNewsItems = document.querySelectorAll('.news-new');
         newNewsItems.forEach(item => {
             item.classList.remove('news-new');
         });
+        markAllNewsAsRead();
     }
 
-    // Then get a fresh reference to sections after DOM is restored
+    // Navigation section
+    if (sectionId === 'navigation') {
+        if (testMode) {
+            // In test mode, replace TeslaWaze iframe with "TESTING MODE" message
+            const teslaWazeContainer = document.querySelector('.teslawaze-container');
+            if (teslaWazeContainer) {
+                const iframe = teslaWazeContainer.querySelector('iframe');
+                if (iframe) {
+                    iframe.style.display = 'none';
+
+                    // Check if our test mode message already exists
+                    let testModeMsg = teslaWazeContainer.querySelector('.test-mode-message');
+                    if (!testModeMsg) {
+                        // Create and add the test mode message
+                        testModeMsg = document.createElement('div');
+                        testModeMsg.className = 'test-mode-message';
+                        testModeMsg.style.cssText = 'display: flex; justify-content: center; align-items: center; height: 100%; font-size: 32px; font-weight: bold;';
+                        testModeMsg.textContent = 'TESTING MODE';
+                        teslaWazeContainer.appendChild(testModeMsg);
+                    } else {
+                        testModeMsg.style.display = 'flex';
+                    }
+                }
+            }
+        } else {
+            // Normal mode - ensure iframe is visible and test mode message is hidden
+            const teslaWazeContainer = document.querySelector('.teslawaze-container');
+            if (teslaWazeContainer) {
+                const iframe = teslaWazeContainer.querySelector('iframe');
+                const testModeMsg = teslaWazeContainer.querySelector('.test-mode-message');
+
+                if (iframe) iframe.style.display = '';
+                if (testModeMsg) testModeMsg.style.display = 'none';
+            }
+        }
+    }
+    
+    // Satellite section
+    if (sectionId === 'satellite') {
+        // Load weather image when satellite section is shown
+        const weatherImage = document.getElementById('weather-image');
+        weatherImage.src = SAT_URLS.latest;
+    } else {
+        // Remove weather img src to force reload when switching back
+        const weatherImage = document.getElementById('weather-image');
+        if (weatherImage) {
+            weatherImage.src = '';
+        }
+    }
+
+    // Update network info if the network section is visible
+    if (sectionId === 'network') {
+        if (!networkInfoUpdated) {
+            updateNetworkInfo();
+            networkInfoUpdated = true;
+        }
+    }
+
+    // Update Wikipedia data if the landmarks section is visible
+    if (sectionId === 'landmarks') {
+        if (lat !== null && long !== null) {
+            fetchLandmarkData(lat, long);
+        } else {
+            customLog('Location not available for Wikipedia data.');
+        }
+    }
+
+    // Get a fresh reference to sections after DOM is restored
     const sections = document.querySelectorAll('.section');
     sections.forEach(section => {
         section.style.display = 'none';
@@ -632,66 +699,7 @@ window.showSection = function (sectionId) {
     if (section) {
         section.style.display = 'block';
 
-        if (sectionId === 'navigation' && testMode) {
-            // In test mode, replace TeslaWaze iframe with "TESTING MODE" message
-            const teslaWazeContainer = document.querySelector('.teslawaze-container');
-            if (teslaWazeContainer) {
-                const iframe = teslaWazeContainer.querySelector('iframe');
-                if (iframe) {
-                    iframe.style.display = 'none';
-
-                    // Check if our test mode message already exists
-                    let testModeMsg = teslaWazeContainer.querySelector('.test-mode-message');
-                    if (!testModeMsg) {
-                        // Create and add the test mode message
-                        testModeMsg = document.createElement('div');
-                        testModeMsg.className = 'test-mode-message';
-                        testModeMsg.style.cssText = 'display: flex; justify-content: center; align-items: center; height: 100%; font-size: 32px; font-weight: bold;';
-                        testModeMsg.textContent = 'TESTING MODE';
-                        teslaWazeContainer.appendChild(testModeMsg);
-                    } else {
-                        testModeMsg.style.display = 'flex';
-                    }
-                }
-            }
-        } else if (sectionId === 'navigation') {
-            // Normal mode - ensure iframe is visible and test mode message is hidden
-            const teslaWazeContainer = document.querySelector('.teslawaze-container');
-            if (teslaWazeContainer) {
-                const iframe = teslaWazeContainer.querySelector('iframe');
-                const testModeMsg = teslaWazeContainer.querySelector('.test-mode-message');
-
-                if (iframe) iframe.style.display = '';
-                if (testModeMsg) testModeMsg.style.display = 'none';
-            }
-        }
         
-        if (sectionId === 'satellite') {
-            // Load weather image when satellite section is shown
-            const weatherImage = document.getElementById('weather-image');
-            weatherImage.src = SAT_URLS.latest;
-        } else {
-            // Remove weather img src to force reload when switching back
-            const weatherImage = document.getElementById('weather-image');
-            if (weatherImage) {
-                weatherImage.src = '';
-            }
-        }
-
-        if (sectionId === 'network') {
-            if (!networkInfoUpdated) {
-                updateNetworkInfo();
-                networkInfoUpdated = true;
-            }
-        }
-
-        if (sectionId === 'landmarks') {
-            if (lat !== null && long !== null) {
-                fetchLandmarkData(lat, long);
-            } else {
-                customLog('Location not available for Wikipedia data.');
-            }
-        }
     }
 };
 

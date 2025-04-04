@@ -1,6 +1,6 @@
 // Imports
 import { updateNews } from './news.js';
-import { customLog } from './common.js';
+import { customLog, testMode } from './common.js';
 import { updateChartAxisColors } from './net.js';
 import { autoDarkMode } from './wx.js';
 
@@ -16,8 +16,8 @@ export { settings, currentUser, isLoggedIn, hashedUser };
 // Default settings that will be used when no user is logged in
 const defaultSettings = {
     // General settings
-    "auto-dark-mode": true,
     "dark-mode": false,
+    "auto-dark-mode": true,
     "24-hour-time": false,
     "imperial-units": true,
     // News source settings
@@ -427,7 +427,9 @@ window.toggleSettingFrom = function(element) {
 
         // If the setting is RSS-related, update the news feed
         if (key.startsWith('rss-')) {
-            updateNews(true);
+            // Check if the setting is being enabled or disabled
+            const isAdding = value;
+            updateNews(!isAdding);
         }
 
         // If the setting is dark mode related, update the dark mode

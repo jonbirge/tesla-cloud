@@ -3,16 +3,27 @@
 require_once __DIR__ . '/git_info.php';
 
 // Get version information directly using the function
+// TODO: Remove this once deployment is containerized
 $gitInfo = getGitInfo();
 $version = isset($gitInfo['commit']) ? $gitInfo['commit'] : 'unknown';
 
+// Check if reload parameter is set to bypass cache
+$forceReload = isset($_GET['reload']) || isset($_GET['n']);
+
+// Check if serial fetching is requested
+$useSerialFetch = isset($_GET['serial']);
+
 // Settings
-$cacheDuration = 15*10; // 15 minutes
+$cacheDuration = 15*60; // 10 minutes
 $cacheFile = '/tmp/rss_cache_' . $version . '.json';
 $cacheTimestampFile = '/tmp/rss_cache_timestamp_' . $version;
 $logFile = '/tmp/rss_php_' . $version . '.log';
-$maxStories = 180; // Maximum number of stories to send to client
-$maxSingleSource = 40; // Maximum number of stories to keep from a single source
+$maxStories = 512; // Maximum number of stories to send to client
+$maxSingleSource = 32; // Maximum number of stories to keep from a single source
+
+// Get number of stories to return
+$numStories = isset($_GET['n']) ? intval($_GET['n']) : $maxStories;
+$numStories = max(1, min($maxStories, $numStories));
 
 // List of RSS feeds to fetch
 $feeds = [
@@ -83,16 +94,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         logMessage("Received excluded feeds: " . implode(', ', $excludedFeeds));
     }
 }
-
-// Check if reload parameter is set to bypass cache
-$forceReload = isset($_GET['reload']) || isset($_GET['n']);
-
-// Check if serial fetching is requested
-$useSerialFetch = isset($_GET['serial']);
-
-// Get number of stories to return
-$numStories = isset($_GET['n']) ? intval($_GET['n']) : $maxStories;
-$numStories = max(1, min($maxStories, $numStories));
 
 // Cache logic
 if (!$forceReload && file_exists($cacheFile) && file_exists($cacheTimestampFile)) {
