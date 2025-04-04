@@ -1,6 +1,6 @@
 // Imports
 import { updateNews } from './news.js';
-import { customLog } from './common.js';
+import { customLog, testMode } from './common.js';
 import { updateChartAxisColors } from './net.js';
 import { autoDarkMode } from './wx.js';
 
@@ -8,16 +8,104 @@ import { autoDarkMode } from './wx.js';
 let isLoggedIn = false;
 let currentUser = null;
 let hashedUser = null; // Store the hashed version of the user ID
+let rssIsDirty = false; // Flag to indicate if RSS settings have changed
+let rssDrop = false; // Flag to indicate if an RSS feed has been dropped
 let settings = {}; // Initialize settings object
 
 // Export settings object so it's accessible to other modules
 export { settings, currentUser, isLoggedIn, hashedUser };
 
+// Settings section is being left
+export function leaveSettings() {
+    if (rssIsDirty) {
+        customLog('RSS settings are dirty, updating news feed.')
+        // If RSS is dirty, update the news feed
+        updateNews(rssDrop);
+        rssIsDirty = false; // Reset the dirty flag
+        rssDrop = false; // Reset the drop flag
+    }
+}
+
+// Turn on dark mode
+export function turnOnDarkMode() {
+    document.body.classList.add('dark-mode');
+    document.getElementById('darkModeToggle').checked = true;
+    toggleSetting('dark-mode', true);
+    updateDarkModeDependants();
+}
+
+// Turn off dark mode
+export function turnOffDarkMode() {
+    document.body.classList.remove('dark-mode');
+    document.getElementById('darkModeToggle').checked = false;
+    toggleSetting('dark-mode', false);
+    updateDarkModeDependants();
+}
+
+// Function to attempt login from cookie
+export async function attemptLogin() {
+    const urlParams = new URLSearchParams(window.location.search);
+    let userId = urlParams.get('user');
+    
+    // If no userid in URL, try to get from cookie
+    if (!userId) {
+        userId = getCookie('userid');
+        customLog('Checking for userid cookie:', userId ? 'found' : 'not found');
+    }
+
+    if (userId) {
+        await fetchSettings(userId); // Fetch settings for the user
+    } else {
+        initializeSettings(); // No user ID found, use default settings
+    }
+}
+
+// Function to toggle a setting (updates both local cache and server)
+export async function toggleSetting(key, value) {
+    // Handle local settings
+    settings[key] = value;
+
+    // Update toggle state visually
+    updateToggleVisualState(key, value);
+
+    customLog(`Setting "${key}" updated to ${value} (local)`);
+
+    // Update server if logged in
+    if (isLoggedIn && currentUser) {
+        try {
+            // Update the local settings cache with boolean value
+            settings[key] = value;
+
+            // Update toggle state visually
+            updateToggleVisualState(key, value);
+
+            // Update the server with the boolean value using the RESTful API
+            const response = await fetch(`settings.php/${encodeURIComponent(hashedUser)}/${encodeURIComponent(key)}`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    value: value
+                })
+            });
+
+            if (response.ok) {
+                customLog(`Setting "${key}" updated to ${value} (server)`);
+            } else {
+                customLog(`Failed to update setting "${key}" on server`);
+            }
+        } catch (error) {
+            customLog('Error toggling setting:', error);
+        }
+    }
+}
+
 // Default settings that will be used when no user is logged in
 const defaultSettings = {
     // General settings
-    "auto-dark-mode": true,
     "dark-mode": false,
+    "auto-dark-mode": true,
     "24-hour-time": false,
     "imperial-units": true,
     // News source settings
@@ -53,22 +141,6 @@ function initializeSettings() {
     settings = { ...defaultSettings };
     initializeToggleStates();
     customLog('Settings initialized: ', settings);
-}
-
-// Turn on dark mode
-export function turnOnDarkMode() {
-    document.body.classList.add('dark-mode');
-    document.getElementById('darkModeToggle').checked = true;
-    toggleSetting('dark-mode', true);
-    updateDarkModeDependants();
-}
-
-// Turn off dark mode
-export function turnOffDarkMode() {
-    document.body.classList.remove('dark-mode');
-    document.getElementById('darkModeToggle').checked = false;
-    toggleSetting('dark-mode', false);
-    updateDarkModeDependants();
 }
 
 // Update things that depend on dark mode
@@ -214,24 +286,6 @@ async function createNewUser(userId, hashedId = null) {
     }
 }
 
-// Function to attempt login from cookie
-export async function attemptLogin() {
-    const urlParams = new URLSearchParams(window.location.search);
-    let userId = urlParams.get('user');
-    
-    // If no userid in URL, try to get from cookie
-    if (!userId) {
-        userId = getCookie('userid');
-        customLog('Checking for userid cookie:', userId ? 'found' : 'not found');
-    }
-
-    if (userId) {
-        await fetchSettings(userId); // Fetch settings for the user
-    } else {
-        initializeSettings(); // No user ID found, use default settings
-    }
-}
-
 // Update login/logout button visibility based on state
 function updateLoginState() {
     const loginButton = document.getElementById('login-button');
@@ -245,47 +299,6 @@ function updateLoginState() {
         loginButton.classList.remove('hidden');
         logoutButton.classList.add('hidden');
         logoutButton.textContent = 'Logout';
-    }
-}
-
-// Function to toggle a setting (updates both local cache and server)
-export async function toggleSetting(key, value) {
-    // Handle local settings
-    settings[key] = value;
-
-    // Update toggle state visually
-    updateToggleVisualState(key, value);
-
-    customLog(`Setting "${key}" updated to ${value} (local)`);
-
-    // Update server if logged in
-    if (isLoggedIn && currentUser) {
-        try {
-            // Update the local settings cache with boolean value
-            settings[key] = value;
-
-            // Update toggle state visually
-            updateToggleVisualState(key, value);
-
-            // Update the server with the boolean value using the RESTful API
-            const response = await fetch(`settings.php/${encodeURIComponent(hashedUser)}/${encodeURIComponent(key)}`, {
-                method: 'PUT',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({
-                    value: value
-                })
-            });
-
-            if (response.ok) {
-                customLog(`Setting "${key}" updated to ${value} (server)`);
-            } else {
-                customLog(`Failed to update setting "${key}" on server`);
-            }
-        } catch (error) {
-            customLog('Error toggling setting:', error);
-        }
     }
 }
 
@@ -425,9 +438,12 @@ window.toggleSettingFrom = function(element) {
         const value = element.checked;
         toggleSetting(key, value);
 
-        // If the setting is RSS-related, update the news feed
+        // If the setting is RSS-related, set the dirty flag
         if (key.startsWith('rss-')) {
-            updateNews(true);
+            const isDrop = !value; // If unchecked, it's a drop
+            rssIsDirty = true;
+            rssDrop = rssDrop || isDrop; // Set the drop flag if this is a drop
+            customLog(`RSS setting "${key}" changed to ${value} (dirty: ${rssIsDirty}, drop: ${rssDrop})`);
         }
 
         // If the setting is dark mode related, update the dark mode

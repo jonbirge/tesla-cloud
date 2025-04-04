@@ -1,3 +1,11 @@
+// Imports
+import { customLog, highlightUpdate, testMode, updateTimeZone, GEONAMES_USERNAME } from './common.js';
+import { PositionSimulator } from './location.js';
+import { attemptLogin, leaveSettings, settings } from './settings.js';
+import { fetchWeatherData, weatherData } from './wx.js';
+import { updateNetworkInfo, startPingTest } from './net.js';
+import { markAllNewsAsRead } from './news.js';
+
 // Settings
 const LATLON_UPDATE_INTERVAL = 2; // seconds
 const UPDATE_DISTANCE_THRESHOLD = 500; // meters
@@ -12,15 +20,8 @@ const SAT_URLS = {
     latest_ir: 'https://cdn.star.nesdis.noaa.gov/GOES16/ABI/CONUS/11/1250x750.jpg',
 };
 
-// Imports
-import { customLog, highlightUpdate, testMode, updateTimeZone, GEONAMES_USERNAME } from './common.js';
-import { PositionSimulator } from './location.js';
-import { attemptLogin, settings } from './settings.js';
-import { fetchWeatherData, weatherData } from './wx.js';
-import { updateNetworkInfo, startPingTest } from './net.js';
-import { setUserHasSeenLatestNews } from './news.js';
-
 // Variables
+let currentSection = null; // Track the current section
 let lastUpdate = 0; // Timestamp of last location update
 let lat = null;
 let long = null;
@@ -567,6 +568,12 @@ window.loadExternalUrl = function (url, inFrame = false) {
 
 // Show a specific section and update URL - defined directly on window object
 window.showSection = function (sectionId) {
+    // Check if we're actually going anywhere
+    if (currentSection === sectionId) {
+        customLog(`Already in section: ${sectionId}`);
+        return;
+    }
+
     // Log the clicked section
     customLog(`Showing section: ${sectionId}`);
 
@@ -583,13 +590,26 @@ window.showSection = function (sectionId) {
         rightFrame.classList.remove('external');
     }
 
+    // Clear "new" markers from news items and clear unread flags from data
+    if (currentSection === 'news') {
+        const newNewsItems = document.querySelectorAll('.news-new');
+        newNewsItems.forEach(item => {
+            item.classList.remove('news-new');
+        });
+        markAllNewsAsRead();
+    }
+
     // If switching to news section, clear the notification dot
     if (sectionId === 'news') {
-        setUserHasSeenLatestNews(true);
         const newsButton = document.querySelector('.section-button[onclick="showSection(\'news\')"]');
         if (newsButton) {
             newsButton.classList.remove('has-notification');
         }
+    }
+
+    // If we're leaving settings, handle any rss feed changes
+    if (currentSection === 'settings') {
+        leaveSettings();
     }
 
     // If switching to about section, clear the notification dot
@@ -600,39 +620,9 @@ window.showSection = function (sectionId) {
         }
     }
 
-    // Clear "new" markers from news items when switching to a different section
-    if (sectionId !== 'news') {
-        const newNewsItems = document.querySelectorAll('.news-new');
-        newNewsItems.forEach(item => {
-            item.classList.remove('news-new');
-        });
-    }
-
-    // Then get a fresh reference to sections after DOM is restored
-    const sections = document.querySelectorAll('.section');
-    sections.forEach(section => {
-        section.style.display = 'none';
-    });
-
-    // Deactivate all buttons
-    const buttons = document.querySelectorAll('.section-button');
-    buttons.forEach(button => {
-        button.classList.remove('active');
-    });
-
-    // Activate the clicked button
-    const button = document.querySelector(`.section-button[onclick="showSection('${sectionId}')"]`);
-    if (button) {
-        button.classList.add('active');
-    }
-
-    // Handle initialization of the selected section
-    // TODO: Have a set of functions to run when a section loads and when it leaves
-    const section = document.getElementById(sectionId);
-    if (section) {
-        section.style.display = 'block';
-
-        if (sectionId === 'navigation' && testMode) {
+    // Navigation section
+    if (sectionId === 'navigation') {
+        if (testMode) {
             // In test mode, replace TeslaWaze iframe with "TESTING MODE" message
             const teslaWazeContainer = document.querySelector('.teslawaze-container');
             if (teslaWazeContainer) {
@@ -654,7 +644,7 @@ window.showSection = function (sectionId) {
                     }
                 }
             }
-        } else if (sectionId === 'navigation') {
+        } else {
             // Normal mode - ensure iframe is visible and test mode message is hidden
             const teslaWazeContainer = document.querySelector('.teslawaze-container');
             if (teslaWazeContainer) {
@@ -665,34 +655,64 @@ window.showSection = function (sectionId) {
                 if (testModeMsg) testModeMsg.style.display = 'none';
             }
         }
-        
-        if (sectionId === 'satellite') {
-            // Load weather image when satellite section is shown
-            const weatherImage = document.getElementById('weather-image');
-            weatherImage.src = SAT_URLS.latest;
-        } else {
-            // Remove weather img src to force reload when switching back
-            const weatherImage = document.getElementById('weather-image');
-            if (weatherImage) {
-                weatherImage.src = '';
-            }
-        }
+    }
 
-        if (sectionId === 'network') {
-            if (!networkInfoUpdated) {
-                updateNetworkInfo();
-                networkInfoUpdated = true;
-            }
-        }
-
-        if (sectionId === 'landmarks') {
-            if (lat !== null && long !== null) {
-                fetchLandmarkData(lat, long);
-            } else {
-                customLog('Location not available for Wikipedia data.');
-            }
+    // Satellite section
+    if (sectionId === 'satellite') {
+        // Load weather image when satellite section is shown
+        const weatherImage = document.getElementById('weather-image');
+        weatherImage.src = SAT_URLS.latest;
+    } else {
+        // Remove weather img src to force reload when switching back
+        const weatherImage = document.getElementById('weather-image');
+        if (weatherImage) {
+            weatherImage.src = '';
         }
     }
+
+    // Update network info if the network section is visible
+    if (sectionId === 'network') {
+        if (!networkInfoUpdated) {
+            updateNetworkInfo();
+            networkInfoUpdated = true;
+        }
+    }
+
+    // Update Wikipedia data if the landmarks section is visible
+    if (sectionId === 'landmarks') {
+        if (lat !== null && long !== null) {
+            fetchLandmarkData(lat, long);
+        } else {
+            customLog('Location not available for Wikipedia data.');
+        }
+    }
+
+    // Get a fresh reference to sections after DOM is restored
+    const sections = document.querySelectorAll('.section');
+    sections.forEach(section => {
+        section.style.display = 'none';
+    });
+
+    // Deactivate all buttons
+    const buttons = document.querySelectorAll('.section-button');
+    buttons.forEach(button => {
+        button.classList.remove('active');
+    });
+
+    // Activate the clicked button
+    const button = document.querySelector(`.section-button[onclick="showSection('${sectionId}')"]`);
+    if (button) {
+        button.classList.add('active');
+    }
+
+    // Handle visibility of the selected section
+    const section = document.getElementById(sectionId);
+    if (section) {
+        section.style.display = 'block';
+    }
+
+    // Update the current section variable
+    currentSection = sectionId;
 };
 
 

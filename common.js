@@ -4,7 +4,7 @@ import { settings } from './settings.js';
 // Global variables
 const GEONAMES_USERNAME = 'birgefuller';
 let locationTimeZone = browserTimeZone();
-let testMode = null; // Set to true if test parameter exists
+let testMode = false; // Set to true if test parameter exists
 
 // Exports
 export { locationTimeZone, testMode, GEONAMES_USERNAME }
