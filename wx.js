@@ -250,38 +250,51 @@ function dayHasHazards(forecastList) {
 function updateForecastDisplay() {
     const forecastDays = document.querySelectorAll('.forecast-day');
     const dailyData = extractDailyForecast(forecastData);
-    
+
     dailyData.forEach((day, index) => {
         if (index < forecastDays.length) {
             const date = new Date(day.dt * 1000);
             const dayElement = forecastDays[index];
-            
-            // Clear previous content and classes
-            dayElement.innerHTML = '';
-            dayElement.className = 'forecast-day';
-            
-            // Add weather condition class based on main weather condition
+
+            // Update weather condition class
             const weatherCondition = day.weather[0].main.toLowerCase();
-            dayElement.classList.add(weatherCondition);
-            
-            // Add alert symbol if hazards detected
-            if (dayHasHazards(day)) {
-                const alert = document.createElement('div');
-                alert.className = 'forecast-alert';
-                alert.innerHTML = '⚠️';
-                dayElement.appendChild(alert);
+            dayElement.className = `forecast-day ${weatherCondition}`;
+
+            // Update date
+            const dateElement = dayElement.querySelector('.forecast-date');
+            if (dateElement) {
+                dateElement.textContent = date.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
             }
-            
-            // Add the rest of the forecast content
-            dayElement.innerHTML += `
-            <div class="forecast-date">${date.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })}</div>
-            <img class="forecast-icon" src="https://openweathermap.org/img/wn/${day.weather[0].icon}@2x.png" alt="${day.weather[0].description}">
-            <div class="forecast-temp">${formatTemperature(day.temp_min)}/${formatTemperature(day.temp_max)}</div>
-            <div class="forecast-desc">${day.weather[0].main}</div>
-            `;
+
+            // Update weather icon
+            const iconElement = dayElement.querySelector('.forecast-icon');
+            if (iconElement) {
+                iconElement.src = `https://openweathermap.org/img/wn/${day.weather[0].icon}@2x.png`;
+                iconElement.alt = day.weather[0].description;
+            }
+
+            // Update temperature
+            const tempElement = dayElement.querySelector('.forecast-temp');
+            if (tempElement) {
+                tempElement.textContent = `${formatTemperature(day.temp_min)}/${formatTemperature(day.temp_max)}`;
+            }
+
+            // Update description
+            const descElement = dayElement.querySelector('.forecast-desc');
+            if (descElement) {
+                descElement.textContent = day.weather[0].main;
+            }
+
+            // Show or hide hazard alert
+            const alertIcon = dayElement.querySelector('.forecast-alert');
+            if (dayHasHazards(day)) {
+                alertIcon.classList.remove('hidden');
+            } else {
+                alertIcon.classList.add('hidden');
+            }
         }
     });
-    
+
     // After updating the forecast display, check for weather hazards
     checkWeatherHazards();
 }
