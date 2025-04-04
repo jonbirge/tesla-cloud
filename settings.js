@@ -18,7 +18,7 @@ export { settings, currentUser, isLoggedIn, hashedUser };
 // Settings section is being left
 export function leaveSettings() {
     if (rssIsDirty) {
-        customLog
+        customLog('RSS settings are dirty, updating news feed.')
         // If RSS is dirty, update the news feed
         updateNews(rssDrop);
         rssIsDirty = false; // Reset the dirty flag
