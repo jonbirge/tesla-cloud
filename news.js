@@ -12,6 +12,7 @@ let seenNewsIds = new Set(); // Track news IDs we've already seen
 
 // Mark all current news items as read
 export function markAllNewsAsRead() {
+    customLog('Marking all news as read');
     if (newsItems) {
         newsItems.forEach(item => {
             item.isUnread = false;
@@ -44,6 +45,7 @@ export async function updateNews(clear = false) {
 
         // Clear the news container as needed
         if (clear) {
+            customLog('Clearing news headlines...');
             newsContainer.innerHTML = '';
             seenNewsIds.clear(); // Clear seen news IDs
             newsItems = null; // Clear news items

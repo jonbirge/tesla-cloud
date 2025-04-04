@@ -1,7 +1,7 @@
 // Imports
 import { customLog, highlightUpdate, testMode, updateTimeZone, GEONAMES_USERNAME } from './common.js';
 import { PositionSimulator } from './location.js';
-import { attemptLogin, settings } from './settings.js';
+import { attemptLogin, leaveSettings, settings } from './settings.js';
 import { fetchWeatherData, weatherData } from './wx.js';
 import { updateNetworkInfo, startPingTest } from './net.js';
 import { markAllNewsAsRead } from './news.js';
@@ -21,6 +21,7 @@ const SAT_URLS = {
 };
 
 // Variables
+let currentSection = null; // Track the current section
 let lastUpdate = 0; // Timestamp of last location update
 let lat = null;
 let long = null;
@@ -567,6 +568,12 @@ window.loadExternalUrl = function (url, inFrame = false) {
 
 // Show a specific section and update URL - defined directly on window object
 window.showSection = function (sectionId) {
+    // Check if we're actually going anywhere
+    if (currentSection === sectionId) {
+        customLog(`Already in section: ${sectionId}`);
+        return;
+    }
+
     // Log the clicked section
     customLog(`Showing section: ${sectionId}`);
 
@@ -583,6 +590,15 @@ window.showSection = function (sectionId) {
         rightFrame.classList.remove('external');
     }
 
+    // Clear "new" markers from news items and clear unread flags from data
+    if (currentSection === 'news') {
+        const newNewsItems = document.querySelectorAll('.news-new');
+        newNewsItems.forEach(item => {
+            item.classList.remove('news-new');
+        });
+        markAllNewsAsRead();
+    }
+
     // If switching to news section, clear the notification dot
     if (sectionId === 'news') {
         const newsButton = document.querySelector('.section-button[onclick="showSection(\'news\')"]');
@@ -591,21 +607,17 @@ window.showSection = function (sectionId) {
         }
     }
 
+    // If we're leaving settings, handle any rss feed changes
+    if (currentSection === 'settings') {
+        leaveSettings();
+    }
+
     // If switching to about section, clear the notification dot
     if (sectionId === 'about') {
         const aboutButton = document.querySelector('.section-button[onclick="showSection(\'about\')"]');
         if (aboutButton) {
             aboutButton.classList.remove('has-notification');
         }
-    }
-
-    // Clear "new" markers from news items and clear unread flags from data
-    if (sectionId !== 'news') {
-        const newNewsItems = document.querySelectorAll('.news-new');
-        newNewsItems.forEach(item => {
-            item.classList.remove('news-new');
-        });
-        markAllNewsAsRead();
     }
 
     // Navigation section
@@ -644,7 +656,7 @@ window.showSection = function (sectionId) {
             }
         }
     }
-    
+
     // Satellite section
     if (sectionId === 'satellite') {
         // Load weather image when satellite section is shown
@@ -693,14 +705,14 @@ window.showSection = function (sectionId) {
         button.classList.add('active');
     }
 
-    // Handle initialization of the selected section
-    // TODO: Have a set of functions to run when a section loads and when it leaves
+    // Handle visibility of the selected section
     const section = document.getElementById(sectionId);
     if (section) {
         section.style.display = 'block';
-
-        
     }
+
+    // Update the current section variable
+    currentSection = sectionId;
 };
 
 
