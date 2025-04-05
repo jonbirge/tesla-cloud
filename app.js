@@ -3,7 +3,7 @@ import { customLog, highlightUpdate, testMode, updateTimeZone, GEONAMES_USERNAME
 import { PositionSimulator } from './location.js';
 import { attemptLogin, leaveSettings, settings } from './settings.js';
 import { fetchWeatherData, weatherData } from './wx.js';
-import { updateNetworkInfo, startPingTest } from './net.js';
+import { updateNetworkInfo, updatePingChart, startPingTest } from './net.js';
 import { markAllNewsAsRead } from './news.js';
 
 // Settings
@@ -698,6 +698,7 @@ window.showSection = function (sectionId) {
             updateNetworkInfo();
             networkInfoUpdated = true;
         }
+        updatePingChart(true);  // with animation
     }
 
     // Update Wikipedia data if the landmarks section is visible

@@ -13,7 +13,7 @@ let userLocation = {
     altitude: null
 };
 
-// Get user's location
+// Get user's current geolocation coordinates
 function getUserLocation() {
     if (navigator.geolocation) {
         navigator.geolocation.getCurrentPosition(
@@ -35,6 +35,7 @@ function getUserLocation() {
     }
 }
 
+// Fetches and displays network information including IP details and reverse DNS
 export function updateNetworkInfo() {
     // Write diagnostic information to the console
     customLog('Updating network info...');
@@ -75,6 +76,7 @@ export function updateNetworkInfo() {
         });
 }
 
+// Initializes and starts periodic ping tests to measure network latency
 export function startPingTest() {
     // Get initial location
     getUserLocation();
@@ -94,7 +96,7 @@ export function startPingTest() {
     }
 }
 
-// Destroy the chart if it exists - needed for proper cleanup and reinitialization
+// Cleans up the ping chart instance to prevent memory leaks
 function destroyPingChart() {
     if (pingChart) {
         pingChart.destroy();
@@ -103,6 +105,7 @@ function destroyPingChart() {
     }
 }
 
+// Creates and configures the chart visualization for ping data
 function initializePingChart() {
     // First, ensure any existing chart is destroyed
     destroyPingChart();
@@ -208,6 +211,7 @@ function initializePingChart() {
     customLog('Ping chart initialized');
 }
 
+// Updates chart colors based on current theme settings
 export function updateChartAxisColors() {
     // Console log
     customLog('Updating chart axis colors...');
@@ -229,14 +233,14 @@ export function updateChartAxisColors() {
     }
 }
 
-function pingTestServer() {
-    const startTime = performance.now();
-    
+// Performs a ping test and records the result
+async function pingTestServer() {
+    // Get updated location data
+    getUserLocation();
+
     // Prepare form data with user and location information
     const formData = new FormData();
     formData.append('user_id', hashedUser || 'anonymous');
-    
-    // Add location data if available
     if (userLocation.latitude !== null) {
         formData.append('latitude', userLocation.latitude);
     }
@@ -246,46 +250,74 @@ function pingTestServer() {
     if (userLocation.altitude !== null) {
         formData.append('altitude', userLocation.altitude);
     }
-    
-    // Get updated location data for next ping
-    getUserLocation();
-    
-    fetch('ping.php', {
-        method: 'POST',
-        body: formData,
-        cache: 'no-store'
-    })
-        .then(() => {
-            const pingTime = performance.now() - startTime; // ms
-            
-            // Discard the first ping
-            if (!pingTestServer.firstPingDiscarded) {
-                pingTestServer.firstPingDiscarded = true;
-                customLog('First ping discarded: ', Math.round(pingTime));
-                return;
-            }
 
-            pingData.push(pingTime);
-            if (pingData.length > 100) {
-                pingData.shift(); // Keep last n pings
-            }
-
-            // Always update network status indicator
-            updateNetworkStatus(pingTime);
-            
-            // Only update chart if network section is visible
-            const networkSection = document.getElementById('network');
-            if (networkSection && networkSection.style.display === 'block' && pingChart) {
-                pingChart.data.labels = Array.from({ length: pingData.length }, (_, i) => i);
-                pingChart.update('none'); // Update without animation for better performance
-            }
-        })
-        .catch(error => {
-            customLog('Ping failed: ', error);
-            updateNetworkStatus(null);
+    // Send a low-overhead HEAD request to the server
+    const startTime = performance.now();
+    try {
+        const response = await fetch('ping.php', {
+            method: 'HEAD'
         });
+        
+        if (!response.ok) {
+            throw new Error('Network response was not ok');
+        }
+        
+        await response.text();
+        const pingTime = performance.now() - startTime; // ms
+        
+        // Discard the first ping
+        // if (!pingTestServer.firstPingDiscarded) {
+        //     pingTestServer.firstPingDiscarded = true;
+        //     customLog('First ping discarded: ', Math.round(pingTime));
+        //     return;
+        // }
+
+        updateNetworkStatus(pingTime);
+
+        pingData.push(pingTime);
+        if (pingData.length > 100) {
+            pingData.shift(); // Keep last n pings
+        }
+
+        // Only update chart if network section is visible
+        const networkSection = document.getElementById('network');
+        if (networkSection && networkSection.style.display === 'block' && pingChart) {
+            updatePingChart(true);  // Update with animation
+        }
+    } catch (error) {
+        customLog('Ping HEAD failed: ', error);
+    }
+
+    // Add last ping time to form data as a string
+    formData.append('ping', pingData.at(-1).toFixed(1));
+    try {
+        const response = await fetch('ping.php', {
+            method: 'POST',
+            body: formData,
+            cache: 'no-store'
+        });
+
+        if (!response.ok) {
+            throw new Error('Network response was not ok');
+        }
+    } catch (error) {
+        customLog('Ping POST failed: ', error);
+    }
 }
 
+// Updates the ping chart with current data, with optional animation
+export function updatePingChart(animated = false) {
+    if (pingChart) {
+        pingChart.data.labels = Array.from({ length: pingData.length }, (_, i) => i);
+        if (animated) {
+            pingChart.update();
+        } else {
+            pingChart.update('none'); // Update without animation for better performance
+        }
+    }
+}
+
+// Updates the visual network status indicator based on ping latency
 function updateNetworkStatus(pingTime) {
     const networkStatus = document.getElementById('network-status');
     if (!networkStatus) return;
@@ -312,6 +344,7 @@ function updateNetworkStatus(pingTime) {
     }
 }
 
+// Stops the automatic ping testing
 window.pausePingTest = function() {
     if (pingInterval) {
         clearInterval(pingInterval);
@@ -320,6 +353,7 @@ window.pausePingTest = function() {
     }
 }
 
+// Resumes automatic ping testing
 window.resumePingTest = function() {
     if (!pingInterval) {
         // Ping the server immediately
@@ -331,4 +365,4 @@ window.resumePingTest = function() {
 }
 
 // Initialize the firstPingDiscarded flag
-pingTestServer.firstPingDiscarded = false;
+// pingTestServer.firstPingDiscarded = false;
