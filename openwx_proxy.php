@@ -34,11 +34,20 @@ $queryParams = $_GET;
 // Add API key to query parameters
 $queryParams['appid'] = $_ENV['OPENWX_KEY'];
 
+// Get the API endpoint path from the URL path info
+$pathInfo = isset($_SERVER['PATH_INFO']) ? $_SERVER['PATH_INFO'] : '';
+if (empty($pathInfo)) {
+    http_response_code(400);
+    echo json_encode(['error' => 'No API endpoint specified in path']);
+    exit;
+}
+
+// Remove leading slash if present
+$pathInfo = ltrim($pathInfo, '/');
+
 // Build the proxied URL
-$baseUrl = 'https://api.openweathermap.org/data/2.5/';
-$endpoint = isset($queryParams['endpoint']) ? $queryParams['endpoint'] : 'weather';
-unset($queryParams['endpoint']); // Remove endpoint from query parameters
-$proxiedUrl = $baseUrl . $endpoint . '?' . http_build_query($queryParams);
+$baseUrl = 'https://api.openweathermap.org/';
+$proxiedUrl = $baseUrl . $pathInfo . '?' . http_build_query($queryParams);
 
 // Initialize cURL
 $ch = curl_init($proxiedUrl);

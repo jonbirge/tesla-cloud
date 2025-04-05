@@ -2,9 +2,6 @@
 import { customLog, formatTime, highlightUpdate } from './common.js';
 import { settings, turnOffDarkMode, turnOnDarkMode } from './settings.js';
 
-// Constants
-const OPENWX_API_KEY = null; // Removed API key for security
-
 // Global variables
 let weatherData = null;
 let sunrise = null;
@@ -103,7 +100,7 @@ export function fetchWeatherData(lat, long, silentLoad = false) {
     // Fetch and update weather data
     Promise.all([
         fetch(`https://secure.geonames.org/findNearByWeatherJSON?lat=${lat}&lng=${long}&username=birgefuller`),
-        fetch(`openwx_proxy.php?endpoint=forecast&lat=${lat}&lon=${long}&units=imperial`)
+        fetch(`openwx_proxy.php/data/2.5/forecast?lat=${lat}&lon=${long}&units=imperial`)
     ])
         .then(([currentResponse, forecastResponse]) => Promise.all([
             currentResponse.json(),
@@ -144,11 +141,6 @@ export function fetchWeatherData(lat, long, silentLoad = false) {
             // In case of error, hide spinner and show error message - only if not silent loading
             if (!silentLoad) {
                 if (loadingSpinner) loadingSpinner.style.display = 'none';
-                if (forecastContainer) {
-                    forecastContainer.style.display = 'flex';
-                    // Show error message in the forecast container
-                    forecastContainer.innerHTML = '<div class="error-message">Unable to load weather data!</div>';
-                }
             }
         });
 }
@@ -410,7 +402,7 @@ export function checkWeatherHazards() {
 
 // Fetches and updates the Air Quality Index (AQI)
 function updateAQI(lat, lon) {
-    fetch(`openwx_proxy.php?endpoint=air_pollution&lat=${lat}&lon=${lon}`)
+    fetch(`openwx_proxy.php/data/2.5/air_pollution?lat=${lat}&lon=${lon}`)
         .then(response => response.json())
         .then(data => {
             const aqi = data.list[0].main.aqi;
