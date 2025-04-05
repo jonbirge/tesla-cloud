@@ -9,6 +9,7 @@ $requestMethod = $_SERVER['REQUEST_METHOD'];
 // For HEAD requests, return minimal response and exit early
 if ($requestMethod === 'HEAD') {
     // No content needed for HEAD requests, just set headers if necessary
+    http_response_code(200);
     header('Content-Type: text/plain');
     exit;
 }
@@ -26,9 +27,17 @@ if (file_exists($envFilePath)) {
         }
     } else {
         logMessage("Failed to parse .env file: " . json_last_error_msg(), "ERROR");
+        http_response_code(500);
+        header('Content-Type: text/plain');
+        echo "Error parsing .env file.";
+        exit;
     }
 } else {
     logMessage(".env file not found at $envFilePath", "WARNING");
+    http_response_code(500);
+    header('Content-Type: text/plain');
+    echo "Configuration file not found.";
+    exit;
 }
 
 // SQL database configuration
@@ -77,17 +86,30 @@ if ($dbHost && $dbName && $dbUser) {
         $latitude = isset($_POST['latitude']) ? (double)$_POST['latitude'] : null;
         $longitude = isset($_POST['longitude']) ? (double)$_POST['longitude'] : null;
         $altitude = isset($_POST['altitude']) ? (double)$_POST['altitude'] : null;
+        $pingTime = isset($_POST['ping']) ? (double)$_POST['ping'] : null;
         
         // Log the ping data to database
-        $stmt = $dbConnection->prepare("INSERT INTO ping_data (user_id, latitude, longitude, altitude, ip_address) VALUES (?, ?, ?, ?, ?)");
-        $stmt->execute([$userId, $latitude, $longitude, $altitude, $clientIP]);
+        $stmt = $dbConnection->prepare("INSERT INTO ping_data (user_id, latitude, longitude, altitude, ip_address, ping_time) VALUES (?, ?, ?, ?, ?, ?)");
+        $stmt->execute([$userId, $latitude, $longitude, $altitude, $clientIP, $pingTime]);
         
+        // Respond with 200 OK
+        header('Content-Type: text/plain');
+        echo "Ping logged successfully.";
+
         logMessage("Logged ping from user: " . $userId . ", IP: " . $clientIP);
     } catch (PDOException $e) {
         logMessage("Database error: " . $e->getMessage(), "ERROR");
+        http_response_code(500);
+        header('Content-Type: text/plain');
+        echo "Database error: " . $e->getMessage();
+        exit;
     }
 } else {
     logMessage("Missing database configuration", "WARNING");
+    http_response_code(500);
+    header('Content-Type: text/plain');
+    echo "Database configuration is missing.";
+    exit;
 }
 
 // Return the current server time as a human readable string (original functionality)

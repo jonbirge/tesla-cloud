@@ -261,11 +261,11 @@ async function pingTestServer() {
         const pingTime = performance.now() - startTime; // ms
         
         // Discard the first ping
-        if (!pingTestServer.firstPingDiscarded) {
-            pingTestServer.firstPingDiscarded = true;
-            customLog('First ping discarded: ', Math.round(pingTime));
-            return;
-        }
+        // if (!pingTestServer.firstPingDiscarded) {
+        //     pingTestServer.firstPingDiscarded = true;
+        //     customLog('First ping discarded: ', Math.round(pingTime));
+        //     return;
+        // }
 
         updateNetworkStatus(pingTime);
 
@@ -281,17 +281,23 @@ async function pingTestServer() {
             pingChart.update('none'); // Update without animation for better performance
         }
     } catch (error) {
-        customLog('Ping failed: ', error);
+        customLog('Ping HEAD failed: ', error);
     }
 
+    // Add last ping time to form data as a string
+    formData.append('ping', pingData.at(-1).toFixed(1));
     try {
-        await fetch('ping.php', {
+        const response = await fetch('ping.php', {
             method: 'POST',
             body: formData,
             cache: 'no-store'
         });
+
+        if (!response.ok) {
+            throw new Error('Network response was not ok');
+        }
     } catch (error) {
-        customLog('Ping failed: ', error);
+        customLog('Ping POST failed: ', error);
     }
 }
 
@@ -332,7 +338,7 @@ window.pausePingTest = function() {
 window.resumePingTest = function() {
     if (!pingInterval) {
         // Ping the server immediately
-        pingTestServer();
+        // pingTestServer();
         // Resume pinging every 10 seconds
         pingInterval = setInterval(pingTestServer, pingWait);
         customLog('Network ping testing resumed');
