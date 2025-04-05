@@ -3,6 +3,17 @@
 // Define log file path
 $logFile = '/tmp/ping_php.log';
 
+// Get the request method
+$requestMethod = $_SERVER['REQUEST_METHOD'];
+
+// For HEAD requests, return minimal response and exit early
+if ($requestMethod === 'HEAD') {
+    // No content needed for HEAD requests, just set headers if necessary
+    header('Content-Type: text/plain');
+    exit;
+}
+
+// Continue with normal processing for POST requests
 // Load .env variables from a JSON file
 $envFilePath = __DIR__ . '/.env';
 if (file_exists($envFilePath)) {

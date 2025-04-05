@@ -229,14 +229,13 @@ export function updateChartAxisColors() {
     }
 }
 
-function pingTestServer() {
-    const startTime = performance.now();
-    
+async function pingTestServer() {
+    // Get updated location data
+    getUserLocation();
+
     // Prepare form data with user and location information
     const formData = new FormData();
     formData.append('user_id', hashedUser || 'anonymous');
-    
-    // Add location data if available
     if (userLocation.latitude !== null) {
         formData.append('latitude', userLocation.latitude);
     }
@@ -246,44 +245,54 @@ function pingTestServer() {
     if (userLocation.altitude !== null) {
         formData.append('altitude', userLocation.altitude);
     }
-    
-    // Get updated location data for next ping
-    getUserLocation();
-    
-    fetch('ping.php', {
-        method: 'POST',
-        body: formData,
-        cache: 'no-store'
-    })
-        .then(() => {
-            const pingTime = performance.now() - startTime; // ms
-            
-            // Discard the first ping
-            if (!pingTestServer.firstPingDiscarded) {
-                pingTestServer.firstPingDiscarded = true;
-                customLog('First ping discarded: ', Math.round(pingTime));
-                return;
-            }
 
-            pingData.push(pingTime);
-            if (pingData.length > 100) {
-                pingData.shift(); // Keep last n pings
-            }
-
-            // Always update network status indicator
-            updateNetworkStatus(pingTime);
-            
-            // Only update chart if network section is visible
-            const networkSection = document.getElementById('network');
-            if (networkSection && networkSection.style.display === 'block' && pingChart) {
-                pingChart.data.labels = Array.from({ length: pingData.length }, (_, i) => i);
-                pingChart.update('none'); // Update without animation for better performance
-            }
-        })
-        .catch(error => {
-            customLog('Ping failed: ', error);
-            updateNetworkStatus(null);
+    // Send a low-overhead HEAD request to the server
+    const startTime = performance.now();
+    try {
+        const response = await fetch('ping.php', {
+            method: 'HEAD'
         });
+        
+        if (!response.ok) {
+            throw new Error('Network response was not ok');
+        }
+        
+        await response.text();
+        const pingTime = performance.now() - startTime; // ms
+        
+        // Discard the first ping
+        if (!pingTestServer.firstPingDiscarded) {
+            pingTestServer.firstPingDiscarded = true;
+            customLog('First ping discarded: ', Math.round(pingTime));
+            return;
+        }
+
+        updateNetworkStatus(pingTime);
+
+        pingData.push(pingTime);
+        if (pingData.length > 100) {
+            pingData.shift(); // Keep last n pings
+        }
+
+        // Only update chart if network section is visible
+        const networkSection = document.getElementById('network');
+        if (networkSection && networkSection.style.display === 'block' && pingChart) {
+            pingChart.data.labels = Array.from({ length: pingData.length }, (_, i) => i);
+            pingChart.update('none'); // Update without animation for better performance
+        }
+    } catch (error) {
+        customLog('Ping failed: ', error);
+    }
+
+    try {
+        await fetch('ping.php', {
+            method: 'POST',
+            body: formData,
+            cache: 'no-store'
+        });
+    } catch (error) {
+        customLog('Ping failed: ', error);
+    }
 }
 
 function updateNetworkStatus(pingTime) {
