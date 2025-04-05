@@ -14,8 +14,9 @@ if ($requestMethod === 'HEAD') {
     exit;
 }
 
-// Continue with normal processing for POST requests
-// Load .env variables from a JSON file
+// *****Continue with normal processing for POST/GET requests *****
+
+// Load .env variables from a JSON file to get the database configuration
 $envFilePath = __DIR__ . '/.env';
 if (file_exists($envFilePath)) {
     $envContent = file_get_contents($envFilePath);
@@ -114,6 +115,7 @@ if ($dbHost && $dbName && $dbUser) {
 
 // Return the current server time as a human readable string (original functionality)
 echo(date('Y-m-d H:i:s'));
+
 
 // Simple logging function
 function logMessage($message, $level = 'INFO') {
