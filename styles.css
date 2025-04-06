@@ -116,11 +116,6 @@ hr {
     place-self: left;
 }
 
-/* Landmarks */
-#landmark-items {
-    text-align: justify;
-}
-
 
 /* Layout */
 
@@ -150,22 +145,11 @@ hr {
     flex-grow: 1;
     height: 100%; /* Ensure it spans the full height of the container */
     overflow-y: auto; /* Enable scrolling for the right frame */
-    padding: 20px 40px 20px 15px;
+    padding: 20px 45px 20px 15px;
     box-sizing: border-box; /* Include padding in the height calculation */
-    scrollbar-gutter: stable; /* Ensure consistent scrollbar spacing */
+    /* scrollbar-gutter: stable; */
     scrollbar-width: thin; /* Use a thin scrollbar */
-}
-
-.right-frame.external {
-    padding: 0;
-    overflow: hidden;
-}
-
-.right-frame iframe {
-    width: 100%;
-    height: 100%;
-    border: none;
-    display: block;
+    position: relative; /* Add positioning context for the absolute positioned external-site */
 }
 
 .section {
@@ -174,6 +158,34 @@ hr {
 
 .hidden {
     display: none;
+}
+
+/* External site container */
+#external-site {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  width: 100%;
+  height: 100%;
+  display: none;
+  overflow: hidden;
+  padding: 0;
+  margin: 0;
+}
+
+#external-site iframe {
+  width: 100%;
+  height: 100%;
+  border: none;
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  padding: 0;
+  margin: 0;
 }
 
 

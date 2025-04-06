@@ -571,33 +571,44 @@ window.loadExternalUrl = function (url, inFrame = false) {
         return;
     }
 
-    // Load external content in the right frame
-    const rightFrame = document.getElementById('rightFrame');
-
-    // Store current content
-    if (!rightFrame.hasAttribute('data-original-content')) {
-        rightFrame.setAttribute('data-original-content', rightFrame.innerHTML);
-    }
-
+    // Hide all sections first
+    const sections = document.querySelectorAll('.section');
+    sections.forEach(section => {
+        section.style.display = 'none';
+    });
+    
+    // Get the external-site container
+    const externalSite = document.getElementById('external-site');
+    
+    // Clear any existing content
+    externalSite.innerHTML = '';
+    
     // Create and load iframe
-    rightFrame.innerHTML = '';
-    rightFrame.classList.add('external');
     const iframe = document.createElement('iframe');
     iframe.setAttribute('allow', 'geolocation; fullscreen');
     iframe.src = url;
-    rightFrame.appendChild(iframe);
-
+    externalSite.appendChild(iframe);
+    
+    // Show the external site container
+    externalSite.style.display = 'block';
+    
+    // Flag the right frame as being in external mode
+    const rightFrame = document.getElementById('rightFrame');
+    rightFrame.classList.add('external');
+    
     // Deactivate current section button
-    const activeButton = document.querySelector('.section-button.active');
-    if (activeButton) {
-        activeButton.classList.remove('active');
-    }
+    // const activeButton = document.querySelector('.section-button.active');
+    // if (activeButton) {
+    //     activeButton.classList.remove('active');
+    // }
 }
 
 // Show a specific section and update URL - defined directly on window object
 window.showSection = function (sectionId) {
+    const rightFrame = document.getElementById('rightFrame');
+    
     // Check if we're actually going anywhere
-    if (currentSection === sectionId) {
+    if (currentSection === sectionId && !rightFrame.classList.contains('external')) {
         customLog(`Already in section: ${sectionId}`);
         return;
     }
@@ -610,11 +621,14 @@ window.showSection = function (sectionId) {
     url.searchParams.set('section', sectionId);
     window.history.pushState({}, '', url);
 
-    // First, restore original content if we're in external mode
-    const rightFrame = document.getElementById('rightFrame');
+    // Shutdown external site if there is one
+    const externalSite = document.getElementById('external-site');
     if (rightFrame.classList.contains('external')) {
-        rightFrame.innerHTML = rightFrame.getAttribute('data-original-content');
-        rightFrame.removeAttribute('data-original-content');
+        // Hide the external site container
+        externalSite.style.display = 'none';
+        // Clear any existing iframe content to prevent resource usage
+        externalSite.innerHTML = '';
+        // Remove external mode flag
         rightFrame.classList.remove('external');
     }
 
@@ -716,11 +730,20 @@ window.showSection = function (sectionId) {
         }
     }
 
-    // Get a fresh reference to sections after DOM is restored
+    // Hide all sections first
     const sections = document.querySelectorAll('.section');
     sections.forEach(section => {
         section.style.display = 'none';
     });
+
+    // Make sure external-site is hidden
+    externalSite.style.display = 'none';
+
+    // Show the selected section
+    const section = document.getElementById(sectionId);
+    if (section) {
+        section.style.display = 'block';
+    }
 
     // Deactivate all buttons
     const buttons = document.querySelectorAll('.section-button');
@@ -732,12 +755,6 @@ window.showSection = function (sectionId) {
     const button = document.querySelector(`.section-button[onclick="showSection('${sectionId}')"]`);
     if (button) {
         button.classList.add('active');
-    }
-
-    // Handle visibility of the selected section
-    const section = document.getElementById(sectionId);
-    if (section) {
-        section.style.display = 'block';
     }
 
     // Update the current section variable
