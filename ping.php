@@ -14,7 +14,15 @@ if ($requestMethod === 'HEAD') {
     exit;
 }
 
-// *****Continue with normal processing for POST/GET requests *****
+// For GET requests, just return the current server time
+if ($requestMethod === 'GET') {
+    // Return the current server time as a human readable string
+    header('Content-Type: text/plain');
+    echo date('Y-m-d H:i:s');
+    exit;
+}
+
+// *****Continue with normal processing for POST requests *****
 
 // Load .env variables from a JSON file to get the database configuration
 $envFilePath = __DIR__ . '/.env';
@@ -112,9 +120,6 @@ if ($dbHost && $dbName && $dbUser) {
     echo "Database configuration is missing.";
     exit;
 }
-
-// Return the current server time as a human readable string (original functionality)
-echo(date('Y-m-d H:i:s'));
 
 
 // Simple logging function
