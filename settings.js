@@ -333,16 +333,30 @@ function initializeToggleStates() {
 }
 
 // Cookie management functions
+
+// Helper function to get current domain for cookie namespacing
+function getCurrentDomain() {
+    // Get hostname (e.g., example.com or beta.example.com)
+    const hostname = window.location.hostname;
+    // Convert to a safe string for use in cookie names
+    return hostname.replace(/[^a-zA-Z0-9]/g, '_');
+}
+
 function setCookie(name, value, days = 36500) { // Default to ~100 years (forever)
+    // Namespace the cookie name with the current domain
+    const domainSpecificName = `${getCurrentDomain()}_${name}`;
+    
     const d = new Date();
     d.setTime(d.getTime() + (days * 24 * 60 * 60 * 1000));
     const expires = "expires=" + d.toUTCString();
-    document.cookie = name + "=" + value + ";" + expires + ";path=/";
-    customLog(`Cookie set: ${name}=${value}, expires: ${d.toUTCString()}`);
+    document.cookie = domainSpecificName + "=" + value + ";" + expires + ";path=/";
+    customLog(`Cookie set: ${domainSpecificName}=${value}, expires: ${d.toUTCString()}`);
 }
 
 function getCookie(name) {
-    const cookieName = name + "=";
+    // Namespace the cookie name with the current domain
+    const domainSpecificName = `${getCurrentDomain()}_${name}`;
+    const cookieName = domainSpecificName + "=";
     const decodedCookie = decodeURIComponent(document.cookie);
     const cookieArray = decodedCookie.split(';');
     
@@ -355,17 +369,19 @@ function getCookie(name) {
         }
         if (cookie.indexOf(cookieName) === 0) {
             const value = cookie.substring(cookieName.length, cookie.length);
-            customLog(`Cookie found: ${name}=${value}`);
+            customLog(`Cookie found: ${domainSpecificName}=${value}`);
             return value;
         }
     }
-    customLog(`Cookie not found: ${name}`);
+    customLog(`Cookie not found: ${domainSpecificName}`);
     return "";
 }
 
 function deleteCookie(name) {
-    document.cookie = name + "=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
-    customLog(`Cookie deleted: ${name}`);
+    // Namespace the cookie name with the current domain
+    const domainSpecificName = `${getCurrentDomain()}_${name}`;
+    document.cookie = domainSpecificName + "=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+    customLog(`Cookie deleted: ${domainSpecificName}`);
 }
 
 // Function to show the login modal
