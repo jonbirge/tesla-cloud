@@ -485,7 +485,7 @@ function updateServerNote() {
     fetch('NOTE', { cache: 'no-store' })
         .then(response => {
             if (!response.ok) {
-                throw new Error('NOTE file not found');
+                throw new Error('File not found.');
             }
             return response.text();
         })
@@ -514,7 +514,13 @@ function updateServerNote() {
             }
         })
         .catch(error => {
-            customLog('No NOTE file available: ', error);
+            customLog('No NOTE file available.');
+
+            // Ensure the announcement section is hidden
+            const announcementSection = document.getElementById('announcement');
+            if (announcementSection) {
+                announcementSection.style.display = 'none';
+            }
         });
 }
 
