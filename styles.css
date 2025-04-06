@@ -340,16 +340,17 @@ hr {
     transition: background-color 0.3s;
     width: auto;
     font-weight: 600;
-    height: 40px; /* Adjust the height as needed */
+    height: 40px;
     align-items: center;
     justify-content: center;
     gap: 10px;
-    text-align: center; /* Add this line to center the text */
+    text-align: center;
 }
 
 .button-list a img {
     height: 36px;
     width: auto;
+    border-radius: 7px;
 }
 
 
