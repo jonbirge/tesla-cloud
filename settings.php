@@ -167,10 +167,8 @@ switch ($method) {
         }
         
         // Save the default settings
-        if (saveUserSettings($userId, $defaultSettings)) {
-            // Add entry to user_ids table
-            initializeUserIdEntry($userId);
-            
+        if (initializeUserIdEntry($userId)) {
+            saveUserSettings($userId, $defaultSettings);
             logMessage("User settings created successfully for $userId");
             http_response_code(201); // Created
             echo json_encode([
