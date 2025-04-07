@@ -76,9 +76,9 @@ h2 {
 
 p {
     margin-top: 12px;
-    margin-bottom: 0px;
+    margin-bottom: 12px;
     text-align: justify;
-    max-width: 1000px;
+    max-width: 980px;
 }
 
 ul {
@@ -86,7 +86,7 @@ ul {
     margin-top: 0px;
     margin-bottom: 0px;
     text-align: justify;
-    max-width: 960px;
+    max-width: 940px;
 }
 
 li {
@@ -130,7 +130,6 @@ hr {
 }
 
 .left-frame {
-    /* background-color: var(--bg-color); */
     width: 300px;
     flex-shrink: 0;
     /* height: 100%; */
