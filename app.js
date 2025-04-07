@@ -764,9 +764,6 @@ window.showSection = function (sectionId) {
 
 // ***** Main code *****
 
-// Console logging
-customLog('*** app.js top level code ***');
-
 // Update link click event listener
 document.addEventListener('click', function (e) {
     if (e.target.tagName === 'A' && !e.target.closest('.section-buttons')) {
