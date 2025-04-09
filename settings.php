@@ -141,6 +141,7 @@ if (count($uriParts) > 1) {
         $userId = $uriParts[$scriptPos + 1];
         
         // Check if we also have a key
+        // TODO: Just return all the rest of the parts concatenated
         if (isset($uriParts[$scriptPos + 2])) {
             $key = $uriParts[$scriptPos + 2];
         }
@@ -153,32 +154,44 @@ $method = $_SERVER['REQUEST_METHOD'];
 switch ($method) {
     case 'POST':
         // POST request - create a new user settings resource
-        if (!$userId || !validateUserId($userId)) {
-            logMessage("Invalid or missing user ID: $userId", "ERROR");
+
+        // Check if userId is valid
+        if ($userId && !validateUserId($userId)) {
+            logMessage("POST: Invalid user ID: $userId", "ERROR");
             http_response_code(400);
             exit;
         }
         
         // Check if user settings already exist
-        if (userSettingsExist($userId)) {
-            logMessage("User settings already exist for $userId", "WARNING");
+        if ($userId && userSettingsExist($userId)) {
+            logMessage("POST: User settings already exist for $userId", "WARNING");
             http_response_code(409); // Conflict
             exit;
         }
         
-        // Save the default settings
-        if (initializeUserIdEntry($userId)) {
-            saveUserSettings($userId, $defaultSettings);
-            logMessage("User settings created successfully for $userId");
+        // Generate userId if none is provided
+        if (!$userId) {
+            logMessage("POST: Creating new user with random ID", "INFO");
+            $userId = bin2hex(string: random_bytes(length: 4)); // Generate a random user ID
+            $automated = true;
+        } else {
+            $automated = false;
+        }
+        logMessage("POST: Creating user settings for $userId...", "INFO");
+
+        if (initializeUserIdEntry(userId: $userId, auto_created: $automated)) {
+            saveUserSettings(userId: $userId, settings: $defaultSettings); // Default settings
+            logMessage("POST: User settings created successfully for $userId", "INFO");
             http_response_code(201); // Created
             echo json_encode([
                 'success' => true, 
-                'userId' => $userId, 
-                'message' => 'User settings created with default values',
+                'userId' => $userId,
+                'auto_generated' => $automated,
+                'message' => 'User settings created with default values.',
                 'settings' => $defaultSettings
             ]);
         } else {
-            logMessage("Failed to create user settings for $userId", "ERROR");
+            logMessage("POST: Failed to create user settings for $userId", "ERROR");
             http_response_code(500);
         }
         break;
@@ -186,13 +199,13 @@ switch ($method) {
     case 'HEAD':
         // HEAD request - check if user settings exist without returning content
         if (!$userId || !validateUserId($userId)) {
-            logMessage("Invalid or missing user ID: $userId", "ERROR");
+            logMessage("HEAD: Invalid or missing user ID: $userId", "ERROR");
             http_response_code(400);
             exit;
         }
         
         if (!userSettingsExist($userId)) {
-            logMessage("User settings not found for $userId", "WARNING");
+            logMessage("HEAD: User settings not found for $userId", "WARNING");
             http_response_code(404);
             exit;
         }
@@ -210,7 +223,7 @@ switch ($method) {
     case 'GET':
         // GET request - retrieve settings for a user
         if (!$userId || !validateUserId($userId)) {
-            logMessage("Invalid or missing user ID: $userId", "ERROR");
+            logMessage("GET: Invalid or missing user ID: $userId", "ERROR");
             http_response_code(400);
             echo json_encode(['error' => 'Invalid or missing user ID in URL path']);
             exit;
@@ -218,7 +231,7 @@ switch ($method) {
 
         // Check if the user settings exist
         if (!userSettingsExist($userId)) {
-            logMessage("User settings not found for $userId", "WARNING");
+            logMessage("GET: User settings not found for $userId", "WARNING");
             http_response_code(404);
             exit;
         }
@@ -237,7 +250,7 @@ switch ($method) {
                 if (!empty($settingsWithPrefix)) {
                     echo json_encode($settingsWithPrefix);
                 } else {
-                    logMessage("No settings found with key or prefix '$key' for user $userId", "WARNING");
+                    logMessage("GET: No settings found with key or prefix '$key' for user $userId", "WARNING");
                     http_response_code(404);
                 }
             }
@@ -327,11 +340,12 @@ switch ($method) {
 // ***** Utility Functions *****
 
 // Helper function to initialize or update a user entry in the user_ids table
-function initializeUserIdEntry($userId) {
+function initializeUserIdEntry($userId, $auto_created = false): bool {
     global $dbConnection;
-    logMessage("Initializing or updating user_ids entry for user $userId");
+    logMessage("Initializing/updating user_ids entry for user $userId");
     
     try {
+
         $currentTime = date('Y-m-d H:i:s');
         
         // First check if the user already exists in the user_ids table
@@ -343,22 +357,24 @@ function initializeUserIdEntry($userId) {
             // Update existing user's last_login and increment login_count
             $updateStmt = $dbConnection->prepare("
                 UPDATE user_ids 
-                SET last_login = ?, login_count = login_count + 1 
+                SET last_login = ?, login_count = login_count + 1, last_ip = ?
                 WHERE user_id = ?
             ");
-            $updateStmt->execute([$currentTime, $userId]);
+            $updateStmt->execute([$currentTime, getClientIP(), $userId]);
             logMessage("Updated login statistics for user $userId");
         } else {
             // Create new user entry with initial values
+            $auto_created_bit = $auto_created ? 1 : 0;
             $insertStmt = $dbConnection->prepare("
-                INSERT INTO user_ids (user_id, initial_login, last_login, login_count) 
-                VALUES (?, ?, ?, 1)
+                INSERT INTO user_ids (user_id, initial_login, last_login, last_ip, login_count, auto_created) 
+                VALUES (?, ?, ?, ?, 1, ?)
             ");
-            $insertStmt->execute([$userId, $currentTime, $currentTime]);
+            $insertStmt->execute([$userId, $currentTime, $currentTime, getClientIP(), $auto_created_bit]);
             logMessage("Added user $userId to user_ids table with initial login at $currentTime");
         }
         
         return true;
+
     } catch (PDOException $e) {
         logMessage("Failed to initialize user_ids entry: " . $e->getMessage(), "WARNING");
         // Non-fatal error
@@ -452,7 +468,7 @@ function getSettingsWithPrefix($userId, $keyPrefix) {
 
 // Helper function to validate user ID
 function validateUserId($userId) {
-    $isValid = (strlen($userId) >= 9) && preg_match('/^[a-zA-Z0-9_-]+$/', $userId);
+    $isValid = (strlen($userId) >= 8) && preg_match('/^[a-zA-Z0-9_-]+$/', $userId);
     logMessage("Validating user ID: $userId - " . ($isValid ? "Valid" : "Invalid"));
     return $isValid;
 }
