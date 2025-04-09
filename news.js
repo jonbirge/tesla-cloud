@@ -60,7 +60,7 @@ export async function updateNews(clear = false) {
             newsContainer.innerHTML = '<div class="spinner-container"><div class="spinner"></div></div>';
         }
         
-        customLog('Updating news headlines...');
+        customLog('Fetching news headlines...');
         if (excludedFeeds.length > 0) {
             customLog('Excluding RSS feeds:', excludedFeeds);
         }

@@ -8,13 +8,13 @@ $gitInfo = getGitInfo();
 $version = isset($gitInfo['commit']) ? $gitInfo['commit'] : 'unknown';
 
 // Check if reload parameter is set to bypass cache
-$forceReload = isset($_GET['reload']) || isset($_GET['n']);
+$forceReload = isset($_GET['reload']);
 
 // Check if serial fetching is requested
 $useSerialFetch = isset($_GET['serial']);
 
 // Settings
-$cacheDuration = 15*60; // 10 minutes
+$cacheDuration = 10*60;  // seconds?
 $cacheFile = '/tmp/rss_cache_' . $version . '.json';
 $cacheTimestampFile = '/tmp/rss_cache_timestamp_' . $version;
 $logFile = '/tmp/rss_php_' . $version . '.log';
@@ -45,6 +45,7 @@ $feeds = [
     'electrek' => 'https://electrek.co/feed/',
     'thedrive' => 'https://www.thedrive.com/feed',
     'jalopnik' => 'https://jalopnik.com/rss',
+    'techcrunch' => 'https://techcrunch.com/feed/',
     'arstechnica' => 'https://feeds.arstechnica.com/arstechnica/index',
     'engadget' => 'https://www.engadget.com/rss.xml',
     'gizmodo' => 'https://gizmodo.com/rss',
@@ -74,7 +75,7 @@ register_shutdown_function(function() {
 });
 
 // Create empty log file
-file_put_contents($logFile, 'rss.php started...' . "\n");
+// file_put_contents($logFile, 'rss.php started...' . "\n");
 
 // Set the content type and add headers to prevent caching
 header('Cache-Control: no-cache, no-store, must-revalidate');
@@ -96,6 +97,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 }
 
 // Cache logic
+if ($forceReload) {
+    logMessage("Force reload requested, bypassing cache.");
+}
 if (!$forceReload && file_exists($cacheFile) && file_exists($cacheTimestampFile)) {
     $timestamp = file_get_contents($cacheTimestampFile);
     if ((time() - $timestamp) < $cacheDuration) {
@@ -106,7 +110,7 @@ if (!$forceReload && file_exists($cacheFile) && file_exists($cacheTimestampFile)
         $useCache = false;
     }
 } else {
-    logMessage("Cache not found or expired, fetching new data...");
+    logMessage("Cache not available, fetching new data...");
     $useCache = false;
 }
 
@@ -146,6 +150,10 @@ if ($useCache) {
     file_put_contents($cacheFile, json_encode($allItems));
     file_put_contents($cacheTimestampFile, time());
 }
+
+// Log the total number of stories
+$totalStories = count($allItems);
+logMessage("Total stories fetched: $totalStories");
 
 // Apply exclusion filters to cached data
 $outputItems = applyExclusionFilters($allItems, $excludedFeeds);
