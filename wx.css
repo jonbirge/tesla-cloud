@@ -186,8 +186,6 @@ body.dark-mode .forecast-day.rain img.forecast-icon {
     position: absolute;
     top: 5px;
     left: 7px;
-    color: #ff9900;
-    font-size: 18px;
 }
 
 .forecast-date {
