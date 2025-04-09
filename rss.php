@@ -32,11 +32,11 @@ $feeds = [
     'wapo' => 'https://feeds.washingtonpost.com/rss/national',
     'latimes' => 'https://www.latimes.com/rss2.0.xml',
     'bos' => 'https://www.boston.com/tag/local-news/feed',
+    'den' => 'https://www.denverpost.com/feed/',
     'bloomberg' => 'https://feeds.bloomberg.com/news.rss',
     'bloomberg-tech' => 'https://feeds.bloomberg.com/technology/news.rss',
-    'bbc' => 'http://feeds.bbci.co.uk/news/world/rss.xml',
-    'telegraph' => 'https://www.telegraph.co.uk/news/rss.xml',
     'economist' => 'https://www.economist.com/latest/rss.xml',
+    'bbc' => 'http://feeds.bbci.co.uk/news/world/rss.xml',
     'lemonde' => 'https://www.lemonde.fr/rss/une.xml',
     'derspiegel' => 'https://www.spiegel.de/international/index.rss',
     'notateslaapp' => 'https://www.notateslaapp.com/rss',
@@ -45,11 +45,14 @@ $feeds = [
     'electrek' => 'https://electrek.co/feed/',
     'thedrive' => 'https://www.thedrive.com/feed',
     'jalopnik' => 'https://jalopnik.com/rss',
+    'caranddriver' => 'https://www.caranddriver.com/rss/all.xml/',
     'techcrunch' => 'https://techcrunch.com/feed/',
     'arstechnica' => 'https://feeds.arstechnica.com/arstechnica/index',
     'engadget' => 'https://www.engadget.com/rss.xml',
     'gizmodo' => 'https://gizmodo.com/rss',
     'theverge' => 'https://www.theverge.com/rss/index.xml',
+    'wired' => 'https://www.wired.com/feed/rss',
+    'spacenews' => 'https://spacenews.com/feed/',
     'defensenews' => 'https://www.defensenews.com/arc/outboundfeeds/rss/?outputType=xml'
 ];
 

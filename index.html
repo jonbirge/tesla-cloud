@@ -438,7 +438,7 @@
         <div id="settings" class="section">
             <button id="logout-button" class="logout-button hidden" onclick="handleLogout()">Logout</button>
             
-            <h2>General</h2>
+            <h2>General Settings</h2>
             <div class="settings-controls">
                 <div class="settings-toggle-item" data-setting="auto-dark-mode" onclick="this.querySelector('input').click()">
                     <label>Auto Dark Mode</label><input type="checkbox" onchange="toggleSettingFrom(this)"><span class="settings-toggle-slider"></span>
@@ -453,7 +453,8 @@
                 </div>
             </div>
             
-            <h2>News Sources</h2>
+            <h2>News Feeds</h2>
+            <h3>General</h3>
             <div class="settings-controls news-source-grid">
                 <div class="settings-toggle-item news-toggle-item" data-setting="rss-wsj" onclick="this.querySelector('input').click()">
                     <label>Wall Street Journal</label><input type="checkbox" onchange="toggleSettingFrom(this)"><span class="settings-toggle-slider"></span>
@@ -475,6 +476,10 @@
                     <label>Boston Globe</label><input type="checkbox" onchange="toggleSettingFrom(this)" checked><span class="settings-toggle-slider"></span>
                 </div>
 
+                <div class="settings-toggle-item news-toggle-item" data-setting="rss-den" onclick="this.querySelector('input').click()">
+                    <label>Denver Post</label><input type="checkbox" onchange="toggleSettingFrom(this)" checked><span class="settings-toggle-slider"></span>
+                </div>
+
                 <div class="settings-toggle-item news-toggle-item" data-setting="rss-bloomberg" onclick="this.querySelector('input').click()">
                     <label>Bloomberg</label><input type="checkbox" onchange="toggleSettingFrom(this)" checked><span class="settings-toggle-slider"></span>
                 </div>
@@ -485,10 +490,6 @@
 
                 <div class="settings-toggle-item news-toggle-item" data-setting="rss-bbc" onclick="this.querySelector('input').click()">
                     <label>BBC</label><input type="checkbox" onchange="toggleSettingFrom(this)" checked><span class="settings-toggle-slider"></span>
-                </div>
-
-                <div class="settings-toggle-item news-toggle-item" data-setting="rss-telegraph" onclick="this.querySelector('input').click()">
-                    <label>The Telegraph</label><input type="checkbox" onchange="toggleSettingFrom(this)" checked><span class="settings-toggle-slider"></span>
                 </div>
 
                 <div class="settings-toggle-item news-toggle-item" data-setting="rss-economist" onclick="this.querySelector('input').click()">
@@ -502,7 +503,10 @@
                 <div class="settings-toggle-item news-toggle-item" data-setting="rss-derspiegel" onclick="this.querySelector('input').click()">
                     <label>Der Spiegel</label><input type="checkbox" onchange="toggleSettingFrom(this)" checked><span class="settings-toggle-slider"></span>
                 </div>
+            </div>
 
+            <h3>Tech & EVs</h3>
+            <div class="settings-controls news-source-grid">
                 <div class="settings-toggle-item news-toggle-item" data-setting="rss-notateslaapp" onclick="this.querySelector('input').click()">
                     <label>Not A Tesla App</label><input type="checkbox" onchange="toggleSettingFrom(this)" checked><span class="settings-toggle-slider"></span>
                 </div>
@@ -531,6 +535,10 @@
                     <label>Jalopnik</label><input type="checkbox" onchange="toggleSettingFrom(this)" checked><span class="settings-toggle-slider"></span>
                 </div>
 
+                <div class="settings-toggle-item news-toggle-item" data-setting="rss-caranddriver" onclick="this.querySelector('input').click()">
+                    <label>Car & Driver</label><input type="checkbox" onchange="toggleSettingFrom(this)"><span class="settings-toggle-slider"></span>
+                </div>
+
                 <div class="settings-toggle-item news-toggle-item" data-setting="rss-theverge" onclick="this.querySelector('input').click()">
                     <label>The Verge</label><input type="checkbox" onchange="toggleSettingFrom(this)" checked><span class="settings-toggle-slider"></span>
                 </div>
@@ -545,6 +553,14 @@
 
                 <div class="settings-toggle-item news-toggle-item" data-setting="rss-gizmodo" onclick="this.querySelector('input').click()">
                     <label>Gizmodo</label><input type="checkbox" onchange="toggleSettingFrom(this)"><span class="settings-toggle-slider"></span>
+                </div>
+
+                <div class="settings-toggle-item news-toggle-item" data-setting="rss-wired" onclick="this.querySelector('input').click()">
+                    <label>WIRED</label><input type="checkbox" onchange="toggleSettingFrom(this)"><span class="settings-toggle-slider"></span>
+                </div>
+
+                <div class="settings-toggle-item news-toggle-item" data-setting="rss-spacenews" onclick="this.querySelector('input').click()">
+                    <label>SpaceNews</label><input type="checkbox" onchange="toggleSettingFrom(this)"><span class="settings-toggle-slider"></span>
                 </div>
 
                 <div class="settings-toggle-item news-toggle-item" data-setting="rss-defensenews" onclick="this.querySelector('input').click()">

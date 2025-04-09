@@ -74,6 +74,14 @@ h2 {
     font-weight: var(--heading-font-weight);
 }
 
+h3 {
+    color: var(--button-text);
+    font-size: calc(var(--heading-font-size) - 2pt);
+    margin-bottom: 7px;
+    margin-top: 16px;
+    font-weight: calc(var(--heading-font-weight) - 100);
+}
+
 p {
     margin-top: 12px;
     margin-bottom: 12px;
