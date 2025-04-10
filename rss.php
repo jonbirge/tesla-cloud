@@ -99,6 +99,20 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 }
 
+// Check if we're receiving a POST request with included feeds
+$includedFeeds = [];
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    // Get the request body
+    $requestBody = file_get_contents('php://input');
+    $requestData = json_decode($requestBody, true);
+    
+    // Check if includedFeeds is set in the request
+    if (isset($requestData['includedFeeds']) && is_array($requestData['includedFeeds'])) {
+        $includedFeeds = $requestData['includedFeeds'];
+        logMessage("Received included feeds: " . implode(', ', $includedFeeds));
+    }
+}
+
 // Load timestamp data if it exists
 $feedTimestamps = [];
 if (file_exists($cacheTimestampFile)) {
@@ -208,6 +222,9 @@ logMessage("Total stories fetched: $totalStories");
 
 // Apply exclusion filters to cached data
 $outputItems = applyExclusionFilters($allItems, $excludedFeeds);
+
+// Apply inclusion filters to cached data
+$outputItems = applyInclusionFilters($outputItems, $includedFeeds);
     
 // Limit number of stories if needed
 $outputItems = array_slice($outputItems, 0, $numStories);
@@ -401,6 +418,25 @@ function applyExclusionFilters($items, $excludedFeeds) {
     logMessage("Filtering out excluded feeds: " . implode(', ', $excludedFeeds));
     $filteredItems = array_filter($items, function($item) use ($excludedFeeds) {
         return !in_array($item['source'], $excludedFeeds);
+    });
+    
+    // Re-index array after filtering
+    $filteredItems = array_values($filteredItems);
+    logMessage("After filtering: " . count($filteredItems) . " items remain");
+    
+    return $filteredItems;
+}
+
+// Function to apply inclusion filters to items
+function applyInclusionFilters($items, $includedFeeds) {
+    if (empty($includedFeeds)) {
+        // If no feeds are specified, include all feeds
+        return $items;
+    }
+    
+    logMessage("Filtering to only include feeds: " . implode(', ', $includedFeeds));
+    $filteredItems = array_filter($items, function($item) use ($includedFeeds) {
+        return in_array($item['source'], $includedFeeds);
     });
     
     // Re-index array after filtering
