@@ -27,33 +27,36 @@ $numStories = max(1, min($maxStories, $numStories));
 
 // List of RSS feeds to fetch - now with individual cache durations in minutes
 $feeds = [
-    'wsj' => ['url' => 'https://feeds.content.dowjones.io/public/rss/RSSWorldNews', 'cache' => 15],
+    // General news sources
+    'wsj' => ['url' => 'https://feeds.content.dowjones.io/public/rss/RSSWorldNews', 'cache' => 10],
     'nyt' => ['url' => 'https://rss.nytimes.com/services/xml/rss/nyt/HomePage.xml', 'cache' => 10],
     'wapo' => ['url' => 'https://feeds.washingtonpost.com/rss/national', 'cache' => 10],
-    'latimes' => ['url' => 'https://www.latimes.com/rss2.0.xml', 'cache' => 15],
-    'bos' => ['url' => 'https://www.boston.com/tag/local-news/feed', 'cache' => 20],
-    'den' => ['url' => 'https://www.denverpost.com/feed/', 'cache' => 20],
-    'bloomberg' => ['url' => 'https://feeds.bloomberg.com/news.rss', 'cache' => 10],
-    'bloomberg-tech' => ['url' => 'https://feeds.bloomberg.com/technology/news.rss', 'cache' => 15],
-    'economist' => ['url' => 'https://www.economist.com/latest/rss.xml', 'cache' => 60],
+    'latimes' => ['url' => 'https://www.latimes.com/rss2.0.xml', 'cache' => 10],
+    'bos' => ['url' => 'https://www.boston.com/tag/local-news/feed', 'cache' => 10],
+    'den' => ['url' => 'https://www.denverpost.com/feed/', 'cache' => 10],
     'bbc' => ['url' => 'http://feeds.bbci.co.uk/news/world/rss.xml', 'cache' => 10],
-    'lemonde' => ['url' => 'https://www.lemonde.fr/rss/une.xml', 'cache' => 20],
-    'derspiegel' => ['url' => 'https://www.spiegel.de/international/index.rss', 'cache' => 30],
+    'lemonde' => ['url' => 'https://www.lemonde.fr/rss/une.xml', 'cache' => 10],
+    'derspiegel' => ['url' => 'https://www.spiegel.de/international/index.rss', 'cache' => 10],
+    'bloomberg' => ['url' => 'https://feeds.bloomberg.com/news.rss', 'cache' => 10],
+    'bloomberg-tech' => ['url' => 'https://feeds.bloomberg.com/technology/news.rss', 'cache' => 30],
+    
+    // Technology and specialized sources
+    'economist' => ['url' => 'https://www.economist.com/latest/rss.xml', 'cache' => 30],
     'notateslaapp' => ['url' => 'https://www.notateslaapp.com/rss', 'cache' => 30],
-    'teslarati' => ['url' => 'https://www.teslarati.com/feed/', 'cache' => 15],
-    'insideevs' => ['url' => 'https://insideevs.com/rss/articles/all/', 'cache' => 15],
-    'electrek' => ['url' => 'https://electrek.co/feed/', 'cache' => 15],
-    'thedrive' => ['url' => 'https://www.thedrive.com/feed', 'cache' => 20],
-    'jalopnik' => ['url' => 'https://jalopnik.com/rss', 'cache' => 20],
+    'teslarati' => ['url' => 'https://www.teslarati.com/feed/', 'cache' => 30],
+    'insideevs' => ['url' => 'https://insideevs.com/rss/articles/all/', 'cache' => 30],
+    'electrek' => ['url' => 'https://electrek.co/feed/', 'cache' => 30],
+    'thedrive' => ['url' => 'https://www.thedrive.com/feed', 'cache' => 30],
+    'jalopnik' => ['url' => 'https://jalopnik.com/rss', 'cache' => 30],
     'caranddriver' => ['url' => 'https://www.caranddriver.com/rss/all.xml/', 'cache' => 30],
-    'techcrunch' => ['url' => 'https://techcrunch.com/feed/', 'cache' => 15],
-    'arstechnica' => ['url' => 'https://feeds.arstechnica.com/arstechnica/index', 'cache' => 15],
-    'engadget' => ['url' => 'https://www.engadget.com/rss.xml', 'cache' => 15],
-    'gizmodo' => ['url' => 'https://gizmodo.com/rss', 'cache' => 15],
-    'theverge' => ['url' => 'https://www.theverge.com/rss/index.xml', 'cache' => 15],
-    'wired' => ['url' => 'https://www.wired.com/feed/rss', 'cache' => 20],
+    'techcrunch' => ['url' => 'https://techcrunch.com/feed/', 'cache' => 30],
+    'arstechnica' => ['url' => 'https://feeds.arstechnica.com/arstechnica/index', 'cache' => 30],
+    'engadget' => ['url' => 'https://www.engadget.com/rss.xml', 'cache' => 30],
+    'gizmodo' => ['url' => 'https://gizmodo.com/rss', 'cache' => 30],
+    'theverge' => ['url' => 'https://www.theverge.com/rss/index.xml', 'cache' => 30],
+    'wired' => ['url' => 'https://www.wired.com/feed/rss', 'cache' => 30],
     'spacenews' => ['url' => 'https://spacenews.com/feed/', 'cache' => 30],
-    'defensenews' => ['url' => 'https://www.defensenews.com/arc/outboundfeeds/rss/?outputType=xml', 'cache' => 60]
+    'defensenews' => ['url' => 'https://www.defensenews.com/arc/outboundfeeds/rss/?outputType=xml', 'cache' => 30]
 ];
 
 // Set up error logging - clear log file on each run
