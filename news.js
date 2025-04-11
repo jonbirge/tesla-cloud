@@ -23,15 +23,15 @@ export function markAllNewsAsRead() {
 // Updates the news headlines, optionally clearing existing ones
 export async function updateNews(clear = false) {
     try {
-        // Collect excluded RSS feeds from user settings
-        const excludedFeeds = [];
+        // Collect included RSS feeds from user settings
+        const includedFeeds = [];
         if (settings) {
-            // Collect all RSS feed settings that are set to false
+            // Collect all RSS feed settings that are set to true
             for (const key in settings) {
-                if (key.startsWith('rss-') && settings[key] === false) {
+                if (key.startsWith('rss-') && settings[key] === true) {
                     // Extract feed ID after the "rss-" prefix
                     const feedId = key.substring(4);
-                    excludedFeeds.push(feedId);
+                    includedFeeds.push(feedId);
                 }
             }
         }
@@ -61,17 +61,19 @@ export async function updateNews(clear = false) {
         }
         
         customLog('Fetching news headlines...');
-        if (excludedFeeds.length > 0) {
-            customLog('Excluding RSS feeds:', excludedFeeds);
+        if (includedFeeds.length > 0) {
+            customLog('Including RSS feeds:', includedFeeds);
+        } else {
+            customLog('No RSS feeds selected, showing all available feeds');
         }
         
-        // Send the request with excluded feeds in the body
+        // Send the request with included feeds in the body
         const response = await fetch(baseUrl, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
             },
-            body: JSON.stringify({ excludedFeeds })
+            body: JSON.stringify({ includedFeeds })
         });
         const loadedItems = await response.json();
         

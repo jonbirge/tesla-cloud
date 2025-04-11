@@ -14,9 +14,9 @@ $forceReload = isset($_GET['reload']);
 $useSerialFetch = isset($_GET['serial']);
 
 // Settings
-$cacheDuration = 10*60;  // seconds?
+$defaultCacheDuration = 10; // Default cache duration in minutes
 $cacheFile = '/tmp/rss_cache_' . $version . '.json';
-$cacheTimestampFile = '/tmp/rss_cache_timestamp_' . $version;
+$cacheTimestampFile = '/tmp/rss_cache_timestamp_' . $version . '.json';
 $logFile = '/tmp/rss_php_' . $version . '.log';
 $maxStories = 512; // Maximum number of stories to send to client
 $maxSingleSource = 32; // Maximum number of stories to keep from a single source
@@ -25,35 +25,38 @@ $maxSingleSource = 32; // Maximum number of stories to keep from a single source
 $numStories = isset($_GET['n']) ? intval($_GET['n']) : $maxStories;
 $numStories = max(1, min($maxStories, $numStories));
 
-// List of RSS feeds to fetch
+// List of RSS feeds to fetch - now with individual cache durations in minutes
 $feeds = [
-    'wsj' => 'https://feeds.content.dowjones.io/public/rss/RSSWorldNews',
-    'nyt' => 'https://rss.nytimes.com/services/xml/rss/nyt/HomePage.xml',
-    'wapo' => 'https://feeds.washingtonpost.com/rss/national',
-    'latimes' => 'https://www.latimes.com/rss2.0.xml',
-    'bos' => 'https://www.boston.com/tag/local-news/feed',
-    'den' => 'https://www.denverpost.com/feed/',
-    'bloomberg' => 'https://feeds.bloomberg.com/news.rss',
-    'bloomberg-tech' => 'https://feeds.bloomberg.com/technology/news.rss',
-    'economist' => 'https://www.economist.com/latest/rss.xml',
-    'bbc' => 'http://feeds.bbci.co.uk/news/world/rss.xml',
-    'lemonde' => 'https://www.lemonde.fr/rss/une.xml',
-    'derspiegel' => 'https://www.spiegel.de/international/index.rss',
-    'notateslaapp' => 'https://www.notateslaapp.com/rss',
-    'teslarati' => 'https://www.teslarati.com/feed/',
-    'insideevs' => 'https://insideevs.com/rss/articles/all/',
-    'electrek' => 'https://electrek.co/feed/',
-    'thedrive' => 'https://www.thedrive.com/feed',
-    'jalopnik' => 'https://jalopnik.com/rss',
-    'caranddriver' => 'https://www.caranddriver.com/rss/all.xml/',
-    'techcrunch' => 'https://techcrunch.com/feed/',
-    'arstechnica' => 'https://feeds.arstechnica.com/arstechnica/index',
-    'engadget' => 'https://www.engadget.com/rss.xml',
-    'gizmodo' => 'https://gizmodo.com/rss',
-    'theverge' => 'https://www.theverge.com/rss/index.xml',
-    'wired' => 'https://www.wired.com/feed/rss',
-    'spacenews' => 'https://spacenews.com/feed/',
-    'defensenews' => 'https://www.defensenews.com/arc/outboundfeeds/rss/?outputType=xml'
+    // General news sources
+    'wsj' => ['url' => 'https://feeds.content.dowjones.io/public/rss/RSSWorldNews', 'cache' => 10],
+    'nyt' => ['url' => 'https://rss.nytimes.com/services/xml/rss/nyt/HomePage.xml', 'cache' => 10],
+    'wapo' => ['url' => 'https://feeds.washingtonpost.com/rss/national', 'cache' => 10],
+    'latimes' => ['url' => 'https://www.latimes.com/rss2.0.xml', 'cache' => 10],
+    'bos' => ['url' => 'https://www.boston.com/tag/local-news/feed', 'cache' => 10],
+    'den' => ['url' => 'https://www.denverpost.com/feed/', 'cache' => 10],
+    'chi' => ['url' => 'https://www.chicagotribune.com/news/feed/', 'cache' => 10],
+    'bbc' => ['url' => 'http://feeds.bbci.co.uk/news/world/rss.xml', 'cache' => 10],
+    'lemonde' => ['url' => 'https://www.lemonde.fr/rss/une.xml', 'cache' => 60],
+    'derspiegel' => ['url' => 'https://www.spiegel.de/international/index.rss', 'cache' => 60],
+    'bloomberg' => ['url' => 'https://feeds.bloomberg.com/news.rss', 'cache' => 10],
+    'economist' => ['url' => 'https://www.economist.com/latest/rss.xml', 'cache' => 60],
+    
+    // Technology and specialized sources
+    'bloomberg-tech' => ['url' => 'https://feeds.bloomberg.com/technology/news.rss', 'cache' => 30],
+    'notateslaapp' => ['url' => 'https://www.notateslaapp.com/rss', 'cache' => 30],
+    'teslarati' => ['url' => 'https://www.teslarati.com/feed/', 'cache' => 30],
+    'insideevs' => ['url' => 'https://insideevs.com/rss/articles/all/', 'cache' => 30],
+    'thedrive' => ['url' => 'https://www.thedrive.com/feed', 'cache' => 30],
+    'jalopnik' => ['url' => 'https://jalopnik.com/rss', 'cache' => 30],
+    'caranddriver' => ['url' => 'https://www.caranddriver.com/rss/all.xml/', 'cache' => 30],
+    'techcrunch' => ['url' => 'https://techcrunch.com/feed/', 'cache' => 30],
+    'arstechnica' => ['url' => 'https://feeds.arstechnica.com/arstechnica/index', 'cache' => 30],
+    'engadget' => ['url' => 'https://www.engadget.com/rss.xml', 'cache' => 30],
+    'gizmodo' => ['url' => 'https://gizmodo.com/rss', 'cache' => 30],
+    'theverge' => ['url' => 'https://www.theverge.com/rss/index.xml', 'cache' => 30],
+    'wired' => ['url' => 'https://www.wired.com/feed/rss', 'cache' => 30],
+    'spacenews' => ['url' => 'https://spacenews.com/feed/', 'cache' => 30],
+    'defensenews' => ['url' => 'https://www.defensenews.com/arc/outboundfeeds/rss/?outputType=xml', 'cache' => 30]
 ];
 
 // Set up error logging - clear log file on each run
@@ -77,9 +80,6 @@ register_shutdown_function(function() {
     }
 });
 
-// Create empty log file
-// file_put_contents($logFile, 'rss.php started...' . "\n");
-
 // Set the content type and add headers to prevent caching
 header('Cache-Control: no-cache, no-store, must-revalidate');
 header('Expires: 0');
@@ -99,48 +99,110 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 }
 
-// Cache logic
-if ($forceReload) {
-    logMessage("Force reload requested, bypassing cache.");
-}
-if (!$forceReload && file_exists($cacheFile) && file_exists($cacheTimestampFile)) {
-    $timestamp = file_get_contents($cacheTimestampFile);
-    if ((time() - $timestamp) < $cacheDuration) {
-        logMessage("Using cached data, last updated: " . date('Y-m-d H:i:s', $timestamp));
-        $useCache = true;
-    } else {
-        logMessage("Cache expired, fetching new data...");
-        $useCache = false;
+// Check if we're receiving a POST request with included feeds
+$includedFeeds = [];
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    // Get the request body
+    $requestBody = file_get_contents('php://input');
+    $requestData = json_decode($requestBody, true);
+    
+    // Check if includedFeeds is set in the request
+    if (isset($requestData['includedFeeds']) && is_array($requestData['includedFeeds'])) {
+        $includedFeeds = $requestData['includedFeeds'];
+        logMessage("Received included feeds: " . implode(', ', $includedFeeds));
     }
-} else {
-    logMessage("Cache not available, fetching new data...");
-    $useCache = false;
+}
+
+// Load timestamp data if it exists
+$feedTimestamps = [];
+if (file_exists($cacheTimestampFile)) {
+    $feedTimestamps = json_decode(file_get_contents($cacheTimestampFile), true);
+    if (!is_array($feedTimestamps)) {
+        $feedTimestamps = []; // Reset if invalid format
+    }
 }
 
 // Get items from cache or from external sources
 $allItems = [];
-if ($useCache) {
-    $allItems = json_decode(file_get_contents($cacheFile), true);
-} else {    
+$needsCaching = false;
+
+// Load cached data if it exists
+$cachedItems = [];
+if (file_exists($cacheFile)) {
+    $cachedItems = json_decode(file_get_contents($cacheFile), true);
+    if (!is_array($cachedItems)) {
+        $cachedItems = []; // Reset if invalid format
+    }
+}
+
+// Group cached items by source
+$itemsBySource = [];
+foreach ($cachedItems as $item) {
+    $source = $item['source'];
+    if (!isset($itemsBySource[$source])) {
+        $itemsBySource[$source] = [];
+    }
+    $itemsBySource[$source][] = $item;
+}
+
+// Determine which feeds need to be refreshed
+$feedsToFetch = [];
+$currentTime = time();
+
+foreach ($feeds as $source => $feedData) {
+    $cacheDurationSeconds = $feedData['cache'] * 60; // Convert minutes to seconds
+    $lastUpdated = isset($feedTimestamps[$source]) ? $feedTimestamps[$source] : 0;
+    
+    if ($forceReload || ($currentTime - $lastUpdated) > $cacheDurationSeconds) {
+        // Cache expired or force reload requested
+        $feedsToFetch[$source] = $feedData['url'];
+        $needsCaching = true;
+        logMessage("Cache expired for $source, fetching new data...");
+    } else {
+        // Use cached data
+        logMessage("Using cached data for $source, last updated: " . date('Y-m-d H:i:s', $lastUpdated));
+        if (isset($itemsBySource[$source])) {
+            $allItems = array_merge($allItems, $itemsBySource[$source]);
+        }
+    }
+}
+
+// Fetch feeds that need updating
+if (!empty($feedsToFetch)) {
     if ($useSerialFetch) {
         // Serial fetching mode
-        foreach ($feeds as $source => $url) {
+        foreach ($feedsToFetch as $source => $url) {
             $xml = fetchRSS($url);
             if ($xml !== false) {
                 $items = parseRSS($xml, $source);
                 $allItems = array_merge($allItems, $items);
+                
+                // Update timestamp for this feed
+                $feedTimestamps[$source] = $currentTime;
             }
         }
     } else {
         // Parallel fetching mode (default)
-        $feedResults = fetchRSSParallel($feeds);
+        $feedResults = fetchRSSParallel($feedsToFetch);
         
         // Process the results
         foreach ($feedResults as $source => $xml) {
             if ($xml !== false) {
                 $items = parseRSS($xml, $source);
                 $allItems = array_merge($allItems, $items);
+                
+                // Update timestamp for this feed
+                $feedTimestamps[$source] = $currentTime;
             }
+        }
+    }
+    
+    // Update the cache with new data
+    // We need to merge with existing cached items that we didn't refresh
+    foreach ($itemsBySource as $source => $items) {
+        if (!isset($feedsToFetch[$source])) {
+            // This source wasn't refreshed, so add its items to allItems
+            $allItems = array_merge($allItems, $items);
         }
     }
     
@@ -149,9 +211,9 @@ if ($useCache) {
         return $b['date'] - $a['date'];
     });
 
-    // Cache the results - the cache contains ALL items
+    // Update cache files
     file_put_contents($cacheFile, json_encode($allItems));
-    file_put_contents($cacheTimestampFile, time());
+    file_put_contents($cacheTimestampFile, json_encode($feedTimestamps));
 }
 
 // Log the total number of stories
@@ -160,6 +222,9 @@ logMessage("Total stories fetched: $totalStories");
 
 // Apply exclusion filters to cached data
 $outputItems = applyExclusionFilters($allItems, $excludedFeeds);
+
+// Apply inclusion filters to cached data
+$outputItems = applyInclusionFilters($outputItems, $includedFeeds);
     
 // Limit number of stories if needed
 $outputItems = array_slice($outputItems, 0, $numStories);
@@ -353,6 +418,25 @@ function applyExclusionFilters($items, $excludedFeeds) {
     logMessage("Filtering out excluded feeds: " . implode(', ', $excludedFeeds));
     $filteredItems = array_filter($items, function($item) use ($excludedFeeds) {
         return !in_array($item['source'], $excludedFeeds);
+    });
+    
+    // Re-index array after filtering
+    $filteredItems = array_values($filteredItems);
+    logMessage("After filtering: " . count($filteredItems) . " items remain");
+    
+    return $filteredItems;
+}
+
+// Function to apply inclusion filters to items
+function applyInclusionFilters($items, $includedFeeds) {
+    if (empty($includedFeeds)) {
+        // If no feeds are specified, include all feeds
+        return $items;
+    }
+    
+    logMessage("Filtering to only include feeds: " . implode(', ', $includedFeeds));
+    $filteredItems = array_filter($items, function($item) use ($includedFeeds) {
+        return in_array($item['source'], $includedFeeds);
     });
     
     // Re-index array after filtering
