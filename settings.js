@@ -1,6 +1,6 @@
 // Imports
 import { updateNews } from './news.js';
-import { customLog, testMode } from './common.js';
+import { customLog } from './common.js';
 import { updateChartAxisColors } from './net.js';
 import { autoDarkMode } from './wx.js';
 
@@ -137,6 +137,7 @@ const defaultSettings = {
     "rss-latimes": false,
     "rss-bos": false,
     "rss-den": false,
+    "rss-chi": false,
     "rss-bloomberg": false,
     "rss-bloomberg-tech": false,
     "rss-bbc": true,
@@ -146,7 +147,6 @@ const defaultSettings = {
     "rss-notateslaapp": true,
     "rss-teslarati": true,
     "rss-insideevs": true,
-    "rss-electrek": false,
     "rss-thedrive": false,
     "rss-techcrunch": true,
     "rss-jalopnik": false,
