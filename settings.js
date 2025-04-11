@@ -147,7 +147,6 @@ const defaultSettings = {
     "rss-notateslaapp": true,
     "rss-teslarati": true,
     "rss-insideevs": true,
-    "rss-electrek": false,
     "rss-thedrive": false,
     "rss-techcrunch": true,
     "rss-jalopnik": false,
