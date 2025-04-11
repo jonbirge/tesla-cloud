@@ -34,14 +34,15 @@ $feeds = [
     'latimes' => ['url' => 'https://www.latimes.com/rss2.0.xml', 'cache' => 10],
     'bos' => ['url' => 'https://www.boston.com/tag/local-news/feed', 'cache' => 10],
     'den' => ['url' => 'https://www.denverpost.com/feed/', 'cache' => 10],
+    'chi' => ['url' => 'https://www.chicagotribune.com/news/feed/', 'cache' => 10],
     'bbc' => ['url' => 'http://feeds.bbci.co.uk/news/world/rss.xml', 'cache' => 10],
     'lemonde' => ['url' => 'https://www.lemonde.fr/rss/une.xml', 'cache' => 10],
     'derspiegel' => ['url' => 'https://www.spiegel.de/international/index.rss', 'cache' => 10],
     'bloomberg' => ['url' => 'https://feeds.bloomberg.com/news.rss', 'cache' => 10],
-    'bloomberg-tech' => ['url' => 'https://feeds.bloomberg.com/technology/news.rss', 'cache' => 30],
+    'economist' => ['url' => 'https://www.economist.com/latest/rss.xml', 'cache' => 30],
     
     // Technology and specialized sources
-    'economist' => ['url' => 'https://www.economist.com/latest/rss.xml', 'cache' => 30],
+    'bloomberg-tech' => ['url' => 'https://feeds.bloomberg.com/technology/news.rss', 'cache' => 30],
     'notateslaapp' => ['url' => 'https://www.notateslaapp.com/rss', 'cache' => 30],
     'teslarati' => ['url' => 'https://www.teslarati.com/feed/', 'cache' => 30],
     'insideevs' => ['url' => 'https://insideevs.com/rss/articles/all/', 'cache' => 30],
