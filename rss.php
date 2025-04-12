@@ -14,12 +14,11 @@ $forceReload = isset($_GET['reload']);
 $useSerialFetch = isset($_GET['serial']);
 
 // Settings
-$defaultCacheDuration = 10; // Default cache duration in minutes
 $cacheFile = '/tmp/rss_cache_' . $version . '.json';
 $cacheTimestampFile = '/tmp/rss_cache_timestamp_' . $version . '.json';
 $logFile = '/tmp/rss_php_' . $version . '.log';
 $maxStories = 512; // Maximum number of stories to send to client
-$maxSingleSource = 32; // Maximum number of stories to keep from a single source
+$maxSingleSource = 16; // Maximum number of stories to keep from a single source
 
 // Get number of stories to return
 $numStories = isset($_GET['n']) ? intval($_GET['n']) : $maxStories;
@@ -59,8 +58,7 @@ $feeds = [
     'defensenews' => ['url' => 'https://www.defensenews.com/arc/outboundfeeds/rss/?outputType=xml', 'cache' => 30]
 ];
 
-// Set up error logging - clear log file on each run
-file_put_contents('/tmp/rss-php-errors.log', ''); // Empty the file
+// Set up error logging
 ini_set('log_errors', 1);
 ini_set('error_log', '/tmp/rss-php-errors.log');
 
@@ -84,20 +82,6 @@ register_shutdown_function(function() {
 header('Cache-Control: no-cache, no-store, must-revalidate');
 header('Expires: 0');
 header('Content-Type: application/json');
-
-// Check if we're receiving a POST request with excluded feeds
-$excludedFeeds = [];
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    // Get the request body
-    $requestBody = file_get_contents('php://input');
-    $requestData = json_decode($requestBody, true);
-    
-    // Check if excludedFeeds is set in the request
-    if (isset($requestData['excludedFeeds']) && is_array($requestData['excludedFeeds'])) {
-        $excludedFeeds = $requestData['excludedFeeds'];
-        logMessage("Received excluded feeds: " . implode(', ', $excludedFeeds));
-    }
-}
 
 // Check if we're receiving a POST request with included feeds
 $includedFeeds = [];
@@ -124,7 +108,6 @@ if (file_exists($cacheTimestampFile)) {
 
 // Get items from cache or from external sources
 $allItems = [];
-$needsCaching = false;
 
 // Load cached data if it exists
 $cachedItems = [];
@@ -156,7 +139,6 @@ foreach ($feeds as $source => $feedData) {
     if ($forceReload || ($currentTime - $lastUpdated) > $cacheDurationSeconds) {
         // Cache expired or force reload requested
         $feedsToFetch[$source] = $feedData['url'];
-        $needsCaching = true;
         logMessage("Cache expired for $source, fetching new data...");
     } else {
         // Use cached data
@@ -220,11 +202,8 @@ if (!empty($feedsToFetch)) {
 $totalStories = count($allItems);
 logMessage("Total stories fetched: $totalStories");
 
-// Apply exclusion filters to cached data
-$outputItems = applyExclusionFilters($allItems, $excludedFeeds);
-
-// Apply inclusion filters to cached data
-$outputItems = applyInclusionFilters($outputItems, $includedFeeds);
+// Apply inclusion filters to data
+$outputItems = applyInclusionFilters($allItems, $includedFeeds);
     
 // Limit number of stories if needed
 $outputItems = array_slice($outputItems, 0, $numStories);
