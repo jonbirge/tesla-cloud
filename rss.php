@@ -133,16 +133,28 @@ $feedsToFetch = [];
 $currentTime = time();
 
 foreach ($feeds as $source => $feedData) {
-    $cacheDurationSeconds = $feedData['cache'] * 60; // Convert minutes to seconds
-    $lastUpdated = isset($feedTimestamps[$source]) ? $feedTimestamps[$source] : 0;
+    // Check if this feed is in the inclusion list (or if no inclusion list was provided)
+    $isIncluded = empty($includedFeeds) || in_array($source, $includedFeeds);
     
-    if ($forceReload || ($currentTime - $lastUpdated) > $cacheDurationSeconds) {
-        // Cache expired or force reload requested
-        $feedsToFetch[$source] = $feedData['url'];
-        logMessage("Cache expired for $source, fetching new data...");
+    if ($isIncluded) {
+        // Only check cache expiration for included feeds
+        $cacheDurationSeconds = $feedData['cache'] * 60; // Convert minutes to seconds
+        $lastUpdated = isset($feedTimestamps[$source]) ? $feedTimestamps[$source] : 0;
+        
+        if ($forceReload || ($currentTime - $lastUpdated) > $cacheDurationSeconds) {
+            // Cache expired or force reload requested
+            $feedsToFetch[$source] = $feedData['url'];
+            logMessage("Cache expired for $source, fetching new data...");
+        } else {
+            // Use cached data for included feed that hasn't expired
+            logMessage("Using cached data for $source, last updated: " . date('Y-m-d H:i:s', $lastUpdated));
+            if (isset($itemsBySource[$source])) {
+                $allItems = array_merge($allItems, $itemsBySource[$source]);
+            }
+        }
     } else {
-        // Use cached data
-        logMessage("Using cached data for $source, last updated: " . date('Y-m-d H:i:s', $lastUpdated));
+        // Always use cached data for feeds not in the inclusion list
+        logMessage("Using cached data for $source (not in inclusion list)");
         if (isset($itemsBySource[$source])) {
             $allItems = array_merge($allItems, $itemsBySource[$source]);
         }
