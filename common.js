@@ -57,6 +57,18 @@ export function highlightUpdate(id, content = null) {
     }, 2000);
 }
 
+// Update src of element only if it needs to change to avoid reloads
+export function srcUpdate(id, url) {
+    const element = document.getElementById(id);
+    const currentUrl = element.src;
+    customLog('current src:', currentUrl);
+    customLog('new src:', url);
+    if (!(url === currentUrl)) {
+        element.src = url;
+        customLog('Updating src for', id);
+    }
+}
+
 // Helper function to format time according to user settings
 export function formatTime(date, options = {}) {
     // Default options

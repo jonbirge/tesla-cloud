@@ -130,6 +130,8 @@ const defaultSettings = {
     "auto-dark-mode": true,
     "24-hour-time": false,
     "imperial-units": true,
+    "map-choice": "waze",  // Default to Waze
+    
     // News source settings
     "rss-wsj": true,
     "rss-nyt": true,
@@ -369,11 +371,21 @@ async function fetchSettings() {
 // Update visual state of a toggle
 function updateToggleVisualState(key, value) {
     const settingItem = document.querySelector(`.settings-toggle-item[data-setting="${key}"]`);
-    if (settingItem) {
-        const toggle = settingItem.querySelector('input[type="checkbox"]');
-        if (toggle) {
-            toggle.checked = value;
-        }
+    if (!settingItem) return;
+    
+    // Handle checkbox toggles
+    const toggle = settingItem.querySelector('input[type="checkbox"]');
+    if (toggle) {
+        toggle.checked = value === true;
+        return;
+    }
+    
+    // Handle option-based toggles
+    if (settingItem.classList.contains('option-switch-container')) {
+        const buttons = settingItem.querySelectorAll('.option-button');
+        buttons.forEach(btn => {
+            btn.classList.toggle('active', btn.dataset.value === value);
+        });
     }
 }
 
@@ -387,10 +399,20 @@ function initializeToggleStates() {
         if (!key) return;
         
         const value = settings[key] !== undefined ? settings[key] : false; // Default to false if not set
-        const toggle = item.querySelector('input[type="checkbox"]');
         
+        // Handle checkbox toggles
+        const toggle = item.querySelector('input[type="checkbox"]');
         if (toggle) {
             toggle.checked = value;
+            return; // Skip the rest of the loop for this item
+        }
+        
+        // Handle option-switch-container toggles
+        if (item.classList.contains('option-switch-container')) {
+            const buttons = item.querySelectorAll('.option-button');
+            buttons.forEach(button => {
+                button.classList.toggle('active', button.dataset.value === value);
+            });
         }
     });
 }
@@ -534,4 +556,22 @@ window.toggleSettingFrom = function(element) {
             }
         }
     }
+}
+
+// Function for toggling option-based settings (like map-choice)
+window.toggleOptionSetting = function(button) {
+    const settingItem = button.closest('.option-switch-container');
+    if (!settingItem || !settingItem.dataset.setting) return;
+
+    const key = settingItem.dataset.setting;
+    const value = button.dataset.value;
+    
+    // Update the active state visually
+    const buttons = settingItem.querySelectorAll('.option-button');
+    buttons.forEach(btn => btn.classList.remove('active'));
+    button.classList.add('active');
+    
+    // Store the setting
+    toggleSetting(key, value);
+    customLog(`Option setting "${key}" changed to "${value}"`);
 }

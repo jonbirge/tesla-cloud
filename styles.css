@@ -609,6 +609,15 @@ input:checked + .toggle-slider:before {
     flex-grow: 1; /* Allow it to grow to fill available space */
 }
 
+.map-title {
+    position: absolute;
+    margin: 5px;
+    z-index: 10;
+    font-size: 12pt;
+    font-weight: 700;
+    /* text-transform: uppercase; */
+}
+
 #teslawaze {
     border-radius: var(--button-radius);
     width: 100%;
@@ -1035,4 +1044,48 @@ input:checked + .settings-toggle-slider:before {
 
 .news-toggle-item {
     font-size: 15pt;
+}
+
+/* Option Switch (Two-option selector) */
+
+.option-switch-container {
+    padding-right: 15px; /* Ensure there's adequate right padding */
+}
+
+.option-switch {
+    display: flex;
+    border-radius: var(--button-radius);
+    overflow: hidden;
+    background-color: white;
+}
+
+.option-button {
+    flex: 1;
+    background: none;
+    border: none;
+    padding: 8px 14px;
+    color: var(--text-color);
+    font-size: 14pt;
+    font-weight: 550;
+    cursor: pointer;
+    transition: background-color 0.3s, color 0.3s;
+}
+
+.option-button.active {
+    background-color: var(--tesla-blue);
+    color: white;
+}
+
+.option-button:hover:not(.active) {
+    background-color: rgba(0, 0, 0, 0.05); /* Subtle hover effect for both modes */
+}
+
+body.dark-mode .option-button:hover:not(.active) {
+    background-color: rgba(255, 255, 255, 0.1); /* Maintain original hover effect for dark mode */
+}
+
+.settings-toggle-item.option-switch-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
 }

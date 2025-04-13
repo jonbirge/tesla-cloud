@@ -131,8 +131,8 @@
             </div>
             <hr>
             <div class="teslawaze-container">
-                <h2 style="position: absolute; margin: 10px; z-index: 10; padding: 5px;">TeslaWaze</h2>
-                <iframe id="teslawaze" src="https://teslawaze.azurewebsites.net" allow="geolocation" loading="lazy"></iframe>
+                <h2 id="map-title" class="map-title">TeslaWaze</h2>
+                <iframe id="teslawaze" src="" allow="geolocation" loading="lazy"></iframe>
             </div>
         </div>
 
@@ -446,7 +446,14 @@
                     <label>Imperial Units</label><input type="checkbox" onchange="toggleSettingFrom(this)"><span class="settings-toggle-slider"></span>
                 </div>
 
-                <!-- TODO: Select between Waze and ABRP -->
+                <!-- Selection between Waze and ABRP -->
+                <div class="settings-toggle-item option-switch-container" data-setting="map-choice">
+                    <label>Map</label>
+                    <div class="option-switch">
+                        <button class="option-button active" data-value="waze" onclick="toggleOptionSetting(this)">Waze</button>
+                        <button class="option-button" data-value="abrp" onclick="toggleOptionSetting(this)">ABRP</button>
+                    </div>
+                </div>
             </div>
             
             <h2>News Feeds</h2>

@@ -1,9 +1,9 @@
 // Imports
-import { customLog, highlightUpdate, testMode, updateTimeZone, GEONAMES_USERNAME } from './common.js';
+import { customLog, highlightUpdate, srcUpdate, testMode, updateTimeZone, GEONAMES_USERNAME } from './common.js';
 import { PositionSimulator } from './location.js';
 import { attemptLogin, leaveSettings, settings } from './settings.js';
 import { fetchWeatherData, weatherData } from './wx.js';
-import { updateNetworkInfo, updatePingChart, startPingTest } from './net.js';
+import { updateNetworkInfo, updatePingChart, startPingTest, updateChartAxisColors } from './net.js';
 import { markAllNewsAsRead } from './news.js';
 
 // Settings
@@ -632,6 +632,11 @@ window.showSection = function (sectionId) {
         rightFrame.classList.remove('external');
     }
 
+    // If we're leaving settings, handle any rss feed changes
+    if (currentSection === 'settings') {
+        leaveSettings();
+    }
+
     // Clear "new" markers from news items and clear unread flags from data
     if (currentSection === 'news') {
         const newNewsItems = document.querySelectorAll('.news-new');
@@ -649,11 +654,6 @@ window.showSection = function (sectionId) {
         }
     }
 
-    // If we're leaving settings, handle any rss feed changes
-    if (currentSection === 'settings') {
-        leaveSettings();
-    }
-
     // If switching to about section, clear the notification dot
     if (sectionId === 'about') {
         const aboutButton = document.querySelector('.section-button[onclick="showSection(\'about\')"]');
@@ -664,37 +664,35 @@ window.showSection = function (sectionId) {
 
     // Navigation section
     if (sectionId === 'navigation') {
-        if (testMode) {
-            // In test mode, replace TeslaWaze iframe with "TESTING MODE" message
-            const teslaWazeContainer = document.querySelector('.teslawaze-container');
-            if (teslaWazeContainer) {
-                const iframe = teslaWazeContainer.querySelector('iframe');
-                if (iframe) {
-                    iframe.style.display = 'none';
-
-                    // Check if our test mode message already exists
-                    let testModeMsg = teslaWazeContainer.querySelector('.test-mode-message');
-                    if (!testModeMsg) {
-                        // Create and add the test mode message
-                        testModeMsg = document.createElement('div');
-                        testModeMsg.className = 'test-mode-message';
-                        testModeMsg.style.cssText = 'display: flex; justify-content: center; align-items: center; height: 100%; font-size: 32px; font-weight: bold;';
-                        testModeMsg.textContent = 'TESTING MODE';
-                        teslaWazeContainer.appendChild(testModeMsg);
-                    } else {
-                        testModeMsg.style.display = 'flex';
-                    }
-                }
+        // Normal mode - ensure iframe is visible and test mode message is hidden
+        const teslaWazeContainer = document.querySelector('.teslawaze-container');
+        const iframe = teslaWazeContainer.querySelector('iframe');
+        const testModeMsg = teslaWazeContainer.querySelector('.test-mode-message');
+        if (!testMode) {
+            const mapTitle = teslaWazeContainer.querySelector('.map-title');
+            if (settings["map-choice"] === 'waze') {
+                srcUpdate("teslawaze", "https://teslawaze.azurewebsites.net/");
+                mapTitle.textContent = "TeslaWaze";
+            } else {
+                srcUpdate("teslawaze", "https://abetterrouteplanner.com/");
+                mapTitle.textContent = "ABRP";
             }
+            iframe.style.display = '';
+            if (testModeMsg) testModeMsg.style.display = 'none';
         } else {
-            // Normal mode - ensure iframe is visible and test mode message is hidden
-            const teslaWazeContainer = document.querySelector('.teslawaze-container');
-            if (teslaWazeContainer) {
-                const iframe = teslaWazeContainer.querySelector('iframe');
-                const testModeMsg = teslaWazeContainer.querySelector('.test-mode-message');
-
-                if (iframe) iframe.style.display = '';
-                if (testModeMsg) testModeMsg.style.display = 'none';
+            // In test mode, replace TeslaWaze iframe with "TESTING MODE" message
+            iframe.src = "";
+            iframe.style.display = 'none';
+            // Check if our test mode message already exists
+            if (!testModeMsg) {
+                // Create and add the test mode message
+                testModeMsg = document.createElement('div');
+                testModeMsg.className = 'test-mode-message';
+                testModeMsg.style.cssText = 'display: flex; justify-content: center; align-items: center; height: 100%; font-size: 32px; font-weight: bold;';
+                testModeMsg.textContent = 'TESTING MODE';
+                teslaWazeContainer.appendChild(testModeMsg);
+            } else {
+                testModeMsg.style.display = 'flex';
             }
         }
     }
