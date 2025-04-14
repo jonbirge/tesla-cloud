@@ -9,6 +9,62 @@ const NEWS_REFRESH_INTERVAL = 5; // minutes
 let newsItems = null; // Current array of news items
 let newsUpdateInterval = null;
 let seenNewsIds = new Set(); // Track news IDs we've already seen
+let newsTimeUpdateInterval = null; // Interval for updating "time ago" displays
+
+// Utility function to generate "time ago" text from a timestamp
+function generateTimeAgoText(timestamp) {
+    const now = new Date();
+    const itemDate = new Date(timestamp * 1000);
+    const timeDifference = Math.floor((now - itemDate) / 1000); // Difference in seconds
+
+    if (timeDifference < 60) {
+        return `${timeDifference} seconds ago`;
+    } else if (timeDifference < 7200) {
+        const minutes = Math.floor(timeDifference / 60);
+        return `${minutes} minute${minutes > 1 ? 's' : ''} ago`;
+    } else if (timeDifference < 86400) {
+        const hours = Math.floor(timeDifference / 3600);
+        return `${hours} hour${hours > 1 ? 's' : ''} ago`;
+    } else {
+        const days = Math.floor(timeDifference / 86400);
+        const remainingSeconds = timeDifference % 86400;
+        const hours = Math.floor(remainingSeconds / 3600);
+        return `${days} day${days > 1 ? 's' : ''} and ${hours} hour${hours > 1 ? 's' : ''} ago`;
+    }
+}
+
+// Updates all news timestamp displays on the page
+export function updateNewsTimeDisplays() {
+    const timeElements = document.querySelectorAll('.news-time[data-timestamp]');
+    timeElements.forEach(element => {
+        const timestamp = parseInt(element.getAttribute('data-timestamp'));
+        if (!isNaN(timestamp)) {
+            element.textContent = generateTimeAgoText(timestamp);
+        }
+    });
+}
+
+// Start the interval that updates time ago displays
+export function startNewsTimeUpdates() {
+    customLog('Starting news time updates');
+    // Clear any existing interval first
+    if (newsTimeUpdateInterval) {
+        clearInterval(newsTimeUpdateInterval);
+    }
+    // Update immediately
+    updateNewsTimeDisplays();
+    // Then set up interval to update every second
+    newsTimeUpdateInterval = setInterval(updateNewsTimeDisplays, 5000);
+}
+
+// Stop the interval that updates time ago displays
+export function stopNewsTimeUpdates() {
+    customLog('Stopping news time updates');
+    if (newsTimeUpdateInterval) {
+        clearInterval(newsTimeUpdateInterval);
+        newsTimeUpdateInterval = null;
+    }
+}
 
 // Mark all current news items as read
 export function markAllNewsAsRead() {
@@ -156,25 +212,6 @@ function genItemID(item)
 // Takes news item and generates HTML for it
 function generateHTMLforItem(item)
 {
-    const date = new Date(item.date * 1000);
-    const dateString = date.toLocaleDateString('en-US', { 
-        month: 'short', 
-        day: 'numeric'
-    });
-    const timeString = formatTime(date, { 
-        timeZoneName: 'short'
-    });
-    
-    // Extract domain for favicon
-    // TODO: Cache favicon URLs to avoid repeated requests
-    let faviconUrl = '';
-    try {
-        const url = new URL(item.link);
-        faviconUrl = `https://www.google.com/s2/favicons?domain=${url.hostname}&sz=32`;
-    } catch (e) {
-        console.error('Error parsing URL for favicon:', e);
-    }
-
     // If the item is unread, add a class to highlight it
     let classList = null;
     if (item.isUnread) {
@@ -183,13 +220,21 @@ function generateHTMLforItem(item)
         classList = 'news-item';
     }
 
+    // Extract domain for favicon
+    let faviconUrl = '';
+    try {
+        const url = new URL(item.link);
+        faviconUrl = `https://www.google.com/s2/favicons?domain=${url.hostname}&sz=32`;
+    } catch (e) {
+        console.error('Error parsing URL for favicon:', e);
+    }
+
     return `
         <button class="${classList}" data-id="${item.id}" onclick="loadExternalUrl('${item.link}')">
             <img src="${faviconUrl}" class="news-favicon" onerror="this.style.display='none'">
             <div>
                 <span class="news-source">${item.source.toUpperCase()}</span>
-                <span class="news-date">${dateString}</span>
-                <span class="news-time">${timeString}</span>
+                <span class="news-time" data-timestamp="${item.date}">${generateTimeAgoText(item.date)}</span>
             </div>
             <div class="news-title">${item.title}</div>
         </button>`;

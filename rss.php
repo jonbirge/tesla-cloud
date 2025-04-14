@@ -191,15 +191,6 @@ if (!empty($feedsToFetch)) {
         }
     }
     
-    // Update the cache with new data
-    // We need to merge with existing cached items that we didn't refresh
-    foreach ($itemsBySource as $source => $items) {
-        if (!isset($feedsToFetch[$source])) {
-            // This source wasn't refreshed, so add its items to allItems
-            $allItems = array_merge($allItems, $items);
-        }
-    }
-    
     // Sort by date, newest first
     usort($allItems, function($a, $b) {
         return $b['date'] - $a['date'];

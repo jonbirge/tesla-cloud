@@ -4,7 +4,7 @@ import { PositionSimulator } from './location.js';
 import { attemptLogin, leaveSettings, settings } from './settings.js';
 import { fetchWeatherData, weatherData } from './wx.js';
 import { updateNetworkInfo, updatePingChart, startPingTest, updateChartAxisColors } from './net.js';
-import { markAllNewsAsRead } from './news.js';
+import { markAllNewsAsRead, startNewsTimeUpdates, stopNewsTimeUpdates, updateNewsTimeDisplays } from './news.js';
 
 // Settings
 const LATLON_UPDATE_INTERVAL = 2; // seconds
@@ -646,12 +646,17 @@ window.showSection = function (sectionId) {
         markAllNewsAsRead();
     }
 
-    // If switching to news section, clear the notification dot
+    // If switching to news section, clear the notification dot and start time updates
     if (sectionId === 'news') {
         const newsButton = document.querySelector('.section-button[onclick="showSection(\'news\')"]');
         if (newsButton) {
             newsButton.classList.remove('has-notification');
         }
+        // Start the timer that updates the "time ago" displays
+        startNewsTimeUpdates();
+    } else if (currentSection === 'news') {
+        // If we're leaving the news section, stop the time updates
+        stopNewsTimeUpdates();
     }
 
     // If switching to about section, clear the notification dot
