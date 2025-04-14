@@ -16,7 +16,7 @@ export { sunrise, sunset, weatherData };
 
 // Helper function to convert temperature based on user settings
 function formatTemperature(tempF) {
-    if (!settings || settings["units"] === "English" || settings["units"] === undefined) {
+    if (!settings || settings["imperial-units"]) {
         return Math.round(tempF) + "°";
     } else {
         // Convert F to C: (F - 32) * 5/9
@@ -26,7 +26,7 @@ function formatTemperature(tempF) {
 
 // Helper function to convert wind speed based on user settings
 function formatWindSpeed(speedMS) {
-    if (!settings || settings["units"] === "English" || settings["units"] === undefined) {
+    if (!settings || settings["imperial-units"]) {
         // Convert m/s to mph
         return Math.round(speedMS * 2.237) + " MPH";
     } else {

@@ -98,9 +98,6 @@ export async function toggleSetting(key, value) {
             // Update the local settings cache with boolean value
             settings[key] = value;
 
-            // Update toggle state visually
-            updateToggleVisualState(key, value);
-
             // Update the server with the boolean value using the RESTful API
             const response = await fetch(`settings.php/${encodeURIComponent(hashedUser)}/${encodeURIComponent(key)}`, {
                 method: 'PUT',
@@ -129,7 +126,7 @@ const defaultSettings = {
     "dark-mode": false,
     "auto-dark-mode": true,
     "24-hour-time": false,
-    "units": "English",    // "English" or "Metric"
+    "imperial-units": true,    // "English" or "Metric"
     "map-choice": "waze",
     
     // News source settings
@@ -373,6 +370,21 @@ function updateToggleVisualState(key, value) {
     const settingItem = document.querySelector(`.settings-toggle-item[data-setting="${key}"]`);
     if (!settingItem) return;
     
+    // Special compatibility cases
+    if (key  === 'imperial-units') {
+        let unitsValue;
+        if (value === true) {
+            unitsValue = 'english';
+        } else {
+            unitsValue = 'metric';
+        }
+        const buttons = settingItem.querySelectorAll('.option-button');
+        buttons.forEach(btn => {
+            btn.classList.toggle('active', btn.dataset.value === unitsValue);
+        });
+        return;
+    }
+
     // Handle checkbox toggles
     const toggle = settingItem.querySelector('input[type="checkbox"]');
     if (toggle) {
@@ -389,7 +401,7 @@ function updateToggleVisualState(key, value) {
     }
 }
 
-// Initialize all toggle states based on settings
+// Initialize all toggle states based on 'settings' dictionary
 function initializeToggleStates() {
     // Find all settings toggle items with data-setting attributes
     const toggleItems = document.querySelectorAll('.settings-toggle-item[data-setting]');
@@ -398,8 +410,17 @@ function initializeToggleStates() {
         const key = item.dataset.setting;
         if (!key) return;
         
-        const value = settings[key] !== undefined ? settings[key] : false; // Default to false if not set
+        let value = settings[key] !== undefined ? settings[key] : false; // Default to false if not set
         
+        // Handle special cases for compatibility
+        if (key === 'imperial-units') {
+            if (value) {
+                value = 'english';
+            } else {
+                value = 'metric';
+            }
+        }
+
         // Handle checkbox toggles
         const toggle = item.querySelector('input[type="checkbox"]');
         if (toggle) {
@@ -564,8 +585,14 @@ window.toggleOptionSetting = function(button) {
     if (!settingItem || !settingItem.dataset.setting) return;
 
     const key = settingItem.dataset.setting;
-    const value = button.dataset.value;
+    let value = button.dataset.value;
     
+    // Handle special cases for compatibility
+    if (key === 'imperial-units') {
+        // Convert value to boolean
+        value = (value === 'english');
+    }
+
     // Update the active state visually
     const buttons = settingItem.querySelectorAll('.option-button');
     buttons.forEach(btn => btn.classList.remove('active'));
