@@ -129,8 +129,8 @@ const defaultSettings = {
     "dark-mode": false,
     "auto-dark-mode": true,
     "24-hour-time": false,
-    "imperial-units": true,
-    "map-choice": "waze",  // Default to Waze
+    "units": "English",    // "English" or "Metric"
+    "map-choice": "waze",
     
     // News source settings
     "rss-wsj": true,

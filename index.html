@@ -442,8 +442,13 @@
                     <label>24-hour Time</label><input type="checkbox" onchange="toggleSettingFrom(this)"><span class="settings-toggle-slider"></span>
                 </div>
 
-                <div class="settings-toggle-item" data-setting="imperial-units" onclick="this.querySelector('input').click()">
-                    <label>Imperial Units</label><input type="checkbox" onchange="toggleSettingFrom(this)"><span class="settings-toggle-slider"></span>
+                <!-- Units selection (Metric or English) -->
+                <div class="settings-toggle-item option-switch-container" data-setting="units">
+                    <label>Units</label>
+                    <div class="option-switch">
+                        <button class="option-button" data-value="Metric" onclick="toggleOptionSetting(this)">Metric</button>
+                        <button class="option-button active" data-value="English" onclick="toggleOptionSetting(this)">English</button>
+                    </div>
                 </div>
 
                 <!-- Selection between Waze and ABRP -->

@@ -223,7 +223,7 @@ function updateWindage(vehicleSpeed, vehicleHeading, windSpeed, windDirection) {
 
     // Update the wind component displays with proper units
     if (headWind !== null) {
-        if (!settings || settings["imperial-units"]) {
+        if (!settings || settings["units"] === "English" || settings["units"] === undefined) {
             document.getElementById('headwind').innerText = Math.abs(Math.round(headWind));
         } else {
             // Convert mph to m/s (1 mph ≈ 0.44704 m/s)
@@ -231,7 +231,7 @@ function updateWindage(vehicleSpeed, vehicleHeading, windSpeed, windDirection) {
         }
         document.getElementById('headwind-arrow').innerHTML = (headWind > 0 ? '&#9660;' : '&#9650;'); // down/up filled triangles
         // Change the label to TAILWIND when headWind is negative and use appropriate units
-        if (!settings || settings["imperial-units"]) {
+        if (!settings || settings["units"] === "English" || settings["units"] === undefined) {
             document.getElementById('headwind-label').innerText = (headWind < 0) ? "TAILWIND (MPH)" : "HEADWIND (MPH)";
         } else {
             document.getElementById('headwind-label').innerText = (headWind < 0) ? "TAILWIND (M/S)" : "HEADWIND (M/S)";
@@ -240,7 +240,7 @@ function updateWindage(vehicleSpeed, vehicleHeading, windSpeed, windDirection) {
         document.getElementById('headwind').innerText = '--';
         document.getElementById('headwind-arrow').innerHTML = '';
         // Set label with appropriate units
-        if (!settings || settings["imperial-units"]) {
+        if (!settings || settings["units"] === "English" || settings["units"] === undefined) {
             document.getElementById('headwind-label').innerText = "HEADWIND (MPH)";
         } else {
             document.getElementById('headwind-label').innerText = "HEADWIND (M/S)";
@@ -248,7 +248,7 @@ function updateWindage(vehicleSpeed, vehicleHeading, windSpeed, windDirection) {
     }
 
     if (crossWind !== null) {
-        if (!settings || settings["imperial-units"]) {
+        if (!settings || settings["units"] === "English" || settings["units"] === undefined) {
             document.getElementById('crosswind').innerText = Math.abs(Math.round(crossWind));
         } else {
             // Convert mph to m/s
@@ -260,7 +260,7 @@ function updateWindage(vehicleSpeed, vehicleHeading, windSpeed, windDirection) {
         document.getElementById('crosswind-arrow').innerHTML = '';
     }
     // Set label with appropriate units
-    if (!settings || settings["imperial-units"]) {
+    if (!settings || settings["units"] === "English" || settings["units"] === undefined) {
         document.getElementById('crosswind-label').innerText = "CROSSWIND (MPH)";
     } else {
         document.getElementById('crosswind-label').innerText = "CROSSWIND (M/S)";
@@ -389,7 +389,7 @@ function handlePositionUpdate(position) {
 
         // Update display values with proper units
         if (alt) {
-            if (!settings || settings["imperial-units"]) {
+            if (!settings || settings["units"] === "English" || settings["units"] === undefined) {
                 // Convert meters to feet
                 document.getElementById('altitude').innerText = Math.round(alt * 3.28084);
                 document.getElementById('altitude-unit').innerText = 'FT';
@@ -404,7 +404,7 @@ function handlePositionUpdate(position) {
         document.getElementById('accuracy').innerText = acc ? Math.round(acc) + ' m' : '--';
 
         // Update headwind/crosswind labels
-        if (!settings || settings["imperial-units"]) {
+        if (!settings || settings["units"] === "English" || settings["units"] === undefined) {
             document.getElementById('headwind-label').innerText =
                 document.getElementById('headwind-label').innerText.replace("(MPH)", "(MPH)");
             document.querySelector('.stat-box:nth-child(4) .stat-label').innerText =
