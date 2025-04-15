@@ -1017,9 +1017,11 @@ input:checked + .settings-toggle-slider:before {
 
 #in-map-toggle {
     position: absolute;
-    margin: 5px;
+    margin: 0px;
+    padding: 7px;
     z-index: 10;
     background-color: transparent;
+    opacity: 80%;
 }
 
 #in-map-toggle .option-switch {
