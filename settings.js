@@ -428,41 +428,16 @@ function updateToggleVisualState(key, value) {
 }
 
 // Initialize all toggle states based on 'settings' dictionary
-// TODO: Use udpateToggleVisualState() to update the UI and avoid 
 function initializeToggleStates() {
-    // Find all settings toggle items with data-setting attributes
-    const toggleItems = document.querySelectorAll('.settings-toggle-item[data-setting]');
-    
-    toggleItems.forEach(item => {
-        const key = item.dataset.setting;
-        if (!key) return;
-        
-        let value = settings[key] !== undefined ? settings[key] : false; // Default to false if not set
-        
-        // Handle special cases for compatibility
-        if (key === 'imperial-units') {
-            if (value) {
-                value = 'english';
-            } else {
-                value = 'metric';
-            }
+    // Iterate through all keys in the settings object
+    for (const key in settings) {
+        // Check if the key is a setting we care about
+        if (settings.hasOwnProperty(key)) {
+            const value = settings[key];
+            // Update the visual state of the toggle
+            updateToggleVisualState(key, value);
         }
-
-        // Handle checkbox toggles
-        const toggle = item.querySelector('input[type="checkbox"]');
-        if (toggle) {
-            toggle.checked = value;
-            return; // Skip the rest of the loop for this item
-        }
-        
-        // Handle option-switch-container toggles
-        if (item.classList.contains('option-switch-container')) {
-            const buttons = item.querySelectorAll('.option-button');
-            buttons.forEach(button => {
-                button.classList.toggle('active', button.dataset.value === value);
-            });
-        }
-    });
+    }
 }
 
 // Cookie management functions
