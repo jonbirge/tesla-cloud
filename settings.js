@@ -80,9 +80,13 @@ export async function attemptLogin() {
     customLog('currentUser:', currentUser);
     customLog('hashedUser:', hashedUser);
     customLog('isLoggedIn:', isLoggedIn);
+
+    // Initialize settings as needed
+    updateMapFrame();
 }
 
 // Function to toggle a setting (updates both local cache and server)
+// TODO: Handle the special cases via callbacks from new Settings object?
 export async function toggleSetting(key, value) {
     // Handle local settings
     settings[key] = value;
@@ -117,6 +121,26 @@ export async function toggleSetting(key, value) {
         } catch (error) {
             customLog('Error toggling setting:', error);
         }
+    }
+
+    // If the setting is RSS-related, set the dirty flag
+    if (key.startsWith('rss-')) {
+        const isDrop = !value; // If unchecked, it's a drop
+        rssIsDirty = true;
+        rssDrop = rssDrop || isDrop; // Set the drop flag if this is a drop
+        customLog(`RSS setting "${key}" changed to ${value} (dirty: ${rssIsDirty}, drop: ${rssDrop})`);
+    }
+
+    // If the setting is dark mode related, update the dark mode
+    if (key === 'auto-dark-mode') {
+        if (value) {
+            autoDarkMode();
+        }
+    }
+
+    // Handle map choice setting
+    if (key === 'map-choice') {
+        updateMapFrame();
     }
 }
 
@@ -367,41 +391,44 @@ async function fetchSettings() {
 
 // Update visual state of a toggle
 function updateToggleVisualState(key, value) {
-    const settingItem = document.querySelector(`.settings-toggle-item[data-setting="${key}"]`);
-    if (!settingItem) return;
-    
-    // Special compatibility cases
-    if (key  === 'imperial-units') {
-        let unitsValue;
-        if (value === true) {
-            unitsValue = 'english';
-        } else {
-            unitsValue = 'metric';
-        }
-        const buttons = settingItem.querySelectorAll('.option-button');
-        buttons.forEach(btn => {
-            btn.classList.toggle('active', btn.dataset.value === unitsValue);
-        });
-        return;
-    }
+    const toggleItems = document.querySelectorAll(`.settings-toggle-item[data-setting="${key}"]`);
+    if (!toggleItems) return;
 
-    // Handle checkbox toggles
-    const toggle = settingItem.querySelector('input[type="checkbox"]');
-    if (toggle) {
-        toggle.checked = value === true;
-        return;
-    }
-    
-    // Handle option-based toggles
-    if (settingItem.classList.contains('option-switch-container')) {
-        const buttons = settingItem.querySelectorAll('.option-button');
-        buttons.forEach(btn => {
-            btn.classList.toggle('active', btn.dataset.value === value);
-        });
-    }
+    toggleItems.forEach(item => {
+        // Special compatibility cases
+        if (key === 'imperial-units') {
+            let unitsValue;
+            if (value === true) {
+                unitsValue = 'english';
+            } else {
+                unitsValue = 'metric';
+            }
+            const buttons = item.querySelectorAll('.option-button');
+            buttons.forEach(btn => {
+                btn.classList.toggle('active', btn.dataset.value === unitsValue);
+            });
+            return;
+        }
+
+        // Handle checkbox toggles
+        const toggle = item.querySelector('input[type="checkbox"]');
+        if (toggle) {
+            toggle.checked = value === true;
+            return;
+        }
+
+        // Handle option-based toggles
+        if (item.classList.contains('option-switch-container')) {
+            const buttons = item.querySelectorAll('.option-button');
+            buttons.forEach(btn => {
+                btn.classList.toggle('active', btn.dataset.value === value);
+            });
+        }
+    });
 }
 
 // Initialize all toggle states based on 'settings' dictionary
+// TODO: Use udpateToggleVisualState() to update the UI and avoid 
 function initializeToggleStates() {
     // Find all settings toggle items with data-setting attributes
     const toggleItems = document.querySelectorAll('.settings-toggle-item[data-setting]');
@@ -561,21 +588,6 @@ window.toggleSettingFrom = function(element) {
         const key = settingItem.dataset.setting;
         const value = element.checked;
         toggleSetting(key, value);
-
-        // If the setting is RSS-related, set the dirty flag
-        if (key.startsWith('rss-')) {
-            const isDrop = !value; // If unchecked, it's a drop
-            rssIsDirty = true;
-            rssDrop = rssDrop || isDrop; // Set the drop flag if this is a drop
-            customLog(`RSS setting "${key}" changed to ${value} (dirty: ${rssIsDirty}, drop: ${rssDrop})`);
-        }
-
-        // If the setting is dark mode related, update the dark mode
-        if (key === 'auto-dark-mode') {
-            if (value) {
-                autoDarkMode();
-            }
-        }
     }
 }
 
@@ -592,11 +604,6 @@ window.toggleOptionSetting = function(button) {
         // Convert value to boolean
         value = (value === 'english');
     }
-
-    // Update the active state visually
-    const buttons = settingItem.querySelectorAll('.option-button');
-    buttons.forEach(btn => btn.classList.remove('active'));
-    button.classList.add('active');
     
     // Store the setting
     toggleSetting(key, value);

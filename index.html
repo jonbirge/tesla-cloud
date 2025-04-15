@@ -131,7 +131,12 @@
             </div>
             <hr>
             <div class="teslawaze-container">
-                <h2 id="map-title" class="map-title">TeslaWaze</h2>
+                <div id="in-map-toggle" class="settings-toggle-item option-switch-container" data-setting="map-choice">
+                    <div class="option-switch">
+                        <button class="option-button active" data-value="waze" onclick="toggleOptionSetting(this)">TeslaWaze</button>
+                        <button class="option-button" data-value="abrp" onclick="toggleOptionSetting(this)">ABRP</button>
+                    </div>
+                </div>
                 <iframe id="teslawaze" src="" allow="geolocation" loading="lazy"></iframe>
             </div>
         </div>
@@ -442,7 +447,6 @@
                     <label>24-hour Time</label><input type="checkbox" onchange="toggleSettingFrom(this)"><span class="settings-toggle-slider"></span>
                 </div>
 
-                <!-- Units selection (Metric or English) -->
                 <div class="settings-toggle-item option-switch-container" data-setting="imperial-units">
                     <label>Units</label>
                     <div class="option-switch">
@@ -451,7 +455,6 @@
                     </div>
                 </div>
 
-                <!-- Selection between Waze and ABRP -->
                 <div class="settings-toggle-item option-switch-container" data-setting="map-choice">
                     <label>Dashboard Map</label>
                     <div class="option-switch">

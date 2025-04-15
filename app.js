@@ -541,6 +541,37 @@ function updateVersion() {
     }
 }
 
+window.updateMapFrame = function () {
+    // Normal mode - ensure iframe is visible and test mode message is hidden
+    const teslaWazeContainer = document.querySelector('.teslawaze-container');
+    const iframe = teslaWazeContainer.querySelector('iframe');
+    const testModeMsg = teslaWazeContainer.querySelector('.test-mode-message');
+    if (!testMode) {
+        if (settings["map-choice"] === 'waze') {
+            srcUpdate("teslawaze", "https://teslawaze.azurewebsites.net/");
+        } else {
+            srcUpdate("teslawaze", "https://abetterrouteplanner.com/");
+        }
+        iframe.style.display = '';
+        if (testModeMsg) testModeMsg.style.display = 'none';
+    } else {
+        // In test mode, replace TeslaWaze iframe with "TESTING MODE" message
+        iframe.src = "";
+        iframe.style.display = 'none';
+        // Check if our test mode message already exists
+        if (!testModeMsg) {
+            // Create and add the test mode message
+            testModeMsg = document.createElement('div');
+            testModeMsg.className = 'test-mode-message';
+            testModeMsg.style.cssText = 'display: flex; justify-content: center; align-items: center; height: 100%; font-size: 32px; font-weight: bold;';
+            testModeMsg.textContent = 'TESTING MODE';
+            teslaWazeContainer.appendChild(testModeMsg);
+        } else {
+            testModeMsg.style.display = 'flex';
+        }
+    }
+}
+
 // Switches the weather image based on the type provided
 window.switchWeatherImage = function (type) {
     const weatherImage = document.getElementById('weather-image');
@@ -664,41 +695,6 @@ window.showSection = function (sectionId) {
         const aboutButton = document.querySelector('.section-button[onclick="showSection(\'about\')"]');
         if (aboutButton) {
             aboutButton.classList.remove('has-notification');
-        }
-    }
-
-    // Navigation section
-    if (sectionId === 'navigation') {
-        // Normal mode - ensure iframe is visible and test mode message is hidden
-        const teslaWazeContainer = document.querySelector('.teslawaze-container');
-        const iframe = teslaWazeContainer.querySelector('iframe');
-        const testModeMsg = teslaWazeContainer.querySelector('.test-mode-message');
-        if (!testMode) {
-            const mapTitle = teslaWazeContainer.querySelector('.map-title');
-            if (settings["map-choice"] === 'waze') {
-                srcUpdate("teslawaze", "https://teslawaze.azurewebsites.net/");
-                mapTitle.textContent = "TeslaWaze";
-            } else {
-                srcUpdate("teslawaze", "https://abetterrouteplanner.com/");
-                mapTitle.textContent = "ABRP";
-            }
-            iframe.style.display = '';
-            if (testModeMsg) testModeMsg.style.display = 'none';
-        } else {
-            // In test mode, replace TeslaWaze iframe with "TESTING MODE" message
-            iframe.src = "";
-            iframe.style.display = 'none';
-            // Check if our test mode message already exists
-            if (!testModeMsg) {
-                // Create and add the test mode message
-                testModeMsg = document.createElement('div');
-                testModeMsg.className = 'test-mode-message';
-                testModeMsg.style.cssText = 'display: flex; justify-content: center; align-items: center; height: 100%; font-size: 32px; font-weight: bold;';
-                testModeMsg.textContent = 'TESTING MODE';
-                teslaWazeContainer.appendChild(testModeMsg);
-            } else {
-                testModeMsg.style.display = 'flex';
-            }
         }
     }
 

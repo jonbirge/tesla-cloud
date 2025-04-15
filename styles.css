@@ -609,15 +609,6 @@ input:checked + .toggle-slider:before {
     flex-grow: 1; /* Allow it to grow to fill available space */
 }
 
-.map-title {
-    position: absolute;
-    margin: 5px;
-    z-index: 10;
-    font-size: 12pt;
-    font-weight: 700;
-    /* text-transform: uppercase; */
-}
-
 #teslawaze {
     border-radius: var(--button-radius);
     width: 100%;
@@ -1024,27 +1015,22 @@ input:checked + .settings-toggle-slider:before {
     transform: translateX(26px);
 }
 
-
-/* News Source Grid */
-
-.news-source-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-    gap: 9px;
-    width: auto;
+#in-map-toggle {
+    position: absolute;
+    margin: 5px;
+    z-index: 10;
+    background-color: transparent;
 }
 
-.news-toggle-item {
-    padding: 12px 15px;
-    margin-bottom: 0;
-    max-width: none;
-    width: auto;
-    border-radius: 9px;
+#in-map-toggle .option-switch {
+    background-color: var(--button-bg);
 }
 
-.news-toggle-item {
-    font-size: 15pt;
+#in-map-toggle .option-button {
+    font-size: 12pt;
+    font-weight: 700;
 }
+
 
 /* Option Switch (Two-option selector) */
 
@@ -1066,7 +1052,7 @@ input:checked + .settings-toggle-slider:before {
     padding: 8px 14px;
     color: var(--text-color);
     font-size: 14pt;
-    font-weight: 550;
+    font-weight: 600;
     cursor: pointer;
     transition: background-color 0.3s, color 0.3s;
 }
@@ -1077,15 +1063,37 @@ input:checked + .settings-toggle-slider:before {
 }
 
 .option-button:hover:not(.active) {
-    background-color: rgba(0, 0, 0, 0.05); /* Subtle hover effect for both modes */
+    background-color: rgba(0, 0, 0, 0.05);
 }
 
 body.dark-mode .option-button:hover:not(.active) {
-    background-color: rgba(255, 255, 255, 0.1); /* Maintain original hover effect for dark mode */
+    background-color: rgba(255, 255, 255, 0.1);
 }
 
 .settings-toggle-item.option-switch-container {
     display: flex;
     justify-content: space-between;
     align-items: center;
+}
+
+
+/* News Source Grid */
+
+.news-source-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 9px;
+    width: auto;
+}
+
+.news-toggle-item {
+    padding: 12px 15px;
+    margin-bottom: 0;
+    max-width: none;
+    width: auto;
+    border-radius: 9px;
+}
+
+.news-toggle-item {
+    font-size: 15pt;
 }
