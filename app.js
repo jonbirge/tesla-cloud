@@ -2,11 +2,11 @@
 import { customLog, highlightUpdate, srcUpdate, testMode, updateTimeZone, GEONAMES_USERNAME } from './common.js';
 import { PositionSimulator } from './location.js';
 import { attemptLogin, leaveSettings, settings } from './settings.js';
-import { fetchWeatherData, weatherData } from './wx.js';
+import { fetchWeatherData, weatherData, SAT_URLS } from './wx.js';
 import { updateNetworkInfo, updatePingChart, startPingTest, updateChartAxisColors } from './net.js';
 import { markAllNewsAsRead, startNewsTimeUpdates, stopNewsTimeUpdates, updateNewsTimeDisplays } from './news.js';
 
-// Settings
+// Parameters
 const LATLON_UPDATE_INTERVAL = 2; // seconds
 const UPDATE_DISTANCE_THRESHOLD = 500; // meters
 const UPDATE_TIME_THRESHOLD = 10; // minutes
@@ -14,13 +14,8 @@ const WX_DISTANCE_THRESHOLD = 25000; // meters
 const WX_TIME_THRESHOLD = 30; // minutes
 const MAX_SPEED = 50; // Maximum speed for radar display (mph)
 const MIN_GPS_UPDATE_INTERVAL = 1000; // ms - minimum time between updates
-const SAT_URLS = {
-    latest: 'https://cdn.star.nesdis.noaa.gov/GOES16/GLM/CONUS/EXTENT3/1250x750.jpg',
-    loop: 'https://cdn.star.nesdis.noaa.gov/GOES16/GLM/CONUS/EXTENT3/GOES16-CONUS-EXTENT3-625x375.gif',
-    latest_ir: 'https://cdn.star.nesdis.noaa.gov/GOES16/ABI/CONUS/11/1250x750.jpg',
-};
 
-// Variables
+// Module variables
 let currentSection = null; // Track the current section
 let lastUpdate = 0; // Timestamp of last location update
 let lat = null;
@@ -570,28 +565,6 @@ window.updateMapFrame = function () {
             testModeMsg.style.display = 'flex';
         }
     }
-}
-
-// Switches the weather image based on the type provided
-window.switchWeatherImage = function (type) {
-    const weatherImage = document.getElementById('weather-image');
-    weatherImage.style.opacity = '0';
-    
-    setTimeout(() => {
-        weatherImage.src = SAT_URLS[type];
-        weatherImage.style.opacity = '1';
-    }, 300);
-    
-    // Update buttons and slider position
-    const weatherSwitch = document.querySelector('.weather-switch');
-    const buttons = weatherSwitch.getElementsByTagName('button');
-    buttons[0].classList.toggle('active', type === 'latest');
-    buttons[1].classList.toggle('active', type === 'loop');
-    buttons[2].classList.toggle('active', type === 'latest_ir');
-    
-    // Update slider position for three states
-    const positions = { 'latest': 0, 'loop': 1, 'latest_ir': 2 };
-    weatherSwitch.style.setProperty('--slider-position', positions[type]);
 }
 
 // Function to load an external URL in a new tab or frame

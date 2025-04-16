@@ -2,7 +2,14 @@
 import { customLog, formatTime, highlightUpdate } from './common.js';
 import { settings, turnOffDarkMode, turnOnDarkMode } from './settings.js';
 
-// Global variables
+// Parameters
+const SAT_URLS = {
+    latest: 'https://cdn.star.nesdis.noaa.gov/GOES16/GLM/CONUS/EXTENT3/1250x750.jpg',
+    loop: 'https://cdn.star.nesdis.noaa.gov/GOES16/GLM/CONUS/EXTENT3/GOES16-CONUS-EXTENT3-625x375.gif',
+    latest_ir: 'https://cdn.star.nesdis.noaa.gov/GOES16/ABI/CONUS/11/1250x750.jpg',
+};
+
+// Module variables
 let weatherData = null;
 let sunrise = null;
 let sunset = null;
@@ -12,7 +19,7 @@ let lastLat = null;
 let lastLong = null;
 
 // Export these variables for use in other modules
-export { sunrise, sunset, weatherData };
+export { sunrise, sunset, weatherData, SAT_URLS };
 
 // Helper function to convert temperature based on user settings
 function formatTemperature(tempF) {
@@ -495,6 +502,28 @@ window.showHourlyForecast = function (dayIndex) {
 window.closeHourlyForecast = function () {
     document.querySelector('.overlay').classList.remove('show');
     document.querySelector('.forecast-popup').classList.remove('show');
+}
+
+// Switches the weather image based on the type provided
+window.switchWeatherImage = function (type) {
+    const weatherImage = document.getElementById('weather-image');
+    weatherImage.style.opacity = '0';
+    
+    setTimeout(() => {
+        weatherImage.src = SAT_URLS[type];
+        weatherImage.style.opacity = '1';
+    }, 300);
+    
+    // Update buttons and slider position
+    const weatherSwitch = document.querySelector('.weather-switch');
+    const buttons = weatherSwitch.getElementsByTagName('button');
+    buttons[0].classList.toggle('active', type === 'latest');
+    buttons[1].classList.toggle('active', type === 'loop');
+    buttons[2].classList.toggle('active', type === 'latest_ir');
+    
+    // Update slider position for three states
+    const positions = { 'latest': 0, 'loop': 1, 'latest_ir': 2 };
+    weatherSwitch.style.setProperty('--slider-position', positions[type]);
 }
 
 // Add click handler to close popup when clicking overlay
