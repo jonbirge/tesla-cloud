@@ -430,6 +430,9 @@
                 <li>A blue dot next to a section button indicates updated information within that section.</li>
             </ul>
 
+            <h2>Acknowledgements</h2>
+            <p>Thanks to whomever made the fantastic "TeslaWaze" site, one of the embedded options in the dashboard. Thanks also to the friendly folks on <a href="https://www.teslaownersonline.com/">Tesla Owners Online</a> who gave early feedback and support.</p>
+
             <h2>Version</h2>
             <p id="version">--</p>
         </div>
@@ -437,7 +440,7 @@
         <div id="settings" class="section">
             <button id="logout-button" class="logout-button hidden" onclick="handleLogout()">Logout</button>
             
-            <h2>General Settings</h2>
+            <h2>Settings</h2>
             <div class="settings-controls">
                 <div class="settings-toggle-item" data-setting="auto-dark-mode" onclick="this.querySelector('input').click()">
                     <label>Auto Dark Mode</label><input type="checkbox" onchange="toggleSettingFrom(this)"><span class="settings-toggle-slider"></span>
@@ -458,9 +461,15 @@
                 <div class="settings-toggle-item option-switch-container" data-setting="map-choice">
                     <label>Dashboard Map</label>
                     <div class="option-switch">
-                        <button class="option-button active" data-value="waze" onclick="toggleOptionSetting(this)">Waze</button>
+                        <button class="option-button active" data-value="waze" onclick="toggleOptionSetting(this)">TeslaWaze</button>
                         <button class="option-button" data-value="abrp" onclick="toggleOptionSetting(this)">ABRP</button>
                     </div>
+                </div>
+                <div class="settings-toggle-item" data-setting="news-forwarding" onclick="this.querySelector('input').click()">
+                    <label>Forward News</label><input type="checkbox" onchange="toggleSettingFrom(this)"><span class="settings-toggle-slider"></span>
+                </div>
+                <div class="settings-toggle-item settings-text-item" data-setting="forwarding-email">
+                    <label>E-mail</label><input type="text" placeholder="Enter e-mail address" onchange="updateSettingFrom(this)">
                 </div>
             </div>
             
@@ -578,17 +587,7 @@
                     <label>DefenseNews</label><input type="checkbox" onchange="toggleSettingFrom(this)"><span class="settings-toggle-slider"></span>
                 </div>
             </div>
-
-            <h3>News Forwarding</h3>
-            <p>If enabled, you can forward news articles to an e-mail address for reading later.</p>
-            <div class="settings-controls">
-                <div class="settings-toggle-item" data-setting="news-forwarding" onclick="this.querySelector('input').click()">
-                    <label>Forward News</label><input type="checkbox" onchange="toggleSettingFrom(this)"><span class="settings-toggle-slider"></span>
-                </div>
-                <div class="settings-toggle-item settings-text-item" data-setting="forwarding-email">
-                    <label>E-mail</label><input type="text" placeholder="Enter e-mail address" onchange="updateSettingFrom(this)">
-                </div>
-            </div>
+            
         </div>
 
         </div> <!-- End of sections -->
