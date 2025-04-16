@@ -14,11 +14,11 @@ $forceReload = isset($_GET['reload']);
 $useSerialFetch = isset($_GET['serial']);
 
 // Settings
-$cacheFile = '/tmp/rss_cache_' . $version . '.json';
-$cacheTimestampFile = '/tmp/rss_cache_timestamp_' . $version . '.json';
-$logFile = '/tmp/rss_php_' . $version . '.log';
-$maxStories = 512; // Maximum number of stories to send to client
-$maxSingleSource = 16; // Maximum number of stories to keep from a single source
+$cacheDir = '/tmp';
+$cacheTimestampFile = $cacheDir . '/rss_cache_timestamp_' . $version . '.json';
+$logFile = $cacheDir . '/rss_php_' . $version . '.log';
+$maxStories = 512;
+$maxSingleSource = 16;
 
 // Get number of stories to return
 $numStories = isset($_GET['n']) ? intval($_GET['n']) : $maxStories;
@@ -102,112 +102,69 @@ $feedTimestamps = [];
 if (file_exists($cacheTimestampFile)) {
     $feedTimestamps = json_decode(file_get_contents($cacheTimestampFile), true);
     if (!is_array($feedTimestamps)) {
-        $feedTimestamps = []; // Reset if invalid format
+        $feedTimestamps = [];
     }
 }
 
-// Get items from cache or from external sources
+// Determine which feeds to process
+$requestedFeeds = empty($includedFeeds) ? array_keys($feeds) : $includedFeeds;
+
+// Collect all items
 $allItems = [];
-
-// Load cached data if it exists
-$cachedItems = [];
-if (file_exists($cacheFile)) {
-    $cachedItems = json_decode(file_get_contents($cacheFile), true);
-    if (!is_array($cachedItems)) {
-        $cachedItems = []; // Reset if invalid format
-    }
-}
-
-// Group cached items by source
-$itemsBySource = [];
-foreach ($cachedItems as $item) {
-    $source = $item['source'];
-    if (!isset($itemsBySource[$source])) {
-        $itemsBySource[$source] = [];
-    }
-    $itemsBySource[$source][] = $item;
-}
-
-// Determine which feeds need to be refreshed
-$feedsToFetch = [];
 $currentTime = time();
+$updatedTimestamps = false;
 
-foreach ($feeds as $source => $feedData) {
-    // Check if this feed is in the inclusion list (or if no inclusion list was provided)
-    $isIncluded = empty($includedFeeds) || in_array($source, $includedFeeds);
-    
-    if ($isIncluded) {
-        // Only check cache expiration for included feeds
-        $cacheDurationSeconds = $feedData['cache'] * 60; // Convert minutes to seconds
-        $lastUpdated = isset($feedTimestamps[$source]) ? $feedTimestamps[$source] : 0;
-        
-        if ($forceReload || ($currentTime - $lastUpdated) > $cacheDurationSeconds) {
-            // Cache expired or force reload requested
-            $feedsToFetch[$source] = $feedData['url'];
-            logMessage("Cache expired for $source, fetching new data...");
-        } else {
-            // Use cached data for included feed that hasn't expired
-            logMessage("Using cached data for $source, last updated: " . date('Y-m-d H:i:s', $lastUpdated));
-            if (isset($itemsBySource[$source])) {
-                $allItems = array_merge($allItems, $itemsBySource[$source]);
-            }
+foreach ($requestedFeeds as $source) {
+    if (!isset($feeds[$source])) continue;
+    $feedData = $feeds[$source];
+    $cacheFile = "{$cacheDir}/rss_cache_{$source}_{$version}.json";
+    $cacheDurationSeconds = $feedData['cache'] * 60;
+    $lastUpdated = isset($feedTimestamps[$source]) ? $feedTimestamps[$source] : 0;
+    $useCache = false;
+
+    if (!$forceReload && file_exists($cacheFile) && ($currentTime - $lastUpdated) <= $cacheDurationSeconds) {
+        // Use cache
+        $cachedItems = json_decode(file_get_contents($cacheFile), true);
+        if (is_array($cachedItems)) {
+            $allItems = array_merge($allItems, $cachedItems);
+            logMessage("Loaded {$source} from cache.");
+            $useCache = true;
         }
-    } else {
-        // Always use cached data for feeds not in the inclusion list
-        logMessage("Using cached data for $source (not in inclusion list)");
-        if (isset($itemsBySource[$source])) {
-            $allItems = array_merge($allItems, $itemsBySource[$source]);
+    }
+
+    if (!$useCache) {
+        // Fetch and cache
+        $xml = $useSerialFetch ? fetchRSS($feedData['url']) : fetchRSS($feedData['url']); // Only one at a time now
+        if ($xml !== false) {
+            $items = parseRSS($xml, $source);
+            file_put_contents($cacheFile, json_encode($items));
+            $feedTimestamps[$source] = $currentTime;
+            $updatedTimestamps = true;
+            $allItems = array_merge($allItems, $items);
+            logMessage("Fetched {$source} from internet and updated cache.");
+        } else {
+            logMessage("Failed to fetch {$source} from internet.");
         }
     }
 }
 
-// Fetch feeds that need updating
-if (!empty($feedsToFetch)) {
-    if ($useSerialFetch) {
-        // Serial fetching mode
-        foreach ($feedsToFetch as $source => $url) {
-            $xml = fetchRSS($url);
-            if ($xml !== false) {
-                $items = parseRSS($xml, $source);
-                $allItems = array_merge($allItems, $items);
-                
-                // Update timestamp for this feed
-                $feedTimestamps[$source] = $currentTime;
-            }
-        }
-    } else {
-        // Parallel fetching mode (default)
-        $feedResults = fetchRSSParallel($feedsToFetch);
-        
-        // Process the results
-        foreach ($feedResults as $source => $xml) {
-            if ($xml !== false) {
-                $items = parseRSS($xml, $source);
-                $allItems = array_merge($allItems, $items);
-                
-                // Update timestamp for this feed
-                $feedTimestamps[$source] = $currentTime;
-            }
-        }
-    }
-    
-    // Sort by date, newest first
-    usort($allItems, function($a, $b) {
-        return $b['date'] - $a['date'];
-    });
-
-    // Update cache files
-    file_put_contents($cacheFile, json_encode($allItems));
+// Update timestamps file if needed
+if ($updatedTimestamps) {
     file_put_contents($cacheTimestampFile, json_encode($feedTimestamps));
 }
+
+// Sort by date, newest first
+usort($allItems, function($a, $b) {
+    return $b['date'] - $a['date'];
+});
 
 // Log the total number of stories
 $totalStories = count($allItems);
 logMessage("Total stories fetched: $totalStories");
 
 // Apply inclusion filters to data
-$outputItems = applyInclusionFilters($allItems, $includedFeeds);
-    
+$outputItems = applyInclusionFilters($allItems, $requestedFeeds);
+
 // Limit number of stories if needed
 $outputItems = array_slice($outputItems, 0, $numStories);
 
@@ -216,59 +173,6 @@ echo json_encode($outputItems);
 
 
 // ***** Utility functions *****
-
-function fetchRSSParallel($feedUrls) {
-    $multiHandle = curl_multi_init();
-    $curlHandles = [];
-    $results = [];
-    
-    // Initialize all curl handles and add them to multi handle
-    foreach ($feedUrls as $source => $url) {
-        $ch = curl_init();
-        curl_setopt($ch, CURLOPT_URL, $url);
-        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-        curl_setopt($ch, CURLOPT_TIMEOUT, 10);
-        curl_setopt($ch, CURLOPT_USERAGENT, 'Mozilla/5.0 (compatible; RSS Reader/1.0)');
-        curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
-        curl_setopt($ch, CURLOPT_PRIVATE, $source); // Store the source as private data
-        
-        curl_multi_add_handle($multiHandle, $ch);
-        $curlHandles[] = $ch;
-        $results[$source] = false; // Initialize with false for error checking later
-    }
-    
-    // Execute all queries simultaneously
-    $active = null;
-    do {
-        $mrc = curl_multi_exec($multiHandle, $active);
-    } while ($mrc == CURLM_CALL_MULTI_PERFORM);
-    
-    while ($active && $mrc == CURLM_OK) {
-        if (curl_multi_select($multiHandle) != -1) {
-            do {
-                $mrc = curl_multi_exec($multiHandle, $active);
-            } while ($mrc == CURLM_CALL_MULTI_PERFORM);
-        }
-    }
-    
-    // Process the results
-    foreach ($curlHandles as $ch) {
-        $source = curl_getinfo($ch, CURLINFO_PRIVATE);
-        $content = curl_multi_getcontent($ch);
-        
-        if (curl_errno($ch)) {
-            error_log("RSS Feed Error: " . curl_error($ch) . " - URL: " . $feedUrls[$source]);
-        } else {
-            $results[$source] = $content;
-        }
-        
-        curl_multi_remove_handle($multiHandle, $ch);
-        curl_close($ch);
-    }
-    
-    curl_multi_close($multiHandle);
-    return $results;
-}
 
 function fetchRSS($url) {
     $ch = curl_init();
