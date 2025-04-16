@@ -578,6 +578,17 @@
                     <label>DefenseNews</label><input type="checkbox" onchange="toggleSettingFrom(this)"><span class="settings-toggle-slider"></span>
                 </div>
             </div>
+
+            <h3>News Forwarding</h3>
+            <p>If enabled, you can forward news articles to an e-mail address for reading later.</p>
+            <div class="settings-controls">
+                <div class="settings-toggle-item" data-setting="news-forwarding" onclick="this.querySelector('input').click()">
+                    <label>Forward News</label><input type="checkbox" onchange="toggleSettingFrom(this)"><span class="settings-toggle-slider"></span>
+                </div>
+                <div class="settings-toggle-item settings-text-item" data-setting="forwarding-email">
+                    <label>E-mail</label><input type="text" placeholder="Enter e-mail address" onchange="updateSettingFrom(this)">
+                </div>
+            </div>
         </div>
 
         </div> <!-- End of sections -->

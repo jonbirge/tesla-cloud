@@ -954,7 +954,7 @@ input:checked + .toggle-slider:before {
     border-radius: var(--button-radius);
     padding: 15px;
     margin-bottom: 9px;
-    max-width: 380px;
+    max-width: 480px;
     font-weight: 550;
     cursor: pointer; /* Add cursor pointer to indicate it's clickable */
 }
@@ -1013,6 +1013,47 @@ input:focus + .settings-toggle-slider {
 
 input:checked + .settings-toggle-slider:before {
     transform: translateX(26px);
+}
+
+
+/* Settings Text Item */
+
+.settings-text-item input[type="text"] {
+    opacity: 100%;
+    width: 320px;
+    height: 19px;
+    position: relative;
+    padding: 8px 14px;
+    /* border: 1px solid #fff; */
+    border-width: 0px;
+    border-radius: 9px;
+    background: #fff;
+    color: #333;
+    font-size: 1em;
+    transition: border 0.2s;
+}
+
+.settings-text-item input[type="text"]:focus {
+    border: 2px solid #8b8b8b;
+    background: #f9f9f9;
+}
+
+#in-map-toggle {
+    position: absolute;
+    margin: 0px;
+    padding: 7px;
+    z-index: 10;
+    background-color: transparent;
+    opacity: 80%;
+}
+
+#in-map-toggle .option-switch {
+    background-color: var(--button-bg);
+}
+
+#in-map-toggle .option-button {
+    font-size: 12pt;
+    font-weight: 700;
 }
 
 #in-map-toggle {

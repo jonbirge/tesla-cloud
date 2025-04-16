@@ -181,6 +181,9 @@ const defaultSettings = {
     "rss-wired": false,
     "rss-spacenews": false,
     "rss-defensenews": false,
+    // News forwarding
+    "news-forwarding": false,
+    "forwarding-email": "",
 };
 
 // Function to initialize with defaults
@@ -389,52 +392,58 @@ async function fetchSettings() {
     }
 }
 
-// Update visual state of a toggle
+// Update visual state of a toggle or text input
 function updateToggleVisualState(key, value) {
     const toggleItems = document.querySelectorAll(`.settings-toggle-item[data-setting="${key}"]`);
-    if (!toggleItems) return;
-
-    toggleItems.forEach(item => {
-        // Special compatibility cases
-        if (key === 'imperial-units') {
-            let unitsValue;
-            if (value === true) {
-                unitsValue = 'english';
-            } else {
-                unitsValue = 'metric';
+    if (toggleItems && toggleItems.length > 0) {
+        toggleItems.forEach(item => {
+            // Special compatibility cases
+            if (key === 'imperial-units') {
+                let unitsValue;
+                if (value === true) {
+                    unitsValue = 'english';
+                } else {
+                    unitsValue = 'metric';
+                }
+                const buttons = item.querySelectorAll('.option-button');
+                buttons.forEach(btn => {
+                    btn.classList.toggle('active', btn.dataset.value === unitsValue);
+                });
+                return;
             }
-            const buttons = item.querySelectorAll('.option-button');
-            buttons.forEach(btn => {
-                btn.classList.toggle('active', btn.dataset.value === unitsValue);
-            });
-            return;
-        }
 
-        // Handle checkbox toggles
-        const toggle = item.querySelector('input[type="checkbox"]');
-        if (toggle) {
-            toggle.checked = value === true;
-            return;
-        }
+            // Handle checkbox toggles
+            const toggle = item.querySelector('input[type="checkbox"]');
+            if (toggle) {
+                toggle.checked = value === true;
+                return;
+            }
 
-        // Handle option-based toggles
-        if (item.classList.contains('option-switch-container')) {
-            const buttons = item.querySelectorAll('.option-button');
-            buttons.forEach(btn => {
-                btn.classList.toggle('active', btn.dataset.value === value);
-            });
-        }
-    });
+            // Handle option-based toggles
+            if (item.classList.contains('option-switch-container')) {
+                const buttons = item.querySelectorAll('.option-button');
+                buttons.forEach(btn => {
+                    btn.classList.toggle('active', btn.dataset.value === value);
+                });
+            }
+        });
+    }
+
+    // Handle text-based settings (like forwarding-email)
+    if (key === 'forwarding-email') {
+        const textItems = document.querySelectorAll(`.settings-text-item[data-setting="forwarding-email"] input[type="text"]`);
+        textItems.forEach(input => {
+            input.value = value || '';
+        });
+    }
 }
 
-// Initialize all toggle states based on 'settings' dictionary
+// Initialize all toggle and text states based on 'settings' dictionary
 function initializeToggleStates() {
     // Iterate through all keys in the settings object
     for (const key in settings) {
-        // Check if the key is a setting we care about
         if (settings.hasOwnProperty(key)) {
             const value = settings[key];
-            // Update the visual state of the toggle
             updateToggleVisualState(key, value);
         }
     }
@@ -566,21 +575,12 @@ window.toggleSettingFrom = function(element) {
     }
 }
 
-// Function for toggling option-based settings (like map-choice)
-window.toggleOptionSetting = function(button) {
-    const settingItem = button.closest('.option-switch-container');
-    if (!settingItem || !settingItem.dataset.setting) return;
-
-    const key = settingItem.dataset.setting;
-    let value = button.dataset.value;
-    
-    // Handle special cases for compatibility
-    if (key === 'imperial-units') {
-        // Convert value to boolean
-        value = (value === 'english');
+// Function called by the text input UI elements for text-based settings
+window.updateSettingFrom = function(element) {
+    const settingItem = element.closest('.settings-text-item');
+    if (settingItem && settingItem.dataset.setting) {
+        const key = settingItem.dataset.setting;
+        const value = element.value.trim();
+        toggleSetting(key, value);
     }
-    
-    // Store the setting
-    toggleSetting(key, value);
-    customLog(`Option setting "${key}" changed to "${value}"`);
 }
