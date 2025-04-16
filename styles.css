@@ -945,6 +945,9 @@ input:checked + .toggle-slider:before {
 
 .settings-controls {
     margin-top: 12px;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, 470px);
+    gap: 0px 11px; /* row gap, column gap */
 }
 
 .settings-toggle-item {
@@ -961,7 +964,7 @@ input:checked + .toggle-slider:before {
 
 .settings-toggle-item label {
     flex-grow: 1; /* Make label take up all available space */
-    cursor: pointer; /* Add cursor pointer to label */
+    cursor: inherit;
 }
 
 .settings-toggle-item input {
@@ -1018,18 +1021,23 @@ input:checked + .settings-toggle-slider:before {
 
 /* Settings Text Item */
 
+.settings-text-item {
+    cursor: initial; /* Prevent cursor change on text input */
+}
+
 .settings-text-item input[type="text"] {
     opacity: 100%;
     width: 320px;
     height: 19px;
     position: relative;
     padding: 8px 14px;
-    /* border: 1px solid #fff; */
     border-width: 0px;
     border-radius: 9px;
     background: #fff;
     color: #333;
-    font-size: 1em;
+    font-size: 14pt;
+    font-weight: 500;
+    text-align: right;
     transition: border 0.2s;
 }
 
@@ -1079,11 +1087,14 @@ input:checked + .settings-toggle-slider:before {
 
 .option-switch-container {
     padding-right: 15px; /* Ensure there's adequate right padding */
+    padding-top: 11px;
+    padding-bottom: 11px;
+    cursor: initial;
 }
 
 .option-switch {
     display: flex;
-    border-radius: var(--button-radius);
+    border-radius: calc(var(--button-radius) - 2px);
     overflow: hidden;
     background-color: white;
 }
@@ -1123,8 +1134,7 @@ body.dark-mode .option-button:hover:not(.active) {
 /* News Source Grid */
 
 .news-source-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    grid-template-columns: repeat(auto-fill, 310px);
     gap: 9px;
     width: auto;
 }
