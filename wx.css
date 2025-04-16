@@ -338,7 +338,7 @@ body.dark-mode .forecast-day.rain img.forecast-icon {
     width: 18px;
     height: 18px;
     margin-left: 8px;
-    vertical-align: middle;
+    vertical-align: baseline;
     background-color: #ccc;
     border-radius: 50%;
     position: relative;

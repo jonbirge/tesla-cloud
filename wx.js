@@ -42,18 +42,6 @@ function formatWindSpeed(speedMS) {
     }
 }
 
-// Convert numerical phase to human-readable name
-function getMoonPhaseName(phase) {
-    if (phase === 0 || phase === 1) return "New Moon";
-    if (phase < 0.25) return "Waxing Crescent";
-    if (phase === 0.25) return "First Quarter";
-    if (phase < 0.5) return "Waxing Gibbous";
-    if (phase === 0.5) return "Full Moon";
-    if (phase < 0.75) return "Waning Gibbous";
-    if (phase === 0.75) return "Last Quarter";
-    return "Waning Crescent";
-}
-
 // Generate a CSS styling for the moon phase icon based on phase value
 function getMoonPhaseIcon(phase) {
     // Create CSS for the moon icon based on the phase value (0 to 1)
@@ -156,9 +144,11 @@ export function fetchWeatherData(lat, long, silentLoad = false) {
 function fetchSunData(lat, long) {
     // Log the lat/long for debugging
     customLog(`Fetching sun data for lat: ${lat}, long: ${long}`);
+    const unixTime = Math.floor(Date.now() / 1000);
+    customLog(`Current Unix time: ${unixTime}`);
     Promise.all([
         fetch(`https://api.sunrise-sunset.org/json?lat=${lat}&lng=${long}&formatted=0`),
-        fetch(`https://api.farmsense.net/v1/moonphases/?d=${Math.floor(Date.now() / 1000)}`)
+        fetch(`https://api.farmsense.net/v1/moonphases/?d=${unixTime}`)
     ])
         .then(([sunResponse, moonResponse]) => Promise.all([sunResponse.json(), moonResponse.json()]))
         .then(([sunData, moonData]) => {
@@ -187,13 +177,13 @@ function updateSunMoonDisplay() {
     highlightUpdate('sunset', sunsetTime);
     
     if (moonPhaseData) {
-        const moonPhase = getMoonPhaseName(moonPhaseData.Phase);
+        const moonPhase = moonPhaseData.Phase;
         highlightUpdate('moonphase', moonPhase);
         
         // Update the moon icon
         const moonIcon = document.getElementById('moon-icon');
         if (moonIcon) {
-            moonIcon.setAttribute('style', getMoonPhaseIcon(moonPhaseData.Phase));
+            moonIcon.setAttribute('style', getMoonPhaseIcon(moonPhaseData.Illumination));
         }
     }
 }
