@@ -11,71 +11,6 @@ let newsUpdateInterval = null;
 let seenNewsIds = new Set(); // Track news IDs we've already seen
 let newsTimeUpdateInterval = null; // Interval for updating "time ago" displays
 
-// Utility function to generate "time ago" text from a timestamp
-function generateTimeAgoText(timestamp) {
-    const now = new Date();
-    const itemDate = new Date(timestamp * 1000);
-    const timeDifference = Math.floor((now - itemDate) / 1000); // Difference in seconds
-
-    if (timeDifference < 60) {
-        return `${timeDifference} seconds ago`;
-    } else if (timeDifference < 7200) {
-        const minutes = Math.floor(timeDifference / 60);
-        return `${minutes} minute${minutes > 1 ? 's' : ''} ago`;
-    } else if (timeDifference < 86400) {
-        const hours = Math.floor(timeDifference / 3600);
-        return `${hours} hour${hours > 1 ? 's' : ''} ago`;
-    } else {
-        const days = Math.floor(timeDifference / 86400);
-        const remainingSeconds = timeDifference % 86400;
-        const hours = Math.floor(remainingSeconds / 3600);
-        return `${days} day${days > 1 ? 's' : ''} and ${hours} hour${hours > 1 ? 's' : ''} ago`;
-    }
-}
-
-// Updates all news timestamp displays on the page
-export function updateNewsTimeDisplays() {
-    const timeElements = document.querySelectorAll('.news-time[data-timestamp]');
-    timeElements.forEach(element => {
-        const timestamp = parseInt(element.getAttribute('data-timestamp'));
-        if (!isNaN(timestamp)) {
-            element.textContent = generateTimeAgoText(timestamp);
-        }
-    });
-}
-
-// Start the interval that updates time ago displays
-export function startNewsTimeUpdates() {
-    customLog('Starting news time updates');
-    // Clear any existing interval first
-    if (newsTimeUpdateInterval) {
-        clearInterval(newsTimeUpdateInterval);
-    }
-    // Update immediately
-    updateNewsTimeDisplays();
-    // Then set up interval to update every second
-    newsTimeUpdateInterval = setInterval(updateNewsTimeDisplays, 5000);
-}
-
-// Stop the interval that updates time ago displays
-export function stopNewsTimeUpdates() {
-    customLog('Stopping news time updates');
-    if (newsTimeUpdateInterval) {
-        clearInterval(newsTimeUpdateInterval);
-        newsTimeUpdateInterval = null;
-    }
-}
-
-// Mark all current news items as read
-export function markAllNewsAsRead() {
-    customLog('Marking all news as read');
-    if (newsItems) {
-        newsItems.forEach(item => {
-            item.isUnread = false;
-        });
-    }
-}
-
 // Updates the news headlines, optionally clearing existing ones
 export async function updateNews(clear = false) {
     try {
@@ -200,6 +135,86 @@ export async function updateNews(clear = false) {
             newsContainer.innerHTML = '<p><em>Error loading headlines</em></p>';
         }
     }
+
+    // Update the visibility of share buttons
+    setShareButtonsVisibility();
+}
+
+// Set visibility of the share buttons based on settings
+export function setShareButtonsVisibility() {
+    const shareButtons = document.querySelectorAll('.share-icon');
+    shareButtons.forEach(button => {
+        if (settings["news-forwarding"]) {
+            button.style.display = 'block';
+        } else {
+            button.style.display = 'none';
+        }
+    });
+}
+
+// Updates all news timestamp displays on the page
+export function updateNewsTimeDisplays() {
+    const timeElements = document.querySelectorAll('.news-time[data-timestamp]');
+    timeElements.forEach(element => {
+        const timestamp = parseInt(element.getAttribute('data-timestamp'));
+        if (!isNaN(timestamp)) {
+            element.textContent = generateTimeAgoText(timestamp);
+        }
+    });
+}
+
+// Start the interval that updates time ago displays
+export function startNewsTimeUpdates() {
+    customLog('Starting news time updates');
+    // Clear any existing interval first
+    if (newsTimeUpdateInterval) {
+        clearInterval(newsTimeUpdateInterval);
+    }
+    // Update immediately
+    updateNewsTimeDisplays();
+    // Then set up interval to update every second
+    newsTimeUpdateInterval = setInterval(updateNewsTimeDisplays, 5000);
+}
+
+// Stop the interval that updates time ago displays
+export function stopNewsTimeUpdates() {
+    customLog('Stopping news time updates');
+    if (newsTimeUpdateInterval) {
+        clearInterval(newsTimeUpdateInterval);
+        newsTimeUpdateInterval = null;
+    }
+}
+
+// Mark all current news items as read
+export function markAllNewsAsRead() {
+    customLog('Marking all news as read');
+    if (newsItems) {
+        newsItems.forEach(item => {
+            item.isUnread = false;
+        });
+    }
+}
+
+// Utility function to generate "time ago" text from a timestamp
+function generateTimeAgoText(timestamp) {
+    const now = new Date();
+    const itemDate = new Date(timestamp * 1000);
+    const timeDifference = Math.floor((now - itemDate) / 1000); // Difference in seconds
+
+    if (timeDifference < 60) {
+        return `${timeDifference} seconds ago`;
+    } else if (timeDifference < 7200) {
+        const minutes = Math.floor(timeDifference / 60);
+        return `${minutes} minute${minutes > 1 ? 's' : ''} ago`;
+    } else if (timeDifference < 86400) {
+        const hours = Math.floor(timeDifference / 3600);
+        return `${hours} hour${hours > 1 ? 's' : ''} ago`;
+    } else {
+        const days = Math.floor(timeDifference / 86400);
+        const remainingSeconds = timeDifference % 86400;
+        const hours = Math.floor(remainingSeconds / 3600);
+        return `${days} day${days > 1 ? 's' : ''} and ${hours} hour${hours > 1 ? 's' : ''} ago`;
+    }
 }
 
 // Generate unique IDs for news items
@@ -237,16 +252,64 @@ function generateHTMLforItem(item)
                 <span class="news-time" data-timestamp="${item.date}">${generateTimeAgoText(item.date)}</span>
             </div>
             <div class="news-title">${item.title}</div>
-            <button class="share-icon" onclick="shareNews('${item.title}'); event.stopPropagation();">
+            <button class="share-icon" onclick="shareNews('${item.title}','${item.link}','${item.source}'); event.stopPropagation();">
                 <img src="share.svg">
             </button>
         </div>`;
 }
 
 // Forwards the news item link to the share function
-window.shareNews = function (item) {
-    // Call the share function with the news item link
-    customLog('Sharing news item:', item);
+window.shareNews = async function (title, link, source) {
+    customLog('Sharing news item:', title, link);
+
+    // E-mail address to share with
+    if (settings["forwarding-email"] === '') {
+        return;
+    }
+    const to = settings["forwarding-email"];
+
+    // Compose HTML payload
+    const html = `
+        <p>${source}</p>
+        <a href="${link}">${title}</a>
+        <br><br>
+        <p>Sent from <a href="https://teslas.cloud">teslas.cloud</a></p>
+    `;
+
+    // Create the subject line
+    const subject = `[teslas.cloud] ${title}`;
+
+    try {
+        const response = await fetch('share.php', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ to, html, subject })
+        });
+        if (response.ok) {
+            const alertBox = document.createElement('div');
+            alertBox.textContent = 'Article shared successfully';
+            alertBox.style.position = 'fixed';
+            alertBox.style.top = '20px';
+            alertBox.style.left = '50%';
+            alertBox.style.transform = 'translateX(-50%)';
+            alertBox.style.backgroundColor = "rgb(15, 181, 21) ";
+            alertBox.style.color = 'white';
+            alertBox.style.padding = '10px';
+            alertBox.style.borderRadius = '5px';
+            alertBox.style.boxShadow = '0 2px 5px rgba(0, 0, 0, 0.3)';
+            alertBox.style.zIndex = '9999';
+            document.body.appendChild(alertBox);
+
+            setTimeout(() => {
+                document.body.removeChild(alertBox);
+            }, 5000);
+        } else {
+            const errorText = await response.text();
+            alert('Failed to share article: ' + errorText);
+        }
+    } catch (err) {
+        alert('Error sharing article: ' + err);
+    }
 }
 
 // Pauses the automatic news updates

@@ -634,7 +634,7 @@ input:checked + .toggle-slider:before {
     background-color: var(--button-bg);
     border-radius: var(--button-radius);
     margin-bottom: 15px;
-    padding: 9px 9px 9px 55px;
+    padding: 9px 9px 9px 61px;
     transition: background-color 0.3s;
     border: none;
     max-width: 1200px;
@@ -643,7 +643,6 @@ input:checked + .toggle-slider:before {
     position: relative;  /* Added for absolute positioning of the favicon */
 }
 
-/* New item indicator */
 .news-new {
     position: relative;
 }
@@ -703,29 +702,34 @@ input:checked + .toggle-slider:before {
     color: var(--button-text);
     margin-top: 0px;
     padding-bottom: 5px;
-    margin-right: 47px; /* avoid indicators */
+    margin-right: 55px; /* avoid indicators */
     font-size: 16pt;
     font-weight: 550;
 }
 
-.share-icon {
-    position: absolute;
-    right: 27px;
-    top: 50%;
-    transform: translateY(-50%);
-    background: none;
-    border: none;
-}
-
 .news-favicon {
     position: absolute;             /* Position absolutely within the news-item */
-    left: 13px;                     /* Position on the left side with some padding */
+    left: 15px;                     /* Position on the left side with some padding */
     top: 50%;                       /* Center vertically */
     transform: translateY(-50%);    /* Perfect vertical centering */
     width: 32px;                    /* Slightly increased width */
     height: 32px;                   /* Slightly increased height */
     border-radius: 4px;             /* Optional: adds a slight rounding to the icons */
     /* opacity: 0.8; */
+}
+
+.share-icon {
+    position: absolute;
+    right: 21px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: none;
+    border: none;
+    cursor: pointer;
+}
+
+body.dark-mode .share-icon img {
+    filter: brightness(0) invert(0.8) grayscale(1);
 }
 
 
@@ -1048,8 +1052,19 @@ input:checked + .settings-toggle-slider:before {
     text-align: right;
 }
 
+.settings-text-item input[type="text"]:disabled {
+    background: #e0e0e0;
+    color: #a0a0a0;
+    cursor: not-allowed;
+}
+
+body.dark-mode .settings-text-item input[type="text"]:disabled {
+    background: #333333;
+    color: #555555;
+}
+
 .settings-text-item input[type="text"]:focus {
-    outline: none;
+    outline: var(--tesla-blue) solid 2px;
 }
 
 #in-map-toggle {

@@ -1,5 +1,5 @@
 // Imports
-import { updateNews } from './news.js';
+import { updateNews, setShareButtonsVisibility } from './news.js';
 import { customLog } from './common.js';
 import { updateChartAxisColors } from './net.js';
 import { autoDarkMode } from './wx.js';
@@ -14,6 +14,47 @@ let settings = {}; // Initialize settings object
 
 // Export settings object so it's accessible to other modules
 export { settings, currentUser, isLoggedIn, hashedUser };
+
+// Default settings that will be used when no user is logged in
+const defaultSettings = {
+    // General settings
+    "dark-mode": false,
+    "auto-dark-mode": true,
+    "24-hour-time": false,
+    "imperial-units": true,    // "English" or "Metric"
+    "map-choice": 'waze',
+    // News forwarding
+    "news-forwarding": false,
+    "forwarding-email": "",
+    // News source settings
+    "rss-wsj": true,
+    "rss-nyt": true,
+    "rss-wapo": true,
+    "rss-latimes": false,
+    "rss-bos": false,
+    "rss-den": false,
+    "rss-chi": false,
+    "rss-bloomberg": false,
+    "rss-bloomberg-tech": false,
+    "rss-bbc": true,
+    "rss-economist": false,
+    "rss-lemonde": false,
+    "rss-derspiegel": false,
+    "rss-notateslaapp": true,
+    "rss-teslarati": true,
+    "rss-insideevs": true,
+    "rss-thedrive": false,
+    "rss-techcrunch": true,
+    "rss-jalopnik": false,
+    "rss-caranddriver": true,
+    "rss-theverge": false,
+    "rss-arstechnica": true,
+    "rss-engadget": false,
+    "rss-gizmodo": false,
+    "rss-wired": false,
+    "rss-spacenews": false,
+    "rss-defensenews": false,
+};
 
 // Settings section is being left
 export function leaveSettings() {
@@ -81,7 +122,7 @@ export async function attemptLogin() {
     customLog('hashedUser:', hashedUser);
     customLog('isLoggedIn:', isLoggedIn);
 
-    // Initialize settings as needed
+    // Initialize map frame option
     updateMapFrame();
 }
 
@@ -142,49 +183,12 @@ export async function toggleSetting(key, value) {
     if (key === 'map-choice') {
         updateMapFrame();
     }
-}
 
-// Default settings that will be used when no user is logged in
-const defaultSettings = {
-    // General settings
-    "dark-mode": false,
-    "auto-dark-mode": true,
-    "24-hour-time": false,
-    "imperial-units": true,    // "English" or "Metric"
-    "map-choice": 'waze',
-    
-    // News source settings
-    "rss-wsj": true,
-    "rss-nyt": true,
-    "rss-wapo": true,
-    "rss-latimes": false,
-    "rss-bos": false,
-    "rss-den": false,
-    "rss-chi": false,
-    "rss-bloomberg": false,
-    "rss-bloomberg-tech": false,
-    "rss-bbc": true,
-    "rss-economist": false,
-    "rss-lemonde": false,
-    "rss-derspiegel": false,
-    "rss-notateslaapp": true,
-    "rss-teslarati": true,
-    "rss-insideevs": true,
-    "rss-thedrive": false,
-    "rss-techcrunch": true,
-    "rss-jalopnik": false,
-    "rss-caranddriver": true,
-    "rss-theverge": false,
-    "rss-arstechnica": true,
-    "rss-engadget": false,
-    "rss-gizmodo": false,
-    "rss-wired": false,
-    "rss-spacenews": false,
-    "rss-defensenews": false,
-    // News forwarding
-    "news-forwarding": false,
-    "forwarding-email": "",
-};
+    // If the setting is news forwarding, update the share buttons
+    if (key === 'news-forwarding') {
+        setShareButtonsVisibility();
+    }
+}
 
 // Function to initialize with defaults
 function initializeSettings() {
@@ -394,29 +398,25 @@ async function fetchSettings() {
 
 // Update visual state of a toggle or text input
 function updateToggleVisualState(key, value) {
-    const toggleItems = document.querySelectorAll(`.settings-toggle-item[data-setting="${key}"]`);
-    if (toggleItems && toggleItems.length > 0) {
-        toggleItems.forEach(item => {
-            // Special compatibility cases
-            if (key === 'imperial-units') {
-                let unitsValue;
-                if (value === true) {
-                    unitsValue = 'english';
-                } else {
-                    unitsValue = 'metric';
-                }
-                const buttons = item.querySelectorAll('.option-button');
-                buttons.forEach(btn => {
-                    btn.classList.toggle('active', btn.dataset.value === unitsValue);
-                });
-                return;
-            }
+    const settingItems = document.querySelectorAll(`.settings-toggle-item[data-setting="${key}"]`);
 
-            // Handle checkbox toggles
+    // Special compatibility cases
+    if (key === 'imperial-units') {
+        let unitsValue;
+        if (value === true) {
+            value = 'english';
+        } else {
+            value = 'metric';
+        }
+    }
+
+    customLog(`Updating visual state for "${key}" to ${value}`);
+    if (settingItems && settingItems.length > 0) {
+        settingItems.forEach(item => {
+            // Handle checkbox toggle
             const toggle = item.querySelector('input[type="checkbox"]');
             if (toggle) {
                 toggle.checked = value === true;
-                return;
             }
 
             // Handle option-based toggles
@@ -426,15 +426,22 @@ function updateToggleVisualState(key, value) {
                     btn.classList.toggle('active', btn.dataset.value === value);
                 });
             }
+
+            // Handle text input
+            if (item.classList.contains('settings-text-item')) {
+                const textInput = item.querySelector('input[type="text"]');
+                if (textInput) {
+                    textInput.value = value || '';
+                }
+            }
         });
     }
 
-    // Handle text-based settings (like forwarding-email)
-    if (key === 'forwarding-email') {
-        const textItems = document.querySelectorAll(`.settings-text-item[data-setting="forwarding-email"] input[type="text"]`);
-        textItems.forEach(input => {
-            input.value = value || '';
-        });
+    // Disable/enable forwarding-email input based on news-forwarding
+    if (key === 'news-forwarding') {
+        // Find all forwarding-email text inputs and disable/enable them
+        const emailInput = document.querySelector('.settings-text-item[data-setting="forwarding-email"] input[type="text"]');
+        emailInput.disabled = !value;
     }
 }
 
@@ -448,8 +455,6 @@ function initializeToggleStates() {
         }
     }
 }
-
-// Cookie management functions
 
 // Helper function to get current domain for cookie namespacing
 function getCurrentDomain() {
