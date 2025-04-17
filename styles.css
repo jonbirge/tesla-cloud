@@ -1041,8 +1041,8 @@ input:checked + .settings-toggle-slider:before {
     padding: 8px 14px;
     border-width: 0px;
     border-radius: 9px;
-    background: #fff;
-    color: #333;
+    background: var(--bg-color);
+    color: var(--button-text);
     font-size: 14pt;
     font-weight: 500;
     text-align: right;
