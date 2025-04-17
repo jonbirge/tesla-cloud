@@ -4,7 +4,7 @@
     --text-color: #777777;
     --active-section-bg: white;
     --separator-color: #cccccc;
-    --button-bg: #d0d0d0;
+    --button-bg: #dddddd;
     --button-text: #333333;
     --button-highlight: #f0f0f0;
     --info-bg: #d0d0d0;
@@ -1046,12 +1046,10 @@ input:checked + .settings-toggle-slider:before {
     font-size: 14pt;
     font-weight: 500;
     text-align: right;
-    transition: border 0.2s;
 }
 
 .settings-text-item input[type="text"]:focus {
-    border: 2px solid #8b8b8b;
-    background: #f9f9f9;
+    outline: none;
 }
 
 #in-map-toggle {
