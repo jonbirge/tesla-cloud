@@ -4,8 +4,9 @@
     --text-color: #777777;
     --active-section-bg: white;
     --separator-color: #cccccc;
-    --button-bg: #dddddd;
+    --button-bg: #d0d0d0;
     --button-text: #333333;
+    --button-highlight: #f0f0f0;
     --info-bg: #d0d0d0;
     --tesla-blue: #0077ff;
     --tesla-red: #ff0000;
@@ -26,6 +27,7 @@ body.dark-mode {
     --separator-color: #444444;
     --button-bg: #333333;
     --button-text: #d6d6d6;
+    --button-highlight: #bdbdbd;
     --info-bg: #302f39;
     --weather-switch-slider: #222222;
     --weather-warning-color: #ff9900;
@@ -1102,7 +1104,7 @@ input:checked + .settings-toggle-slider:before {
     display: flex;
     border-radius: calc(var(--button-radius) - 2px);
     overflow: hidden;
-    background-color: white;
+    background-color: var(--button-highlight);
 }
 
 .option-button {

@@ -575,6 +575,25 @@ window.toggleSettingFrom = function(element) {
     }
 }
 
+// Function for toggling option-based settings (like map-choice)
+window.toggleOptionSetting = function(button) {
+    const settingItem = button.closest('.option-switch-container');
+    if (!settingItem || !settingItem.dataset.setting) return;
+
+    const key = settingItem.dataset.setting;
+    let value = button.dataset.value;
+    
+    // Handle special cases for compatibility
+    if (key === 'imperial-units') {
+        // Convert value to boolean
+        value = (value === 'english');
+    }
+    
+    // Store the setting
+    toggleSetting(key, value);
+    customLog(`Option setting "${key}" changed to "${value}"`);
+}
+
 // Function called by the text input UI elements for text-based settings
 window.updateSettingFrom = function(element) {
     const settingItem = element.closest('.settings-text-item');
