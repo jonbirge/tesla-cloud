@@ -230,14 +230,23 @@ function generateHTMLforItem(item)
     }
 
     return `
-        <button class="${classList}" data-id="${item.id}" onclick="loadExternalUrl('${item.link}')">
+        <div class="${classList}" data-id="${item.id}" onclick="loadExternalUrl('${item.link}')">
             <img src="${faviconUrl}" class="news-favicon" onerror="this.style.display='none'">
             <div>
                 <span class="news-source">${item.source.toUpperCase()}</span>
                 <span class="news-time" data-timestamp="${item.date}">${generateTimeAgoText(item.date)}</span>
             </div>
             <div class="news-title">${item.title}</div>
-        </button>`;
+            <button class="share-icon" onclick="shareNews('${item.title}'); event.stopPropagation();">
+                <img src="share.svg">
+            </button>
+        </div>`;
+}
+
+// Forwards the news item link to the share function
+window.shareNews = function (item) {
+    // Call the share function with the news item link
+    customLog('Sharing news item:', item);
 }
 
 // Pauses the automatic news updates

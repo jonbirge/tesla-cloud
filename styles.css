@@ -626,17 +626,15 @@ input:checked + .toggle-slider:before {
 
 .news-headlines {
     margin: 24px 0;
-    /* max-width: 100%; */
 }
 
 .news-item {
     background-color: var(--button-bg);
     border-radius: var(--button-radius);
-    margin-bottom: 10px;  /* Increased from 9px */
-    padding: 10px 10px 10px 54px;  /* Increased left padding from 46px to 54px */
+    margin-bottom: 15px;
+    padding: 9px 9px 9px 55px;
     transition: background-color 0.3s;
     border: none;
-    width: 100%;
     max-width: 1200px;
     text-align: left;
     cursor: pointer;
@@ -696,28 +694,36 @@ input:checked + .toggle-slider:before {
     color: var(--text-color);
     font-size: 12.5pt;
     margin-left: 5px;
-    display: inline-block;
     font-weight: 500;
 }
 
 .news-title {
     color: var(--button-text);
-    display: block;
-    margin-top: 4px;
-    margin-right: 24px; /* avoid indicator */
+    margin-top: 0px;
+    padding-bottom: 5px;
+    margin-right: 47px; /* avoid indicators */
     font-size: 16pt;
     font-weight: 550;
 }
 
+.share-icon {
+    position: absolute;
+    right: 27px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: none;
+    border: none;
+}
+
 .news-favicon {
-    position: absolute;  /* Position absolutely within the news-item */
-    left: 10px;         /* Position on the left side with some padding */
-    top: 50%;           /* Center vertically */
-    transform: translateY(-50%);  /* Perfect vertical centering */
-    width: 32px;        /* Slightly increased width */
-    height: 32px;       /* Slightly increased height */
-    border-radius: 4px; /* Optional: adds a slight rounding to the icons */
-    opacity: 0.8;
+    position: absolute;             /* Position absolutely within the news-item */
+    left: 13px;                     /* Position on the left side with some padding */
+    top: 50%;                       /* Center vertically */
+    transform: translateY(-50%);    /* Perfect vertical centering */
+    width: 32px;                    /* Slightly increased width */
+    height: 32px;                   /* Slightly increased height */
+    border-radius: 4px;             /* Optional: adds a slight rounding to the icons */
+    /* opacity: 0.8; */
 }
 
 
