@@ -440,12 +440,40 @@ function updateToggleVisualState(key, value) {
 
     // Disable/enable forwarding-email input based on news-forwarding
     if (key === 'news-forwarding') {
-        // Find all forwarding-email text inputs and disable/enable them
-        const emailInput = document.querySelector('.settings-text-item[data-setting="forwarding-email"] input[type="text"]');
-        emailInput.disabled = !value;
-        // Find "news-forward-only" checkbox and disable it if forwarding is disabled
-        const forwardOnlyCheckbox = document.querySelector('.settings-toggle-item[data-setting="news-forward-only"] input[type="checkbox"]');
-        forwardOnlyCheckbox.disabled = !value;
+        setControlEnable('forwarding-email', value);
+        setControlEnable('news-forward-only', value);
+    }
+}
+
+function setControlEnable(key, enabled = true) {
+    const settingItems = document.querySelectorAll(`div[data-setting="${key}"]`);
+    if (settingItems && settingItems.length > 0) {
+        settingItems.forEach(item => {
+            // Make div partly transparent
+            item.style.opacity = enabled ? '1' : '0.35';
+
+            // Handle checkbox toggle
+            const toggle = item.querySelector('input[type="checkbox"]');
+            if (toggle) {
+                toggle.disabled = !enabled;
+            }
+
+            // Handle option-based toggles
+            if (item.classList.contains('option-switch-container')) {
+                const buttons = item.querySelectorAll('.option-button');
+                buttons.forEach(btn => {
+                    btn.disabled = !enabled;
+                });
+            }
+
+            // Handle text input
+            if (item.classList.contains('settings-text-item')) {
+                const textInput = item.querySelector('input[type="text"]');
+                if (textInput) {
+                    textInput.disabled = !enabled;
+                }
+            }
+        });
     }
 }
 
@@ -576,7 +604,9 @@ window.toggleMode = function () {
 // TODO: Handle special cases in toggleSetting(), and deal with RSS by setting "dirty" flag triggering update the next time news is selected.
 window.toggleSettingFrom = function(element) {
     customLog('Toggle setting from UI element.');
-    const settingItem = element.closest('.settings-toggle-item');
+    // const settingItem = element.closest('.settings-toggle-item');
+    // Find closest element with a data-setting attribute
+    const settingItem = element.closest('[data-setting]');
     if (settingItem && settingItem.dataset.setting) {
         const key = settingItem.dataset.setting;
         const value = element.checked;

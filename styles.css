@@ -1063,12 +1063,6 @@ input:checked + .settings-toggle-slider:before {
     text-align: right;
 }
 
-.settings-text-item input[type="text"]:disabled {
-    background: #e0e0e0;
-    color: #a0a0a0;
-    cursor: not-allowed;
-}
-
 body.dark-mode .settings-text-item input[type="text"]:disabled {
     background: #333333;
     color: #555555;
