@@ -444,11 +444,13 @@
             <h2>Settings</h2>
             <div class="settings-controls">
                 <div class="settings-toggle-item" data-setting="auto-dark-mode" onclick="this.querySelector('input').click()">
-                    <label>Auto Dark Mode</label><input type="checkbox" onchange="toggleSettingFrom(this)"><span class="settings-toggle-slider"></span>
+                    <label>Auto Dark Mode</label>
+                    <input type="checkbox" onchange="toggleSettingFrom(this)"><span class="settings-toggle-slider"></span>
                 </div>
 
                 <div class="settings-toggle-item" data-setting="24-hour-time" onclick="this.querySelector('input').click()">
-                    <label>24-hour Time</label><input type="checkbox" onchange="toggleSettingFrom(this)"><span class="settings-toggle-slider"></span>
+                    <label>24-hour Time</label>
+                    <input type="checkbox" onchange="toggleSettingFrom(this)"><span class="settings-toggle-slider"></span>
                 </div>
 
                 <div class="settings-toggle-item option-switch-container" data-setting="imperial-units">
@@ -466,11 +468,26 @@
                         <button class="option-button" data-value="abrp" onclick="toggleOptionSetting(this)">ABRP</button>
                     </div>
                 </div>
+
+                <div>
                 <div class="settings-toggle-item" data-setting="news-forwarding" onclick="this.querySelector('input').click()">
-                    <label>Forward News</label><input type="checkbox" onchange="toggleSettingFrom(this)"><span class="settings-toggle-slider"></span>
+                    <label>Allow News Forwarding</label>
+                    <input type="checkbox" onchange="toggleSettingFrom(this)"><span class="settings-toggle-slider"></span>
                 </div>
+                <div class="settings-description">Allow forwarding news feed items to email</div>
+                </div>
+
+                <div>
+                <div class="settings-toggle-item" data-setting="news-forward-only" onclick="this.querySelector('input').click()">
+                    <label>Clicking News Anywhere Forwards</label>
+                    <input type="checkbox" onchange="toggleSettingFrom(this)"><span class="settings-toggle-slider"></span>
+                </div>
+                <div class="settings-description">Forward news items instead of opening them in browser</div>
+                </div>
+
                 <div class="settings-toggle-item settings-text-item" data-setting="forwarding-email">
-                    <label>Email</label><input type="text" placeholder="Enter e-mail address" onchange="updateSettingFrom(this)">
+                    <label>Email</label>
+                    <input type="text" placeholder="Enter e-mail address" onchange="updateSettingFrom(this)">
                 </div>
             </div>
             

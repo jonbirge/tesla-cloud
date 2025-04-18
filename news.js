@@ -245,7 +245,7 @@ function generateHTMLforItem(item)
     }
 
     return `
-        <div class="${classList}" data-id="${item.id}" onclick="loadExternalUrl('${item.link}')">
+        <div class="${classList}" data-id="${item.id}" onclick="clickNews('${item.title}','${item.link}','${item.source}')">
             <img src="${faviconUrl}" class="news-favicon" onerror="this.style.display='none'">
             <div>
                 <span class="news-source">${item.source.toUpperCase()}</span>
@@ -256,6 +256,15 @@ function generateHTMLforItem(item)
                 <img src="share.svg">
             </button>
         </div>`;
+}
+
+window.clickNews = async function (title, link, source) {
+    if (settings["news-forward-only"]) {
+        await shareNews(title, link, source);
+    }
+    else {
+        loadExternalUrl(link);
+    }
 }
 
 // Forwards the news item link to the share function
@@ -279,6 +288,7 @@ window.shareNews = async function (title, link, source) {
     // Create the subject line
     const subject = `[teslas.cloud] ${title}`;
 
+    // Communicate with the forwarding server
     try {
         const response = await fetch('share.php', {
             method: 'POST',
@@ -294,7 +304,7 @@ window.shareNews = async function (title, link, source) {
             alertBox.style.transform = 'translateX(-50%)';
             alertBox.style.backgroundColor = "rgb(15, 181, 21) ";
             alertBox.style.color = 'white';
-            alertBox.style.padding = '10px';
+            alertBox.style.padding = '15px';
             alertBox.style.borderRadius = '5px';
             alertBox.style.boxShadow = '0 2px 5px rgba(0, 0, 0, 0.3)';
             alertBox.style.zIndex = '9999';

@@ -956,7 +956,7 @@ body.dark-mode .share-icon img {
 /* Settings Section Styles */
 
 .settings-controls {
-    margin-top: 12px;
+    margin-top: -9px;
     display: grid;
     grid-template-columns: repeat(auto-fill, 470px);
     gap: 0px 11px; /* row gap, column gap */
@@ -967,8 +967,11 @@ body.dark-mode .share-icon img {
     align-items: center;
     background-color: var(--button-bg);
     border-radius: var(--button-radius);
-    padding: 15px;
-    margin-bottom: 9px;
+    padding-left: 15px;
+    padding-right: 15px;
+    padding-top: 12px;
+    padding-bottom: 12px;
+    margin-top: 9px;
     max-width: 480px;
     font-weight: 550;
     cursor: pointer; /* Add cursor pointer to indicate it's clickable */
@@ -980,7 +983,7 @@ body.dark-mode .share-icon img {
 }
 
 .settings-toggle-item input {
-    opacity: 0;
+    opacity: 0; /* Hide the checkbox */
     width: 0;
     height: 0;
     position: absolute;
@@ -1016,6 +1019,14 @@ body.dark-mode .share-icon img {
     background-color: white;
     transition: .4s;
     border-radius: 50%;
+}
+
+.settings-description {
+    margin-top: 2pt;
+    font-size: 12.5pt;
+    font-style: italic;
+    margin-left: 11pt;
+    text-align: right;
 }
 
 input:checked + .settings-toggle-slider {
@@ -1156,13 +1167,14 @@ body.dark-mode .option-button:hover:not(.active) {
 
 .news-source-grid {
     grid-template-columns: repeat(auto-fill, 310px);
-    gap: 9px;
+    gap: 0px 10px;
     width: auto;
 }
 
 .news-toggle-item {
-    padding: 12px 15px;
-    margin-bottom: 0;
+    padding: 9px 15px;
+    margin-bottom: 0px;
+    margin-top: 7px;
     max-width: none;
     width: auto;
     border-radius: 9px;

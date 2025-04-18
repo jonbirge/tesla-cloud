@@ -25,6 +25,7 @@ const defaultSettings = {
     "map-choice": 'waze',
     // News forwarding
     "news-forwarding": false,
+    "news-forward-only": false,
     "forwarding-email": "",
     // News source settings
     "rss-wsj": true,
@@ -442,6 +443,9 @@ function updateToggleVisualState(key, value) {
         // Find all forwarding-email text inputs and disable/enable them
         const emailInput = document.querySelector('.settings-text-item[data-setting="forwarding-email"] input[type="text"]');
         emailInput.disabled = !value;
+        // Find "news-forward-only" checkbox and disable it if forwarding is disabled
+        const forwardOnlyCheckbox = document.querySelector('.settings-toggle-item[data-setting="news-forward-only"] input[type="checkbox"]');
+        forwardOnlyCheckbox.disabled = !value;
     }
 }
 
