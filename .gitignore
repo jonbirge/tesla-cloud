@@ -1,2 +1,4 @@
-.env
+*.bak
 NOTE
+test.php
+.env

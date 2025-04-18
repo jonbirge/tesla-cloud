@@ -8,8 +8,8 @@
     <link rel="preconnect" href="https://fonts.googleapis.com" crossorigin>
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="styles.css?0404">
-    <link rel="stylesheet" href="wx.css?0414">
+    <link rel="stylesheet" href="styles.css?0417">
+    <link rel="stylesheet" href="wx.css?0417">
 </head>
 
 <body>
@@ -413,22 +413,26 @@
             <h2>About</h2>
             <p>This service was created by <a href="https://www.mit.edu/~birge/">Jonathan Birge</a> and Alex Birge as an educational father-son project. It is in no way affiliated with Tesla, Inc. and no warranty is made for its utility.</p>
             <p>For questions, issues, or feedback: email <a href="mailto:feedback@teslas.cloud">feedback@teslas.cloud</a> or submit an issue to the <a href="https://github.com/jonbirge/Tesla-Cloud/discussions/categories/bugs">GitHub repository</a>.</p>
-            <p>Apologies to those outside of the US; right now some functionality is limited to CONUS, such as the weather satellite feed. If you're using this from another region, please let us know where (via the email above) and we'll see what we can do to improve support for your region.</p>
+            <p>Apologies to those outside of the US; right now some functionality is limited to CONUS, such as the weather satellite feed.</p>
             
-            <h2>Tips</h2>
+            <h2>Quick Tips</h2>
             <ul>
-                <li>Settings are saved by default, but you can logout (under Settings) to disable this.</li>
-                <li>You can also create a user ID that will allow settings to be saved across multiple browsers/cars:</li>
-                <ul>
-                    <li>First, ensure you're logged out of the default user account in Settings.</li>
-                    <li>Select the 'login' button on the main page and choose any ID with 9 or more characters.</li>
-                    <li>The user ID can be anything you can remember; it is encrypted before being sent to our servers and there is no sensitive data stored outside the browser.</li>
-                </ul>
                 <li>Bookmark this page using the star in the browser menu.</li>
                 <li>Make the browser easily available by dragging it to the left-hand side of the dock at the bottom of the screen.</li>
                 <li>An orange dot next to the Weather section button means there is hazardous weather in the near-term forecast.</li>
                 <li>A blue dot next to a section button indicates updated information within that section.</li>
+                <li>Settings are saved by default, but you can logout (under Settings) to disable this.</li>
+                <li>You can also create a user ID that will allow settings to be saved across multiple browsers/cars:</li>
+                <ul>
+                    <li>First, ensure you're logged out of the default user account in Settings.</li>
+                    <li>Select the 'login' button on the main page and choose an ID with 9 or more characters.</li>
+                    <li>The user ID can be anything you can remember; it is encrypted before being sent to our servers.</li>
+                </ul>
+                <li>Some settings (such as units) currently don't take effect until the next data update.</li>
             </ul>
+
+            <h2>Acknowledgements</h2>
+            <p>Thanks to whomever made the fantastic "TeslaWaze" site, one of the embedded options in the dashboard. Thank you, as well, to the friendly folks on <a href="https://www.teslaownersonline.com/">Tesla Owners Online</a>, who gave considerable helpful feedback and support on early versions.</p>
 
             <h2>Version</h2>
             <p id="version">--</p>
@@ -437,14 +441,16 @@
         <div id="settings" class="section">
             <button id="logout-button" class="logout-button hidden" onclick="handleLogout()">Logout</button>
             
-            <h2>General Settings</h2>
+            <h2>Settings</h2>
             <div class="settings-controls">
                 <div class="settings-toggle-item" data-setting="auto-dark-mode" onclick="this.querySelector('input').click()">
-                    <label>Auto Dark Mode</label><input type="checkbox" onchange="toggleSettingFrom(this)"><span class="settings-toggle-slider"></span>
+                    <label>Auto Dark Mode</label>
+                    <input type="checkbox" onchange="toggleSettingFrom(this)"><span class="settings-toggle-slider"></span>
                 </div>
 
                 <div class="settings-toggle-item" data-setting="24-hour-time" onclick="this.querySelector('input').click()">
-                    <label>24-hour Time</label><input type="checkbox" onchange="toggleSettingFrom(this)"><span class="settings-toggle-slider"></span>
+                    <label>24-hour Time</label>
+                    <input type="checkbox" onchange="toggleSettingFrom(this)"><span class="settings-toggle-slider"></span>
                 </div>
 
                 <div class="settings-toggle-item option-switch-container" data-setting="imperial-units">
@@ -458,9 +464,33 @@
                 <div class="settings-toggle-item option-switch-container" data-setting="map-choice">
                     <label>Dashboard Map</label>
                     <div class="option-switch">
-                        <button class="option-button active" data-value="waze" onclick="toggleOptionSetting(this)">Waze</button>
+                        <button class="option-button active" data-value="waze" onclick="toggleOptionSetting(this)">TeslaWaze</button>
                         <button class="option-button" data-value="abrp" onclick="toggleOptionSetting(this)">ABRP</button>
                     </div>
+                </div>
+
+                <div>
+                    <div class="settings-toggle-item" data-setting="news-forwarding"
+                        onclick="this.querySelector('input').click()">
+                        <label>Allow News Forwarding</label>
+                        <input type="checkbox" onchange="toggleSettingFrom(this)"><span
+                            class="settings-toggle-slider"></span>
+                    </div>
+                    <div class="settings-description">Allow forwarding news feed items to email</div>
+                </div>
+
+                <div data-setting="news-forward-only">
+                    <div class="settings-toggle-item" onclick="this.querySelector('input').click()">
+                        <label>Clicking News Anywhere Forwards</label>
+                        <input type="checkbox" onchange="toggleSettingFrom(this)">
+                        <span class="settings-toggle-slider"></span>
+                    </div>
+                    <div class="settings-description">Forward news items instead of opening them in browser</div>
+                </div>
+
+                <div class="settings-toggle-item settings-text-item" data-setting="forwarding-email">
+                    <label>Email</label>
+                    <input type="text" placeholder="Enter e-mail address" onchange="updateSettingFrom(this)">
                 </div>
             </div>
             
@@ -578,6 +608,7 @@
                     <label>DefenseNews</label><input type="checkbox" onchange="toggleSettingFrom(this)"><span class="settings-toggle-slider"></span>
                 </div>
             </div>
+            
         </div>
 
         </div> <!-- End of sections -->
@@ -648,7 +679,7 @@
 
     <!-- Load JavaScript -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script src="app.js?0414" type="module"></script>
+    <script src="app.js?0417" type="module"></script>
 </body>
 
 </html>

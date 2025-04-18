@@ -1,5 +1,5 @@
 // Imports
-import { updateNews } from './news.js';
+import { updateNews, setShareButtonsVisibility } from './news.js';
 import { customLog } from './common.js';
 import { updateChartAxisColors } from './net.js';
 import { autoDarkMode } from './wx.js';
@@ -14,6 +14,48 @@ let settings = {}; // Initialize settings object
 
 // Export settings object so it's accessible to other modules
 export { settings, currentUser, isLoggedIn, hashedUser };
+
+// Default settings that will be used when no user is logged in
+const defaultSettings = {
+    // General settings
+    "dark-mode": false,
+    "auto-dark-mode": true,
+    "24-hour-time": false,
+    "imperial-units": true,    // "English" or "Metric"
+    "map-choice": 'waze',
+    // News forwarding
+    "news-forwarding": false,
+    "news-forward-only": false,
+    "forwarding-email": "",
+    // News source settings
+    "rss-wsj": true,
+    "rss-nyt": true,
+    "rss-wapo": true,
+    "rss-latimes": false,
+    "rss-bos": false,
+    "rss-den": false,
+    "rss-chi": false,
+    "rss-bloomberg": false,
+    "rss-bloomberg-tech": false,
+    "rss-bbc": true,
+    "rss-economist": false,
+    "rss-lemonde": false,
+    "rss-derspiegel": false,
+    "rss-notateslaapp": true,
+    "rss-teslarati": true,
+    "rss-insideevs": true,
+    "rss-thedrive": false,
+    "rss-techcrunch": true,
+    "rss-jalopnik": false,
+    "rss-caranddriver": true,
+    "rss-theverge": false,
+    "rss-arstechnica": true,
+    "rss-engadget": false,
+    "rss-gizmodo": false,
+    "rss-wired": false,
+    "rss-spacenews": false,
+    "rss-defensenews": false,
+};
 
 // Settings section is being left
 export function leaveSettings() {
@@ -81,7 +123,7 @@ export async function attemptLogin() {
     customLog('hashedUser:', hashedUser);
     customLog('isLoggedIn:', isLoggedIn);
 
-    // Initialize settings as needed
+    // Initialize map frame option
     updateMapFrame();
 }
 
@@ -142,46 +184,12 @@ export async function toggleSetting(key, value) {
     if (key === 'map-choice') {
         updateMapFrame();
     }
-}
 
-// Default settings that will be used when no user is logged in
-const defaultSettings = {
-    // General settings
-    "dark-mode": false,
-    "auto-dark-mode": true,
-    "24-hour-time": false,
-    "imperial-units": true,    // "English" or "Metric"
-    "map-choice": 'waze',
-    
-    // News source settings
-    "rss-wsj": true,
-    "rss-nyt": true,
-    "rss-wapo": true,
-    "rss-latimes": false,
-    "rss-bos": false,
-    "rss-den": false,
-    "rss-chi": false,
-    "rss-bloomberg": false,
-    "rss-bloomberg-tech": false,
-    "rss-bbc": true,
-    "rss-economist": false,
-    "rss-lemonde": false,
-    "rss-derspiegel": false,
-    "rss-notateslaapp": true,
-    "rss-teslarati": true,
-    "rss-insideevs": true,
-    "rss-thedrive": false,
-    "rss-techcrunch": true,
-    "rss-jalopnik": false,
-    "rss-caranddriver": true,
-    "rss-theverge": false,
-    "rss-arstechnica": true,
-    "rss-engadget": false,
-    "rss-gizmodo": false,
-    "rss-wired": false,
-    "rss-spacenews": false,
-    "rss-defensenews": false,
-};
+    // If the setting is news forwarding, update the share buttons
+    if (key === 'news-forwarding') {
+        setShareButtonsVisibility();
+    }
+}
 
 // Function to initialize with defaults
 function initializeSettings() {
@@ -389,58 +397,96 @@ async function fetchSettings() {
     }
 }
 
-// Update visual state of a toggle
+// Update visual state of a toggle or text input
 function updateToggleVisualState(key, value) {
-    const toggleItems = document.querySelectorAll(`.settings-toggle-item[data-setting="${key}"]`);
-    if (!toggleItems) return;
+    const settingItems = document.querySelectorAll(`.settings-toggle-item[data-setting="${key}"]`);
 
-    toggleItems.forEach(item => {
-        // Special compatibility cases
-        if (key === 'imperial-units') {
-            let unitsValue;
-            if (value === true) {
-                unitsValue = 'english';
-            } else {
-                unitsValue = 'metric';
+    // Special compatibility cases
+    if (key === 'imperial-units') {
+        let unitsValue;
+        if (value === true) {
+            value = 'english';
+        } else {
+            value = 'metric';
+        }
+    }
+
+    customLog(`Updating visual state for "${key}" to ${value}`);
+    if (settingItems && settingItems.length > 0) {
+        settingItems.forEach(item => {
+            // Handle checkbox toggle
+            const toggle = item.querySelector('input[type="checkbox"]');
+            if (toggle) {
+                toggle.checked = value === true;
             }
-            const buttons = item.querySelectorAll('.option-button');
-            buttons.forEach(btn => {
-                btn.classList.toggle('active', btn.dataset.value === unitsValue);
-            });
-            return;
-        }
 
-        // Handle checkbox toggles
-        const toggle = item.querySelector('input[type="checkbox"]');
-        if (toggle) {
-            toggle.checked = value === true;
-            return;
-        }
+            // Handle option-based toggles
+            if (item.classList.contains('option-switch-container')) {
+                const buttons = item.querySelectorAll('.option-button');
+                buttons.forEach(btn => {
+                    btn.classList.toggle('active', btn.dataset.value === value);
+                });
+            }
 
-        // Handle option-based toggles
-        if (item.classList.contains('option-switch-container')) {
-            const buttons = item.querySelectorAll('.option-button');
-            buttons.forEach(btn => {
-                btn.classList.toggle('active', btn.dataset.value === value);
-            });
-        }
-    });
+            // Handle text input
+            if (item.classList.contains('settings-text-item')) {
+                const textInput = item.querySelector('input[type="text"]');
+                if (textInput) {
+                    textInput.value = value || '';
+                }
+            }
+        });
+    }
+
+    // Disable/enable forwarding-email input based on news-forwarding
+    if (key === 'news-forwarding') {
+        setControlEnable('forwarding-email', value);
+        setControlEnable('news-forward-only', value);
+    }
 }
 
-// Initialize all toggle states based on 'settings' dictionary
+function setControlEnable(key, enabled = true) {
+    const settingItems = document.querySelectorAll(`div[data-setting="${key}"]`);
+    if (settingItems && settingItems.length > 0) {
+        settingItems.forEach(item => {
+            // Make div partly transparent
+            item.style.opacity = enabled ? '1' : '0.35';
+
+            // Handle checkbox toggle
+            const toggle = item.querySelector('input[type="checkbox"]');
+            if (toggle) {
+                toggle.disabled = !enabled;
+            }
+
+            // Handle option-based toggles
+            if (item.classList.contains('option-switch-container')) {
+                const buttons = item.querySelectorAll('.option-button');
+                buttons.forEach(btn => {
+                    btn.disabled = !enabled;
+                });
+            }
+
+            // Handle text input
+            if (item.classList.contains('settings-text-item')) {
+                const textInput = item.querySelector('input[type="text"]');
+                if (textInput) {
+                    textInput.disabled = !enabled;
+                }
+            }
+        });
+    }
+}
+
+// Initialize all toggle and text states based on 'settings' dictionary
 function initializeToggleStates() {
     // Iterate through all keys in the settings object
     for (const key in settings) {
-        // Check if the key is a setting we care about
         if (settings.hasOwnProperty(key)) {
             const value = settings[key];
-            // Update the visual state of the toggle
             updateToggleVisualState(key, value);
         }
     }
 }
-
-// Cookie management functions
 
 // Helper function to get current domain for cookie namespacing
 function getCurrentDomain() {
@@ -558,7 +604,9 @@ window.toggleMode = function () {
 // TODO: Handle special cases in toggleSetting(), and deal with RSS by setting "dirty" flag triggering update the next time news is selected.
 window.toggleSettingFrom = function(element) {
     customLog('Toggle setting from UI element.');
-    const settingItem = element.closest('.settings-toggle-item');
+    // const settingItem = element.closest('.settings-toggle-item');
+    // Find closest element with a data-setting attribute
+    const settingItem = element.closest('[data-setting]');
     if (settingItem && settingItem.dataset.setting) {
         const key = settingItem.dataset.setting;
         const value = element.checked;
@@ -583,4 +631,14 @@ window.toggleOptionSetting = function(button) {
     // Store the setting
     toggleSetting(key, value);
     customLog(`Option setting "${key}" changed to "${value}"`);
+}
+
+// Function called by the text input UI elements for text-based settings
+window.updateSettingFrom = function(element) {
+    const settingItem = element.closest('.settings-text-item');
+    if (settingItem && settingItem.dataset.setting) {
+        const key = settingItem.dataset.setting;
+        const value = element.value.trim();
+        toggleSetting(key, value);
+    }
 }
