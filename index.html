@@ -81,7 +81,7 @@
 
         <div id="navigation" class="section">
             <div class="nav-container">
-                <div class="radar-container">
+                <div class="radar-container" id="radar-container">
                     <h2 class="radar-title">Relative Wind</h2>
                     <canvas id="radarDisplay" width="200" height="200"></canvas>
                 </div>
@@ -440,35 +440,43 @@
         
         <div id="settings" class="section">
             <button id="logout-button" class="logout-button hidden" onclick="handleLogout()">Logout</button>
-            
+        
             <h2>Settings</h2>
             <div class="settings-controls">
-                <div class="settings-toggle-item" data-setting="auto-dark-mode" onclick="this.querySelector('input').click()">
+                <div class="settings-toggle-item" data-setting="auto-dark-mode"
+                    onclick="this.querySelector('input').click()">
                     <label>Auto Dark Mode</label>
-                    <input type="checkbox" onchange="toggleSettingFrom(this)"><span class="settings-toggle-slider"></span>
+                    <input type="checkbox" onchange="toggleSettingFrom(this)"><span
+                        class="settings-toggle-slider"></span>
                 </div>
-
-                <div class="settings-toggle-item" data-setting="24-hour-time" onclick="this.querySelector('input').click()">
+            
+                <div class="settings-toggle-item" data-setting="24-hour-time"
+                    onclick="this.querySelector('input').click()">
                     <label>24-hour Time</label>
-                    <input type="checkbox" onchange="toggleSettingFrom(this)"><span class="settings-toggle-slider"></span>
+                    <input type="checkbox" onchange="toggleSettingFrom(this)"><span
+                        class="settings-toggle-slider"></span>
                 </div>
-
+            
                 <div class="settings-toggle-item option-switch-container" data-setting="imperial-units">
                     <label>Units</label>
                     <div class="option-switch">
-                        <button class="option-button" data-value="metric" onclick="toggleOptionSetting(this)">Metric</button>
-                        <button class="option-button active" data-value="english" onclick="toggleOptionSetting(this)">English</button>
+                        <button class="option-button" data-value="metric"
+                            onclick="toggleOptionSetting(this)">Metric</button>
+                        <button class="option-button active" data-value="english"
+                            onclick="toggleOptionSetting(this)">English</button>
                     </div>
                 </div>
-
+            
                 <div class="settings-toggle-item option-switch-container" data-setting="map-choice">
                     <label>Dashboard Map</label>
                     <div class="option-switch">
-                        <button class="option-button active" data-value="waze" onclick="toggleOptionSetting(this)">TeslaWaze</button>
-                        <button class="option-button" data-value="abrp" onclick="toggleOptionSetting(this)">ABRP</button>
+                        <button class="option-button active" data-value="waze"
+                            onclick="toggleOptionSetting(this)">TeslaWaze</button>
+                        <button class="option-button" data-value="abrp"
+                            onclick="toggleOptionSetting(this)">ABRP</button>
                     </div>
                 </div>
-
+            
                 <div>
                     <div class="settings-toggle-item" data-setting="news-forwarding"
                         onclick="this.querySelector('input').click()">
@@ -478,19 +486,26 @@
                     </div>
                     <div class="settings-description">Allow forwarding news feed items to email</div>
                 </div>
-
+            
                 <div data-setting="news-forward-only">
                     <div class="settings-toggle-item" onclick="this.querySelector('input').click()">
                         <label>Clicking News Anywhere Forwards</label>
                         <input type="checkbox" onchange="toggleSettingFrom(this)">
                         <span class="settings-toggle-slider"></span>
                     </div>
-                    <div class="settings-description">Forward news items instead of opening them in browser</div>
+                    <div class="settings-description">Forward news items instead of opening them in browser
+                    </div>
                 </div>
-
                 <div class="settings-toggle-item settings-text-item" data-setting="forwarding-email">
                     <label>Email</label>
                     <input type="text" placeholder="Enter e-mail address" onchange="updateSettingFrom(this)">
+                </div>
+            
+                <div class="settings-toggle-item" data-setting="show-wind-radar"
+                    onclick="this.querySelector('input').click()">
+                    <label>Relative Wind Indicator</label>
+                    <input type="checkbox" onchange="toggleSettingFrom(this)" checked><span
+                        class="settings-toggle-slider"></span>
                 </div>
             </div>
             

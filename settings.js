@@ -23,6 +23,7 @@ const defaultSettings = {
     "24-hour-time": false,
     "imperial-units": true,    // "English" or "Metric"
     "map-choice": 'waze',
+    "show-wind-radar": true, // Show/hide wind radar by default
     // News forwarding
     "news-forwarding": false,
     "news-forward-only": false,
@@ -189,18 +190,32 @@ export async function toggleSetting(key, value) {
     if (key === 'news-forwarding') {
         setShareButtonsVisibility();
     }
+
+    // Show/hide radar if setting changes
+    if (key === 'show-wind-radar') {
+        updateRadarVisibility();
+    }
 }
 
 // Function to initialize with defaults
 function initializeSettings() {
     settings = { ...defaultSettings };
     initializeToggleStates();
+    updateRadarVisibility();
     customLog('Settings initialized: ', settings);
 }
 
 // Update things that depend on dark mode
 function updateDarkModeDependants() {
     updateChartAxisColors();
+}
+
+// Function to show/hide radar display based on setting
+function updateRadarVisibility() {
+    const radar = document.getElementById('radar-container');
+    if (radar) {
+        radar.style.display = (settings["show-wind-radar"] === false) ? 'none' : '';
+    }
 }
 
 // Function to hash a user ID using SHA-256
@@ -382,6 +397,7 @@ async function fetchSettings() {
 
             // Initialize toggle states based on settings
             initializeToggleStates();
+            updateRadarVisibility();
 
             // Handle dark mode
             if (settings['dark-mode']) {
@@ -486,6 +502,7 @@ function initializeToggleStates() {
             updateToggleVisualState(key, value);
         }
     }
+    updateRadarVisibility();
 }
 
 // Helper function to get current domain for cookie namespacing
