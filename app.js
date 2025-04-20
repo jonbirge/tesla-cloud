@@ -2,9 +2,9 @@
 import { customLog, highlightUpdate, srcUpdate, testMode, updateTimeZone, GEONAMES_USERNAME } from './common.js';
 import { PositionSimulator } from './location.js';
 import { attemptLogin, leaveSettings, settings } from './settings.js';
-import { fetchWeatherData, weatherData, SAT_URLS } from './wx.js';
-import { updateNetworkInfo, updatePingChart, startPingTest, updateChartAxisColors } from './net.js';
-import { markAllNewsAsRead, startNewsTimeUpdates, stopNewsTimeUpdates, updateNewsTimeDisplays } from './news.js';
+import { fetchForecastData, fetchWeatherData, weatherData, SAT_URLS } from './wx.js';
+import { updateNetworkInfo, updatePingChart, startPingTest } from './net.js';
+import { markAllNewsAsRead, startNewsTimeUpdates, stopNewsTimeUpdates } from './news.js';
 
 // Parameters
 const LATLON_UPDATE_INTERVAL = 2; // seconds
@@ -415,6 +415,7 @@ function handlePositionUpdate(position) {
     // Short distance updates
     if (shouldUpdateShortRangeData()) {
         updateLocationData(lat, long);
+        fetchWeatherData(lat, long);
         lastUpdateLat = lat;
         lastUpdateLong = long;
         lastUpdate = Date.now();
@@ -423,7 +424,7 @@ function handlePositionUpdate(position) {
     // Long distance updates
     if (shouldUpdateLongRangeData()) {
         updateTimeZone(lat, long);
-        fetchWeatherData(lat, long);
+        fetchForecastData(lat, long);
         lastWxUpdateLat = lat;
         lastWxUpdateLong = long;
         lastWxUpdate = Date.now();

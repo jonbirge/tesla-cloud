@@ -58,10 +58,44 @@ export function autoDarkMode(lat, long) {
     }
 }
 
-// Fetches weather data and updates the display
-// TODO: Break into forecast and current weather functions
-export function fetchWeatherData(lat, long, silentLoad = false) {
-    customLog('Fetching weather data...' + (silentLoad ? ' (background load)' : ''));
+export function fetchWeatherData(lat, long) {
+    customLog('Fetching weather data...');
+
+    // Save so we can call functions later outside GPS update loop, if needed
+    lastLat = lat;
+    lastLong = long;
+
+    fetch(`https://secure.geonames.org/findNearByWeatherJSON?lat=${lat}&lng=${long}&username=birgefuller`)
+        .then(response => response.json())
+        .then(weatherDataLocal => {
+            if (weatherDataLocal) {
+                customLog('Current weather data: ', weatherDataLocal);
+                // check to see if wind direction is NaN
+                if (isNaN(weatherDataLocal.weatherObservation.windDirection)) {
+                    weatherDataLocal.weatherObservation.windDirection = null;
+                    weatherDataLocal.weatherObservation.windSpeed = null;
+                } else {
+                    // take the reciprocal of the wind direction to get the wind vector
+                    weatherDataLocal.weatherObservation.windDirection =
+                        (weatherDataLocal.weatherObservation.windDirection + 180) % 360;
+                }
+                weatherData = weatherDataLocal.weatherObservation;
+                updateWeatherDisplay();
+            }
+        })
+        .catch(error => {
+            console.error('Error fetching weather data: ', error);
+
+            // In case of error, hide spinner and show error message - only if not silent loading
+            if (!silentLoad) {
+                if (loadingSpinner) loadingSpinner.style.display = 'none';
+            }
+        });
+}
+
+// Fetches forecast data and updates the display
+export function fetchForecastData(lat, long, silentLoad = false) {
+    customLog('Fetching foercast data...' + (silentLoad ? ' (background load)' : ''));
 
     // Save so we can call functions later outside GPS update loop, if needed
     lastLat = lat;
@@ -78,40 +112,19 @@ export function fetchWeatherData(lat, long, silentLoad = false) {
         if (loadingSpinner) loadingSpinner.style.display = 'flex';
     }
 
-    // Fetch and update sunrise/sunset data
-    customLog(`Fetching sun data for lat: ${lat}, long: ${long}`);
-    const unixTime = Math.floor(Date.now() / 1000);
-    customLog(`Current Unix time: ${unixTime}`);
-
     // Fetch and update weather data
+    const unixTime = Math.floor(Date.now() / 1000);
     Promise.all([
-        fetch(`https://secure.geonames.org/findNearByWeatherJSON?lat=${lat}&lng=${long}&username=birgefuller`),
         fetch(`openwx_proxy.php/data/2.5/forecast?lat=${lat}&lon=${long}&units=imperial`),
         fetch(`https://api.sunrise-sunset.org/json?lat=${lat}&lng=${long}&formatted=0`),
         fetch(`https://api.farmsense.net/v1/moonphases/?d=${unixTime}`)
     ])
-        .then(([currentResponse, forecastResponse, sunResponse, moonResponse]) => Promise.all([
-            currentResponse.json(),
+        .then(([forecastResponse, sunResponse, moonResponse]) => Promise.all([
             forecastResponse.json(),
             sunResponse.json(),
             moonResponse.json()
         ]))
-        .then(([weatherDataLocal, forecastDataLocal, sunData, moonData]) => {
-            if (weatherDataLocal) {
-                customLog('Current weather data: ', weatherDataLocal);
-                // check to see if wind direction is NaN
-                if (isNaN(weatherDataLocal.weatherObservation.windDirection)) {
-                    weatherDataLocal.weatherObservation.windDirection = null;
-                    weatherDataLocal.weatherObservation.windSpeed = null;
-                } else {
-                    // take the reciprocal of the wind direction to get the wind vector
-                    weatherDataLocal.weatherObservation.windDirection =
-                        (weatherDataLocal.weatherObservation.windDirection + 180) % 360;
-                }
-                weatherData = weatherDataLocal.weatherObservation;
-                updateWeatherDisplay();
-            }
-
+        .then(([forecastDataLocal, sunData, moonData]) => {
             if (forecastDataLocal && sunData && moonData) {
                 sunrise = sunData.results.sunrise;
                 sunset = sunData.results.sunset;
@@ -130,8 +143,7 @@ export function fetchWeatherData(lat, long, silentLoad = false) {
             if (loadingSpinner) loadingSpinner.style.display = 'none';
         })
         .catch(error => {
-            console.error('Error fetching weather data: ', error);
-            customLog('Error fetching weather data: ', error);
+            console.error('Error fetching forecast data: ', error);
 
             // In case of error, hide spinner and show error message - only if not silent loading
             if (!silentLoad) {
