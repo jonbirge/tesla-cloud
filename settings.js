@@ -2,7 +2,7 @@
 import { updateNews, setShareButtonsVisibility } from './news.js';
 import { customLog } from './common.js';
 import { updateChartAxisColors } from './net.js';
-import { autoDarkMode } from './wx.js';
+import { autoDarkMode, updateForecastDisplay, updateWeatherDisplay } from './wx.js';
 
 // Global variables
 let isLoggedIn = false;
@@ -10,6 +10,7 @@ let currentUser = null; // Will be NULL if not logged in OR if using auto-genera
 let hashedUser = null; // The hashed version of the user ID
 let rssIsDirty = false; // Flag to indicate if RSS settings have changed
 let rssDrop = false; // Flag to indicate if an RSS feed has been dropped
+let unitIsDirty = false; // Flag to indicate if unit/time settings have changed
 let settings = {}; // Initialize settings object
 
 // Export settings object so it's accessible to other modules
@@ -66,6 +67,13 @@ export function leaveSettings() {
         updateNews(rssDrop);
         rssIsDirty = false; // Reset the dirty flag
         rssDrop = false; // Reset the drop flag
+    }
+
+    if (unitIsDirty) {
+        customLog('Unit/time settings are dirty, updating weather display.')
+        updateForecastDisplay();
+        updateWeatherDisplay();
+        unitIsDirty = false; // Reset the dirty flag
     }
 }
 
@@ -129,7 +137,6 @@ export async function attemptLogin() {
 }
 
 // Function to toggle a setting (updates both local cache and server)
-// TODO: Handle the special cases via callbacks from new Settings object?
 export async function toggleSetting(key, value) {
     // Handle local settings
     settings[key] = value;
@@ -172,6 +179,12 @@ export async function toggleSetting(key, value) {
         rssIsDirty = true;
         rssDrop = rssDrop || isDrop; // Set the drop flag if this is a drop
         customLog(`RSS setting "${key}" changed to ${value} (dirty: ${rssIsDirty}, drop: ${rssDrop})`);
+    }
+
+    // If the setting is unit/time-related, set the dirty flag
+    if (key === 'imperial-units' || key === '24-hour-time') {
+        unitIsDirty = true;
+        customLog(`Unit/time setting "${key}" changed to ${value} (dirty: ${unitIsDirty})`);
     }
 
     // If the setting is dark mode related, update the dark mode
@@ -618,7 +631,6 @@ window.toggleMode = function () {
 }
 
 // Function called by the toggle UI elements
-// TODO: Handle special cases in toggleSetting(), and deal with RSS by setting "dirty" flag triggering update the next time news is selected.
 window.toggleSettingFrom = function(element) {
     customLog('Toggle setting from UI element.');
     // const settingItem = element.closest('.settings-toggle-item');
