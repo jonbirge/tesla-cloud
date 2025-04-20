@@ -2,7 +2,7 @@
 import { highlightUpdate, srcUpdate, testMode, updateTimeZone, GEONAMES_USERNAME } from './common.js';
 import { PositionSimulator } from './location.js';
 import { attemptLogin, leaveSettings, settings } from './settings.js';
-import { fetchForecastData, fetchWeatherData, weatherData, SAT_URLS } from './wx.js';
+import { fetchForecastData, fetchWeatherData, fetchPremiumWeatherData, weatherData, SAT_URLS } from './wx.js';
 import { updateNetworkInfo, updatePingChart, startPingTest } from './net.js';
 import { markAllNewsAsRead, startNewsTimeUpdates, stopNewsTimeUpdates } from './news.js';
 
@@ -425,6 +425,7 @@ function handlePositionUpdate(position) {
     if (shouldUpdateLongRangeData()) {
         updateTimeZone(lat, long);
         fetchForecastData(lat, long);
+        fetchPremiumWeatherData(lat, long);
         lastWxUpdateLat = lat;
         lastWxUpdateLong = long;
         lastWxUpdate = Date.now();

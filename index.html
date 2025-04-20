@@ -8,8 +8,8 @@
     <link rel="preconnect" href="https://fonts.googleapis.com" crossorigin>
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="styles.css?0417">
-    <link rel="stylesheet" href="wx.css?0417">
+    <link rel="stylesheet" href="styles.css?0421">
+    <link rel="stylesheet" href="wx.css?0421">
 </head>
 
 <body>
@@ -34,6 +34,10 @@
             <button id="wx-section" class="section-button" onclick="showSection('weather')">
                 <svg class="button-icon"><use href="#icon-weather"></use></svg>
                 Weather
+            </button>
+            <button id="wx-section" class="section-button" onclick="showSection('prem-weather')">
+                <svg class="button-icon"><use href="#icon-weather"></use></svg>
+                Weather (Beta)
             </button>
             <button class="section-button" onclick="showSection('satellite')">
                 <svg class="button-icon"><use href="#icon-satellite"></use></svg>
@@ -235,6 +239,94 @@
                 <li><a href="https://www.nesdis.noaa.gov/imagery/interactive-maps/the-world-real-time"><img src="https://aviationweather.gov/favicon.ico" loading="lazy">NESDIS Live Globe</a></li>
                 <li><a href="https://www.accuweather.com"><img src="https://www.accuweather.com/favicon.ico" loading="lazy">AccuWeather</a></li>
                 <li><a href="https://aviationweather.gov"><img src="https://aviationweather.gov/favicon.ico" loading="lazy">Aviation Weather</a></li>
+            </ul>
+        </div>
+
+        <div id="prem-weather" class="section">
+            <h2>Extended Forecast</h2>
+            <div id="prem-forecast-loading" class="forecast-loading">
+                <div class="spinner"></div>
+            </div>
+            <div id="prem-forecast-container" class="forecast-container hidden">
+                <div class="forecast-day" onclick="showHourlyForecast(0)">
+                    <div class="forecast-date"></div>
+                    <img class="forecast-icon" src="">
+                    <div class="forecast-temp"></div>
+                    <div class="forecast-desc"></div>
+                    <img class="forecast-alert hidden" src="warn.svg" alt="Warning Icon">
+                </div>
+                <div class="forecast-day" onclick="showHourlyForecast(1)">
+                    <div class="forecast-date"></div>
+                    <img class="forecast-icon" src="">
+                    <div class="forecast-temp"></div>
+                    <div class="forecast-desc"></div>
+                    <img class="forecast-alert hidden" src="warn.svg" alt="Warning Icon">
+                </div>
+                <div class="forecast-day" onclick="showHourlyForecast(2)">
+                    <div class="forecast-date"></div>
+                    <img class="forecast-icon" src="">
+                    <div class="forecast-temp"></div>
+                    <div class="forecast-desc"></div>
+                    <img class="forecast-alert hidden" src="warn.svg" alt="Warning Icon">
+                </div>
+                <div class="forecast-day" onclick="showHourlyForecast(3)">
+                    <div class="forecast-date"></div>
+                    <img class="forecast-icon" src="">
+                    <div class="forecast-temp"></div>
+                    <div class="forecast-desc"></div>
+                    <img class="forecast-alert hidden" src="warn.svg" alt="Warning Icon">
+                </div>
+                <div class="forecast-day" onclick="showHourlyForecast(4)">
+                    <div class="forecast-date"></div>
+                    <img class="forecast-icon" src="">
+                    <div class="forecast-temp"></div>
+                    <div class="forecast-desc"></div>
+                    <img class="forecast-alert hidden" src="warn.svg" alt="Warning Icon">
+                </div>
+            </div>
+            <!-- Add popup elements -->
+            <div id="prem-forecast-overlay" class="overlay"></div>
+            <div class="forecast-popup">
+                <button id="prem-forecast-popup-close" class="forecast-popup-close" type="button">&times;</button>
+                <h2 id="popup-date">Hourly Forecast</h2>
+                <div class="hourly-forecast"></div>
+            </div>
+            <hr>
+            <h2>Conditions <span id="prem-station-info" class="station-name"></span></h2>
+            <div class="data-info" id="prem-wx-data">
+                <div class="data-item">
+                    <h2>Humidity</h2>
+                    <span id="prem-humidity">--</span>
+                </div>
+                <div class="data-item">
+                    <h2>Wind</h2>
+                    <span id="prem-wind">--</span>
+                </div>
+                <div class="data-item">
+                    <h2>AQI</h2>
+                    <span id="aqi">--</span>
+                    <span id="aqi-dot" style="display:inline-block;width:14px;height:14px;border-radius:50%;margin-left:8px;vertical-align:middle;margin-top:-3px;"></span>
+                </div>
+                <div class="data-item">
+                    <h2>Sunrise</h2>
+                    <span id="prem-sunrise">--</span>
+                </div>
+                <div class="data-item">
+                    <h2>Sunset</h2>
+                    <span id="prem-sunset">--</span>
+                </div>
+                <div class="data-item">
+                    <h2>Moon Phase</h2>
+                    <span id="prem-moonphase">--</span>
+                    <span id="prem-moon-icon" class="moon-phase-icon"></span>
+                </div>
+            </div>
+            <hr>
+            <h2>Links</h2>
+            <ul class="button-list">
+                <li><a href="https://www.weather.gov" data-frame><img src="https://www.weather.gov/favicon.ico" loading="lazy">NOAA Weather</a></li>
+                <li><a href="https://radar.weather.gov/" data-frame><img src="https://www.weather.gov/favicon.ico" loading="lazy">NOAA Radar</a></li>
+                <li><a href="https://www.nesdis.noaa.gov/imagery/interactive-maps/the-world-real-time"><img src="https://aviationweather.gov/favicon.ico" loading="lazy">NESDIS Live Globe</a></li>
             </ul>
         </div>
 
@@ -696,7 +788,20 @@
 
     <!-- Load JavaScript -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script src="app.js?0417" type="module"></script>
+    <script src="app.js?0421" type="module"></script>
+    <script>
+      // Attach event listeners for premium forecast popup close and overlay
+      document.addEventListener('DOMContentLoaded', function() {
+        var premCloseBtn = document.getElementById('prem-forecast-popup-close');
+        var premOverlay = document.getElementById('prem-forecast-overlay');
+        if (premCloseBtn) {
+          premCloseBtn.onclick = window.closePremiumPrecipPopup;
+        }
+        if (premOverlay) {
+          premOverlay.addEventListener('click', window.closePremiumPrecipPopup);
+        }
+      });
+    </script>
 </body>
 
 </html>

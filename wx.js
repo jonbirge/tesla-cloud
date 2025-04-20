@@ -10,6 +10,7 @@ const SAT_URLS = {
 };
 
 // Module variables
+let forecastDataPrem = null; // has both current and forecast data
 let weatherData = null;
 let forecastData = null;
 let moonPhaseData = null;
@@ -58,10 +59,162 @@ export function autoDarkMode(lat, long) {
     }
 }
 
-export function fetchPremiumWeatherData(lat, long) {
+export function fetchPremiumWeatherData(lat, long, silentLoad = false) {
     console.log('Fetching premium weather data...');
+
+    // Save so we can call functions later outside GPS update loop, if needed
+    lastLat = lat;
+    lastLong = long;
+
+    // Show loading spinner, hide forecast container - only if not silent loading
+    const forecastContainer = document.getElementById('prem-forecast-container');
+    const loadingSpinner = document.getElementById('prem-forecast-loading');
+
+    // Remember display style of forecast container
+    let lastDisplayStyle = forecastContainer.style.display;
+    if (!silentLoad) {
+        if (forecastContainer) forecastContainer.style.display = 'none';
+        if (loadingSpinner) loadingSpinner.style.display = 'flex';
+    }
+
+    // Fetch and update weather data (single fetch)
+    fetch(`openwx_proxy.php/data/3.0/onecall?lat=${lat}&lon=${long}&units=imperial`)
+        .then(response => response.json())
+        .then(forecastDataLocal => {
+            if (forecastDataLocal) {
+                // You may need to adjust this if you want to fetch moon/sun data separately
+                forecastDataPrem = forecastDataLocal;
+                updatePremiumWeatherDisplay();
+                // autoDarkMode(lat, long);
+            } else {
+                console.log('No premium forecast data available.');
+                forecastDataPrem = null;
+            }
+
+            // if (lat && long) {
+            //     updateAQI(lat, long);
+            // }
+
+            // Hide spinner and show forecast when data is loaded - only if not silent loading
+            if (forecastContainer) forecastContainer.style.display = lastDisplayStyle;
+            if (loadingSpinner) loadingSpinner.style.display = 'none';
+        })
+        .catch(error => {
+            console.error('Error fetching forecast data: ', error);
+
+            // In case of error, hide spinner and show error message - only if not silent loading
+            if (!silentLoad) {
+                if (loadingSpinner) loadingSpinner.style.display = 'none';
+            }
+        });
 }
 
+// Updates the forecast display with premium data
+export function updatePremiumWeatherDisplay() {
+    if (!forecastDataPrem) return;
+
+    // Extract daily summary (first 5 days)
+    const dailyData = extractPremiumDailyForecast(forecastDataPrem.daily || []);
+    const forecastDays = document.querySelectorAll('#prem-forecast-container .forecast-day');
+
+    dailyData.forEach((day, index) => {
+        if (index < forecastDays.length) {
+            const date = new Date(day.dt * 1000);
+            const dayElement = forecastDays[index];
+
+            // Update weather condition class
+            const weatherCondition = day.weather[0].main.toLowerCase();
+            dayElement.className = `forecast-day ${weatherCondition}`;
+
+            // Update date
+            const dateElement = dayElement.querySelector('.forecast-date');
+            if (dateElement) {
+                dateElement.textContent = date.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
+            }
+
+            // Update weather icon
+            const iconElement = dayElement.querySelector('.forecast-icon');
+            if (iconElement) {
+                iconElement.src = `https://openweathermap.org/img/wn/${day.weather[0].icon}@2x.png`;
+                iconElement.alt = day.weather[0].description;
+            }
+
+            // Update temperature
+            const tempElement = dayElement.querySelector('.forecast-temp');
+            if (tempElement) {
+                tempElement.textContent = `${formatPremiumTemperature(day.temp.min)}/${formatPremiumTemperature(day.temp.max)}`;
+            }
+
+            // Update description
+            const descElement = dayElement.querySelector('.forecast-desc');
+            if (descElement) {
+                descElement.textContent = day.weather[0].main;
+            }
+
+            // Show or hide hazard alert
+            const alertIcon = dayElement.querySelector('.forecast-alert');
+            if (premiumDayHasHazards(day)) {
+                alertIcon.classList.remove('hidden');
+            } else {
+                alertIcon.classList.add('hidden');
+            }
+
+            // Attach click handler for precipitation graph
+            dayElement.onclick = () => showPremiumPrecipGraph(index);
+        }
+    });
+
+    // Update current conditions (from forecastDataPrem.current)
+    if (forecastDataPrem.current) {
+        const humidity = forecastDataPrem.current.humidity;
+        const windSpeed = forecastDataPrem.current.wind_speed;
+        const windDir = forecastDataPrem.current.wind_deg;
+        // Update premium section IDs
+        const humidityElem = document.getElementById('prem-humidity');
+        if (humidityElem) humidityElem.textContent = `${humidity}%`;
+        const windElem = document.getElementById('prem-wind');
+        if (windElem) {
+            if (windSpeed && windDir !== undefined) {
+                windElem.textContent = `${formatPremiumWindSpeed(windSpeed)} at ${Math.round(windDir)}°`;
+            } else {
+                windElem.textContent = '--';
+            }
+        }
+        // Station info (OpenWeather doesn't provide station name, so just show update time)
+        const wxUpdateTime = formatTime(new Date(), { hour: '2-digit', minute: '2-digit' });
+        const stationElem = document.getElementById('prem-station-info');
+        if (stationElem) stationElem.textContent = wxUpdateTime;
+    }
+
+    // Update solar and moon data (from forecastDataPrem.daily[0])
+    if (forecastDataPrem.daily && forecastDataPrem.daily[0]) {
+        const today = forecastDataPrem.daily[0];
+        const sunriseTime = formatTime(new Date(today.sunrise * 1000), { timeZoneName: 'short' });
+        const premSunriseElem = document.getElementById('prem-sunrise');
+        if (premSunriseElem) premSunriseElem.textContent = sunriseTime;
+        const sunsetTime = formatTime(new Date(today.sunset * 1000), { timeZoneName: 'short' });
+        const premSunsetElem = document.getElementById('prem-sunset');
+        if (premSunsetElem) premSunsetElem.textContent = sunsetTime;
+        if (today.moon_phase !== undefined) {
+            const moonPhase = getMoonPhaseName(today.moon_phase);
+            const premMoonPhaseElem = document.getElementById('prem-moonphase');
+            if (premMoonPhaseElem) premMoonPhaseElem.textContent = moonPhase;
+            // Update the moon icon
+            const moonIcon = document.getElementById('prem-moon-icon');
+            if (moonIcon) {
+                moonIcon.setAttribute('style', getMoonPhaseIcon(today.moon_phase));
+            }
+        }
+    }
+
+    // Hide spinner, show forecast
+    const forecastContainer = document.getElementById('prem-forecast-container');
+    const loadingSpinner = document.getElementById('prem-forecast-loading');
+    if (forecastContainer) forecastContainer.classList.remove('hidden');
+    if (loadingSpinner) loadingSpinner.style.display = 'none';
+}
+
+// Fetches weather data from the old OpenWeather API
 export function fetchWeatherData(lat, long) {
     console.log('Fetching weather data...');
 
@@ -312,7 +465,45 @@ export function checkWeatherHazards() {
     return hasHazardousWeather;
 }
 
+// Helper: Extract 5 daily summaries from OpenWeather 3.0 API
+function extractPremiumDailyForecast(dailyList) {
+    // dailyList is already daily summaries (up to 8 days)
+    return dailyList.slice(0, 5);
+}
+
+// Helper: Format temperature for premium (units based on settings)
+function formatPremiumTemperature(tempF) {
+    if (!settings || settings["imperial-units"]) {
+        return Math.round(tempF) + "°";
+    } else {
+        // Convert F to C: (F - 32) * 5/9
+        return Math.round((tempF - 32) * 5/9) + "°";
+    }
+}
+
+// Helper: Format wind speed for premium (units based on settings)
+function formatPremiumWindSpeed(speedMS) {
+    if (!settings || settings["imperial-units"]) {
+        // Convert m/s to mph
+        return Math.round(speedMS * 2.237) + " MPH";
+    } else {
+        // Keep as m/s
+        return Math.round(speedMS) + " m/s";
+    }
+}
+
+// Helper: Check for hazards in a premium daily forecast
+function premiumDayHasHazards(day) {
+    const hazardConditions = ['Rain', 'Snow', 'Sleet', 'Hail', 'Thunderstorm', 'Storm', 'Drizzle'];
+    return day.weather.some(w =>
+        hazardConditions.some(condition =>
+            w.main.includes(condition) || w.description.toLowerCase().includes(condition.toLowerCase())
+        )
+    );
+}
+
 // Helper function to convert temperature based on user settings
+// TODO: Move to settings.js
 function formatTemperature(tempF) {
     if (!settings || settings["imperial-units"]) {
         return Math.round(tempF) + "°";
@@ -323,6 +514,7 @@ function formatTemperature(tempF) {
 }
 
 // Helper function to convert wind speed based on user settings
+// TODO: Move to settings.js
 function formatWindSpeed(speedMS) {
     if (!settings || settings["imperial-units"]) {
         // Convert m/s to mph
@@ -333,13 +525,11 @@ function formatWindSpeed(speedMS) {
     }
 }
 
-// Generate a CSS styling for the moon phase icon based on phase value
+// Generate CSS styling for the moon phase icon based on phase value
 function getMoonPhaseIcon(phase) {
     // Create CSS for the moon icon based on the phase value (0 to 1)
     // 0 = new moon (fully dark), 0.5 = full moon (fully light), 1 = new moon again
-    
     let style = '';
-    
     if (phase === 0 || phase === 1) {
         // New moon - completely dark circle
         style = 'background-color: #000;';
@@ -357,8 +547,22 @@ function getMoonPhaseIcon(phase) {
         style = `background-color: #000;
                  box-shadow: inset -${12 * percentageVisible}px 0 0 0 #fff;`;
     }
-    
     return style;
+}
+
+// Return string description of the closest moon phase
+function getMoonPhaseName(phase) {
+    if (phase < 0.05) {
+        return 'New';
+    } else if (phase < 0.35) {
+        return 'Crescent';
+    } else if (phase < 0.65) {
+        return 'Quarter';
+    } else if (phase < 0.95) {
+        return 'Gibbous';
+    } else {
+        return 'Full Moon';
+    }
 }
 
 // Checks if a day has hazardous weather conditions
@@ -371,7 +575,7 @@ function dayHasHazards(forecastList) {
     );
 }
 
-// Summarizes forecast data into daily data
+// Summarizes forecast data for each day
 function extractDailyForecast(forecastList) {
     const dailyData = [];
     const dayMap = new Map();
@@ -400,7 +604,7 @@ function extractDailyForecast(forecastList) {
     return dailyData.slice(0, 5);
 }
 
-// Fetches and updates the Air Quality Index (AQI)
+// Fetches and updates the Air Quality Index (AQI) from openweather.org
 function updateAQI(lat, lon) {
     fetch(`openwx_proxy.php/data/2.5/air_pollution?lat=${lat}&lon=${lon}`)
         .then(response => response.json())
@@ -438,6 +642,131 @@ function updateAQI(lat, lon) {
             highlightUpdate('aqi', aqiText);
             document.getElementById('aqi-dot').style.backgroundColor = color;
         });
+}
+
+// Show precipitation graph for a premium forecast day
+// TODO: Does this really have to have window scope?
+window.showPremiumPrecipGraph = function(dayIndex) {
+    if (!forecastDataPrem) return;
+
+    const daily = forecastDataPrem.daily || [];
+    const hourly = forecastDataPrem.hourly || [];
+    const minutely = forecastDataPrem.minutely || [];
+
+    if (!daily[dayIndex]) return;
+
+    // Calculate start/end of the selected day (UTC)
+    const dayStart = new Date(daily[dayIndex].dt * 1000);
+    dayStart.setUTCHours(0, 0, 0, 0);
+    const dayEnd = new Date(dayStart);
+    dayEnd.setUTCHours(23, 59, 59, 999);
+
+    let precipData = [];
+    let labels = [];
+
+    if (dayIndex === 0 && minutely.length > 0) {
+        // Minutely data for the first hour (if available)
+        const minutelyData = minutely.filter(m => {
+            const t = new Date(m.dt * 1000);
+            return t >= dayStart && t < new Date(dayStart.getTime() + 60 * 60 * 1000);
+        });
+        precipData = minutelyData.map(m => m.precipitation);
+        labels = minutelyData.map(m => {
+            const t = new Date(m.dt * 1000);
+            return t.getUTCMinutes().toString().padStart(2, '0');
+        });
+
+        // Add hourly data for the rest of the day
+        const hourlyData = hourly.filter(h => {
+            const t = new Date(h.dt * 1000);
+            return t >= new Date(dayStart.getTime() + 60 * 60 * 1000) && t <= dayEnd;
+        });
+        precipData = precipData.concat(hourlyData.map(h => {
+            // OpenWeather 3.0: h.rain?.['1h'] is mm, h.pop is probability (0-1)
+            if (h.rain && typeof h.rain['1h'] === 'number') {
+                return h.rain['1h'];
+            }
+            return 0;
+        }));
+        labels = labels.concat(hourlyData.map(h => {
+            const t = new Date(h.dt * 1000);
+            return t.getUTCHours().toString().padStart(2, '0') + ':00';
+        }));
+    } else {
+        // For other days, use hourly data for that day
+        const hourlyData = hourly.filter(h => {
+            const t = new Date(h.dt * 1000);
+            return t >= dayStart && t <= dayEnd;
+        });
+        precipData = hourlyData.map(h => {
+            if (h.rain && typeof h.rain['1h'] === 'number') {
+                return h.rain['1h'];
+            }
+            return 0;
+        });
+        labels = hourlyData.map(h => {
+            const t = new Date(h.dt * 1000);
+            return t.getUTCHours().toString().padStart(2, '0') + ':00';
+        });
+    }
+
+    // Show only the premium overlay/popup
+    const premOverlay = document.querySelector('#prem-weather .overlay');
+    const premPopup = document.querySelector('#prem-weather .forecast-popup');
+    if (premOverlay && premPopup) {
+        premOverlay.classList.add('show');
+        premPopup.classList.add('show');
+    }
+
+    // Set popup title
+    const popupDate = premPopup.querySelector('#popup-date');
+    if (popupDate) {
+        popupDate.textContent = new Date(daily[dayIndex].dt * 1000).toLocaleDateString('en-US', {
+            weekday: 'long',
+            month: 'long',
+            day: 'numeric'
+        }) + ' Precipitation';
+    }
+
+    // Insert chart canvas
+    const hourlyContainer = premPopup.querySelector('.hourly-forecast');
+    if (hourlyContainer) {
+        hourlyContainer.innerHTML = `<canvas id="premium-precip-chart" width="350" height="200"></canvas>`;
+        // Draw chart using Chart.js
+        const ctx = document.getElementById('premium-precip-chart').getContext('2d');
+        if (window.premiumPrecipChart) {
+            window.premiumPrecipChart.destroy();
+        }
+        window.premiumPrecipChart = new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: labels,
+                datasets: [{
+                    label: 'Precipitation (mm/hr)',
+                    data: precipData,
+                    backgroundColor: 'rgba(54, 162, 235, 0.6)'
+                }]
+            },
+            options: {
+                scales: {
+                    x: { title: { display: true, text: 'Time' } },
+                    y: { title: { display: true, text: 'Precipitation (mm/hr)' }, beginAtZero: true }
+                }
+            }
+        });
+    }
+};
+
+// Premium popup close handler
+window.closePremiumPrecipPopup = function() {
+    const premOverlay = document.querySelector('#prem-weather .overlay');
+    const premPopup = document.querySelector('#prem-weather .forecast-popup');
+    if (premOverlay) premOverlay.classList.remove('show');
+    if (premPopup) premPopup.classList.remove('show');
+    if (window.premiumPrecipChart) {
+        window.premiumPrecipChart.destroy();
+        window.premiumPrecipChart = null;
+    }
 }
 
 // Displays the hourly forecast for a specific day
@@ -518,6 +847,3 @@ window.switchWeatherImage = function (type) {
     const positions = { 'latest': 0, 'loop': 1, 'latest_ir': 2 };
     weatherSwitch.style.setProperty('--slider-position', positions[type]);
 }
-
-// Add click handler to close popup when clicking overlay
-document.querySelector('.overlay').addEventListener('click', closeHourlyForecast);
