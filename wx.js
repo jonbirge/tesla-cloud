@@ -1,5 +1,5 @@
 // Import required functions from app.js
-import { customLog, formatTime, highlightUpdate } from './common.js';
+import { formatTime, highlightUpdate } from './common.js';
 import { settings, turnOffDarkMode, turnOnDarkMode } from './settings.js';
 
 // Parameters
@@ -29,14 +29,14 @@ export function autoDarkMode(lat, long) {
             lat = lastLat;
             long = lastLong;
         } else {
-            customLog('autoDarkMode: No coordinates available.');
+            console.log('autoDarkMode: No coordinates available.');
             return;
         }
     }
 
-    customLog('Auto dark mode check for coordinates: ', lat, long);
+    console.log('Auto dark mode check for coordinates: ', lat, long);
     if (!sunrise || !sunset) {
-        customLog('autoDarkMode: sunrise/sunset data not available.');
+        console.log('autoDarkMode: sunrise/sunset data not available.');
         return;
     }
 
@@ -47,19 +47,23 @@ export function autoDarkMode(lat, long) {
         const sunsetTime = new Date(sunset).getTime();
 
         if (currentTime >= sunsetTime || currentTime < sunriseTime) {
-            customLog('Applying dark mode based on sunset...');
+            console.log('Applying dark mode based on sunset...');
             turnOnDarkMode();
         } else {
-            customLog('Applying light mode based on sunrise...');
+            console.log('Applying light mode based on sunrise...');
             turnOffDarkMode();
         }
     } else {
-        customLog('Auto dark mode disabled or coordinates not available.');
+        console.log('Auto dark mode disabled or coordinates not available.');
     }
 }
 
+export function fetchPremiumWeatherData(lat, long) {
+    console.log('Fetching premium weather data...');
+}
+
 export function fetchWeatherData(lat, long) {
-    customLog('Fetching weather data...');
+    console.log('Fetching weather data...');
 
     // Save so we can call functions later outside GPS update loop, if needed
     lastLat = lat;
@@ -69,7 +73,7 @@ export function fetchWeatherData(lat, long) {
         .then(response => response.json())
         .then(weatherDataLocal => {
             if (weatherDataLocal) {
-                customLog('Current weather data: ', weatherDataLocal);
+                console.log('Current weather data: ', weatherDataLocal);
                 // check to see if wind direction is NaN
                 if (isNaN(weatherDataLocal.weatherObservation.windDirection)) {
                     weatherDataLocal.weatherObservation.windDirection = null;
@@ -95,7 +99,7 @@ export function fetchWeatherData(lat, long) {
 
 // Fetches forecast data and updates the display
 export function fetchForecastData(lat, long, silentLoad = false) {
-    customLog('Fetching foercast data...' + (silentLoad ? ' (background load)' : ''));
+    console.log('Fetching foercast data...' + (silentLoad ? ' (background load)' : ''));
 
     // Save so we can call functions later outside GPS update loop, if needed
     lastLat = lat;
@@ -230,7 +234,7 @@ export function updateForecastDisplay() {
 // Updates the weather display with current data
 export function updateWeatherDisplay() {
     if (!weatherData) return;
-    customLog('Updating weather display...');
+    console.log('Updating weather display...');
 
     const windSpeedMS = weatherData.windSpeed;
     const windDir = weatherData.windDirection;
@@ -259,20 +263,20 @@ export function updateWeatherDisplay() {
 
 // Checks for hazardous weather in the upcoming forecast periods
 export function checkWeatherHazards() {
-    customLog('Checking for weather hazards in next forecast periods...');
+    console.log('Checking for weather hazards in next forecast periods...');
     
     if (!forecastData || !Array.isArray(forecastData)) {
-        customLog('No valid forecast data available for hazard check');
+        console.log('No valid forecast data available for hazard check');
         return false;
     }
     
     // Log forecast data structure for debugging
-    customLog(`Forecast data: ${forecastData.length} entries available`);
+    console.log(`Forecast data: ${forecastData.length} entries available`);
     
     // Take just the first n forecast entries
     const upcomingForecasts = forecastData.slice(0, 1);
     
-    customLog(`Looking at ${upcomingForecasts.length} upcoming forecast periods`);
+    console.log(`Looking at ${upcomingForecasts.length} upcoming forecast periods`);
     
     // Check if any upcoming forecasts contain hazardous weather
     const hazardousWeatherTypes = ['Rain', 'Snow', 'Thunderstorm', 'Storm', 'Drizzle', 'Hail'];
@@ -281,7 +285,7 @@ export function checkWeatherHazards() {
         // Log the upcoming forecasts for debugging
         upcomingForecasts.forEach((item, index) => {
             const time = new Date(item.dt * 1000).toLocaleTimeString();
-            customLog(`Forecast ${index + 1} at ${time}: ${JSON.stringify(item.weather[0].main)}`);
+            console.log(`Forecast ${index + 1} at ${time}: ${JSON.stringify(item.weather[0].main)}`);
         });
     }
     
@@ -298,10 +302,10 @@ export function checkWeatherHazards() {
 
     // Add or remove the warning notification
     if (hasHazardousWeather) {
-        customLog('⚠️ WEATHER ALERT: Hazardous weather detected in upcoming forecast!');
+        console.log('⚠️ WEATHER ALERT: Hazardous weather detected in upcoming forecast!');
         weatherButton.classList.add('weather-warning');
     } else {
-        customLog('Weather check complete: No hazards detected in upcoming forecast');
+        console.log('Weather check complete: No hazards detected in upcoming forecast');
         weatherButton.classList.remove('weather-warning');
     }
     
@@ -439,10 +443,10 @@ function updateAQI(lat, lon) {
 // Displays the hourly forecast for a specific day
 window.showHourlyForecast = function (dayIndex) {
     // Logging
-    customLog(`Showing hourly forecast for day index: ${dayIndex}`);
+    console.log(`Showing hourly forecast for day index: ${dayIndex}`);
 
     if (!forecastData) {
-        customLog('No forecast data available for hourly forecast!');
+        console.log('No forecast data available for hourly forecast!');
         return;
     }
 

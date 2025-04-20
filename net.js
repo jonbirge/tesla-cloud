@@ -1,5 +1,4 @@
-// Import the customLog function from app.js
-import { customLog } from './common.js';
+// Import the console.log function from app.js
 import { hashedUser } from './settings.js';
 
 // Global variables
@@ -21,24 +20,24 @@ function getUserLocation() {
                 userLocation.latitude = position.coords.latitude;
                 userLocation.longitude = position.coords.longitude;
                 userLocation.altitude = position.coords.altitude || null;
-                // customLog('Got user location: ', 
+                // console.log('Got user location: ', 
                 //     userLocation.latitude.toFixed(4) + ', ' + 
                 //     userLocation.longitude.toFixed(4) + 
                 //     (userLocation.altitude ? ', alt: ' + userLocation.altitude.toFixed(1) + 'm' : ''));
             },
             (error) => {
-                customLog('Error getting location: ', error.message);
+                console.log('Error getting location: ', error.message);
             }
         );
     } else {
-        customLog('Geolocation is not supported by this browser');
+        console.log('Geolocation is not supported by this browser');
     }
 }
 
 // Fetches and displays network information including IP details and reverse DNS
 export function updateNetworkInfo() {
     // Write diagnostic information to the console
-    customLog('Updating network info...');
+    console.log('Updating network info...');
 
     // Get updated location info
     getUserLocation();
@@ -68,7 +67,7 @@ export function updateNetworkInfo() {
         })
         .catch(error => {
             console.error('Error fetching IP/DNS information: ', error);
-            customLog('Error fetching IP/DNS information: ', error);
+            console.log('Error fetching IP/DNS information: ', error);
             // Set N/A values in case of error
             document.getElementById('rdns').innerText = 'N/A';
             document.getElementById('exitLocation').innerText = 'N/A';
@@ -101,7 +100,7 @@ function destroyPingChart() {
     if (pingChart) {
         pingChart.destroy();
         pingChart = null;
-        customLog('Ping chart destroyed');
+        console.log('Ping chart destroyed');
     }
 }
 
@@ -117,7 +116,7 @@ function initializePingChart() {
     const ctx = chartCanvas.getContext('2d');
 
     // Logging
-    customLog('Initializing ping chart...');
+    console.log('Initializing ping chart...');
     
     // Get the Tesla blue color from CSS
     const teslaBlue = getComputedStyle(document.documentElement).getPropertyValue('--tesla-blue').trim();
@@ -208,13 +207,13 @@ function initializePingChart() {
     updateChartAxisColors(); // Ensure initial colors are right
 
     // Logging
-    customLog('Ping chart initialized');
+    console.log('Ping chart initialized');
 }
 
 // Updates chart colors based on current theme settings
 export function updateChartAxisColors() {
     // Console log
-    customLog('Updating chart axis colors...');
+    console.log('Updating chart axis colors...');
 
     // Get computed values from body element instead of document.documentElement
     const computedStyle = getComputedStyle(document.body);
@@ -268,7 +267,7 @@ async function pingTestServer() {
         // Discard the first ping
         // if (!pingTestServer.firstPingDiscarded) {
         //     pingTestServer.firstPingDiscarded = true;
-        //     customLog('First ping discarded: ', Math.round(pingTime));
+        //     console.log('First ping discarded: ', Math.round(pingTime));
         //     return;
         // }
 
@@ -285,7 +284,7 @@ async function pingTestServer() {
             updatePingChart(true);  // Update with animation
         }
     } catch (error) {
-        customLog('Ping HEAD failed: ', error);
+        console.log('Ping HEAD failed: ', error);
     }
 
     // Add last ping time to form data as a string
@@ -301,7 +300,7 @@ async function pingTestServer() {
             throw new Error('Network response was not ok');
         }
     } catch (error) {
-        customLog('Ping POST failed: ', error);
+        console.log('Ping POST failed: ', error);
     }
 }
 
@@ -349,7 +348,7 @@ window.pausePingTest = function() {
     if (pingInterval) {
         clearInterval(pingInterval);
         pingInterval = null;
-        customLog('Network ping testing paused');
+        console.log('Network ping testing paused');
     }
 }
 
@@ -360,7 +359,7 @@ window.resumePingTest = function() {
         pingTestServer();
         // Resume pinging every 10 seconds
         pingInterval = setInterval(pingTestServer, pingWait);
-        customLog('Network ping testing resumed');
+        console.log('Network ping testing resumed');
     }
 }
 
