@@ -182,6 +182,7 @@ export function updatePremiumWeatherDisplay() {
             }
 
             // Attach click handler for precipitation graph
+            // TODO: Should be done in HTML?
             dayElement.onclick = () => showPremiumPrecipGraph(index);
         }
     });
@@ -191,7 +192,6 @@ export function updatePremiumWeatherDisplay() {
         const humidity = forecastDataPrem.current.humidity;
         const windSpeed = forecastDataPrem.current.wind_speed;
         const windDir = forecastDataPrem.current.wind_deg;
-        // Update premium section IDs
         highlightUpdate('prem-humidity', `${humidity}%`);
         if (windSpeed && windDir !== undefined) {
             highlightUpdate('prem-wind', `${formatWindSpeed(windSpeed)} at ${Math.round(windDir)}°`);
@@ -302,9 +302,7 @@ export function fetchForecastData(lat, long, silentLoad = false) {
                 autoDarkMode(lat, long);
             }
 
-            if (lat && long) {
-                updateAQI(lat, long);
-            }
+            updateAQI(lat, long);
 
             // Hide spinner and show forecast when data is loaded - only if not silent loading
             if (forecastContainer) forecastContainer.style.display = lastDisplayStyle;
@@ -423,6 +421,57 @@ export function updateWeatherDisplay() {
     // Update station information
     const stationInfoStr = stationName + ' @ ' + wxUpdateTime;
     highlightUpdate('station-info', stationInfoStr);
+}
+
+// Check if premium forecast data has any hazards or rain in the next hour, checking both the hourly forecast and the minutely forecast, and setting the warning notification, if so, adding the warning notification to the prem-wx-section button
+export function checkPremiumWeatherHazards() {
+    console.log('Checking for premium weather hazards in next forecast periods...');
+
+    if (!forecastDataPrem || !Array.isArray(forecastDataPrem)) {
+        console.log('No valid premium forecast data available for hazard check');
+        return false;
+    }
+
+    // Log forecast data structure for debugging
+    console.log(`Premium forecast data: ${forecastDataPrem.length} entries available`);
+
+    // Take just the first n forecast entries
+    const upcomingForecasts = forecastDataPrem.hourly.slice(0, 1);
+
+    console.log(`Looking at ${upcomingForecasts.length} upcoming premium forecast periods`);
+
+    // Check if any upcoming forecasts contain hazardous weather
+    const hazardousWeatherTypes = ['Rain', 'Snow', 'Thunderstorm', 'Storm', 'Drizzle', 'Hail'];
+
+    if (upcomingForecasts.length > 0) {
+        // Log the upcoming forecasts for debugging
+        upcomingForecasts.forEach((item, index) => {
+            const time = new Date(item.dt * 1000).toLocaleTimeString();
+            console.log(`Premium Forecast ${index + 1} at ${time}: ${JSON.stringify(item.weather[0].main)}`);
+        });
+    }
+
+    const hasHazardousWeather = upcomingForecasts.some(item =>
+        item.weather && item.weather.some(w =>
+            hazardousWeatherTypes.some(type =>
+                w.main.includes(type) || w.description.toLowerCase().includes(type.toLowerCase())
+            )
+        )
+    );
+
+    // Get the weather section button
+    const weatherButton = document.getElementById('prem-wx-section');
+
+    // Add or remove the warning notification
+    if (hasHazardousWeather) {
+        console.log('⚠️ PREMIUM WEATHER ALERT: Hazardous weather detected in upcoming forecast!');
+        weatherButton.classList.add('weather-warning');
+    } else {
+        console.log('Premium weather check complete: No hazards detected in upcoming forecast');
+        weatherButton.classList.remove('weather-warning');
+    }
+
+    return hasHazardousWeather;
 }
 
 // Checks for hazardous weather in the upcoming forecast periods
