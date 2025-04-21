@@ -8,10 +8,10 @@ import { markAllNewsAsRead, startNewsTimeUpdates, stopNewsTimeUpdates } from './
 
 // Parameters
 const LATLON_UPDATE_INTERVAL = 2; // seconds
-const UPDATE_DISTANCE_THRESHOLD = 500; // meters
+const UPDATE_DISTANCE_THRESHOLD = 2500; // meters
 const UPDATE_TIME_THRESHOLD = 10; // minutes
 const WX_DISTANCE_THRESHOLD = 25000; // meters
-const WX_TIME_THRESHOLD = 30; // minutes
+const WX_TIME_THRESHOLD = 60; // minutes
 const MAX_SPEED = 50; // Maximum speed for radar display (mph)
 const MIN_GPS_UPDATE_INTERVAL = 1000; // ms - minimum time between updates
 

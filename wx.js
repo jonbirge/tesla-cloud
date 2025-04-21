@@ -59,6 +59,7 @@ export function autoDarkMode(lat, long) {
     }
 }
 
+// Fetches premium weather data from OpenWeather API
 export function fetchPremiumWeatherData(lat, long, silentLoad = false) {
     console.log('Fetching premium weather data...');
 
@@ -98,10 +99,8 @@ export function fetchPremiumWeatherData(lat, long, silentLoad = false) {
                             const city = data[0].name;
                             const state = data[0].state;
                             const country = data[0].country;
-                            const locationElem = document.getElementById('prem-station-info');
-                            if (locationElem) {
-                                locationElem.textContent = `${city}, ${state} @ ${weatherUpdateTime}`;
-                            }
+                            const stationStr = `${city}, ${state} @ ${weatherUpdateTime}`;
+                            highlightUpdate('prem-station-info', stationStr);
                         } else {
                             console.log('No location data available.');
                         }
@@ -165,7 +164,7 @@ export function updatePremiumWeatherDisplay() {
             // Update temperature
             const tempElement = dayElement.querySelector('.forecast-temp');
             if (tempElement) {
-                tempElement.textContent = `${formatPremiumTemperature(day.temp.min)}/${formatPremiumTemperature(day.temp.max)}`;
+                tempElement.textContent = `${formatTemperature(day.temp.min)}/${formatTemperature(day.temp.max)}`;
             }
 
             // Update description
@@ -193,15 +192,11 @@ export function updatePremiumWeatherDisplay() {
         const windSpeed = forecastDataPrem.current.wind_speed;
         const windDir = forecastDataPrem.current.wind_deg;
         // Update premium section IDs
-        const humidityElem = document.getElementById('prem-humidity');
-        if (humidityElem) humidityElem.textContent = `${humidity}%`;
-        const windElem = document.getElementById('prem-wind');
-        if (windElem) {
-            if (windSpeed && windDir !== undefined) {
-                windElem.textContent = `${formatPremiumWindSpeed(windSpeed)} at ${Math.round(windDir)}°`;
-            } else {
-                windElem.textContent = '--';
-            }
+        highlightUpdate('prem-humidity', `${humidity}%`);
+        if (windSpeed && windDir !== undefined) {
+            highlightUpdate('prem-wind', `${formatWindSpeed(windSpeed)} at ${Math.round(windDir)}°`);
+        } else {
+            highlightUpdate('prem-wind', '--');
         }
     }
 
@@ -209,15 +204,12 @@ export function updatePremiumWeatherDisplay() {
     if (forecastDataPrem.daily && forecastDataPrem.daily[0]) {
         const today = forecastDataPrem.daily[0];
         const sunriseTime = formatTime(new Date(today.sunrise * 1000), { timeZoneName: 'short' });
-        const premSunriseElem = document.getElementById('prem-sunrise');
-        if (premSunriseElem) premSunriseElem.textContent = sunriseTime;
+        highlightUpdate('prem-sunrise', sunriseTime);
         const sunsetTime = formatTime(new Date(today.sunset * 1000), { timeZoneName: 'short' });
-        const premSunsetElem = document.getElementById('prem-sunset');
-        if (premSunsetElem) premSunsetElem.textContent = sunsetTime;
+        highlightUpdate('prem-sunset', sunsetTime);
         if (today.moon_phase !== undefined) {
             const moonPhase = getMoonPhaseName(today.moon_phase);
-            const premMoonPhaseElem = document.getElementById('prem-moonphase');
-            if (premMoonPhaseElem) premMoonPhaseElem.textContent = moonPhase;
+            highlightUpdate('prem-moonphase', moonPhase);
             // Update the moon icon
             const moonIcon = document.getElementById('prem-moon-icon');
             if (moonIcon) {
@@ -490,8 +482,8 @@ function extractPremiumDailyForecast(dailyList) {
     return dailyList.slice(0, 5);
 }
 
-// Helper: Format temperature for premium (units based on settings)
-function formatPremiumTemperature(tempF) {
+// Consolidated: Format temperature based on user settings
+function formatTemperature(tempF) {
     if (!settings || settings["imperial-units"]) {
         return Math.round(tempF) + "°";
     } else {
@@ -500,8 +492,8 @@ function formatPremiumTemperature(tempF) {
     }
 }
 
-// Helper: Format wind speed for premium (units based on settings)
-function formatPremiumWindSpeed(speedMS) {
+// Consolidated: Format wind speed based on user settings
+function formatWindSpeed(speedMS) {
     if (!settings || settings["imperial-units"]) {
         // Convert m/s to mph
         return Math.round(speedMS * 2.237) + " MPH";
@@ -519,29 +511,6 @@ function premiumDayHasHazards(day) {
             w.main.includes(condition) || w.description.toLowerCase().includes(condition.toLowerCase())
         )
     );
-}
-
-// Helper function to convert temperature based on user settings
-// TODO: Move to settings.js
-function formatTemperature(tempF) {
-    if (!settings || settings["imperial-units"]) {
-        return Math.round(tempF) + "°";
-    } else {
-        // Convert F to C: (F - 32) * 5/9
-        return Math.round((tempF - 32) * 5/9) + "°";
-    }
-}
-
-// Helper function to convert wind speed based on user settings
-// TODO: Move to settings.js
-function formatWindSpeed(speedMS) {
-    if (!settings || settings["imperial-units"]) {
-        // Convert m/s to mph
-        return Math.round(speedMS * 2.237) + " MPH";
-    } else {
-        // Keep as m/s
-        return Math.round(speedMS) + " m/s";
-    }
 }
 
 // Generate CSS styling for the moon phase icon based on phase value
@@ -660,6 +629,9 @@ function updateAQI(lat, lon) {
 
             highlightUpdate('aqi', aqiText);
             document.getElementById('aqi-dot').style.backgroundColor = color;
+
+            highlightUpdate('prem-aqi', aqiText);
+            document.getElementById('prem-aqi-dot').style.backgroundColor = color;
         });
 }
 
