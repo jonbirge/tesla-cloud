@@ -82,10 +82,33 @@ export function fetchPremiumWeatherData(lat, long, silentLoad = false) {
         .then(response => response.json())
         .then(forecastDataLocal => {
             if (forecastDataLocal) {
-                // You may need to adjust this if you want to fetch moon/sun data separately
                 forecastDataPrem = forecastDataLocal;
                 updatePremiumWeatherDisplay();
                 // autoDarkMode(lat, long);
+                // Update time and location of weather data, using FormatTime
+                const weatherUpdateTime = formatTime(new Date(forecastDataLocal.current.dt * 1000), {
+                    hour: '2-digit',
+                    minute: '2-digit'
+                });
+                // Get nearest city using OpenWeather GEOlocation API
+                fetch(`openwx_proxy.php/geo/1.0/reverse?lat=${lat}&lon=${long}&limit=1`)
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data && data.length > 0) {
+                            const city = data[0].name;
+                            const state = data[0].state;
+                            const country = data[0].country;
+                            const locationElem = document.getElementById('prem-station-info');
+                            if (locationElem) {
+                                locationElem.textContent = `${city}, ${state} @ ${weatherUpdateTime}`;
+                            }
+                        } else {
+                            console.log('No location data available.');
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error fetching location data: ', error);
+                    });
             } else {
                 console.log('No premium forecast data available.');
                 forecastDataPrem = null;
@@ -180,10 +203,6 @@ export function updatePremiumWeatherDisplay() {
                 windElem.textContent = '--';
             }
         }
-        // Station info (OpenWeather doesn't provide station name, so just show update time)
-        const wxUpdateTime = formatTime(new Date(), { hour: '2-digit', minute: '2-digit' });
-        const stationElem = document.getElementById('prem-station-info');
-        if (stationElem) stationElem.textContent = wxUpdateTime;
     }
 
     // Update solar and moon data (from forecastDataPrem.daily[0])

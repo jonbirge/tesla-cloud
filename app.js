@@ -416,6 +416,7 @@ function handlePositionUpdate(position) {
     if (shouldUpdateShortRangeData()) {
         updateLocationData(lat, long);
         fetchWeatherData(lat, long);
+        fetchPremiumWeatherData(lat, long);
         lastUpdateLat = lat;
         lastUpdateLong = long;
         lastUpdate = Date.now();
@@ -425,7 +426,6 @@ function handlePositionUpdate(position) {
     if (shouldUpdateLongRangeData()) {
         updateTimeZone(lat, long);
         fetchForecastData(lat, long);
-        fetchPremiumWeatherData(lat, long);
         lastWxUpdateLat = lat;
         lastWxUpdateLong = long;
         lastWxUpdate = Date.now();
