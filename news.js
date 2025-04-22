@@ -235,13 +235,18 @@ function generateHTMLforItem(item)
         classList = 'news-item';
     }
 
-    // Extract domain for favicon
+    // Extract domain for favicon either from the item.icon or from item.link if available
     let faviconUrl = '';
-    try {
-        const url = new URL(item.link);
-        faviconUrl = `https://www.google.com/s2/favicons?domain=${url.hostname}&sz=32`;
-    } catch (e) {
-        console.error('Error parsing URL for favicon:', e);
+    if (item.icon && typeof item.icon === 'string' && item.icon.trim() !== '') {
+        // Use the domain from the icon key
+        faviconUrl = `https://www.google.com/s2/favicons?domain=${item.icon}&sz=32`;
+    } else {
+        try {
+            const url = new URL(item.link);
+            faviconUrl = `https://www.google.com/s2/favicons?domain=${url.hostname}&sz=32`;
+        } catch (e) {
+            console.error('Error parsing URL for favicon:', e);
+        }
     }
 
     return `

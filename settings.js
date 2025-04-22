@@ -22,9 +22,9 @@ const defaultSettings = {
     "dark-mode": false,
     "auto-dark-mode": true,
     "24-hour-time": false,
-    "imperial-units": true,    // "English" or "Metric"
+    "imperial-units": true,
     "map-choice": 'waze',
-    "show-wind-radar": true, // Show/hide wind radar by default
+    "show-wind-radar": true,
     // News forwarding
     "news-forwarding": false,
     "news-forward-only": false,
@@ -38,17 +38,16 @@ const defaultSettings = {
     "rss-den": false,
     "rss-chi": false,
     "rss-bloomberg": false,
-    "rss-bloomberg-tech": false,
-    "rss-bbc": true,
+    "rss-ap": true,
+    "rss-bbc": false,
     "rss-economist": false,
     "rss-lemonde": false,
-    "rss-derspiegel": false,
+    "rss-cnn": false,
     "rss-notateslaapp": true,
     "rss-teslarati": true,
     "rss-insideevs": true,
     "rss-thedrive": false,
     "rss-techcrunch": true,
-    "rss-jalopnik": false,
     "rss-caranddriver": true,
     "rss-theverge": false,
     "rss-arstechnica": true,
@@ -57,6 +56,7 @@ const defaultSettings = {
     "rss-wired": false,
     "rss-spacenews": false,
     "rss-defensenews": false,
+    "rss-aviationweek": false,
 };
 
 // Settings section is being left
