@@ -1177,3 +1177,196 @@ body.dark-mode .option-button:hover:not(.active) {
 .news-toggle-item {
     font-size: 15pt;
 }
+
+/* Mobile Landscape Mode */
+@media only screen and (max-width: 900px) and (orientation: landscape) {
+    :root {
+        --heading-font-size: 14pt;
+        --heading-font-weight: 600;
+        --button-radius: 10px;
+    }
+    
+    body {
+        font-size: 13pt;
+    }
+    
+    h1 {
+        font-size: 16pt;
+        margin-bottom: 5px;
+    }
+    
+    h2 {
+        margin-top: 15px;
+        margin-bottom: 7px;
+    }
+    
+    /* Layout adjustment */
+    .frame-container {
+        flex-direction: column;
+    }
+    
+    /* Convert left menu to horizontal top menu */
+    .left-frame {
+        width: 100%;
+        height: auto;
+        max-height: 90px;
+        padding: 5px;
+        overflow-y: hidden;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+        scrollbar-width: none; /* Hide scrollbar for Firefox */
+    }
+    
+    .left-frame::-webkit-scrollbar {
+        display: none; /* Hide scrollbar for Chrome/Safari */
+    }
+    
+    /* Convert section buttons to horizontal layout */
+    .section-buttons {
+        flex-direction: row;
+        min-width: min-content;
+        width: auto;
+        height: 80px;
+        overflow-x: auto;
+    }
+    
+    .section-buttons h1 {
+        display: none; /* Hide title to save space */
+    }
+    
+    .section-button {
+        font-size: 14pt;
+        padding: 8px 15px;
+        margin: 0 3px;
+        white-space: nowrap;
+        height: 60px;
+    }
+    
+    .button-icon {
+        width: 16px;
+        height: 16px;
+        margin-right: 8px;
+    }
+    
+    /* Right frame takes remaining space */
+    .right-frame {
+        height: calc(100vh - 90px);
+        padding: 10px 15px;
+    }
+    
+    /* Dashboard adjustments */
+    .nav-container {
+        gap: 20px;
+        margin: 10px 0px -15px 0px;
+    }
+    
+    .radar-container {
+        padding-top: 20px;
+        margin-right: 15px;
+    }
+    
+    #radarDisplay {
+        width: 150px;
+        height: 150px;
+    }
+    
+    .stat-box {
+        height: 90px;
+    }
+    
+    .stat-value {
+        font-size: 36pt;
+    }
+    
+    .stat-unit {
+        font-size: 18pt;
+    }
+    
+    .stat-label {
+        font-size: 11pt;
+    }
+    
+    /* Teslawaze container adjustment */
+    .teslawaze-container {
+        height: calc(100vh - 300px);
+        min-height: 200px;
+    }
+    
+    /* Button lists */
+    .button-list {
+        grid-template-columns: repeat(auto-fill, 220px);
+        gap: 10px;
+    }
+    
+    .button-list a {
+        padding: 15px 5px;
+        height: 30px;
+        font-size: 13pt;
+    }
+    
+    /* News items */
+    .news-item {
+        padding: 8px 8px 8px 50px;
+    }
+    
+    .news-favicon {
+        width: 26px;
+        height: 26px;
+    }
+    
+    .news-title {
+        font-size: 14pt;
+        margin-right: 40px;
+    }
+    
+    /* Settings adjustments */
+    .settings-controls {
+        grid-template-columns: repeat(auto-fill, 300px);
+    }
+    
+    .settings-toggle-item {
+        padding: 8px 10px;
+        font-size: 13pt;
+    }
+    
+    .settings-toggle-item span.settings-toggle-slider {
+        width: 50px;
+        height: 26px;
+    }
+    
+    .settings-toggle-slider:before {
+        height: 20px;
+        width: 20px;
+    }
+    
+    input:checked + .settings-toggle-slider:before {
+        transform: translateX(22px);
+    }
+    
+    /* News sources grid */
+    .news-source-grid {
+        grid-template-columns: repeat(auto-fill, 240px);
+    }
+    
+    .news-toggle-item {
+        font-size: 13pt;
+    }
+    
+    /* Control container (top right) */
+    .control-container {
+        top: 85px;
+        right: 10px;
+        padding: 5px 10px;
+    }
+    
+    .toggle-label {
+        font-size: 13pt;
+    }
+    
+    /* Login button */
+    .login-button {
+        margin-top: 10px;
+        padding: 10px 15px;
+        font-size: 14pt;
+    }
+}

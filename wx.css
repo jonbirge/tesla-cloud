@@ -349,3 +349,96 @@ body.dark-mode .forecast-day.rain img.forecast-icon {
 body.dark-mode .moon-phase-icon {
     background-color: #555;
 }
+
+/* Mobile Landscape Mode */
+@media only screen and (max-width: 900px) and (orientation: landscape) {
+    /* Weather switch elements */
+    .weather-switch-container {
+        margin: 10px 0;
+    }
+    
+    .weather-switch {
+        width: 320px;
+    }
+    
+    .weather-switch button {
+        padding: 10px 16px;
+        font-size: 14pt;
+    }
+    
+    /* Weather images */
+    .weather-image {
+        max-width: 95%;
+    }
+    
+    /* Forecast container */
+    .forecast-container {
+        gap: 10px;
+        margin: 12px 0;
+        max-width: 95%;
+    }
+    
+    .forecast-day {
+        padding: 10px;
+        min-width: 100px;
+        max-width: 140px;
+    }
+    
+    .forecast-date {
+        font-size: 10pt;
+        margin-bottom: 5px;
+    }
+    
+    .forecast-icon {
+        width: 48px;
+        height: 48px;
+        margin: 5px;
+    }
+    
+    .forecast-temp {
+        font-size: 13pt;
+        margin: 5px 0;
+    }
+    
+    .forecast-desc {
+        font-size: 12pt;
+    }
+    
+    /* Forecast popup */
+    .forecast-popup {
+        width: 80%;
+        max-height: 70vh;
+    }
+    
+    .hourly-forecast {
+        grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+        gap: 10px;
+    }
+    
+    .hourly-item {
+        padding: 10px;
+    }
+    
+    .hourly-time {
+        font-size: 12pt;
+    }
+    
+    .hourly-temp {
+        font-size: 12pt;
+    }
+    
+    .hourly-desc {
+        font-size: 11pt;
+    }
+    
+    /* Moon phase icon */
+    .moon-phase-icon {
+        width: 14px;
+        height: 14px;
+    }
+    
+    /* Loading spinner */
+    .forecast-loading {
+        height: 150px;
+    }
+}
