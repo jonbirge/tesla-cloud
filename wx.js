@@ -19,6 +19,9 @@ let sunset = null;
 let lastLat = null;
 let lastLong = null;
 
+// Add a variable to track the minutely chart instance
+let minutelyPrecipChart = null;
+
 // Export these variables for use in other modules
 export { sunrise, sunset, weatherData, SAT_URLS };
 
@@ -215,6 +218,65 @@ export function updatePremiumWeatherDisplay() {
             if (moonIcon) {
                 moonIcon.setAttribute('style', getMoonPhaseIcon(today.moon_phase));
             }
+        }
+    }
+
+    // --- Minutely Precipitation Graph Logic ---
+    const minutely = forecastDataPrem.minutely || [];
+    let hasMinutelyPrecip = false;
+    let precipData = [];
+    let labels = [];
+
+    if (minutely.length > 0) {
+        // Only consider the next hour (60 min)
+        precipData = minutely.slice(0, 60).map(m => m.precipitation || 0);
+        labels = minutely.slice(0, 60).map(m => {
+            const t = new Date(m.dt * 1000);
+            return t.getMinutes().toString().padStart(2, '0');
+        });
+        hasMinutelyPrecip = precipData.some(val => val > 0);
+    }
+
+    const minutelyContainer = document.getElementById('minutely-precip-container');
+    const minutelyChartCanvas = document.getElementById('minutely-precip-chart');
+    const premWxSectionBtn = document.getElementById('prem-wx-section');
+
+    if (hasMinutelyPrecip && minutelyContainer && minutelyChartCanvas) {
+        minutelyContainer.style.display = '';
+        // Show orange alert dot on section button
+        premWxSectionBtn.classList.add('weather-warning');
+
+        // Draw or update the chart
+        if (minutelyPrecipChart) {
+            minutelyPrecipChart.destroy();
+        }
+        minutelyPrecipChart = new Chart(minutelyChartCanvas.getContext('2d'), {
+            type: 'bar',
+            data: {
+                labels: labels,
+                datasets: [{
+                    label: 'Precipitation (mm/hr)',
+                    data: precipData,
+                    backgroundColor: 'rgba(255, 119, 0, 0.6)'
+                }]
+            },
+            options: {
+                plugins: {
+                    legend: { display: false }
+                },
+                scales: {
+                    x: { title: { display: true, text: 'Minute (next hour)' } },
+                    y: { title: { display: true, text: 'Precipitation (mm/hr)' }, beginAtZero: true }
+                }
+            }
+        });
+    } else {
+        // Hide the graph and remove alert dot
+        if (minutelyContainer) minutelyContainer.style.display = 'none';
+        if (premWxSectionBtn) premWxSectionBtn.classList.remove('weather-warning');
+        if (minutelyPrecipChart) {
+            minutelyPrecipChart.destroy();
+            minutelyPrecipChart = null;
         }
     }
 
