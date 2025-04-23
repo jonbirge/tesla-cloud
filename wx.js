@@ -747,70 +747,13 @@ function updateAQI(lat, lon) {
 }
 
 // Show precipitation graph for a premium forecast day
-// TODO: Does this really have to have window scope?
 window.showPremiumPrecipGraph = function(dayIndex) {
     if (!forecastDataPrem) return;
 
     const daily = forecastDataPrem.daily || [];
     const hourly = forecastDataPrem.hourly || [];
-    const minutely = forecastDataPrem.minutely || [];
 
     if (!daily[dayIndex]) return;
-
-    // Calculate start/end of the selected day (UTC)
-    const dayStart = new Date(daily[dayIndex].dt * 1000);
-    dayStart.setUTCHours(0, 0, 0, 0);
-    const dayEnd = new Date(dayStart);
-    dayEnd.setUTCHours(23, 59, 59, 999);
-
-    let precipData = [];
-    let labels = [];
-
-    if (dayIndex === 0 && minutely.length > 0) {
-        // Minutely data for the first hour (if available)
-        const minutelyData = minutely.filter(m => {
-            const t = new Date(m.dt * 1000);
-            return t >= dayStart && t < new Date(dayStart.getTime() + 60 * 60 * 1000);
-        });
-        precipData = minutelyData.map(m => m.precipitation);
-        labels = minutelyData.map(m => {
-            const t = new Date(m.dt * 1000);
-            return t.getUTCMinutes().toString().padStart(2, '0');
-        });
-
-        // Add hourly data for the rest of the day
-        const hourlyData = hourly.filter(h => {
-            const t = new Date(h.dt * 1000);
-            return t >= new Date(dayStart.getTime() + 60 * 60 * 1000) && t <= dayEnd;
-        });
-        precipData = precipData.concat(hourlyData.map(h => {
-            // OpenWeather 3.0: h.rain?.['1h'] is mm, h.pop is probability (0-1)
-            if (h.rain && typeof h.rain['1h'] === 'number') {
-                return h.rain['1h'];
-            }
-            return 0;
-        }));
-        labels = labels.concat(hourlyData.map(h => {
-            const t = new Date(h.dt * 1000);
-            return t.getUTCHours().toString().padStart(2, '0') + ':00';
-        }));
-    } else {
-        // For other days, use hourly data for that day
-        const hourlyData = hourly.filter(h => {
-            const t = new Date(h.dt * 1000);
-            return t >= dayStart && t <= dayEnd;
-        });
-        precipData = hourlyData.map(h => {
-            if (h.rain && typeof h.rain['1h'] === 'number') {
-                return h.rain['1h'];
-            }
-            return 0;
-        });
-        labels = hourlyData.map(h => {
-            const t = new Date(h.dt * 1000);
-            return t.getUTCHours().toString().padStart(2, '0') + ':00';
-        });
-    }
 
     // Show only the premium overlay/popup
     const premOverlay = document.querySelector('#prem-weather .overlay');
@@ -820,42 +763,75 @@ window.showPremiumPrecipGraph = function(dayIndex) {
         premPopup.classList.add('show');
     }
 
-    // Set popup title
+    // Calculate start/end of the selected day in local time
+    const selectedDate = new Date(daily[dayIndex].dt * 1000);
+    const dayStart = new Date(selectedDate);
+    dayStart.setHours(0, 0, 0, 0);
+    const dayEnd = new Date(selectedDate);
+    dayEnd.setHours(23, 59, 59, 999);
+
+    // Set popup title with local date
     const popupDate = premPopup.querySelector('#popup-date');
     if (popupDate) {
-        popupDate.textContent = new Date(daily[dayIndex].dt * 1000).toLocaleDateString('en-US', {
+        popupDate.textContent = selectedDate.toLocaleDateString('en-US', {
             weekday: 'long',
             month: 'long',
             day: 'numeric'
-        }) + ' Precipitation';
+        });
     }
 
-    // Insert chart canvas
+    // Check if we're beyond the hourly forecast limit (48 hours)
+    const now = new Date();
+    const hoursDiff = (dayStart - now) / (1000 * 60 * 60);
     const hourlyContainer = premPopup.querySelector('.hourly-forecast');
+
+    if (hoursDiff >= 48) {
+        // Beyond hourly forecast limit - show message
+        hourlyContainer.innerHTML = `
+            <div style="grid-column: 1/-1; text-align: center; padding: 20px;">
+                <p>Detailed hourly forecast is only available for the next 48 hours.</p>
+                <p>Daily forecast summary for ${selectedDate.toLocaleDateString('en-US', {weekday: 'long'})}:</p>
+                <div class="hourly-item ${daily[dayIndex].weather[0].main.toLowerCase()}" style="margin-top: 15px;">
+                    <img src="https://openweathermap.org/img/wn/${daily[dayIndex].weather[0].icon}@2x.png" 
+                         alt="${daily[dayIndex].weather[0].description}" 
+                         style="width: 50px; height: 50px;">
+                    <div class="hourly-temp">${formatTemperature(daily[dayIndex].temp.min)}/${formatTemperature(daily[dayIndex].temp.max)}</div>
+                    <div class="hourly-desc">${daily[dayIndex].weather[0].main}</div>
+                </div>
+            </div>`;
+        return;
+    }
+
+    // Filter hourly data for the selected day using local time comparison
+    const dayHourly = hourly.filter(h => {
+        const itemDate = new Date(h.dt * 1000);
+        return itemDate >= dayStart && itemDate <= dayEnd;
+    });
+
+    // Take every 3rd hour
+    const threeHourData = dayHourly.filter((_, index) => index % 3 === 0);
+
+    // Update popup content
     if (hourlyContainer) {
-        hourlyContainer.innerHTML = `<canvas id="premium-precip-chart" width="350" height="200"></canvas>`;
-        // Draw chart using Chart.js
-        const ctx = document.getElementById('premium-precip-chart').getContext('2d');
-        if (window.premiumPrecipChart) {
-            window.premiumPrecipChart.destroy();
-        }
-        window.premiumPrecipChart = new Chart(ctx, {
-            type: 'bar',
-            data: {
-                labels: labels,
-                datasets: [{
-                    label: 'Precipitation (mm/hr)',
-                    data: precipData,
-                    backgroundColor: 'rgba(54, 162, 235, 0.6)'
-                }]
-            },
-            options: {
-                scales: {
-                    x: { title: { display: true, text: 'Time' } },
-                    y: { title: { display: true, text: 'Precipitation (mm/hr)' }, beginAtZero: true }
-                }
-            }
-        });
+        hourlyContainer.innerHTML = threeHourData.map(item => {
+            const itemDate = new Date(item.dt * 1000);
+            const time = formatTime(itemDate, {
+                hour: 'numeric',
+                minute: '2-digit'
+            });
+            
+            // Get weather condition class
+            const weatherCondition = item.weather[0].main.toLowerCase();
+            
+            return `
+                <div class="hourly-item ${weatherCondition}">
+                    <div class="hourly-time">${time}</div>
+                    <img src="https://openweathermap.org/img/wn/${item.weather[0].icon}@2x.png" alt="${item.weather[0].description}" style="width: 50px; height: 50px;">
+                    <div class="hourly-temp">${formatTemperature(item.temp)}</div>
+                    <div class="hourly-desc">${item.weather[0].main}</div>
+                </div>
+            `;
+        }).join('');
     }
 };
 
