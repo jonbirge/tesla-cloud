@@ -228,10 +228,19 @@ export function updatePremiumWeatherDisplay() {
     if (forecastDataPrem.current) {
         const humidity = forecastDataPrem.current.humidity;
         const windSpeed = forecastDataPrem.current.wind_speed;
+        const windGust = forecastDataPrem.current.wind_gust;
         const windDir = forecastDataPrem.current.wind_deg;
         highlightUpdate('prem-humidity', `${humidity}%`);
         if (windSpeed && windDir !== undefined) {
-            highlightUpdate('prem-wind', `${formatWindSpeed(windSpeed)} at ${Math.round(windDir)}°`);
+            let windText;
+            if (windGust && windGust > windSpeed) {
+                // Show wind-gust format
+                windText = `${formatWindSpeedRange(windSpeed, windGust)} at ${Math.round(windDir)}°`;
+            } else {
+                // Just show regular wind speed if no gust data
+                windText = `${formatWindSpeed(windSpeed)} at ${Math.round(windDir)}°`;
+            }
+            highlightUpdate('prem-wind', windText);
         } else {
             highlightUpdate('prem-wind', '--');
         }
@@ -672,6 +681,17 @@ function formatWindSpeed(speedMS) {
     } else {
         // Keep as m/s
         return Math.round(speedMS) + " m/s";
+    }
+}
+
+// Add this new helper function before the end of the file, near the other formatting functions
+function formatWindSpeedRange(speedMS, gustMS) {
+    if (!settings || settings["imperial-units"]) {
+        // Convert m/s to mph
+        return `${Math.round(speedMS * 2.237)}-${Math.round(gustMS * 2.237)} MPH`;
+    } else {
+        // Keep as m/s
+        return `${Math.round(speedMS)}-${Math.round(gustMS)} m/s`;
     }
 }
 
