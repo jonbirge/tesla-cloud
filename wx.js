@@ -841,10 +841,21 @@ window.showPremiumPrecipGraph = function(dayIndex) {
         });
     }
 
-    // Check if we're beyond the hourly forecast limit (48 hours)
+    const hourlyContainer = premPopup.querySelector('.hourly-forecast');
+    
+    // Simple rule: Only show hourly forecasts for the first two days (index 0 and 1)
+    if (dayIndex > 1) {
+        // Beyond day 2 - show simplified message
+        hourlyContainer.innerHTML = `
+            <div style="grid-column: 1/-1; text-align: center; padding: 20px;">
+                <p>Detailed hourly forecast is only available for the next 2 days.</p>
+            </div>`;
+        return;
+    }
+
+    // Check if we're beyond the hourly forecast limit (48 hours) - keeping this check as a fallback
     const now = new Date();
     const hoursDiff = (dayStart - now) / (1000 * 60 * 60);
-    const hourlyContainer = premPopup.querySelector('.hourly-forecast');
 
     if (hoursDiff >= 48) {
         // Beyond hourly forecast limit - show simplified message
