@@ -287,25 +287,6 @@ hr {
   animation-fill-mode: forwards; /* Keep final state */
 }
 
-/* Weather warning notification dot */
-.section-button.weather-warning {
-  position: relative;
-}
-
-.section-button.weather-warning::after {
-  content: "";
-  position: absolute;
-  top: 50%;
-  left: 5px;
-  transform: translateY(-50%);
-  width: 10px;
-  height: 10px;
-  background-color: var(--weather-warning-color);
-  border-radius: 50%;
-  animation: pulse 2s 1;
-  animation-fill-mode: forwards;
-}
-
 @keyframes pulse {
   0% {
     transform: translateY(-50%) scale(0.6);
