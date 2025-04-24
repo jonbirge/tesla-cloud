@@ -87,6 +87,40 @@ export function fetchPremiumWeatherData(lat, long, silentLoad = false) {
         .then(forecastDataLocal => {
             if (forecastDataLocal) {
                 forecastDataPrem = forecastDataLocal;
+                
+                // If in test mode, generate random precipitation data for minutely forecast
+                if (testMode) {
+                    console.log('TEST MODE: Generating random precipitation data');
+                    // Create minutely data if it doesn't exist
+                    if (!forecastDataPrem.minutely || forecastDataPrem.minutely.length < 60) {
+                        forecastDataPrem.minutely = [];
+                        
+                        // Current timestamp in seconds
+                        const nowSec = Math.floor(Date.now() / 1000);
+                        
+                        // Generate 60 minutes of data
+                        for (let i = 0; i < 60; i++) {
+                            forecastDataPrem.minutely.push({
+                                dt: nowSec + (i * 60),
+                                precipitation: Math.random() * 5 // Random value between 0-5 mm/hr
+                            });
+                        }
+                    } else {
+                        // Modify existing minutely data
+                        forecastDataPrem.minutely.forEach(minute => {
+                            minute.precipitation = Math.random() * 5; // Random value between 0-5 mm/hr
+                        });
+                    }
+                    
+                    // Make sure at least some values are non-zero to trigger display
+                    // Set a few minutes to have definite precipitation
+                    for (let i = 10; i < 30; i++) {
+                        if (i < forecastDataPrem.minutely.length) {
+                            forecastDataPrem.minutely[i].precipitation = 2 + Math.random() * 3; // 2-5 mm/hr
+                        }
+                    }
+                }
+                
                 updatePremiumWeatherDisplay();
                 // autoDarkMode(lat, long);
                 // Update time and location of weather data, using FormatTime
@@ -230,10 +264,10 @@ export function updatePremiumWeatherDisplay() {
     if (minutely.length > 0) {
         // Only consider the next hour (60 min)
         precipData = minutely.slice(0, 60).map(m => m.precipitation || 0);
-        labels = minutely.slice(0, 60).map(m => {
-            const t = new Date(m.dt * 1000);
-            return t.getMinutes().toString().padStart(2, '0');
-        });
+        
+        // Change: Use "time until" in minutes for X-axis labels, starting at 0
+        labels = minutely.slice(0, 60).map((m, index) => index.toString());
+        
         hasMinutelyPrecip = precipData.some(val => val > 0);
     }
 
@@ -265,8 +299,35 @@ export function updatePremiumWeatherDisplay() {
                     legend: { display: false }
                 },
                 scales: {
-                    x: { title: { display: true, text: 'Minute (next hour)' } },
-                    y: { title: { display: true, text: 'Precipitation (mm/hr)' }, beginAtZero: true }
+                    x: { 
+                        title: { 
+                            display: true, 
+                            text: 'Minutes from now',
+                            font: {
+                                size: 22 // Double the default size (usually around 8px)
+                            }
+                        },
+                        ticks: {
+                            font: {
+                                size: 18 // Larger tick labels
+                            }
+                        } 
+                    },
+                    y: { 
+                        title: { 
+                            display: true, 
+                            text: 'Precipitation (mm/hr)',
+                            font: {
+                                size: 22 // Double the default size
+                            }
+                        }, 
+                        beginAtZero: true,
+                        ticks: {
+                            font: {
+                                size: 18 // Larger tick labels
+                            }
+                        }
+                    }
                 }
             }
         });

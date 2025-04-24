@@ -542,7 +542,7 @@ window.updateMapFrame = function () {
     // Normal mode - ensure iframe is visible and test mode message is hidden
     const teslaWazeContainer = document.querySelector('.teslawaze-container');
     const iframe = teslaWazeContainer.querySelector('iframe');
-    const testModeMsg = teslaWazeContainer.querySelector('.test-mode-message');
+    let testModeMsg = teslaWazeContainer.querySelector('.test-mode-message');
     if (!testMode) {
         if (settings["map-choice"] === 'waze') {
             srcUpdate("teslawaze", "https://teslawaze.azurewebsites.net/");
