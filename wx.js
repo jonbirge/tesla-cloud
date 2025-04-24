@@ -1,5 +1,5 @@
 // Import required functions from app.js
-import { formatTime, highlightUpdate } from './common.js';
+import { formatTime, highlightUpdate, testMode } from './common.js';
 import { settings, turnOffDarkMode, turnOnDarkMode } from './settings.js';
 
 // Parameters
@@ -786,18 +786,10 @@ window.showPremiumPrecipGraph = function(dayIndex) {
     const hourlyContainer = premPopup.querySelector('.hourly-forecast');
 
     if (hoursDiff >= 48) {
-        // Beyond hourly forecast limit - show message
+        // Beyond hourly forecast limit - show simplified message
         hourlyContainer.innerHTML = `
             <div style="grid-column: 1/-1; text-align: center; padding: 20px;">
                 <p>Detailed hourly forecast is only available for the next 48 hours.</p>
-                <p>Daily forecast summary for ${selectedDate.toLocaleDateString('en-US', {weekday: 'long'})}:</p>
-                <div class="hourly-item ${daily[dayIndex].weather[0].main.toLowerCase()}" style="margin-top: 15px;">
-                    <img src="https://openweathermap.org/img/wn/${daily[dayIndex].weather[0].icon}@2x.png" 
-                         alt="${daily[dayIndex].weather[0].description}" 
-                         style="width: 50px; height: 50px;">
-                    <div class="hourly-temp">${formatTemperature(daily[dayIndex].temp.min)}/${formatTemperature(daily[dayIndex].temp.max)}</div>
-                    <div class="hourly-desc">${daily[dayIndex].weather[0].main}</div>
-                </div>
             </div>`;
         return;
     }
