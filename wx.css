@@ -229,7 +229,7 @@ body.dark-mode .forecast-day.rain img.forecast-icon {
     padding: 20px;
     z-index: 1000;
     max-width: 90%;
-    width: 600px;
+    width: 90%; /* Increased width to fit more items */
     max-height: 80vh;
     overflow-y: auto;
     box-shadow: 5px 5px 15px rgba(0, 0, 0, 0.5);
@@ -269,17 +269,16 @@ body.dark-mode .forecast-day.rain img.forecast-icon {
 
 .hourly-forecast {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
-    gap: 15px;
+    grid-template-columns: repeat(auto-fill, minmax(90px, 1fr)); /* Reduced the minimum width */
+    gap: 6px; /* Reduced gap */
     margin-top: 15px;
 }
 
 .hourly-item {
     background: linear-gradient(to bottom, var(--sky-gradient-top), var(--sky-gradient-bottom));
-    padding: 15px;
+    padding: 6px; /* Reduced padding */
     border-radius: var(--button-radius);
     text-align: center;
-    /* box-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1); */
     transition: background 0.3s ease;
 }
 
@@ -306,23 +305,31 @@ body.dark-mode .forecast-day.rain img.forecast-icon {
 
 .hourly-time {
     font-weight: 500;
-    font-size: 14pt;;
+    font-size: 11pt; /* Reduced font size */
     color: var(--button-text);
-    margin-bottom: 5px;
+    margin-bottom: 2px; /* Reduced margin */
+}
+
+.hourly-icon {
+    width: 32px; /* Smaller icon */
+    height: 32px; /* Smaller icon */
 }
 
 .hourly-temp {
     color: var(--button-text);
-    font-size: 14pt;
+    font-size: 11pt; /* Reduced font size */
     font-weight: 750;
-    margin: 5px 0;
+    margin: 2px 0; /* Reduced margin */
 }
 
 .hourly-desc {
     color: var(--button-text);
-    font-size: 13pt;
+    font-size: 10pt; /* Reduced font size */
     font-style: italic;
     font-weight: 600;
+    white-space: nowrap; /* Prevent text wrapping */
+    overflow: hidden; /* Hide text that doesn't fit */
+    text-overflow: ellipsis; /* Add ellipsis for overflow text */
 }
 
 .station-name {
@@ -406,29 +413,35 @@ body.dark-mode .moon-phase-icon {
     
     /* Forecast popup */
     .forecast-popup {
-        width: 80%;
+        width: 90%;
         max-height: 70vh;
     }
     
     .hourly-forecast {
-        grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
-        gap: 10px;
+        grid-template-columns: repeat(auto-fill, minmax(70px, 1fr)); /* Even smaller for landscape */
+        gap: 5px;
     }
     
     .hourly-item {
-        padding: 10px;
+        padding: 5px;
     }
     
     .hourly-time {
-        font-size: 12pt;
+        font-size: 10pt;
+    }
+    
+    .hourly-icon {
+        width: 28px;
+        height: 28px;
     }
     
     .hourly-temp {
-        font-size: 12pt;
+        font-size: 10pt;
+        margin: 1px 0;
     }
     
     .hourly-desc {
-        font-size: 11pt;
+        font-size: 9pt;
     }
     
     /* Moon phase icon */

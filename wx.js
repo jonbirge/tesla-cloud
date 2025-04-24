@@ -861,12 +861,9 @@ window.showPremiumPrecipGraph = function(dayIndex) {
         return itemDate >= dayStart && itemDate <= dayEnd;
     });
 
-    // Take every 3rd hour
-    const threeHourData = dayHourly.filter((_, index) => index % 3 === 0);
-
-    // Update popup content
+    // Update popup content - directly use dayHourly without creating a redundant copy
     if (hourlyContainer) {
-        hourlyContainer.innerHTML = threeHourData.map(item => {
+        hourlyContainer.innerHTML = dayHourly.map(item => {
             const itemDate = new Date(item.dt * 1000);
             const time = formatTime(itemDate, {
                 hour: 'numeric',
@@ -879,7 +876,7 @@ window.showPremiumPrecipGraph = function(dayIndex) {
             return `
                 <div class="hourly-item ${weatherCondition}">
                     <div class="hourly-time">${time}</div>
-                    <img src="https://openweathermap.org/img/wn/${item.weather[0].icon}@2x.png" alt="${item.weather[0].description}" style="width: 50px; height: 50px;">
+                    <img src="https://openweathermap.org/img/wn/${item.weather[0].icon}.png" alt="${item.weather[0].description}" class="hourly-icon">
                     <div class="hourly-temp">${formatTemperature(item.temp)}</div>
                     <div class="hourly-desc">${item.weather[0].main}</div>
                 </div>
@@ -940,7 +937,7 @@ window.showHourlyForecast = function (dayIndex) {
         return `
             <div class="hourly-item ${weatherCondition}">
                 <div class="hourly-time">${time}</div>
-                <img src="https://openweathermap.org/img/wn/${item.weather[0].icon}@2x.png" alt="${item.weather[0].description}" style="width: 50px; height: 50px;">
+                <img src="https://openweathermap.org/img/wn/${item.weather[0].icon}.png" alt="${item.weather[0].description}" class="hourly-icon">
                 <div class="hourly-temp">${formatTemperature(item.main.temp)}</div>
                 <div class="hourly-desc">${item.weather[0].main}</div>
             </div>
