@@ -278,6 +278,12 @@ export function updatePremiumWeatherDisplay() {
         labels = minutely.slice(0, 60).map((m, index) => index.toString());
         
         hasMinutelyPrecip = precipData.some(val => val > 0);
+        
+        // Check for rain in the next 15 minutes and show alert if detected
+        checkImminentRain(minutely);
+    } else {
+        // If no minutely data available, make sure to hide the rain indicator
+        toggleRainIndicator(false);
     }
 
     const minutelyContainer = document.getElementById('minutely-precip-container');
@@ -357,6 +363,130 @@ export function updatePremiumWeatherDisplay() {
     if (loadingSpinner) loadingSpinner.style.display = 'none';
 }
 
+// New function: Check for imminent rain (next 15 minutes)
+function checkImminentRain(minutelyData) {
+    if (!minutelyData || minutelyData.length === 0) {
+        toggleRainIndicator(false);
+        return false;
+    }
+    
+    // Check only the next 15 minutes
+    const next15MinData = minutelyData.slice(0, 15);
+    
+    // Determine if any precipitation is expected in the next 15 minutes
+    // Using a small threshold to filter out trace amounts
+    const precipThreshold = 0.1; // mm/hr
+    const hasImminentRain = next15MinData.some(minute => 
+        (minute.precipitation || 0) > precipThreshold
+    );
+    
+    // Toggle the rain indicator based on our findings
+    toggleRainIndicator(hasImminentRain);
+    
+    // If rain is imminent, show a notification
+    if (hasImminentRain) {
+        // Calculate when rain will start (first minute above threshold)
+        const rainStartMinute = next15MinData.findIndex(minute => 
+            (minute.precipitation || 0) > precipThreshold
+        );
+        
+        // Find the maximum precipitation intensity in the next 15 minutes
+        const maxPrecip = Math.max(...next15MinData.map(minute => minute.precipitation || 0));
+        
+        // Create the notification message
+        let message;
+        if (rainStartMinute === 0) {
+            message = `Rain detected now! (${maxPrecip.toFixed(1)} mm/hr)`;
+        } else {
+            message = `Rain expected in ${rainStartMinute} minute${rainStartMinute > 1 ? 's' : ''} (${maxPrecip.toFixed(1)} mm/hr)`;
+        }
+        
+        // Show the notification
+        showNotification(message);
+    }
+    
+    return hasImminentRain;
+}
+
+// New function: Toggle the rain indicator
+function toggleRainIndicator(show) {
+    // Get or create the rain indicator element
+    let rainIndicator = document.getElementById('rain-indicator');
+    
+    if (!rainIndicator && show) {
+        // Create the rain indicator if it doesn't exist
+        rainIndicator = document.createElement('div');
+        rainIndicator.id = 'rain-indicator';
+        rainIndicator.className = 'status-indicator rain-status';
+        rainIndicator.title = 'Rain expected within 15 minutes';
+        
+        // Add SVG icon for cloud (changed from rain icon)
+        rainIndicator.innerHTML = `
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24">
+                <path class="cloud-icon" fill="currentColor" d="M19.35,10.03C18.67,6.59 15.64,4 12,4C9.11,4 6.6,5.64 5.35,8.03C2.34,8.36 0,10.9 0,14A6,6 0 0,0 6,20H19A5,5 0 0,0 24,15C24,12.36 21.95,10.22 19.35,10.03Z"/>
+            </svg>
+        `;
+        
+        // Insert at the beginning of the control container and center it horizontally
+        const controlContainer = document.querySelector('.control-container');
+        if (controlContainer) {
+            controlContainer.insertBefore(rainIndicator, controlContainer.firstChild);
+        }
+    } else if (rainIndicator && !show) {
+        // Remove the indicator if it exists and should not be shown
+        rainIndicator.remove();
+    }
+}
+
+// New function: Show a temporary notification
+function showNotification(message) {
+    // Check if a notification container already exists
+    let notificationContainer = document.getElementById('notification-container');
+    
+    if (!notificationContainer) {
+        // Create a notification container if it doesn't exist
+        notificationContainer = document.createElement('div');
+        notificationContainer.id = 'notification-container';
+        document.body.appendChild(notificationContainer);
+    }
+    
+    // Create the notification element
+    const notification = document.createElement('div');
+    notification.className = 'notification';
+    notification.innerHTML = `
+        <div class="notification-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24">
+                <path fill="currentColor" d="M19.35,10.03C18.67,6.59 15.64,4 12,4C9.11,4 6.6,5.64 5.35,8.03C2.34,8.36 0,10.9 0,14A6,6 0 0,0 6,20H19A5,5 0 0,0 24,15C24,12.36 21.95,10.22 19.35,10.03Z"/>
+            </svg>
+        </div>
+        <div class="notification-message">${message}</div>
+    `;
+    
+    // Add the notification to the container
+    notificationContainer.appendChild(notification);
+    
+    // Make the notification visible with a fade-in effect
+    setTimeout(() => {
+        notification.classList.add('show');
+    }, 10);
+    
+    // Remove the notification after 5 seconds
+    setTimeout(() => {
+        notification.classList.remove('show');
+        notification.classList.add('hide');
+        
+        // Remove the element after the fade-out animation completes
+        setTimeout(() => {
+            notification.remove();
+            
+            // Remove the container if there are no more notifications
+            if (notificationContainer.children.length === 0) {
+                notificationContainer.remove();
+            }
+        }, 300);
+    }, 5000);
+}
+
 // Fetches weather data from the old OpenWeather API
 export function fetchWeatherData(lat, long) {
     console.log('Fetching weather data...');
@@ -369,7 +499,6 @@ export function fetchWeatherData(lat, long) {
         .then(response => response.json())
         .then(weatherDataLocal => {
             if (weatherDataLocal) {
-                console.log('Current weather data: ', weatherDataLocal);
                 // check to see if wind direction is NaN
                 if (isNaN(weatherDataLocal.weatherObservation.windDirection)) {
                     weatherDataLocal.weatherObservation.windDirection = null;

@@ -16,6 +16,7 @@
     --status-poor: #ff9100;    /* Yellow for poor connection */
     --status-good: #00d000;    /* Green for good connection */
     --status-unavailable: #888888;  /* Gray for unavailable/bad connection */
+    --status-rain: #00a1ff;    /* Blue for rain indicator */
     --heading-font-size: 17pt;
     --heading-font-weight: 650;
 }
@@ -34,6 +35,7 @@ body.dark-mode {
     --status-poor: #ffcd27;    /* Yellow for poor connection */
     --status-good: #5eff19;    /* Green for good connection */
     --status-unavailable: #888888;  /* Gray for unavailable/bad connection */
+    --status-rain: #4fb8ff;    /* Blue for rain indicator */
 }
 
 
@@ -733,16 +735,116 @@ body.dark-mode .share-icon img {
 }
 
 
-/* Network Status Indicator */
-
-.network-status {
-    margin-right: 22px;
+/* Status Indicators - Unified Styling */
+.status-indicator {
     width: 24px;
     height: 24px;
+    margin-right: 22px;
     display: flex;
     align-items: center;
     justify-content: center;
     transition: color 0.3s ease;
+}
+
+/* Network Status Indicator */
+.network-status {
+    color: var(--status-unavailable);
+}
+
+.network-status.unavailable {
+    color: var(--status-unavailable);
+}
+
+.network-status.poor {
+    color: var(--status-poor);
+}
+
+.network-status.good {
+    color: var(--status-good);
+}
+
+/* GPS Status Indicator */
+.gps-status {
+    color: var(--status-unavailable);
+}
+
+.gps-status.unavailable {
+    color: var(--status-unavailable);
+}
+
+.gps-status.poor {
+    color: var(--status-poor);
+}
+
+.gps-status.good {
+    color: var(--status-good);
+}
+
+/* Rain Status Indicator */
+.rain-status {
+    color: var(--weather-warning-color); /* Changed to orange weather warning color */
+    animation: pulse-rain 2s infinite;
+}
+
+@keyframes pulse-rain {
+    0% {
+        opacity: 0.7;
+    }
+    50% {
+        opacity: 1;
+    }
+    100% {
+        opacity: 0.7;
+    }
+}
+
+/* Notification System */
+#notification-container {
+    position: fixed;
+    top: 20px;
+    left: 50%; /* Center horizontally */
+    transform: translateX(-50%); /* Offset by half width for true centering */
+    z-index: 9999;
+    max-width: 80%; /* Allow more width */
+    min-width: 200px;
+}
+
+.notification {
+    display: flex;
+    align-items: center;
+    background-color: rgba(0, 0, 0, 0.75);
+    padding: 12px 16px;
+    border-radius: 8px;
+    margin-bottom: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    opacity: 0;
+    transform: translateY(-20px);
+    transition: opacity 0.3s, transform 0.3s;
+    white-space: nowrap; /* Keep on one line */
+    width: auto; /* Size to content */
+    display: inline-flex; /* Only take needed width */
+}
+
+.notification.show {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+.notification.hide {
+    opacity: 0;
+    transform: translateY(-20px);
+}
+
+.notification-icon {
+    margin-right: 12px;
+    color: var(--weather-warning-color); /* Match the orange warning color */
+}
+
+.notification-message {
+    font-size: 14pt;
+    font-weight: 500;
+    color: #ff9500; /* Bright orange color for text */
+    white-space: nowrap; /* Ensure text stays on one line */
 }
 
 
@@ -768,6 +870,9 @@ body.dark-mode .share-icon img {
 @keyframes spin {
     to { transform: rotate(360deg); }
 }
+
+
+/* Network status indicator */
 
 .network-status svg {
     width: 24px;
