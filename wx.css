@@ -106,13 +106,13 @@ body.dark-mode {
     padding: 15px;
     text-align: center;
     position: relative;
-    cursor: pointer;
     min-width: 120px;
     max-width: 180px;
 }
 
 .hourly-avail {
     box-shadow: 5px 5px 9px 0px rgba(0, 0, 0, 0.5);
+    cursor: pointer;
 }
 
 #wx-data {

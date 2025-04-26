@@ -180,9 +180,10 @@ export function updatePremiumWeatherDisplay() {
         if (index < forecastDays.length) {
             const date = new Date(day.dt * 1000);
             const dayElement = forecastDays[index];
+            const hourlyAvail = index < 2 ? true : false;
 
             // Update weather condition class
-            const hourlyClass = index < 2 ? 'hourly-avail' : null;
+            const hourlyClass = hourlyAvail ? 'hourly-avail' : null;
             const weatherCondition = day.weather[0].main.toLowerCase();
             dayElement.className = `forecast-day ${hourlyClass} ${weatherCondition}`;
 
@@ -220,7 +221,9 @@ export function updatePremiumWeatherDisplay() {
             }
 
             // Attach click handler for precipitation graph?
-            dayElement.onclick = () => showPremiumPrecipGraph(index);
+            if (hourlyAvail) {
+                dayElement.onclick = () => showPremiumPrecipGraph(index);
+            }
         }
     });
 
