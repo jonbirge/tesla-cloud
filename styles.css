@@ -586,13 +586,10 @@ input:checked + .toggle-slider:before {
 /* Waze frame */
 
 .teslawaze-container {
-    height: calc(100vh - 380px);
+    height: calc(100vh - 370px);
     min-height: 280px;
-    margin-top: 20px;
-    width: 100%;
     margin-bottom: 0; /* Ensure no bottom margin */
     position: relative; /* Add positioning context */
-    flex-grow: 1; /* Allow it to grow to fill available space */
 }
 
 #teslawaze {
@@ -600,11 +597,6 @@ input:checked + .toggle-slider:before {
     width: 100%;
     height: 100%;
     border: none;
-    position: absolute; /* Position absolutely within container */
-    top: 0;
-    left: 0;
-    bottom: 0;
-    right: 0;
 }
 
 
@@ -619,10 +611,7 @@ input:checked + .toggle-slider:before {
     border-radius: var(--button-radius);
     margin-bottom: 15px;
     padding: 9px 9px 9px 61px;
-    transition: background-color 0.3s;
-    border: none;
     max-width: 1200px;
-    text-align: left;
     cursor: pointer;
     position: relative;  /* Added for absolute positioning of the favicon */
 }
@@ -669,14 +658,12 @@ input:checked + .toggle-slider:before {
 }
 
 .news-source {
-    color: var(--tesla-blue);
     font-weight: 675;
     margin-right: 10px;
     font-size: 11.5pt;
 }
 
 .news-time, .news-date {
-    color: var(--text-color);
     font-size: 12.5pt;
     margin-left: 5px;
     font-weight: 500;
@@ -699,7 +686,7 @@ input:checked + .toggle-slider:before {
     width: 32px;                    /* Slightly increased width */
     height: 32px;                   /* Slightly increased height */
     border-radius: 4px;             /* Optional: adds a slight rounding to the icons */
-    /* opacity: 0.8; */
+    opacity: 0.8;
 }
 
 .share-icon {
