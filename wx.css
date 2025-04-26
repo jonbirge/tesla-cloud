@@ -3,8 +3,8 @@
     --sky-clear-bottom: #a8d0f0;
     --sky-cloudy-top: #cacaca;
     --sky-cloudy-bottom: #70a0c7;
-    --sky-rainy-top: #a0a0a0;
-    --sky-rainy-bottom: #7a7f8d;
+    --sky-rainy-top: #7a7f8d;
+    --sky-rainy-bottom: #cacaca;
     --sky-storm-top: #c9d6e2;
     --sky-storm-bottom: #7b8a9a;
     --sky-snow-top: #f0f5fb;
@@ -16,8 +16,8 @@ body.dark-mode {
     --sky-clear-bottom: #441a45;
     --sky-cloudy-top: #262729;
     --sky-cloudy-bottom: #142236;
-    --sky-rainy-top: #262729;
-    --sky-rainy-bottom: #2a3040;
+    --sky-rainy-top: #2a3040;
+    --sky-rainy-bottom: #262729;
     --sky-storm-top: #080e18;
     --sky-storm-bottom: #292b2e;
     --sky-snow-top: #3e3e3b;
@@ -41,7 +41,6 @@ body.dark-mode {
     gap: 4px;
     position: relative;
     width: 420px;
-    /* --slider-position: 0; */
 }
 
 .weather-switch button {
@@ -110,6 +109,10 @@ body.dark-mode {
     cursor: pointer;
     min-width: 120px;
     max-width: 180px;
+}
+
+.hourly-avail {
+    box-shadow: 5px 5px 9px 0px rgba(0, 0, 0, 0.5);
 }
 
 #wx-data {
@@ -195,6 +198,7 @@ body.dark-mode .forecast-day.rain img.forecast-icon {
     font-size: 12pt;
     font-weight: 650;
     text-transform: uppercase;
+    color: var(--button-text);
 }
 
 .forecast-icon {

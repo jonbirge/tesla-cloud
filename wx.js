@@ -182,8 +182,9 @@ export function updatePremiumWeatherDisplay() {
             const dayElement = forecastDays[index];
 
             // Update weather condition class
+            const hourlyClass = index < 2 ? 'hourly-avail' : null;
             const weatherCondition = day.weather[0].main.toLowerCase();
-            dayElement.className = `forecast-day ${weatherCondition}`;
+            dayElement.className = `forecast-day ${hourlyClass} ${weatherCondition}`;
 
             // Update date
             const dateElement = dayElement.querySelector('.forecast-date');
@@ -218,8 +219,7 @@ export function updatePremiumWeatherDisplay() {
                 alertIcon.classList.add('hidden');
             }
 
-            // Attach click handler for precipitation graph
-            // TODO: Should be done in HTML?
+            // Attach click handler for precipitation graph?
             dayElement.onclick = () => showPremiumPrecipGraph(index);
         }
     });
@@ -331,7 +331,8 @@ export function updatePremiumWeatherDisplay() {
                             display: true, 
                             text: 'Precipitation (mm/hr)',
                             font: {
-                                size: 22 // Double the default size
+                                size: 22, // Double the default size
+                                weight: 650
                             }
                         }, 
                         beginAtZero: true,
@@ -857,11 +858,9 @@ window.showPremiumPrecipGraph = function(dayIndex) {
 
     if (!daily[dayIndex]) return;
 
-    // Show only the premium overlay/popup
-    const premOverlay = document.querySelector('#prem-weather .overlay');
+    // Show only the premium popup
     const premPopup = document.querySelector('#prem-weather .forecast-popup');
-    if (premOverlay && premPopup) {
-        premOverlay.classList.add('show');
+    if (premPopup) {
         premPopup.classList.add('show');
     }
 
@@ -913,35 +912,155 @@ window.showPremiumPrecipGraph = function(dayIndex) {
         return itemDate >= dayStart && itemDate <= dayEnd;
     });
 
-    // Update popup content - directly use dayHourly without creating a redundant copy
+    // Create a new timeline-based hourly forecast view
     if (hourlyContainer) {
-        hourlyContainer.innerHTML = dayHourly.map(item => {
-            const itemDate = new Date(item.dt * 1000);
-            const time = formatTime(itemDate, {
-                hour: 'numeric',
-                minute: '2-digit'
-            });
+        // Make sure we have at least one hour of data
+        if (dayHourly.length === 0) {
+            hourlyContainer.innerHTML = `<div style="grid-column: 1/-1; text-align: center; padding: 20px;">
+                <p>No hourly data available for this day.</p>
+            </div>`;
+            return;
+        }
+        
+        // First, set up the container styles for the new timeline layout
+        hourlyContainer.style.display = 'flex';
+        hourlyContainer.style.flexDirection = 'column';
+        hourlyContainer.style.width = '100%';
+        hourlyContainer.style.padding = '0'; // Remove padding to align date heading with timeline
+        
+        // Create a timeline view with continuous weather rectangles
+        let timelineHTML = `
+            <div class="timeline-container">
+            <div class="timeline-weather-row">`;
+                
+        // Create weather condition rectangles and detect weather changes for icon placement
+        let prevWeatherMain = null;
+        let weatherChangePoints = [];
+        let weatherChangeIcons = [];
+        
+        // Calculate total width of each hour segment
+        const hourWidth = 100 / dayHourly.length; // percentage width
             
-            // Get weather condition class
+        // Generate the weather rectangles
+        dayHourly.forEach((item, index) => {
             const weatherCondition = item.weather[0].main.toLowerCase();
+            const itemDate = new Date(item.dt * 1000);
+            const hour = itemDate.getHours();
             
-            return `
-                <div class="hourly-item ${weatherCondition}">
-                    <div class="hourly-time">${time}</div>
-                    <img src="https://openweathermap.org/img/wn/${item.weather[0].icon}.png" alt="${item.weather[0].description}" class="hourly-icon">
-                    <div class="hourly-temp">${formatTemperature(item.temp)}</div>
-                    <div class="hourly-desc">${item.weather[0].main}</div>
+            // Check for weather condition changes to place icons
+            if (prevWeatherMain !== item.weather[0].main) {
+                weatherChangePoints.push(index);
+                weatherChangeIcons.push({
+                    position: index,
+                    icon: item.weather[0].icon,
+                    description: item.weather[0].description
+                });
+                prevWeatherMain = item.weather[0].main;
+            }
+            
+            // Add the weather condition rectangle
+            timelineHTML += `
+                <div class="timeline-hour ${weatherCondition}"
+                data-hour="${hour}" data-temp="${item.temp}" data-weather="${item.weather[0].main}">
                 </div>
             `;
-        }).join('');
+        });
+            
+        timelineHTML += `</div>`;
+            
+        // Add weather change icons
+        timelineHTML += `<div class="weather-icons">`;
+        
+        weatherChangeIcons.forEach(change => {
+            // Position the icon exactly at the boundary between hours
+            const iconLeft = change.position * hourWidth;
+            timelineHTML += `
+                <div class="weather-change-icon" style="left: ${iconLeft}%;">
+                    <img src="https://openweathermap.org/img/wn/${change.icon}.png" 
+                        alt="${change.description}" 
+                        title="${change.description}">
+                </div>
+            `;
+        });
+        
+        timelineHTML += `</div>`;
+        
+        // Add temperature indicators (every 3 hours)
+        timelineHTML += `<div class="temperature-indicators">`;
+        
+        dayHourly.forEach((item, index) => {
+            const itemDate = new Date(item.dt * 1000);
+            const hour = itemDate.getHours();
+            
+            // Only show temperature every 3 hours
+            if (hour % 3 === 0 || index === 0) {
+                // Center the temperature in each rectangle
+                const tempLeft = (index * hourWidth) + (hourWidth / 2);
+                timelineHTML += `
+                    <div class="temp-indicator" style="left: ${tempLeft}%;">
+                        ${formatTemperature(item.temp)}
+                    </div>
+                `;
+            }
+        });
+        
+        timelineHTML += `</div>`;
+        
+        // Add hour labels at the bottom (every 3 hours)
+        timelineHTML += `<div class="hour-labels">`;
+        
+        dayHourly.forEach((item, index) => {
+            const itemDate = new Date(item.dt * 1000);
+            const hour = itemDate.getHours();
+            
+            // Only show labels every 3 hours
+            if (hour % 3 === 0 || index === 0) {
+                // Position labels to align with the center of their corresponding rectangle
+                const labelLeft = (index * hourWidth) + (hourWidth / 2);
+                const time = formatTime(itemDate, {
+                    hour: 'numeric',
+                    minute: '2-digit'
+                });
+                
+                timelineHTML += `
+                    <div class="hour-label" style="left: ${labelLeft}%;">
+                        ${time}
+                    </div>
+                `;
+            }
+        });
+        
+        timelineHTML += `</div>`;
+        timelineHTML += `</div>`;
+        
+        // Add a legend for weather conditions
+        timelineHTML += `
+            <div class="weather-legend">
+        `;
+        
+        // Get unique weather conditions for legend
+        const uniqueConditions = new Set();
+        dayHourly.forEach(item => uniqueConditions.add(item.weather[0].main));
+        
+        uniqueConditions.forEach(condition => {
+            const conditionClass = condition.toLowerCase();
+            timelineHTML += `
+                <div class="legend-item ${conditionClass}">
+                    <div class="legend-color"></div>
+                    <span>${condition}</span>
+                </div>
+            `;
+        });
+        
+        timelineHTML += `</div>`;
+        
+        hourlyContainer.innerHTML = timelineHTML;
     }
 };
 
 // Premium popup close handler
 window.closePremiumPrecipPopup = function() {
-    const premOverlay = document.querySelector('#prem-weather .overlay');
     const premPopup = document.querySelector('#prem-weather .forecast-popup');
-    if (premOverlay) premOverlay.classList.remove('show');
     if (premPopup) premPopup.classList.remove('show');
     if (window.premiumPrecipChart) {
         window.premiumPrecipChart.destroy();
@@ -996,13 +1115,11 @@ window.showHourlyForecast = function (dayIndex) {
         `;
     }).join('');
 
-    document.querySelector('.overlay').classList.add('show');
     document.querySelector('.forecast-popup').classList.add('show');
 }
 
 // Closes the hourly forecast popup
 window.closeHourlyForecast = function () {
-    document.querySelector('.overlay').classList.remove('show');
     document.querySelector('.forecast-popup').classList.remove('show');
 }
 

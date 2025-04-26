@@ -18,7 +18,7 @@
     --status-unavailable: #888888;  /* Gray for unavailable/bad connection */
     --status-rain: #00a1ff;    /* Blue for rain indicator */
     --heading-font-size: 17pt;
-    --heading-font-weight: 650;
+    --heading-font-weight: 700;
 }
 
 body.dark-mode {
@@ -59,6 +59,7 @@ body {
 a {
     color: var(--tesla-blue);
     text-decoration: none;
+    font-weight: 575;
 }
 
 h1 {
@@ -480,7 +481,7 @@ input:checked + .toggle-slider:before {
 
 .data-item {
     color: var(--button-text);
-    font-weight: var(--heading-font-weight);
+    font-weight: 600;
     font-size: var(--heading-font-size);
     display: block;
     margin-right: 0;

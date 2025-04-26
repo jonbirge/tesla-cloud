@@ -10,6 +10,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="styles.css?0421">
     <link rel="stylesheet" href="wx.css?0421">
+    <link rel="stylesheet" href="timeline.css?0425">
 </head>
 
 <body>
@@ -194,7 +195,6 @@
                 </div>
             </div>
             <!-- Add popup elements -->
-            <div class="overlay"></div>
             <div class="forecast-popup">
                 <button class="forecast-popup-close" onclick="closeHourlyForecast()">&times;</button>
                 <h2 id="popup-date">Hourly Forecast</h2>
@@ -248,35 +248,35 @@
                 <div class="spinner"></div>
             </div>
             <div id="prem-forecast-container" class="forecast-container hidden">
-                <div class="forecast-day" onclick="showPremiumHourlyForecast(0)">
+                <div class="forecast-day hourly-avail" onclick="showPremiumHourlyForecast(0)">
                     <div class="forecast-date"></div>
                     <img class="forecast-icon" src="">
                     <div class="forecast-temp"></div>
                     <div class="forecast-desc"></div>
                     <img class="forecast-alert hidden" src="warn.svg" alt="Warning Icon">
                 </div>
-                <div class="forecast-day" onclick="showPremiumHourlyForecast(1)">
+                <div class="forecast-day hourly-avail" onclick="showPremiumHourlyForecast(1)">
                     <div class="forecast-date"></div>
                     <img class="forecast-icon" src="">
                     <div class="forecast-temp"></div>
                     <div class="forecast-desc"></div>
                     <img class="forecast-alert hidden" src="warn.svg" alt="Warning Icon">
                 </div>
-                <div class="forecast-day" onclick="showPremiumHourlyForecast(2)">
+                <div class="forecast-day">
                     <div class="forecast-date"></div>
                     <img class="forecast-icon" src="">
                     <div class="forecast-temp"></div>
                     <div class="forecast-desc"></div>
                     <img class="forecast-alert hidden" src="warn.svg" alt="Warning Icon">
                 </div>
-                <div class="forecast-day" onclick="showPremiumHourlyForecast(3)">
+                <div class="forecast-day">
                     <div class="forecast-date"></div>
                     <img class="forecast-icon" src="">
                     <div class="forecast-temp"></div>
                     <div class="forecast-desc"></div>
                     <img class="forecast-alert hidden" src="warn.svg" alt="Warning Icon">
                 </div>
-                <div class="forecast-day" onclick="showPremiumHourlyForecast(4)">
+                <div class="forecast-day">
                     <div class="forecast-date"></div>
                     <img class="forecast-icon" src="">
                     <div class="forecast-temp"></div>
@@ -289,10 +289,9 @@
                 <canvas id="minutely-precip-chart" width="420" height="180"></canvas>
             </div>
             <!-- Add popup elements -->
-            <div id="prem-forecast-overlay" class="overlay"></div>
             <div class="forecast-popup">
                 <button id="prem-forecast-popup-close" class="forecast-popup-close" type="button">&times;</button>
-                <h2 id="popup-date">Hourly Forecast</h2>
+                <h2 id="popup-date"></h2>
                 <div class="hourly-forecast"></div>
             </div>
             <!-- <hr> -->
@@ -795,15 +794,11 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="app.js?0421" type="module"></script>
     <script>
-      // Attach event listeners for premium forecast popup close and overlay
+      // Attach event listeners for premium forecast popup close
       document.addEventListener('DOMContentLoaded', function() {
         var premCloseBtn = document.getElementById('prem-forecast-popup-close');
-        var premOverlay = document.getElementById('prem-forecast-overlay');
         if (premCloseBtn) {
           premCloseBtn.onclick = window.closePremiumPrecipPopup;
-        }
-        if (premOverlay) {
-          premOverlay.addEventListener('click', window.closePremiumPrecipPopup);
         }
       });
     </script>
