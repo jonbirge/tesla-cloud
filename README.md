@@ -2,7 +2,7 @@
 
 ## About
 
-JavaScript-based site with information and links intended for use on an in-car browser. Currently focused on Tesla vehicles, but could eventually be adapted for other vehicles with a browser.
+JavaScript-based site with information and links intended for use on an in-car browser. Currently focused on Teslas, but could be adapted for other vehicles with a browser.
 
 ## Demo
 
@@ -18,12 +18,3 @@ The main branch is generally running at <https://teslas.cloud>.
 
 ### Waze integration
 ![Screenshot 2025-03-05 002326](https://github.com/user-attachments/assets/56618b10-b545-474b-a918-c515212d76dc)
-
-### Media links
-![Screenshot 2025-03-05 002353](https://github.com/user-attachments/assets/4c09959d-405f-4f86-9f84-f1dce43f275d)
-
-### Satellite weather
-![Screenshot 2025-03-05 002342](https://github.com/user-attachments/assets/c1ddf0ff-1ab6-45f5-979e-e0302a68569a)
-
-### Network health
-![Screenshot 2025-03-05 002409](https://github.com/user-attachments/assets/5d2d2a65-4944-4157-8bbe-d2832a2f5971)
