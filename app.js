@@ -1,17 +1,17 @@
 // Imports
-import { customLog, highlightUpdate, srcUpdate, testMode, updateTimeZone, GEONAMES_USERNAME } from './common.js';
+import { highlightUpdate, srcUpdate, testMode, updateTimeZone, GEONAMES_USERNAME } from './common.js';
 import { PositionSimulator } from './location.js';
 import { attemptLogin, leaveSettings, settings } from './settings.js';
-import { fetchForecastData, fetchWeatherData, weatherData, SAT_URLS } from './wx.js';
+import { fetchPremiumWeatherData, weatherData, SAT_URLS } from './wx.js';
 import { updateNetworkInfo, updatePingChart, startPingTest } from './net.js';
 import { markAllNewsAsRead, startNewsTimeUpdates, stopNewsTimeUpdates } from './news.js';
 
 // Parameters
 const LATLON_UPDATE_INTERVAL = 2; // seconds
-const UPDATE_DISTANCE_THRESHOLD = 500; // meters
+const UPDATE_DISTANCE_THRESHOLD = 2500; // meters
 const UPDATE_TIME_THRESHOLD = 10; // minutes
 const WX_DISTANCE_THRESHOLD = 25000; // meters
-const WX_TIME_THRESHOLD = 30; // minutes
+const WX_TIME_THRESHOLD = 60; // minutes
 const MAX_SPEED = 50; // Maximum speed for radar display (mph)
 const MIN_GPS_UPDATE_INTERVAL = 1000; // ms - minimum time between updates
 
@@ -67,8 +67,8 @@ function fetchCityData(lat, long) {
 
 // Function to fetch nearby Wikipedia data based on coordinates
 async function fetchLandmarkData(lat, long) {
-    customLog('Fetching Wikipedia data...');
-    const url = `https://secure.geonames.org/findNearbyWikipediaJSON?lat=${lat}&lng=${long}&username=${GEONAMES_USERNAME}`;
+    console.log('Fetching Wikipedia data...');
+    const url = `https://secure.geonames.org/findNearbyWikipediaJSON?lat=${lat}&lng=${long}&maxRows=9&username=${GEONAMES_USERNAME}`;
     try {
         const response = await fetch(url);
         const data = await response.json();
@@ -264,7 +264,7 @@ function updateWindage(vehicleSpeed, vehicleHeading, windSpeed, windDirection) {
 
 // Function to update location-dependent data
 async function updateLocationData(lat, long) {
-    customLog('Updating location dependent data for (', lat, ', ', long, ')');
+    console.log('Updating location dependent data for (', lat, ', ', long, ')');
     neverUpdatedLocation = false;
 
     // Fire off API requests for external data
@@ -274,14 +274,14 @@ async function updateLocationData(lat, long) {
     // Update connectivity data iff the Network section is visible
     // const networkSection = document.getElementById("network");
     // if (networkSection.style.display === "block") {
-    //     customLog('Updating connectivity data...');
+    //     console.log('Updating connectivity data...');
     //     updateNetworkInfo();
     // }
 
     // Update Wikipedia data iff the Landmarks section is visible
     const locationSection = document.getElementById("landmarks");
     if (locationSection.style.display === "block") {
-        customLog('Updating Wikipedia data...');
+        console.log('Updating Wikipedia data...');
         fetchLandmarkData(lat, long);
     }
 }
@@ -415,7 +415,7 @@ function handlePositionUpdate(position) {
     // Short distance updates
     if (shouldUpdateShortRangeData()) {
         updateLocationData(lat, long);
-        fetchWeatherData(lat, long);
+        fetchPremiumWeatherData(lat, long);
         lastUpdateLat = lat;
         lastUpdateLong = long;
         lastUpdate = Date.now();
@@ -424,7 +424,6 @@ function handlePositionUpdate(position) {
     // Long distance updates
     if (shouldUpdateLongRangeData()) {
         updateTimeZone(lat, long);
-        fetchForecastData(lat, long);
         lastWxUpdateLat = lat;
         lastWxUpdateLong = long;
         lastWxUpdate = Date.now();
@@ -437,7 +436,7 @@ function updateGPS() {
         if (navigator.geolocation) {
             navigator.geolocation.getCurrentPosition(handlePositionUpdate);
         } else {
-            customLog('Geolocation is not supported by this browser.');
+            console.log('Geolocation is not supported by this browser.');
             return false;
         }
     } else { // testing
@@ -453,7 +452,7 @@ function throttledUpdateGPS() {
         lastGPSUpdate = now;
         updateGPS();
     } else {
-        customLog('Skipping rapid GPS update');
+        console.log('Skipping rapid GPS update');
     }
 }
 
@@ -462,7 +461,7 @@ function startGPSUpdates() {
     if (!gpsIntervalId) {
         if (updateGPS()) { // Call immediately and check if browser supports
             gpsIntervalId = setInterval(throttledUpdateGPS, 1000 * LATLON_UPDATE_INTERVAL);
-            customLog('GPS updates started');
+            console.log('GPS updates started');
         }
     }
 }
@@ -472,7 +471,7 @@ function stopGPSUpdates() {
     if (gpsIntervalId) {
         clearInterval(gpsIntervalId);
         gpsIntervalId = null;
-        customLog('GPS updates paused');
+        console.log('GPS updates paused');
     }
 }
 
@@ -510,7 +509,7 @@ function updateServerNote() {
             }
         })
         .catch(error => {
-            customLog('No NOTE file available.');
+            console.log('No NOTE file available.');
 
             // Ensure the announcement section is hidden
             const announcementSection = document.getElementById('announcement');
@@ -541,7 +540,7 @@ window.updateMapFrame = function () {
     // Normal mode - ensure iframe is visible and test mode message is hidden
     const teslaWazeContainer = document.querySelector('.teslawaze-container');
     const iframe = teslaWazeContainer.querySelector('iframe');
-    const testModeMsg = teslaWazeContainer.querySelector('.test-mode-message');
+    let testModeMsg = teslaWazeContainer.querySelector('.test-mode-message');
     if (!testMode) {
         if (settings["map-choice"] === 'waze') {
             srcUpdate("teslawaze", "https://teslawaze.azurewebsites.net/");
@@ -614,12 +613,12 @@ window.showSection = function (sectionId) {
     
     // Check if we're actually going anywhere
     if (currentSection === sectionId && !rightFrame.classList.contains('external')) {
-        customLog(`Already in section: ${sectionId}`);
+        console.log(`Already in section: ${sectionId}`);
         return;
     }
 
     // Log the clicked section
-    customLog(`Showing section: ${sectionId}`);
+    console.log(`Showing section: ${sectionId}`);
 
     // Update URL without page reload 
     const url = new URL(window.location);
@@ -699,7 +698,7 @@ window.showSection = function (sectionId) {
         if (lat !== null && long !== null) {
             fetchLandmarkData(lat, long);
         } else {
-            customLog('Location not available for Wikipedia data.');
+            console.log('Location not available for Wikipedia data.');
         }
     }
 
@@ -767,7 +766,7 @@ document.addEventListener('visibilitychange', () => {
 // Event listeners and initialization after DOM content is loaded
 document.addEventListener('DOMContentLoaded', async function () {
     // Log
-    customLog('DOM fully loaded and parsed...');
+    console.log('DOM fully loaded and parsed...');
 
     // Attempt login from URL parameter or cookie
     await attemptLogin();

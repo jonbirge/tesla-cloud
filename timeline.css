@@ -1,0 +1,208 @@
+/* Timeline-based hourly forecast styles */
+
+/* Day heading alignment */
+.forecast-popup h2 {
+    margin-left: 15pt;
+}
+
+/* Container for the timeline view */
+.timeline-container {
+    position: relative;
+    width: 100%;
+    height: 120px;
+    margin-bottom: 40px;
+    user-select: none;
+}
+
+/* Weather condition row */
+.timeline-weather-row {
+    display: flex;
+    height: 80px;
+    width: 100%;
+    position: relative;
+    border-radius: var(--button-radius);
+    overflow: hidden;
+}
+
+/* Individual hour in the timeline */
+.timeline-hour {
+    flex: 1;
+    height: 100%;
+    position: relative;
+    box-sizing: border-box;
+}
+
+/* Use the existing weather condition gradients */
+.timeline-hour.clear {
+    background: linear-gradient(to bottom, var(--sky-clear-top), var(--sky-clear-bottom));
+}
+
+.timeline-hour.clouds {
+    background: linear-gradient(to bottom, var(--sky-cloudy-top), var(--sky-cloudy-bottom));
+}
+
+.timeline-hour.rain {
+    background: linear-gradient(to bottom, var(--sky-rainy-top), var(--sky-rainy-bottom));
+}
+
+.timeline-hour.storm, .timeline-hour.thunderstorm {
+    background: linear-gradient(to bottom, var(--sky-storm-top), var(--sky-storm-bottom));
+}
+
+.timeline-hour.snow {
+    background: linear-gradient(to bottom, var(--sky-snow-top), var(--sky-snow-bottom));
+}
+
+.timeline-hour:hover {
+    filter: brightness(1.1);
+}
+
+/* Weather icons */
+.weather-icons {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 5;
+    pointer-events: none;
+}
+
+.weather-change-icon {
+    position: absolute;
+    background-color: rgba(255, 255, 255, 0.5);
+    border-radius: 50%;
+    padding: 2px;
+    box-shadow: 0 0 5px rgba(0, 0, 0, 0.2);
+    z-index: 10;
+    transform: translate(-50%, -50%);
+    top: 40px; /* Exact center of the 80px height timeline */
+}
+
+.weather-change-icon img {
+    width: 40px;
+    height: 40px;
+    vertical-align: middle;
+}
+
+/* Temperature indicators */
+.temperature-indicators {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 0;
+    pointer-events: none;
+}
+
+.temp-indicator {
+    position: absolute;
+    text-align: center;
+    font-weight: 650;
+    transform: translateX(-50%);
+    color: var(--text-color);
+    bottom: 10px;
+    font-size: 14pt; /* Bumped up font size for temperature labels */
+}
+
+/* Hour labels */
+.hour-labels {
+    position: absolute;
+    bottom: 5px; /* Move up even closer to the temperature labels */
+    left: 0;
+    width: 100%;
+    pointer-events: none;
+    font-weight: 300;
+}
+
+.hour-label {
+    position: absolute;
+    text-align: center;
+    transform: translateX(-50%);
+    color: var(--text-color);
+    font-size: 13pt; /* Bumped up font size for time labels */
+}
+
+/* Weather legend */
+.weather-legend {
+    display: flex;
+    /* flex-wrap: wrap; */
+    justify-content: center;
+    gap: 10px;
+    /* margin-top: 15px; */
+}
+
+.legend-item {
+    display: flex;
+    /* align-items: center; */
+    margin: 0 10px;
+    font-size: 14pt;
+    font-weight: 500;
+}
+
+.legend-color {
+    width: 35px;
+    height: 25px;
+    margin-right: 7px;
+    border-radius: 3px;
+}
+
+.legend-item.clear .legend-color {
+    background: linear-gradient(to bottom, var(--sky-clear-top), var(--sky-clear-bottom));
+}
+
+.legend-item.clouds .legend-color {
+    background: linear-gradient(to bottom, var(--sky-cloudy-top), var(--sky-cloudy-bottom));
+}
+
+.legend-item.rain .legend-color {
+    background: linear-gradient(to bottom, var(--sky-rainy-top), var(--sky-rainy-bottom));
+}
+
+.legend-item.storm .legend-color, .legend-item.thunderstorm .legend-color {
+    background: linear-gradient(to bottom, var(--sky-storm-top), var(--sky-storm-bottom));
+}
+
+.legend-item.snow .legend-color {
+    background: linear-gradient(to bottom, var(--sky-snow-top), var(--sky-snow-bottom));
+}
+
+/* Mobile Landscape Mode */
+@media only screen and (max-width: 900px) and (orientation: landscape) {
+    .timeline-container {
+        height: 100px;
+        margin-bottom: 35px;
+    }
+    
+    .timeline-weather-row {
+        height: 60px;
+    }
+    
+    .weather-change-icon img {
+        width: 24px;
+        height: 24px;
+    }
+    
+    .temperature-indicators {
+        top: 65px;
+    }
+    
+    .temp-indicator, .hour-label {
+        font-size: 10pt;
+    }
+    
+    .weather-legend {
+        gap: 5px;
+        margin-top: 10px;
+    }
+    
+    .legend-item {
+        margin: 0 5px;
+        font-size: 10pt;
+    }
+    
+    .legend-color {
+        width: 16px;
+        height: 16px;
+    }
+}

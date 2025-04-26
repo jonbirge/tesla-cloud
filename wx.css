@@ -3,8 +3,8 @@
     --sky-clear-bottom: #a8d0f0;
     --sky-cloudy-top: #cacaca;
     --sky-cloudy-bottom: #70a0c7;
-    --sky-rainy-top: #c7c7c7;
-    --sky-rainy-bottom: #a4afbe;
+    --sky-rainy-top: #7a7f8d;
+    --sky-rainy-bottom: #cacaca;
     --sky-storm-top: #c9d6e2;
     --sky-storm-bottom: #7b8a9a;
     --sky-snow-top: #f0f5fb;
@@ -16,8 +16,8 @@ body.dark-mode {
     --sky-clear-bottom: #441a45;
     --sky-cloudy-top: #262729;
     --sky-cloudy-bottom: #142236;
-    --sky-rainy-top: #262729;
-    --sky-rainy-bottom: #2a3040;
+    --sky-rainy-top: #2a3040;
+    --sky-rainy-bottom: #262729;
     --sky-storm-top: #080e18;
     --sky-storm-bottom: #292b2e;
     --sky-snow-top: #3e3e3b;
@@ -41,7 +41,6 @@ body.dark-mode {
     gap: 4px;
     position: relative;
     width: 420px;
-    /* --slider-position: 0; */
 }
 
 .weather-switch button {
@@ -107,9 +106,13 @@ body.dark-mode {
     padding: 15px;
     text-align: center;
     position: relative;
-    cursor: pointer;
     min-width: 120px;
     max-width: 180px;
+}
+
+.hourly-avail {
+    box-shadow: 5px 5px 9px 0px rgba(0, 0, 0, 0.5);
+    cursor: pointer;
 }
 
 #wx-data {
@@ -195,6 +198,7 @@ body.dark-mode .forecast-day.rain img.forecast-icon {
     font-size: 12pt;
     font-weight: 650;
     text-transform: uppercase;
+    color: var(--button-text);
 }
 
 .forecast-icon {
@@ -229,10 +233,18 @@ body.dark-mode .forecast-day.rain img.forecast-icon {
     padding: 20px;
     z-index: 1000;
     max-width: 90%;
-    width: 600px;
+    width: 90%; /* Increased width to fit more items */
     max-height: 80vh;
     overflow-y: auto;
     box-shadow: 5px 5px 15px rgba(0, 0, 0, 0.5);
+}
+
+/* Add a max-width constraint to match our 12-column layout */
+@media (min-width: 1200px) {
+    .forecast-popup {
+        max-width: 1180px; /* 1140px (12-column width) + 40px (padding) */
+        width: 1180px;
+    }
 }
 
 .forecast-popup.show {
@@ -269,17 +281,26 @@ body.dark-mode .forecast-day.rain img.forecast-icon {
 
 .hourly-forecast {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
-    gap: 15px;
+    grid-template-columns: repeat(auto-fill, minmax(90px, 1fr)); /* Current setting */
+    gap: 6px; /* Reduced gap */
     margin-top: 15px;
+    max-width: 1140px; /* 90px × 12 + 6px × 11 gaps = 1146px, rounded down slightly */
+    margin-left: auto;
+    margin-right: auto;
+}
+
+/* Add a media query for larger screens to explicitly limit to 12 columns */
+@media (min-width: 1200px) {
+    .hourly-forecast {
+        grid-template-columns: repeat(12, 1fr); /* Force exactly 12 columns on wide screens */
+    }
 }
 
 .hourly-item {
     background: linear-gradient(to bottom, var(--sky-gradient-top), var(--sky-gradient-bottom));
-    padding: 15px;
+    padding: 6px; /* Reduced padding */
     border-radius: var(--button-radius);
     text-align: center;
-    /* box-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1); */
     transition: background 0.3s ease;
 }
 
@@ -306,23 +327,31 @@ body.dark-mode .forecast-day.rain img.forecast-icon {
 
 .hourly-time {
     font-weight: 500;
-    font-size: 14pt;;
+    font-size: 11pt; /* Reduced font size */
     color: var(--button-text);
-    margin-bottom: 5px;
+    margin-bottom: 2px; /* Reduced margin */
+}
+
+.hourly-icon {
+    width: 32px; /* Smaller icon */
+    height: 32px; /* Smaller icon */
 }
 
 .hourly-temp {
     color: var(--button-text);
-    font-size: 14pt;
+    font-size: 11pt; /* Reduced font size */
     font-weight: 750;
-    margin: 5px 0;
+    margin: 2px 0; /* Reduced margin */
 }
 
 .hourly-desc {
     color: var(--button-text);
-    font-size: 13pt;
+    font-size: 10pt; /* Reduced font size */
     font-style: italic;
     font-weight: 600;
+    white-space: nowrap; /* Prevent text wrapping */
+    overflow: hidden; /* Hide text that doesn't fit */
+    text-overflow: ellipsis; /* Add ellipsis for overflow text */
 }
 
 .station-name {
@@ -348,4 +377,103 @@ body.dark-mode .forecast-day.rain img.forecast-icon {
 /* Dark mode styles for moon icon */
 body.dark-mode .moon-phase-icon {
     background-color: #555;
+}
+
+/* Mobile Landscape Mode */
+@media only screen and (max-width: 900px) and (orientation: landscape) {
+    /* Weather switch elements */
+    .weather-switch-container {
+        margin: 10px 0;
+    }
+    
+    .weather-switch {
+        width: 320px;
+    }
+    
+    .weather-switch button {
+        padding: 10px 16px;
+        font-size: 14pt;
+    }
+    
+    /* Weather images */
+    .weather-image {
+        max-width: 95%;
+    }
+    
+    /* Forecast container */
+    .forecast-container {
+        gap: 10px;
+        margin: 12px 0;
+        max-width: 95%;
+    }
+    
+    .forecast-day {
+        padding: 10px;
+        min-width: 100px;
+        max-width: 140px;
+    }
+    
+    .forecast-date {
+        font-size: 10pt;
+        margin-bottom: 5px;
+    }
+    
+    .forecast-icon {
+        width: 48px;
+        height: 48px;
+        margin: 5px;
+    }
+    
+    .forecast-temp {
+        font-size: 13pt;
+        margin: 5px 0;
+    }
+    
+    .forecast-desc {
+        font-size: 12pt;
+    }
+    
+    /* Forecast popup */
+    .forecast-popup {
+        width: 90%;
+        max-height: 70vh;
+    }
+    
+    .hourly-forecast {
+        grid-template-columns: repeat(auto-fill, minmax(70px, 1fr)); /* Even smaller for landscape */
+        gap: 5px;
+    }
+    
+    .hourly-item {
+        padding: 5px;
+    }
+    
+    .hourly-time {
+        font-size: 10pt;
+    }
+    
+    .hourly-icon {
+        width: 28px;
+        height: 28px;
+    }
+    
+    .hourly-temp {
+        font-size: 10pt;
+        margin: 1px 0;
+    }
+    
+    .hourly-desc {
+        font-size: 9pt;
+    }
+    
+    /* Moon phase icon */
+    .moon-phase-icon {
+        width: 14px;
+        height: 14px;
+    }
+    
+    /* Loading spinner */
+    .forecast-loading {
+        height: 150px;
+    }
 }

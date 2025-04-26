@@ -1,5 +1,4 @@
 // Imports
-import { customLog, formatTime } from './common.js';
 import { settings } from './settings.js';
 
 // Constants
@@ -36,7 +35,7 @@ export async function updateNews(clear = false) {
 
         // Clear the news container as needed
         if (clear) {
-            customLog('Clearing news headlines...');
+            console.log('Clearing news headlines...');
             newsContainer.innerHTML = '';
             seenNewsIds.clear(); // Clear seen news IDs
             newsItems = null; // Clear news items
@@ -51,11 +50,11 @@ export async function updateNews(clear = false) {
             newsContainer.innerHTML = '<div class="spinner-container"><div class="spinner"></div></div>';
         }
         
-        customLog('Fetching news headlines...');
+        console.log('Fetching news headlines...');
         if (includedFeeds.length > 0) {
-            customLog('Including RSS feeds:', includedFeeds);
+            console.log('Including RSS feeds:', includedFeeds);
         } else {
-            customLog('No RSS feeds selected, showing all available feeds');
+            console.log('No RSS feeds selected, showing all available feeds');
         }
         
         // Send the request with included feeds in the body
@@ -123,7 +122,7 @@ export async function updateNews(clear = false) {
         }
     } catch (error) {
         console.error('Error fetching news:', error);
-        customLog('Error fetching news:', error);
+        console.log('Error fetching news:', error);
         
         const newsContainer = document.getElementById('newsHeadlines');
         // Make sure to remove the spinner even in case of an error
@@ -165,7 +164,7 @@ export function updateNewsTimeDisplays() {
 
 // Start the interval that updates time ago displays
 export function startNewsTimeUpdates() {
-    customLog('Starting news time updates');
+    console.log('Starting news time updates');
     // Clear any existing interval first
     if (newsTimeUpdateInterval) {
         clearInterval(newsTimeUpdateInterval);
@@ -178,7 +177,7 @@ export function startNewsTimeUpdates() {
 
 // Stop the interval that updates time ago displays
 export function stopNewsTimeUpdates() {
-    customLog('Stopping news time updates');
+    console.log('Stopping news time updates');
     if (newsTimeUpdateInterval) {
         clearInterval(newsTimeUpdateInterval);
         newsTimeUpdateInterval = null;
@@ -187,7 +186,7 @@ export function stopNewsTimeUpdates() {
 
 // Mark all current news items as read
 export function markAllNewsAsRead() {
-    customLog('Marking all news as read');
+    console.log('Marking all news as read');
     if (newsItems) {
         newsItems.forEach(item => {
             item.isUnread = false;
@@ -274,7 +273,7 @@ window.clickNews = async function (title, link, source) {
 
 // Forwards the news item link to the share function
 window.shareNews = async function (title, link, source) {
-    customLog('Sharing news item:', title, link);
+    console.log('Sharing news item:', title, link);
 
     // E-mail address to share with
     if (settings["forwarding-email"] === '') {
@@ -332,7 +331,7 @@ window.pauseNewsUpdates = function () {
     if (newsUpdateInterval) {
         clearInterval(newsUpdateInterval);
         newsUpdateInterval = null;
-        customLog('News updates paused');
+        console.log('News updates paused');
     }
 }
 
@@ -341,6 +340,6 @@ window.resumeNewsUpdates = function () {
     if (!newsUpdateInterval) {
         updateNews(); // Call immediately
         newsUpdateInterval = setInterval(updateNews, 60000 * NEWS_REFRESH_INTERVAL);
-        customLog('News updates resumed');
+        console.log('News updates resumed');
     }
 }

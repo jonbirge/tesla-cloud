@@ -17,21 +17,14 @@ export async function updateTimeZone(lat, long) {
         if (!tzData || !tzData.timezoneId) {
             throw new Error('Timezone not returned from server.');
         }
-        customLog('Timezone: ', tzData.timezoneId);
+        console.log('Timezone: ', tzData.timezoneId);
         return tzData.timezoneId;
     } catch (error) {
         console.error('Error fetching timezone: ', error);
         const tz = Intl.DateTimeFormat().resolvedOptions().timeZone;
-        customLog('Fallback timezone: ', tz);
+        console.log('Fallback timezone: ', tz);
         return tz;
     }
-}
-
-// Custom log function that prepends the current time
-export function customLog(...args) {
-    const now = new Date();
-    const timeString = now.toLocaleTimeString();
-    console.log(`[${timeString}] `, ...args);
 }
 
 // Update element with a change-dependent highlight effect
@@ -61,11 +54,11 @@ export function highlightUpdate(id, content = null) {
 export function srcUpdate(id, url) {
     const element = document.getElementById(id);
     const currentUrl = element.src;
-    customLog('current src:', currentUrl);
-    customLog('new src:', url);
+    console.log('current src:', currentUrl);
+    console.log('new src:', url);
     if (!(url === currentUrl)) {
         element.src = url;
-        customLog('Updating src for', id);
+        console.log('Updating src for', id);
     }
 }
 
@@ -92,7 +85,7 @@ export function formatTime(date, options = {}) {
 // Return time zone based on browser settings
 function browserTimeZone() {
     const tz = Intl.DateTimeFormat().resolvedOptions().timeZone;
-    customLog('Browser timezone: ', tz);
+    console.log('Browser timezone: ', tz);
     return tz;
 }
 
@@ -103,5 +96,5 @@ const urlParams = new URLSearchParams(window.location.search);
 const testParam = urlParams.get('test');
 testMode = testParam === 'true';
 if (testMode) {
-    customLog('##### TEST MODE #####');
+    console.log('##### TEST MODE #####');
 }
