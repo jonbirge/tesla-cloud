@@ -1,7 +1,7 @@
 // Imports
 import { updateNews, setShareButtonsVisibility } from './news.js';
 import { updateChartAxisColors } from './net.js';
-import { autoDarkMode, updateForecastDisplay, updateWeatherDisplay, updatePremiumWeatherDisplay } from './wx.js';
+import { autoDarkMode, updatePremiumWeatherDisplay } from './wx.js';
 
 // Global variables
 let isLoggedIn = false;
@@ -70,8 +70,6 @@ export function leaveSettings() {
 
     if (unitIsDirty) {
         console.log('Unit/time settings are dirty, updating weather display.')
-        updateForecastDisplay();
-        updateWeatherDisplay();
         updatePremiumWeatherDisplay();
         unitIsDirty = false; // Reset the dirty flag
     }

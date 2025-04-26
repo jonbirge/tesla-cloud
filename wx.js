@@ -150,9 +150,9 @@ export function fetchPremiumWeatherData(lat, long, silentLoad = false) {
                 forecastDataPrem = null;
             }
 
-            // if (lat && long) {
-            //     updateAQI(lat, long);
-            // }
+            if (lat && long) {
+                updateAQI(lat, long);
+            }
 
             // Hide spinner and show forecast when data is loaded - only if not silent loading
             if (forecastContainer) forecastContainer.style.display = lastDisplayStyle;
@@ -288,7 +288,7 @@ export function updatePremiumWeatherDisplay() {
 
     const minutelyContainer = document.getElementById('minutely-precip-container');
     const minutelyChartCanvas = document.getElementById('minutely-precip-chart');
-    const premWxSectionBtn = document.getElementById('prem-wx-section');
+    // const premWxSectionBtn = document.getElementById('prem-wx-section');
 
     if (hasMinutelyPrecip && minutelyContainer && minutelyChartCanvas) {
         minutelyContainer.style.display = '';
@@ -485,200 +485,6 @@ function showNotification(message) {
     }, 5000);
 }
 
-// Fetches weather data from the old OpenWeather API
-export function fetchWeatherData(lat, long) {
-    console.log('Fetching weather data...');
-
-    // Save so we can call functions later outside GPS update loop, if needed
-    lastLat = lat;
-    lastLong = long;
-
-    fetch(`https://secure.geonames.org/findNearByWeatherJSON?lat=${lat}&lng=${long}&username=birgefuller`)
-        .then(response => response.json())
-        .then(weatherDataLocal => {
-            if (weatherDataLocal) {
-                // check to see if wind direction is NaN
-                if (isNaN(weatherDataLocal.weatherObservation.windDirection)) {
-                    weatherDataLocal.weatherObservation.windDirection = null;
-                    weatherDataLocal.weatherObservation.windSpeed = null;
-                } else {
-                    // take the reciprocal of the wind direction to get the wind vector
-                    weatherDataLocal.weatherObservation.windDirection =
-                        (weatherDataLocal.weatherObservation.windDirection + 180) % 360;
-                }
-                weatherData = weatherDataLocal.weatherObservation;
-                updateWeatherDisplay();
-            }
-        })
-        .catch(error => {
-            console.error('Error fetching weather data: ', error);
-
-            // In case of error, hide spinner and show error message - only if not silent loading
-            if (!silentLoad) {
-                if (loadingSpinner) loadingSpinner.style.display = 'none';
-            }
-        });
-}
-
-// Fetches forecast data and updates the display
-export function fetchForecastData(lat, long, silentLoad = false) {
-    console.log('Fetching foercast data...' + (silentLoad ? ' (background load)' : ''));
-
-    // Save so we can call functions later outside GPS update loop, if needed
-    lastLat = lat;
-    lastLong = long;
-
-    // Show loading spinner, hide forecast container - only if not silent loading
-    const forecastContainer = document.getElementById('forecast-container');
-    const loadingSpinner = document.getElementById('forecast-loading');
-
-    // Remember display style of forecast container
-    let lastDisplayStyle = forecastContainer.style.display;
-    if (!silentLoad) {
-        if (forecastContainer) forecastContainer.style.display = 'none';
-        if (loadingSpinner) loadingSpinner.style.display = 'flex';
-    }
-
-    // Fetch and update weather data
-    const unixTime = Math.floor(Date.now() / 1000);
-    Promise.all([
-        fetch(`openwx_proxy.php/data/2.5/forecast?lat=${lat}&lon=${long}&units=imperial`),
-        fetch(`https://api.sunrise-sunset.org/json?lat=${lat}&lng=${long}&formatted=0`),
-        fetch(`https://api.farmsense.net/v1/moonphases/?d=${unixTime}`)
-    ])
-        .then(([forecastResponse, sunResponse, moonResponse]) => Promise.all([
-            forecastResponse.json(),
-            sunResponse.json(),
-            moonResponse.json()
-        ]))
-        .then(([forecastDataLocal, sunData, moonData]) => {
-            if (forecastDataLocal && sunData && moonData) {
-                sunrise = sunData.results.sunrise;
-                sunset = sunData.results.sunset;
-                moonPhaseData = moonData[0];
-                forecastData = forecastDataLocal.list;
-                updateForecastDisplay();
-                autoDarkMode(lat, long);
-            }
-
-            updateAQI(lat, long);
-
-            // Hide spinner and show forecast when data is loaded - only if not silent loading
-            if (forecastContainer) forecastContainer.style.display = lastDisplayStyle;
-            if (loadingSpinner) loadingSpinner.style.display = 'none';
-        })
-        .catch(error => {
-            console.error('Error fetching forecast data: ', error);
-
-            // In case of error, hide spinner and show error message - only if not silent loading
-            if (!silentLoad) {
-                if (loadingSpinner) loadingSpinner.style.display = 'none';
-            }
-        });
-}
-
-// Updates the forecast display with daily data
-export function updateForecastDisplay() {
-    if (!forecastData) return;
-
-    const forecastDays = document.querySelectorAll('.forecast-day');
-    const dailyData = extractDailyForecast(forecastData);
-
-    dailyData.forEach((day, index) => {
-        if (index < forecastDays.length) {
-            const date = new Date(day.dt * 1000);
-            const dayElement = forecastDays[index];
-
-            // Update weather condition class
-            const weatherCondition = day.weather[0].main.toLowerCase();
-            dayElement.className = `forecast-day ${weatherCondition}`;
-
-            // Update date
-            const dateElement = dayElement.querySelector('.forecast-date');
-            if (dateElement) {
-                dateElement.textContent = date.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
-            }
-
-            // Update weather icon
-            const iconElement = dayElement.querySelector('.forecast-icon');
-            if (iconElement) {
-                iconElement.src = `https://openweathermap.org/img/wn/${day.weather[0].icon}@2x.png`;
-                iconElement.alt = day.weather[0].description;
-            }
-
-            // Update temperature
-            const tempElement = dayElement.querySelector('.forecast-temp');
-            if (tempElement) {
-                tempElement.textContent = `${formatTemperature(day.temp_min)}/${formatTemperature(day.temp_max)}`;
-            }
-
-            // Update description
-            const descElement = dayElement.querySelector('.forecast-desc');
-            if (descElement) {
-                descElement.textContent = day.weather[0].main;
-            }
-
-            // Show or hide hazard alert
-            const alertIcon = dayElement.querySelector('.forecast-alert');
-            if (dayHasHazards(day)) {
-                alertIcon.classList.remove('hidden');
-            } else {
-                alertIcon.classList.add('hidden');
-            }
-        }
-    });
-
-    // Update solar data
-    if (!sunrise || !sunset) return;
-    const sunriseTime = formatTime(new Date(sunrise), {
-        timeZoneName: 'short'
-    });
-    highlightUpdate('sunrise', sunriseTime);
-    const sunsetTime = formatTime(new Date(sunset), {
-        timeZoneName: 'short'
-    });
-    highlightUpdate('sunset', sunsetTime);
-    if (moonPhaseData) {
-        const moonPhase = moonPhaseData.Phase;
-        highlightUpdate('moonphase', moonPhase);
-        // Update the moon icon
-        const moonIcon = document.getElementById('moon-icon');
-        if (moonIcon) {
-            moonIcon.setAttribute('style', getMoonPhaseIcon(moonPhaseData.Illumination));
-        }
-    }
-}
-
-// Updates the weather display with current data
-export function updateWeatherDisplay() {
-    if (!weatherData) return;
-    console.log('Updating weather display...');
-
-    const windSpeedMS = weatherData.windSpeed;
-    const windDir = weatherData.windDirection;
-    const humidity = weatherData.humidity;
-
-    highlightUpdate('humidity', `${humidity}%`);
-    if (windDir && windSpeedMS) {
-        highlightUpdate('wind',
-            `${formatWindSpeed(windSpeedMS)} at ${Math.round(windDir)}°`);
-    } else {
-        highlightUpdate('wind', '--');
-    }
-
-    const wxUpdateTime = formatTime(new Date(), {
-        hour: '2-digit',
-        minute: '2-digit'
-    });
-
-    // Get station name
-    const stationName = weatherData.stationName || '';
-
-    // Update station information
-    const stationInfoStr = stationName + ' @ ' + wxUpdateTime;
-    highlightUpdate('station-info', stationInfoStr);
-}
-
 // Helper: Extract 5 daily summaries from OpenWeather 3.0 API
 function extractPremiumDailyForecast(dailyList) {
     // dailyList is already daily summaries (up to 8 days)
@@ -767,45 +573,6 @@ function getMoonPhaseName(phase) {
     }
 }
 
-// Checks if a day has hazardous weather conditions
-function dayHasHazards(forecastList) {
-    const hazardConditions = ['Rain', 'Snow', 'Sleet', 'Hail', 'Thunderstorm', 'Storm', 'Drizzle'];
-    return forecastList.weather.some(w => 
-        hazardConditions.some(condition => 
-            w.main.includes(condition) || w.description.includes(condition.toLowerCase())
-        )
-    );
-}
-
-// Summarizes forecast data for each day
-function extractDailyForecast(forecastList) {
-    const dailyData = [];
-    const dayMap = new Map();
-    
-    forecastList.forEach(item => {
-        const date = new Date(item.dt * 1000).toDateString();
-        
-        if (!dayMap.has(date)) {
-            dayMap.set(date, {
-                dt: item.dt,
-                temp_min: item.main.temp_min,
-                temp_max: item.main.temp_max,
-                weather: [item.weather[0]]
-            });
-        } else {
-            const existing = dayMap.get(date);
-            existing.temp_min = Math.min(existing.temp_min, item.main.temp_min);
-            existing.temp_max = Math.max(existing.temp_max, item.main.temp_max);
-            if (!existing.weather.some(w => w.main === item.weather[0].main)) {
-                existing.weather.push(item.weather[0]);
-            }
-        }
-    });
-    
-    dayMap.forEach(day => dailyData.push(day));
-    return dailyData.slice(0, 5);
-}
-
 // Fetches and updates the Air Quality Index (AQI) from openweather.org
 function updateAQI(lat, lon) {
     fetch(`openwx_proxy.php/data/2.5/air_pollution?lat=${lat}&lon=${lon}`)
@@ -840,9 +607,6 @@ function updateAQI(lat, lon) {
                     aqiText = 'Unknown';
                     color = 'gray';
             }
-
-            highlightUpdate('aqi', aqiText);
-            document.getElementById('aqi-dot').style.backgroundColor = color;
 
             highlightUpdate('prem-aqi', aqiText);
             document.getElementById('prem-aqi-dot').style.backgroundColor = color;
