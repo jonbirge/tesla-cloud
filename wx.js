@@ -18,8 +18,6 @@ let sunrise = null;
 let sunset = null;
 let lastLat = null;
 let lastLong = null;
-
-// Add a variable to track the minutely chart instance
 let minutelyPrecipChart = null;
 
 // Export these variables for use in other modules
@@ -320,12 +318,13 @@ export function updatePremiumWeatherDisplay() {
                             display: true, 
                             text: 'Minutes from now',
                             font: {
-                                size: 22 // Double the default size (usually around 8px)
+                                size: 22,
+                                weight: 650
                             }
                         },
                         ticks: {
                             font: {
-                                size: 18 // Larger tick labels
+                                size: 18
                             }
                         } 
                     },
@@ -334,14 +333,14 @@ export function updatePremiumWeatherDisplay() {
                             display: true, 
                             text: 'Precipitation (mm/hr)',
                             font: {
-                                size: 22, // Double the default size
+                                size: 22,
                                 weight: 650
                             }
                         }, 
                         beginAtZero: true,
                         ticks: {
                             font: {
-                                size: 18 // Larger tick labels
+                                size: 18
                             }
                         }
                     }

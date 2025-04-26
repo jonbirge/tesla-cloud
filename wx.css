@@ -111,7 +111,10 @@ body.dark-mode {
 }
 
 .hourly-avail {
-    box-shadow: 5px 5px 9px 0px rgba(0, 0, 0, 0.5);
+    /* box-shadow: 5px 5px 9px 0px rgba(0, 0, 0, 0.5); */
+    border-color: var(--tesla-blue);
+    border-width: 2.5pt;
+    border-style: solid;
     cursor: pointer;
 }
 
@@ -119,8 +122,13 @@ body.dark-mode {
     max-width: 960px;
 }
 
+#minutely-precip-container {
+    max-width: 1100px;
+}
+
 
 /* Loading spinner */
+
 .forecast-loading {
     display: flex; /* Initially visible */
     justify-content: center;
