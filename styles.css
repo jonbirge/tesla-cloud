@@ -1258,8 +1258,33 @@ body.dark-mode .option-button:hover:not(.active) {
     font-size: 15pt;
 }
 
+
+/* Stock Status Indicator */
+
+.stock-status {
+    min-width: 80px;
+    font-size: 12pt;
+    font-weight: 650;
+    transition: color 0.3s ease;
+    font-variant-numeric: tabular-nums;
+    margin-bottom: -1pt;
+}
+
+.stock-status.up {
+    color: var(--stock-up);
+}
+
+.stock-status.down {
+    color: var(--stock-down);
+}
+
+.stock-status.neutral {
+    color: var(--stock-neutral);
+}
+
+
 /* Mobile Landscape Mode */
-@media only screen and (max-width: 900px) and (orientation: landscape) {
+@media only screen and (max-width: 900px) {
     :root {
         --heading-font-size: 14pt;
         --heading-font-weight: 600;
@@ -1449,26 +1474,4 @@ body.dark-mode .option-button:hover:not(.active) {
         padding: 10px 15px;
         font-size: 14pt;
     }
-}
-
-/* Stock Status Indicator */
-.stock-status {
-    margin-right: 22px;
-    min-width: 80px;
-    font-size: 14px;
-    font-weight: 600;
-    transition: color 0.3s ease;
-    font-variant-numeric: tabular-nums;
-}
-
-.stock-status.up {
-    color: var(--stock-up);
-}
-
-.stock-status.down {
-    color: var(--stock-down);
-}
-
-.stock-status.neutral {
-    color: var(--stock-neutral);
 }
