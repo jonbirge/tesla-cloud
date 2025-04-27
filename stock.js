@@ -3,6 +3,9 @@ const STOCK_API_ENDPOINT = 'quote.php?symbol=SPY'; // Using our PHP proxy with S
 const UPDATE_INTERVAL = 5 * 60 * 1000; // 5 minutes in milliseconds
 let stockUpdateTimer = null;
 
+// Import settings to check visibility setting
+import { settings } from './settings.js';
+
 // Function to fetch S&P 500 data
 export async function fetchStockData() {
     try {
@@ -62,6 +65,9 @@ function updateStockDisplay(percentChange) {
 
 // Function to start periodic updates
 export function startStockUpdates() {
+    // Check if stock indicator should be visible
+    updateStockIndicatorVisibility();
+    
     // Fetch data immediately
     fetchStockData();
     
@@ -75,5 +81,13 @@ export function stopStockUpdates() {
     if (stockUpdateTimer) {
         clearInterval(stockUpdateTimer);
         stockUpdateTimer = null;
+    }
+}
+
+// Function to update stock indicator visibility based on settings
+function updateStockIndicatorVisibility() {
+    const stockIndicator = document.getElementById('stock-status');
+    if (stockIndicator) {
+        stockIndicator.style.display = (settings && settings["show-stock-indicator"] === false) ? 'none' : '';
     }
 }

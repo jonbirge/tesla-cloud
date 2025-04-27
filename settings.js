@@ -24,6 +24,7 @@ const defaultSettings = {
     "imperial-units": true,
     "map-choice": 'waze',
     "show-wind-radar": true,
+    "show-stock-indicator": true, // New setting for S&P 500 indicator
     // News forwarding
     "news-forwarding": false,
     "news-forward-only": false,
@@ -208,6 +209,11 @@ export async function toggleSetting(key, value) {
     if (key === 'show-wind-radar') {
         updateRadarVisibility();
     }
+    
+    // Show/hide stock indicator if setting changes
+    if (key === 'show-stock-indicator') {
+        updateStockIndicatorVisibility();
+    }
 }
 
 // Function to initialize with defaults
@@ -228,6 +234,14 @@ function updateRadarVisibility() {
     const radar = document.getElementById('radar-container');
     if (radar) {
         radar.style.display = (settings["show-wind-radar"] === false) ? 'none' : '';
+    }
+}
+
+// Function to show/hide stock indicator based on setting
+function updateStockIndicatorVisibility() {
+    const stockIndicator = document.getElementById('stock-status');
+    if (stockIndicator) {
+        stockIndicator.style.display = (settings["show-stock-indicator"] === false) ? 'none' : '';
     }
 }
 
