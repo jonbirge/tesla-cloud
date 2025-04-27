@@ -485,3 +485,37 @@ body.dark-mode .moon-phase-icon {
         height: 150px;
     }
 }
+
+/* Notification styles - with dark mode support */
+.notification {
+    display: flex;
+    align-items: center;
+    padding: 15px;
+    margin-bottom: 10px;
+    border-radius: 10px;
+    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.2);
+    transform: translateX(120%);
+    transition: transform 0.3s ease;
+    opacity: 0.95;
+    /* Light mode defaults */
+    background-color: rgba(255, 255, 255, 0.85);
+    color: #cc6600; /* Darker orange for light mode */
+}
+
+body.dark-mode .notification {
+    background-color: rgba(33, 33, 33, 0.9);
+    color: #ff7700; /* Brighter orange for dark mode */
+}
+
+.notification.show {
+    transform: translateX(0);
+}
+
+.notification.hide {
+    transform: translateX(120%);
+}
+
+.notification-message {
+    font-size: 18px;
+    font-weight: 700;
+}
