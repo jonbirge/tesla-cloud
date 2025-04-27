@@ -5,6 +5,7 @@ import { attemptLogin, leaveSettings, settings } from './settings.js';
 import { fetchPremiumWeatherData, SAT_URLS, forecastDataPrem } from './wx.js';
 import { updateNetworkInfo, updatePingChart, startPingTest } from './net.js';
 import { markAllNewsAsRead, startNewsTimeUpdates, stopNewsTimeUpdates } from './news.js';
+import { startStockUpdates, stopStockUpdates } from './stock.js';
 
 // Parameters
 const LATLON_UPDATE_INTERVAL = 2; // seconds
@@ -757,10 +758,12 @@ document.addEventListener('visibilitychange', () => {
         stopGPSUpdates();
         pauseNewsUpdates();
         pausePingTest();
+        stopStockUpdates();
     } else {
         startGPSUpdates();
         resumeNewsUpdates();
         resumePingTest();
+        startStockUpdates();
     }
 });
 
@@ -786,6 +789,9 @@ document.addEventListener('DOMContentLoaded', async function () {
 
     // Begin network sensing
     startPingTest();
+    
+    // Start stock market updates
+    startStockUpdates();
 
     // Get version from vers.php asyncly
     updateVersion();

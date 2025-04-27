@@ -19,6 +19,9 @@
     --status-rain: #00a1ff;    /* Blue for rain indicator */
     --heading-font-size: 17pt;
     --heading-font-weight: 700;
+    --stock-up: #28a745;       /* Green for positive market change */
+    --stock-down: #dc3545;     /* Red for negative market change */
+    --stock-neutral: #888888;  /* Gray for unchanged market */
 }
 
 body.dark-mode {
@@ -36,6 +39,9 @@ body.dark-mode {
     --status-good: #5eff19;    /* Green for good connection */
     --status-unavailable: #888888;  /* Gray for unavailable/bad connection */
     --status-rain: #4fb8ff;    /* Blue for rain indicator */
+    --stock-up: #3ad45b;       /* Brighter green for dark mode */
+    --stock-down: #ff4d5e;     /* Brighter red for dark mode */
+    --stock-neutral: #888888;  /* Same gray for unchanged market */
 }
 
 
@@ -1443,4 +1449,26 @@ body.dark-mode .option-button:hover:not(.active) {
         padding: 10px 15px;
         font-size: 14pt;
     }
+}
+
+/* Stock Status Indicator */
+.stock-status {
+    margin-right: 22px;
+    min-width: 80px;
+    font-size: 14px;
+    font-weight: 600;
+    transition: color 0.3s ease;
+    font-variant-numeric: tabular-nums;
+}
+
+.stock-status.up {
+    color: var(--stock-up);
+}
+
+.stock-status.down {
+    color: var(--stock-down);
+}
+
+.stock-status.neutral {
+    color: var(--stock-neutral);
 }
