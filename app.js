@@ -2,7 +2,7 @@
 import { highlightUpdate, srcUpdate, testMode, updateTimeZone, GEONAMES_USERNAME } from './common.js';
 import { PositionSimulator } from './location.js';
 import { attemptLogin, leaveSettings, settings } from './settings.js';
-import { fetchPremiumWeatherData, SAT_URLS } from './wx.js';
+import { fetchPremiumWeatherData, SAT_URLS, forecastDataPrem } from './wx.js';
 import { updateNetworkInfo, updatePingChart, startPingTest } from './net.js';
 import { markAllNewsAsRead, startNewsTimeUpdates, stopNewsTimeUpdates } from './news.js';
 
@@ -370,9 +370,9 @@ function handlePositionUpdate(position) {
         // Update heading displays
         if (lastKnownHeading) {
             document.getElementById('heading').innerText = Math.round(lastKnownHeading) + '°';
-            if (weatherData) {
-                const windSpeedMPH = Math.min((weatherData.windSpeed * 2.237), MAX_SPEED);
-                const windDir = weatherData.windDirection;
+            if (forecastDataPrem && forecastDataPrem.current) {
+                const windSpeedMPH = Math.min((forecastDataPrem.current.wind_speed * 2.237), MAX_SPEED);
+                const windDir = forecastDataPrem.current.wind_deg;
                 updateWindage(speed, lastKnownHeading, windSpeedMPH, windDir);
             } else {
                 updateWindage(speed, lastKnownHeading, 0, 0);
@@ -383,7 +383,7 @@ function handlePositionUpdate(position) {
         }
 
         // Update display values with proper units
-        if (alt) {
+        if (alt !== null) {
             if (!settings || settings["imperial-units"]) {
                 // Convert meters to feet
                 document.getElementById('altitude').innerText = Math.round(alt * 3.28084);

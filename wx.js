@@ -20,7 +20,7 @@ let precipGraphUpdateInterval = null; // Timer for updating the precipitation gr
 let currentRainAlert = false; // Flag to track if we're currently under a rain alert
 
 // Export these variables for use in other modules
-export { sunrise, sunset, SAT_URLS };
+export { sunrise, sunset, SAT_URLS, forecastDataPrem };
 
 // Automatically toggles dark mode based on sunrise and sunset times
 export function autoDarkMode(lat, long) {
