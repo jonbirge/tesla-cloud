@@ -428,15 +428,6 @@ function startPrecipGraphAutoRefresh() {
     }, 30000); // Update every 30 seconds
 }
 
-// Function to stop auto-refresh for precipitation graph
-function stopPrecipGraphAutoRefresh() {
-    if (precipGraphUpdateInterval) {
-        console.log('Stopping precipitation graph auto-refresh interval: ' + precipGraphUpdateInterval);
-        clearInterval(precipGraphUpdateInterval);
-        precipGraphUpdateInterval = null;
-    }
-}
-
 // New function: Check for imminent rain (next 15 minutes)
 function checkImminentRain(minutelyData) {
     if (!minutelyData || minutelyData.length === 0) {
@@ -512,12 +503,8 @@ function toggleRainIndicator(show) {
         rainIndicator.className = 'status-indicator rain-status';
         rainIndicator.title = 'Rain expected within 15 minutes';
         
-        // Add SVG icon for cloud (changed from rain icon)
-        rainIndicator.innerHTML = `
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24">
-                <path class="cloud-icon" fill="currentColor" d="M19.35,10.03C18.67,6.59 15.64,4 12,4C9.11,4 6.6,5.64 5.35,8.03C2.34,8.36 0,10.9 0,14A6,6 0 0,0 6,20H19A5,5 0 0,0 24,15C24,12.36 21.95,10.22 19.35,10.03Z"/>
-            </svg>
-        `;
+        // Add img element for cloud icon using the external SVG file
+        rainIndicator.innerHTML = `<img src="cloud.svg" alt="Rain Alert" width="24" height="24">`;
         
         // Insert at the beginning of the control container and center it horizontally
         const controlContainer = document.querySelector('.control-container');
@@ -547,9 +534,7 @@ function showNotification(message) {
     notification.className = 'notification';
     notification.innerHTML = `
         <div class="notification-icon">
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24">
-                <path fill="currentColor" d="M19.35,10.03C18.67,6.59 15.64,4 12,4C9.11,4 6.6,5.64 5.35,8.03C2.34,8.36 0,10.9 0,14A6,6 0 0,0 6,20H19A5,5 0 0,0 24,15C24,12.36 21.95,10.22 19.35,10.03Z"/>
-            </svg>
+            <img src="cloud.svg" alt="Rain Alert" width="24" height="24">
         </div>
         <div class="notification-message">${message}</div>
     `;

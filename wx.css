@@ -519,3 +519,19 @@ body.dark-mode .notification {
     font-size: 18px;
     font-weight: 700;
 }
+
+/* Cloud icon styles for both status indicator and notification */
+.rain-status img,
+.notification-icon img {
+    filter: invert(50%) sepia(68%) saturate(3233%) hue-rotate(360deg) brightness(103%) contrast(103%);
+}
+
+body.dark-mode .rain-status img,
+body.dark-mode .notification-icon img {
+    filter: invert(74%) sepia(69%) saturate(5422%) hue-rotate(359deg) brightness(101%) contrast(107%);
+}
+
+/* Add a little spacing between the notification icon and text */
+.notification-icon {
+    margin-right: 12px;
+}
