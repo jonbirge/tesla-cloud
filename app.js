@@ -2,7 +2,7 @@
 import { highlightUpdate, srcUpdate, testMode, updateTimeZone, GEONAMES_USERNAME } from './common.js';
 import { PositionSimulator } from './location.js';
 import { attemptLogin, leaveSettings, settings } from './settings.js';
-import { fetchPremiumWeatherData, weatherData, SAT_URLS } from './wx.js';
+import { fetchPremiumWeatherData, SAT_URLS } from './wx.js';
 import { updateNetworkInfo, updatePingChart, startPingTest } from './net.js';
 import { markAllNewsAsRead, startNewsTimeUpdates, stopNewsTimeUpdates } from './news.js';
 
@@ -672,6 +672,7 @@ window.showSection = function (sectionId) {
     }
 
     // Satellite section
+    // TODO: This stuff should either be in wx.js or SAT_URLS moved here.
     if (sectionId === 'satellite') {
         // Load weather image when satellite section is shown
         const weatherImage = document.getElementById('weather-image');

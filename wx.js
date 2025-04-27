@@ -11,17 +11,16 @@ const SAT_URLS = {
 
 // Module variables
 let forecastDataPrem = null; // has both current and forecast data
-let weatherData = null;
-let forecastData = null;
-let moonPhaseData = null;
 let sunrise = null;
 let sunset = null;
 let lastLat = null;
 let lastLong = null;
 let minutelyPrecipChart = null;
+let precipGraphUpdateInterval = null; // Timer for updating the precipitation graph
+let currentRainAlert = false; // Flag to track if we're currently under a rain alert
 
 // Export these variables for use in other modules
-export { sunrise, sunset, weatherData, SAT_URLS };
+export { sunrise, sunset, SAT_URLS };
 
 // Automatically toggles dark mode based on sunrise and sunset times
 export function autoDarkMode(lat, long) {
@@ -93,26 +92,37 @@ export function fetchPremiumWeatherData(lat, long, silentLoad = false) {
                     if (!forecastDataPrem.minutely || forecastDataPrem.minutely.length < 60) {
                         forecastDataPrem.minutely = [];
                         
-                        // Current timestamp in seconds
-                        const nowSec = Math.floor(Date.now() / 1000);
+                        // Current timestamp in seconds, minus a random offset of 0-10 minutes
+                        const randomOffsetMinutes = Math.floor(Math.random() * 11); // 0-10 minutes
+                        const nowSec = Math.floor(Date.now() / 1000) - (randomOffsetMinutes * 60);
+                        console.log(`TEST MODE: Setting initial time to ${randomOffsetMinutes} minutes in the past`);
                         
                         // Generate 60 minutes of data
                         for (let i = 0; i < 60; i++) {
+                            // First 18 data points have zero precipitation
+                            const precipitation = i < 18 ? 0 : Math.random() * 5;
+                            
                             forecastDataPrem.minutely.push({
                                 dt: nowSec + (i * 60),
-                                precipitation: Math.random() * 5 // Random value between 0-5 mm/hr
+                                precipitation: precipitation
                             });
                         }
                     } else {
                         // Modify existing minutely data
-                        forecastDataPrem.minutely.forEach(minute => {
-                            minute.precipitation = Math.random() * 5; // Random value between 0-5 mm/hr
+                        const randomOffsetMinutes = Math.floor(Math.random() * 11); // 0-10 minutes
+                        const nowSec = Math.floor(Date.now() / 1000) - (randomOffsetMinutes * 60);
+                        console.log(`TEST MODE: Setting initial time to ${randomOffsetMinutes} minutes in the past`);
+                        
+                        forecastDataPrem.minutely.forEach((minute, index) => {
+                            minute.dt = nowSec + (index * 60);
+                            // First 18 data points have zero precipitation
+                            minute.precipitation = index < 18 ? 0 : Math.random() * 5;
                         });
                     }
                     
                     // Make sure at least some values are non-zero to trigger display
-                    // Set a few minutes to have definite precipitation
-                    for (let i = 10; i < 30; i++) {
+                    // Set a few minutes after the initial 18 to have definite precipitation
+                    for (let i = 25; i < 40; i++) {
                         if (i < forecastDataPrem.minutely.length) {
                             forecastDataPrem.minutely[i].precipitation = 2 + Math.random() * 3; // 2-5 mm/hr
                         }
@@ -143,6 +153,9 @@ export function fetchPremiumWeatherData(lat, long, silentLoad = false) {
                     .catch(error => {
                         console.error('Error fetching location data: ', error);
                     });
+                
+                // Start auto-refresh for precipitation graph
+                startPrecipGraphAutoRefresh();
             } else {
                 console.log('No premium forecast data available.');
                 forecastDataPrem = null;
@@ -265,96 +278,8 @@ export function updatePremiumWeatherDisplay() {
         }
     }
 
-    // --- Minutely Precipitation Graph Logic ---
-    const minutely = forecastDataPrem.minutely || [];
-    let hasMinutelyPrecip = false;
-    let precipData = [];
-    let labels = [];
-
-    if (minutely.length > 0) {
-        // Only consider the next hour (60 min)
-        precipData = minutely.slice(0, 60).map(m => m.precipitation || 0);
-        
-        // Change: Use "time until" in minutes for X-axis labels, starting at 0
-        labels = minutely.slice(0, 60).map((m, index) => index.toString());
-        
-        hasMinutelyPrecip = precipData.some(val => val > 0);
-        
-        // Check for rain in the next 15 minutes and show alert if detected
-        checkImminentRain(minutely);
-    } else {
-        // If no minutely data available, make sure to hide the rain indicator
-        toggleRainIndicator(false);
-    }
-
-    const minutelyContainer = document.getElementById('minutely-precip-container');
-    const minutelyChartCanvas = document.getElementById('minutely-precip-chart');
-    // const premWxSectionBtn = document.getElementById('prem-wx-section');
-
-    if (hasMinutelyPrecip && minutelyContainer && minutelyChartCanvas) {
-        minutelyContainer.style.display = '';
-
-        // Draw or update the chart
-        if (minutelyPrecipChart) {
-            minutelyPrecipChart.destroy();
-        }
-        minutelyPrecipChart = new Chart(minutelyChartCanvas.getContext('2d'), {
-            type: 'bar',
-            data: {
-                labels: labels,
-                datasets: [{
-                    label: 'Precipitation (mm/hr)',
-                    data: precipData,
-                    backgroundColor: 'rgba(255, 119, 0, 0.6)'
-                }]
-            },
-            options: {
-                plugins: {
-                    legend: { display: false }
-                },
-                scales: {
-                    x: { 
-                        title: { 
-                            display: true, 
-                            text: 'Minutes from now',
-                            font: {
-                                size: 22,
-                                weight: 650
-                            }
-                        },
-                        ticks: {
-                            font: {
-                                size: 18
-                            }
-                        } 
-                    },
-                    y: { 
-                        title: { 
-                            display: true, 
-                            text: 'Precipitation (mm/hr)',
-                            font: {
-                                size: 22,
-                                weight: 650
-                            }
-                        }, 
-                        beginAtZero: true,
-                        ticks: {
-                            font: {
-                                size: 18
-                            }
-                        }
-                    }
-                }
-            }
-        });
-    } else {
-        // Hide the graph and remove alert dot
-        if (minutelyContainer) minutelyContainer.style.display = 'none';
-        if (minutelyPrecipChart) {
-            minutelyPrecipChart.destroy();
-            minutelyPrecipChart = null;
-        }
-    }
+    // Update precipitation graph with time-based x-axis
+    updatePrecipitationGraph();
 
     // Hide spinner, show forecast
     const forecastContainer = document.getElementById('prem-forecast-container');
@@ -363,15 +288,173 @@ export function updatePremiumWeatherDisplay() {
     if (loadingSpinner) loadingSpinner.style.display = 'none';
 }
 
+// Function to update precipitation graph with current time-based x-axis
+function updatePrecipitationGraph() {
+    if (!forecastDataPrem || !forecastDataPrem.minutely) return;
+    
+    const minutely = forecastDataPrem.minutely || [];
+    let hasMinutelyPrecip = false;
+    
+    if (minutely.length > 0) {
+        const currentTime = new Date();
+        console.log(`Updating precipitation graph at: ${currentTime.toLocaleTimeString()}`);
+        
+        // Calculate time offsets relative to now and filter out past times
+        const precipData = minutely.map(m => {
+            const minuteTime = new Date(m.dt * 1000);
+            const timeDiffMinutes = Math.round((minuteTime - currentTime) / (60 * 1000));
+            
+            return {
+                x: timeDiffMinutes,
+                y: m.precipitation || 0,
+                time: minuteTime
+            };
+        }).filter(item => item.x >= 0); // Filter out past times (negative values)
+        
+        // Extract data for chart
+        const labels = precipData.map(item => item.x);
+        const values = precipData.map(item => item.y);
+        
+        // Check if any precipitation values are greater than 0
+        hasMinutelyPrecip = values.some(val => val > 0);
+        
+        // Check for rain in the next 15 minutes and show alert if detected
+        checkImminentRain(minutely);
+        
+        const minutelyContainer = document.getElementById('minutely-precip-container');
+        const minutelyChartCanvas = document.getElementById('minutely-precip-chart');
+        
+        if (hasMinutelyPrecip && minutelyContainer && minutelyChartCanvas) {
+            minutelyContainer.style.display = '';
+            
+            // Draw or update the chart
+            if (minutelyPrecipChart) {
+                minutelyPrecipChart.destroy();
+            }
+            
+            minutelyPrecipChart = new Chart(minutelyChartCanvas.getContext('2d'), {
+                type: 'bar',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'Precipitation (mm/hr)',
+                        data: values,
+                        backgroundColor: 'rgba(255, 119, 0, 0.6)'
+                    }]
+                },
+                options: {
+                    plugins: {
+                        legend: { display: false }
+                    },
+                    scales: {
+                        x: { 
+                            title: { 
+                                display: true, 
+                                text: 'Minutes from now',
+                                font: {
+                                    size: 22,
+                                    weight: 650
+                                }
+                            },
+                            ticks: {
+                                font: {
+                                    size: 18
+                                },
+                                callback: function(value) {
+                                    // Format as "+" for future minutes
+                                    return "+" + value;
+                                }
+                            } 
+                        },
+                        y: { 
+                            title: { 
+                                display: true, 
+                                text: 'Precipitation (mm/hr)',
+                                font: {
+                                    size: 22,
+                                    weight: 650
+                                }
+                            }, 
+                            beginAtZero: true,
+                            ticks: {
+                                font: {
+                                    size: 18
+                                }
+                            }
+                        }
+                    },
+                    animation: {
+                        duration: 200 // Fast animation for updates
+                    }
+                }
+            });
+        } else {
+            // Hide the graph if no precipitation data
+            if (minutelyContainer) minutelyContainer.style.display = 'none';
+            if (minutelyPrecipChart) {
+                minutelyPrecipChart.destroy();
+                minutelyPrecipChart = null;
+            }
+            // Don't stop the timer here - we should keep checking for precipitation
+            // Just log that there's no data currently
+            console.log('No precipitation data to display, but continuing to monitor');
+        }
+    } else {
+        // If no minutely data available, hide the rain indicator
+        toggleRainIndicator(false);
+        // Don't stop the refresh here - data might become available later
+        console.log('No minutely precipitation data available, continuing to monitor');
+    }
+    
+    // Return true if the refresh should continue
+    return true;
+}
+
+// Function to start auto-refresh for precipitation graph
+function startPrecipGraphAutoRefresh() {
+    // Clear any existing interval first
+    clearInterval(precipGraphUpdateInterval);
+    
+    console.log('Starting precipitation graph auto-refresh');
+    
+    // Initial update
+    // updatePrecipitationGraph();
+    
+    // Set up interval to update every 30 seconds
+    precipGraphUpdateInterval = setInterval(() => {
+        // Log refresh state
+        console.log('Running precipitation graph refresh check...');
+        updatePrecipitationGraph();
+    }, 30000); // Update every 30 seconds
+}
+
+// Function to stop auto-refresh for precipitation graph
+function stopPrecipGraphAutoRefresh() {
+    if (precipGraphUpdateInterval) {
+        console.log('Stopping precipitation graph auto-refresh interval: ' + precipGraphUpdateInterval);
+        clearInterval(precipGraphUpdateInterval);
+        precipGraphUpdateInterval = null;
+    }
+}
+
 // New function: Check for imminent rain (next 15 minutes)
 function checkImminentRain(minutelyData) {
     if (!minutelyData || minutelyData.length === 0) {
         toggleRainIndicator(false);
+        currentRainAlert = false; // Reset alert flag when no data
         return false;
     }
     
-    // Check only the next 15 minutes
-    const next15MinData = minutelyData.slice(0, 15);
+    // Get current time
+    const currentTime = new Date();
+    
+    // Filter and process only the next 15 minutes of data
+    const next15MinData = minutelyData.filter(minute => {
+        const minuteTime = new Date(minute.dt * 1000);
+        const timeDiffMinutes = (minuteTime - currentTime) / (60 * 1000);
+        // Include only future times within the next 15 minutes
+        return timeDiffMinutes >= 0 && timeDiffMinutes <= 15;
+    });
     
     // Determine if any precipitation is expected in the next 15 minutes
     // Using a small threshold to filter out trace amounts
@@ -383,10 +466,10 @@ function checkImminentRain(minutelyData) {
     // Toggle the rain indicator based on our findings
     toggleRainIndicator(hasImminentRain);
     
-    // If rain is imminent, show a notification
-    if (hasImminentRain) {
+    // If rain is imminent and we don't have an active alert already, show a notification
+    if (hasImminentRain && !currentRainAlert) {
         // Calculate when rain will start (first minute above threshold)
-        const rainStartMinute = next15MinData.findIndex(minute => 
+        const rainStartIndex = next15MinData.findIndex(minute => 
             (minute.precipitation || 0) > precipThreshold
         );
         
@@ -395,14 +478,23 @@ function checkImminentRain(minutelyData) {
         
         // Create the notification message
         let message;
-        if (rainStartMinute === 0) {
+        if (rainStartIndex === 0) {
             message = `Rain detected now! (${maxPrecip.toFixed(1)} mm/hr)`;
-        } else {
-            message = `Rain expected in ${rainStartMinute} minute${rainStartMinute > 1 ? 's' : ''} (${maxPrecip.toFixed(1)} mm/hr)`;
+        } else if (rainStartIndex > 0) {
+            const minuteTime = new Date(next15MinData[rainStartIndex].dt * 1000);
+            const minutesUntilRain = Math.round((minuteTime - currentTime) / (60 * 1000));
+            message = `Rain expected in ${minutesUntilRain} minute${minutesUntilRain > 1 ? 's' : ''} (${maxPrecip.toFixed(1)} mm/hr)`;
         }
         
-        // Show the notification
-        showNotification(message);
+        if (message) {
+            // Show the notification
+            showNotification(message);
+            // Set flag that we're under an active rain alert
+            currentRainAlert = true;
+        }
+    } else if (!hasImminentRain) {
+        // Reset the alert flag when there's no longer imminent rain
+        currentRainAlert = false;
     }
     
     return hasImminentRain;
@@ -828,65 +920,6 @@ window.showPremiumPrecipGraph = function(dayIndex) {
 window.closePremiumPrecipPopup = function() {
     const premPopup = document.querySelector('#prem-weather .forecast-popup');
     if (premPopup) premPopup.classList.remove('show');
-    if (window.premiumPrecipChart) {
-        window.premiumPrecipChart.destroy();
-        window.premiumPrecipChart = null;
-    }
-}
-
-// Displays the hourly forecast for a specific day
-window.showHourlyForecast = function (dayIndex) {
-    // Logging
-    console.log(`Showing hourly forecast for day index: ${dayIndex}`);
-
-    if (!forecastData) {
-        console.log('No forecast data available for hourly forecast!');
-        return;
-    }
-
-    const startDate = new Date(forecastData[0].dt * 1000).setHours(0, 0, 0, 0);
-    const targetDate = new Date(startDate + dayIndex * 24 * 60 * 60 * 1000);
-    const endDate = new Date(targetDate).setHours(23, 59, 59, 999);
-
-    const hourlyData = forecastData.filter(item => {
-        const itemDate = new Date(item.dt * 1000);
-        return itemDate >= targetDate && itemDate <= endDate;
-    });
-
-    const popupDate = document.getElementById('popup-date');
-    popupDate.textContent = targetDate.toLocaleDateString('en-US', {
-        weekday: 'long',
-        month: 'long',
-        day: 'numeric'
-    });
-
-    const hourlyContainer = document.querySelector('.hourly-forecast');
-    hourlyContainer.innerHTML = hourlyData.map(item => {
-        const itemDate = new Date(item.dt * 1000);
-        const time = formatTime(itemDate, {
-            hour: 'numeric',
-            minute: '2-digit'
-        });
-        
-        // Get weather condition class
-        const weatherCondition = item.weather[0].main.toLowerCase();
-        
-        return `
-            <div class="hourly-item ${weatherCondition}">
-                <div class="hourly-time">${time}</div>
-                <img src="https://openweathermap.org/img/wn/${item.weather[0].icon}.png" alt="${item.weather[0].description}" class="hourly-icon">
-                <div class="hourly-temp">${formatTemperature(item.main.temp)}</div>
-                <div class="hourly-desc">${item.weather[0].main}</div>
-            </div>
-        `;
-    }).join('');
-
-    document.querySelector('.forecast-popup').classList.add('show');
-}
-
-// Closes the hourly forecast popup
-window.closeHourlyForecast = function () {
-    document.querySelector('.forecast-popup').classList.remove('show');
 }
 
 // Switches the weather image based on the type provided
