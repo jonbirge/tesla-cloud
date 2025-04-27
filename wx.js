@@ -81,7 +81,7 @@ export function fetchPremiumWeatherData(lat, long, silentLoad = false) {
     }
 
     // Fetch and update weather data (single fetch)
-    fetch(`openwx_proxy.php/data/3.0/onecall?lat=${lat}&lon=${long}&units=imperial`)
+    fetch(`openwx.php/data/3.0/onecall?lat=${lat}&lon=${long}&units=imperial`)
         .then(response => response.json())
         .then(forecastDataLocal => {
             if (forecastDataLocal) {
@@ -139,7 +139,7 @@ export function fetchPremiumWeatherData(lat, long, silentLoad = false) {
                     minute: '2-digit'
                 });
                 // Get nearest city using OpenWeather GEOlocation API
-                fetch(`openwx_proxy.php/geo/1.0/reverse?lat=${lat}&lon=${long}&limit=1`)
+                fetch(`openwx.php/geo/1.0/reverse?lat=${lat}&lon=${long}&limit=1`)
                     .then(response => response.json())
                     .then(data => {
                         if (data && data.length > 0) {
@@ -656,7 +656,7 @@ function getMoonPhaseName(phase) {
 
 // Fetches and updates the Air Quality Index (AQI) from openweather.org
 function updateAQI(lat, lon) {
-    fetch(`openwx_proxy.php/data/2.5/air_pollution?lat=${lat}&lon=${lon}`)
+    fetch(`openwx.php/data/2.5/air_pollution?lat=${lat}&lon=${lon}`)
         .then(response => response.json())
         .then(data => {
             const aqi = data.list[0].main.aqi;
