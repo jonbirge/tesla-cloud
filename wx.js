@@ -11,8 +11,6 @@ const SAT_URLS = {
 
 // Module variables
 let forecastDataPrem = null; // has both current and forecast data
-let sunrise = null;
-let sunset = null;
 let lastLat = null;
 let lastLong = null;
 let minutelyPrecipChart = null;
@@ -20,9 +18,10 @@ let precipGraphUpdateInterval = null; // Timer for updating the precipitation gr
 let currentRainAlert = false; // Flag to track if we're currently under a rain alert
 
 // Export these variables for use in other modules
-export { sunrise, sunset, SAT_URLS, forecastDataPrem };
+export { SAT_URLS, forecastDataPrem };
 
 // Automatically toggles dark mode based on sunrise and sunset times
+// TODO: This should really go in the settings module!
 export function autoDarkMode(lat, long) {
     // if lat or long are null, then replace with last known values
     if (lat == null || long == null) {
@@ -36,8 +35,11 @@ export function autoDarkMode(lat, long) {
     }
 
     console.log('Auto dark mode check for coordinates: ', lat, long);
+    // Get sunrise and sunset times from forecastDataPrem
+    const sunrise = forecastDataPrem?.current.sunrise * 1000;
+    const sunset = forecastDataPrem?.current.sunset * 1000;
     if (!sunrise || !sunset) {
-        console.log('autoDarkMode: sunrise/sunset data not available.');
+        console.log('Auto dark mode: No sunrise/sunset data available.');
         return;
     }
 

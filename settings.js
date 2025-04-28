@@ -77,6 +77,7 @@ export function leaveSettings() {
 
 // Turn on dark mode
 export function turnOnDarkMode() {
+    console.log('turnOnDarkMode() called');
     document.body.classList.add('dark-mode');
     document.getElementById('darkModeToggle').checked = true;
     toggleSetting('dark-mode', true);
@@ -85,6 +86,7 @@ export function turnOnDarkMode() {
 
 // Turn off dark mode
 export function turnOffDarkMode() {
+    console.log('turnOffDarkMode() called');
     document.body.classList.remove('dark-mode');
     document.getElementById('darkModeToggle').checked = false;
     toggleSetting('dark-mode', false);
@@ -190,7 +192,7 @@ export async function toggleSetting(key, value) {
         if (value) {
             autoDarkMode();
         }
-    }
+    } 
 
     // Handle map choice setting
     if (key === 'map-choice') {
@@ -620,6 +622,7 @@ window.handleLogin = async function () {
 
 // Manually swap dark/light mode
 window.toggleMode = function () {
+    console.log('Toggling dark mode manually.');
     toggleSetting('auto-dark-mode', false);
     document.body.classList.toggle('dark-mode');
     const darkMode = document.body.classList.contains('dark-mode');
