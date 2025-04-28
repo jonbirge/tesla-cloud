@@ -5,6 +5,9 @@ header('Cache-Control: no-cache, no-store, must-revalidate');
 header('Pragma: no-cache');
 header('Expires: 0');
 
+// Cache configuration
+$cacheLifetimeMinutes = 5; // Default cache lifetime in minutes
+
 // Load .env variables from a JSON file
 $envFilePath = __DIR__ . '/.env';
 if (file_exists($envFilePath)) {
@@ -40,6 +43,26 @@ if (!preg_match('/^[A-Za-z0-9\.\-\_]+$/', $ticker)) {
     http_response_code(400);
     echo json_encode(['error' => 'Invalid ticker symbol']);
     exit;
+}
+
+// Check cache before making API request
+$cacheFile = "/tmp/stock_cache_{$ticker}.json";
+$useCache = false;
+
+if (file_exists($cacheFile)) {
+    $cachedContent = file_get_contents($cacheFile);
+    $cachedData = json_decode($cachedContent, true);
+    
+    if (json_last_error() === JSON_ERROR_NONE && isset($cachedData['timestamp'])) {
+        $cacheAge = time() - $cachedData['timestamp'];
+        if ($cacheAge < ($cacheLifetimeMinutes * 60)) {
+            // Cache is valid, use it
+            $responseData = $cachedData['data'];
+            $responseData['cache'] = true;
+            echo json_encode($responseData);
+            exit;
+        }
+    }
 }
 
 // Polygon.io API URL for previous day's data
@@ -85,20 +108,6 @@ $data = json_decode($response, true);
 
 // Check if we have valid data
 if (!$data || isset($data['error']) || $data['status'] !== 'OK' || empty($data['results'])) {
-    // If using demo key, provide fallback static data
-    if ($api_key === "demo") {
-        // Static fallback data for demo mode
-        $output = [
-            'symbol' => 'SPY',
-            'price' => 471.85,
-            'previousClose' => 469.23,
-            'percentChange' => 0.56
-        ];
-        
-        echo json_encode($output);
-        exit;
-    }
-    
     http_response_code(500);
     echo json_encode(['error' => 'Invalid response from Polygon.io API', 'data' => $data]);
     exit;
@@ -119,8 +128,16 @@ $output = [
     'symbol' => $ticker,
     'price' => $currentPrice,
     'previousClose' => $previousClose,
-    'percentChange' => $percentChange
+    'percentChange' => $percentChange,
+    'cache' => false
 ];
+
+// Save to cache
+$cacheData = [
+    'timestamp' => time(),
+    'data' => $output
+];
+file_put_contents($cacheFile, json_encode($cacheData));
 
 // Return the JSON response
 echo json_encode($output);
