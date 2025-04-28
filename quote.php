@@ -23,14 +23,14 @@ if (file_exists($envFilePath)) {
 }
 
 // Check if API key is set
-if (!isset($_ENV['ALPHAVANTAGE_KEY'])) {
+if (!isset($_ENV['POLYGON_KEY'])) {
     http_response_code(500);
-    echo json_encode(['error' => 'API key not found in .env file']);
+    echo json_encode(['error' => 'Polygon API key not found in .env file']);
     exit;
 }
 
 // Get the API key from environment variables
-$api_key = $_ENV['ALPHAVANTAGE_KEY'];
+$api_key = $_ENV['POLYGON_KEY'];
 
 // Default ticker is S&P 500 (^GSPC)
 $ticker = isset($_GET['symbol']) ? $_GET['symbol'] : 'SPY'; // Using SPY ETF as a proxy for S&P 500
@@ -42,8 +42,8 @@ if (!preg_match('/^[A-Za-z0-9\.\-\_]+$/', $ticker)) {
     exit;
 }
 
-// Alpha Vantage API URL for daily time series
-$url = "https://www.alphavantage.co/query?function=GLOBAL_QUOTE&symbol={$ticker}&apikey={$api_key}";
+// Polygon.io API URL for previous day's data
+$url = "https://api.polygon.io/v2/aggs/ticker/{$ticker}/prev?adjusted=true&apiKey={$api_key}";
 
 // Initialize cURL session
 $ch = curl_init();
@@ -76,7 +76,7 @@ if ($statusCode !== 200) {
 $data = json_decode($response, true);
 
 // Check if we have valid data
-if (!$data || isset($data['Error Message']) || !isset($data['Global Quote']) || empty($data['Global Quote'])) {
+if (!$data || isset($data['error']) || $data['status'] !== 'OK' || empty($data['results'])) {
     // If using demo key, provide fallback static data
     if ($api_key === "demo") {
         // Static fallback data for demo mode
@@ -92,21 +92,23 @@ if (!$data || isset($data['Error Message']) || !isset($data['Global Quote']) || 
     }
     
     http_response_code(500);
-    echo json_encode(['error' => 'Invalid response from Alpha Vantage API', 'data' => $data]);
+    echo json_encode(['error' => 'Invalid response from Polygon.io API', 'data' => $data]);
     exit;
 }
 
-// Extract the relevant data
-$quote = $data['Global Quote'];
-$currentPrice = floatval($quote['05. price']);
-$previousClose = floatval($quote['08. previous close']);
-$percentChange = floatval($quote['10. change percent']);
+// Extract the relevant data from Polygon response
+$result = $data['results'][0];
+$currentPrice = floatval($result['c']); // Closing price
+$previousClose = floatval($result['o']); // Opening price
 
-// Format the response - clean up percent change to just be numeric
-$percentChange = floatval(str_replace(['%', '+'], '', $percentChange));
+// Calculate percent change
+$percentChange = 0;
+if ($previousClose > 0) {
+    $percentChange = (($currentPrice - $previousClose) / $previousClose) * 100;
+}
 
 $output = [
-    'symbol' => $quote['01. symbol'],
+    'symbol' => $ticker,
     'price' => $currentPrice,
     'previousClose' => $previousClose,
     'percentChange' => $percentChange

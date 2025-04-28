@@ -8,6 +8,7 @@ import { settings } from './settings.js';
 
 // Function to fetch S&P 500 data
 export async function fetchStockData() {
+    console.log('Fetching S&P500 data...');
     try {
         const response = await fetch(STOCK_API_ENDPOINT);
         if (!response.ok) {
@@ -69,7 +70,7 @@ export function startStockUpdates() {
     updateStockIndicatorVisibility();
     
     // Fetch data immediately
-    fetchStockData();
+    // fetchStockData();
     
     // Set up periodic updates
     if (stockUpdateTimer) clearInterval(stockUpdateTimer);
