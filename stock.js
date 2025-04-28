@@ -7,7 +7,7 @@ let stockUpdateTimer = null;
 import { settings } from './settings.js';
 
 // Function to fetch S&P 500 data
-export async function fetchStockData() {
+async function fetchStockData() {
     console.log('Fetching S&P500 data...');
     try {
         const response = await fetch(STOCK_API_ENDPOINT);
@@ -70,7 +70,7 @@ export function startStockUpdates() {
     updateStockIndicatorVisibility();
     
     // Fetch data immediately
-    // fetchStockData();
+    fetchStockData();
     
     // Set up periodic updates
     if (stockUpdateTimer) clearInterval(stockUpdateTimer);
@@ -83,6 +83,7 @@ export function stopStockUpdates() {
         clearInterval(stockUpdateTimer);
         stockUpdateTimer = null;
     }
+    updateStockIndicatorVisibility();
 }
 
 // Function to update stock indicator visibility based on settings

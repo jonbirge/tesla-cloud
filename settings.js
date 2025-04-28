@@ -2,6 +2,7 @@
 import { updateNews, setShareButtonsVisibility } from './news.js';
 import { updateChartAxisColors } from './net.js';
 import { autoDarkMode, updatePremiumWeatherDisplay } from './wx.js';
+import { startStockUpdates, stopStockUpdates } from './stock.js';
 
 // Global variables
 let isLoggedIn = false;
@@ -118,7 +119,7 @@ export async function attemptLogin() {
             await fetchSettings();
         } else {
             console.log('No user IDs found, creating new auto-generated user...');
-            initializeSettings();
+            setDefaultSettings();
             const newAutoUser = await autoCreateUser(); // Create a new user and log them in
             if (await validateAutoUserId(newAutoUser)) {
                 for (const [key, value] of Object.entries(settings)) {
@@ -143,7 +144,7 @@ export async function toggleSetting(key, value) {
     settings[key] = value;
 
     // Update toggle state visually
-    updateToggleVisualState(key, value);
+    updateSetting(key, value);
 
     console.log(`Setting "${key}" updated to ${value} (local)`);
 
@@ -173,53 +174,12 @@ export async function toggleSetting(key, value) {
             console.log('Error toggling setting:', error);
         }
     }
-
-    // If the setting is RSS-related, set the dirty flag
-    if (key.startsWith('rss-')) {
-        const isDrop = !value; // If unchecked, it's a drop
-        rssIsDirty = true;
-        rssDrop = rssDrop || isDrop; // Set the drop flag if this is a drop
-        console.log(`RSS setting "${key}" changed to ${value} (dirty: ${rssIsDirty}, drop: ${rssDrop})`);
-    }
-
-    // If the setting is unit/time-related, set the dirty flag
-    if (key === 'imperial-units' || key === '24-hour-time') {
-        unitIsDirty = true;
-        console.log(`Unit/time setting "${key}" changed to ${value} (dirty: ${unitIsDirty})`);
-    }
-
-    // If the setting is dark mode related, update the dark mode
-    if (key === 'auto-dark-mode') {
-        if (value) {
-            autoDarkMode();
-        }
-    } 
-
-    // Handle map choice setting
-    if (key === 'map-choice') {
-        updateMapFrame();
-    }
-
-    // If the setting is news forwarding, update the share buttons
-    if (key === 'news-forwarding') {
-        setShareButtonsVisibility();
-    }
-
-    // Show/hide radar if setting changes
-    if (key === 'show-wind-radar') {
-        updateRadarVisibility();
-    }
-    
-    // Show/hide stock indicator if setting changes
-    if (key === 'show-stock-indicator') {
-        updateStockIndicatorVisibility();
-    }
 }
 
 // Function to initialize with defaults
-function initializeSettings() {
+function setDefaultSettings() {
     settings = { ...defaultSettings };
-    initializeToggleStates();
+    initializeSettings();
     updateRadarVisibility();
     console.log('Settings initialized: ', settings);
 }
@@ -234,14 +194,6 @@ function updateRadarVisibility() {
     const radar = document.getElementById('radar-container');
     if (radar) {
         radar.style.display = (settings["show-wind-radar"] === false) ? 'none' : '';
-    }
-}
-
-// Function to show/hide stock indicator based on setting
-function updateStockIndicatorVisibility() {
-    const stockIndicator = document.getElementById('stock-status');
-    if (stockIndicator) {
-        stockIndicator.style.display = (settings["show-stock-indicator"] === false) ? 'none' : '';
     }
 }
 
@@ -423,15 +375,15 @@ async function fetchSettings() {
             document.getElementById('settings-section').classList.remove('hidden');
 
             // Initialize toggle states based on settings
-            initializeToggleStates();
-            updateRadarVisibility();
+            initializeSettings();
+            //updateRadarVisibility();
 
             // Handle dark mode
-            if (settings['dark-mode']) {
-                turnOnDarkMode();
-            } else {
-                turnOffDarkMode();
-            }
+            // if (settings['dark-mode']) {
+            //     turnOnDarkMode();
+            // } else {
+            //     turnOffDarkMode();
+            // }
         } else {
             console.error('Error fetching settings: ', response.statusText);
         }
@@ -441,7 +393,7 @@ async function fetchSettings() {
 }
 
 // Update visual state of a toggle or text input
-function updateToggleVisualState(key, value) {
+function updateSetting(key, value) {
     const settingItems = document.querySelectorAll(`.settings-toggle-item[data-setting="${key}"]`);
 
     // Special compatibility cases
@@ -454,7 +406,8 @@ function updateToggleVisualState(key, value) {
         }
     }
 
-    console.log(`Updating visual state for "${key}" to ${value}`);
+    console.log(`Updating state for "${key}" to ${value}`);
+    
     if (settingItems && settingItems.length > 0) {
         settingItems.forEach(item => {
             // Handle checkbox toggle
@@ -481,13 +434,55 @@ function updateToggleVisualState(key, value) {
         });
     }
 
-    // Disable/enable forwarding-email input based on news-forwarding
+    // If the setting is RSS-related, set the dirty flag
+    if (key.startsWith('rss-')) {
+        const isDrop = !value; // If unchecked, it's a drop
+        rssIsDirty = true;
+        rssDrop = rssDrop || isDrop; // Set the drop flag if this is a drop
+        console.log(`RSS setting "${key}" changed to ${value} (dirty: ${rssIsDirty}, drop: ${rssDrop})`);
+    }
+
+    // If the setting is unit/time-related, set the dirty flag
+    if (key === 'imperial-units' || key === '24-hour-time') {
+        unitIsDirty = true;
+        console.log(`Unit/time setting "${key}" changed to ${value} (dirty: ${unitIsDirty})`);
+    }
+
+    // If the setting is dark mode related, update the dark mode
+    if (key === 'auto-dark-mode') {
+        if (value) {
+            autoDarkMode();
+        }
+    }
+
+    // Handle map choice setting
+    if (key === 'map-choice') {
+        updateMapFrame();
+    }
+
+    // If the setting is news forwarding, update the share buttons
     if (key === 'news-forwarding') {
+        setShareButtonsVisibility();
         setControlEnable('forwarding-email', value);
         setControlEnable('news-forward-only', value);
     }
+
+    // Show/hide radar if setting changes
+    if (key === 'show-wind-radar') {
+        updateRadarVisibility();
+    }
+    
+    // Show/hide stock indicator if setting changes
+    if (key === 'show-stock-indicator') {
+        if (value) {
+            startStockUpdates();
+        } else {
+            stopStockUpdates();
+        }
+    }
 }
 
+// Function to enable/disable controls based on a setting
 function setControlEnable(key, enabled = true) {
     const settingItems = document.querySelectorAll(`div[data-setting="${key}"]`);
     if (settingItems && settingItems.length > 0) {
@@ -521,15 +516,15 @@ function setControlEnable(key, enabled = true) {
 }
 
 // Initialize all toggle and text states based on 'settings' dictionary
-function initializeToggleStates() {
+function initializeSettings() {
     // Iterate through all keys in the settings object
     for (const key in settings) {
         if (settings.hasOwnProperty(key)) {
             const value = settings[key];
-            updateToggleVisualState(key, value);
+            updateSetting(key, value);
         }
     }
-    updateRadarVisibility();
+    //updateRadarVisibility();
 }
 
 // Helper function to get current domain for cookie namespacing
