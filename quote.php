@@ -45,25 +45,33 @@ if (!preg_match('/^[A-Za-z0-9\.\-\_]+$/', $ticker)) {
 // Polygon.io API URL for previous day's data
 $url = "https://api.polygon.io/v2/aggs/ticker/{$ticker}/prev?adjusted=true&apiKey={$api_key}";
 
-// Initialize cURL session
-$ch = curl_init();
+// Set up the stream context with options (replacing cURL options)
+$options = [
+    'http' => [
+        'method' => 'GET',
+        'header' => 'User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
+        'ignore_errors' => true
+    ],
+    'ssl' => [
+        'verify_peer' => true,
+        'verify_peer_name' => true
+    ]
+];
 
-// Set cURL options
-curl_setopt($ch, CURLOPT_URL, $url);
-curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
-curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, true);
-curl_setopt($ch, CURLOPT_USERAGENT, 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36');
+$context = stream_context_create($options);
 
-// Execute cURL request
-$response = curl_exec($ch);
-$statusCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+// Use file_get_contents with the created context
+$response = @file_get_contents($url, false, $context);
 
-// Close cURL session
-curl_close($ch);
+// Get HTTP status code from headers
+$statusCode = 0;
+if (isset($http_response_header[0])) {
+    preg_match('/\d{3}/', $http_response_header[0], $matches);
+    $statusCode = intval($matches[0]);
+}
 
 // Check for errors
-if ($statusCode !== 200) {
+if ($statusCode !== 200 || $response === false) {
     http_response_code(500);
     echo json_encode([
         'error' => 'Failed to fetch data',

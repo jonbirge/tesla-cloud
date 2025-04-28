@@ -49,15 +49,30 @@ $pathInfo = ltrim($pathInfo, '/');
 $baseUrl = 'https://api.openweathermap.org/';
 $proxiedUrl = $baseUrl . $pathInfo . '?' . http_build_query($queryParams);
 
-// Initialize cURL
-$ch = curl_init($proxiedUrl);
-curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-curl_setopt($ch, CURLOPT_HEADER, false);
+// Set up the stream context with options
+$options = [
+    'http' => [
+        'method' => 'GET',
+        'header' => 'User-Agent: PHP/' . phpversion(),
+        'ignore_errors' => true
+    ],
+    'ssl' => [
+        'verify_peer' => true,
+        'verify_peer_name' => true
+    ]
+];
 
-// Execute cURL request
-$response = curl_exec($ch);
-$httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-curl_close($ch);
+$context = stream_context_create($options);
+
+// Use file_get_contents with the created context
+$response = @file_get_contents($proxiedUrl, false, $context);
+
+// Get HTTP status code from headers
+$httpCode = 200; // Default success
+if (isset($http_response_header[0])) {
+    preg_match('/\d{3}/', $http_response_header[0], $matches);
+    $httpCode = intval($matches[0]);
+}
 
 // Set HTTP response code and output the response
 http_response_code($httpCode);
