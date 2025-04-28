@@ -537,6 +537,7 @@ function updateVersion() {
     }
 }
 
+// Function to update the src of an iframe
 window.updateMapFrame = function () {
     // Normal mode - ensure iframe is visible and test mode message is hidden
     const teslaWazeContainer = document.querySelector('.teslawaze-container');
@@ -657,11 +658,6 @@ window.showSection = function (sectionId) {
         if (newsButton) {
             newsButton.classList.remove('has-notification');
         }
-        // Start the timer that updates the "time ago" displays
-        startNewsTimeUpdates();
-    } else if (currentSection === 'news') {
-        // If we're leaving the news section, stop the time updates
-        stopNewsTimeUpdates();
     }
 
     // If switching to about section, clear the notification dot
@@ -734,9 +730,6 @@ window.showSection = function (sectionId) {
     // Update the current section variable
     currentSection = sectionId;
 };
-
-
-// ***** Main code *****
 
 // Update link click event listener
 document.addEventListener('click', function (e) {
