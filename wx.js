@@ -292,7 +292,7 @@ export function updatePremiumWeatherDisplay() {
 
 // Function to update precipitation graph with current time-based x-axis
 function updatePrecipitationGraph() {
-    if (!forecastDataPrem || !forecastDataPrem.minutely) return;
+    if (!currentRainAlert || !forecastDataPrem || !forecastDataPrem.minutely) return;
     
     const minutely = forecastDataPrem.minutely || [];
     let hasMinutelyPrecip = false;
@@ -363,7 +363,6 @@ function updatePrecipitationGraph() {
                                     size: 18
                                 },
                                 callback: function(value) {
-                                    // Format as "+" for future minutes
                                     return "+" + value;
                                 }
                             } 
