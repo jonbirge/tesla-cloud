@@ -4,7 +4,7 @@ import { settings, turnOffDarkMode, turnOnDarkMode } from './settings.js';
 
 // Parameters
 const SAT_URLS = {
-    latest: 'https://cdn.star.nesdis.noaa.gov/GOES19/ABI/CONUS/GEOCOLOR/20251162301_GOES19-ABI-CONUS-GEOCOLOR-1250x750.jpg',
+    latest: 'https://cdn.star.nesdis.noaa.gov/GOES19/ABI/CONUS/GEOCOLOR/1250x750.jpg',
     loop: 'https://cdn.star.nesdis.noaa.gov/GOES16/GLM/CONUS/EXTENT3/GOES16-CONUS-EXTENT3-625x375.gif',
     latest_ir: 'https://cdn.star.nesdis.noaa.gov/GOES16/ABI/CONUS/11/1250x750.jpg',
 };
