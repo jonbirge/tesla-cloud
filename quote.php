@@ -26,14 +26,14 @@ if (file_exists($envFilePath)) {
 }
 
 // Check if API key is set
-if (!isset($_ENV['POLYGON_KEY'])) {
+if (!isset($_ENV['FINNHUB_KEY'])) {
     http_response_code(500);
-    echo json_encode(['error' => 'Polygon API key not found in .env file']);
+    echo json_encode(['error' => 'API key not found in .env file']);
     exit;
 }
 
 // Get the API key from environment variables
-$api_key = $_ENV['POLYGON_KEY'];
+$api_key = $_ENV['FINNHUB_KEY'];
 
 // Default ticker is S&P 500 (^GSPC)
 $ticker = isset($_GET['symbol']) ? $_GET['symbol'] : 'SPY'; // Using SPY ETF as a proxy for S&P 500
@@ -66,7 +66,7 @@ if (file_exists($cacheFile)) {
 }
 
 // Polygon.io API URL for previous day's data
-$url = "https://api.polygon.io/v2/aggs/ticker/{$ticker}/prev?adjusted=true&apiKey={$api_key}";
+$url = "https://finnhub.io/api/v1/quote?symbol={$ticker}&token={$api_key}";
 
 // Set up the stream context with options (replacing cURL options)
 $options = [
@@ -107,27 +107,21 @@ if ($statusCode !== 200 || $response === false) {
 $data = json_decode($response, true);
 
 // Check if we have valid data
-if (!$data || isset($data['error']) || $data['status'] !== 'OK' || empty($data['results'])) {
+if (!$data || empty($data)) {
     http_response_code(500);
-    echo json_encode(['error' => 'Invalid response from Polygon.io API', 'data' => $data]);
+    echo json_encode(['error' => 'Invalid response from API', 'data' => $data]);
     exit;
 }
 
 // Extract the relevant data from Polygon response
-$result = $data['results'][0];
-$currentPrice = floatval($result['c']); // Closing price
-$previousClose = floatval($result['o']); // Opening price
-
-// Calculate percent change
-$percentChange = 0;
-if ($previousClose > 0) {
-    $percentChange = (($currentPrice - $previousClose) / $previousClose) * 100;
-}
+$currentPrice = floatval($data['c']);   // (Current or closing price)
+$percentChange = floatval($data['dp']); // (Percentage change)
+$time = intval($data['t']);             // (Timestamp)
 
 $output = [
     'symbol' => $ticker,
+    'quoteTime'=> $time,
     'price' => $currentPrice,
-    'previousClose' => $previousClose,
     'percentChange' => $percentChange,
     'cache' => false
 ];

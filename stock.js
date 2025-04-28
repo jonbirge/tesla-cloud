@@ -46,7 +46,7 @@ function updateStockDisplay(percentChange) {
     }
     
     // Format the percentage change with one decimal place
-    const formattedChange = Math.abs(percentChange).toFixed(1);
+    const formattedChange = Math.abs(percentChange).toFixed(2);
     
     // Determine if the market is up, down, or unchanged
     if (percentChange > 0) {
