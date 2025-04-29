@@ -175,7 +175,7 @@ hr {
 }
 
 .hidden {
-    display: none;
+    display: none !important;
 }
 
 /* External site container */
@@ -711,6 +711,7 @@ body.dark-mode .share-icon img {
 
 
 /* Status Indicators - Unified Styling */
+
 .status-indicator {
     width: 24px;
     height: 24px;
@@ -721,7 +722,9 @@ body.dark-mode .share-icon img {
     transition: color 0.3s ease;
 }
 
+
 /* Network Status Indicator */
+
 .network-status {
     color: var(--status-unavailable);
 }
@@ -737,117 +740,6 @@ body.dark-mode .share-icon img {
 .network-status.good {
     color: var(--status-good);
 }
-
-/* GPS Status Indicator */
-.gps-status {
-    color: var(--status-unavailable);
-}
-
-.gps-status.unavailable {
-    color: var(--status-unavailable);
-}
-
-.gps-status.poor {
-    color: var(--status-poor);
-}
-
-.gps-status.good {
-    color: var(--status-good);
-}
-
-/* Rain Status Indicator */
-.rain-status {
-    color: var(--weather-warning-color); /* Changed to orange weather warning color */
-    animation: pulse-rain 2s infinite;
-}
-
-@keyframes pulse-rain {
-    0% {
-        opacity: 0.7;
-    }
-    50% {
-        opacity: 1;
-    }
-    100% {
-        opacity: 0.7;
-    }
-}
-
-/* Notification System */
-#notification-container {
-    position: fixed;
-    top: 20px;
-    left: 50%; /* Center horizontally */
-    transform: translateX(-50%); /* Offset by half width for true centering */
-    z-index: 9999;
-    max-width: 80%; /* Allow more width */
-    min-width: 200px;
-}
-
-.notification {
-    display: flex;
-    align-items: center;
-    background-color: rgba(0, 0, 0, 0.75);
-    padding: 12px 16px;
-    border-radius: 8px;
-    margin-bottom: 10px;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-    opacity: 0;
-    transform: translateY(-20px);
-    transition: opacity 0.3s, transform 0.3s;
-    white-space: nowrap; /* Keep on one line */
-    width: auto; /* Size to content */
-    display: inline-flex; /* Only take needed width */
-}
-
-.notification.show {
-    opacity: 1;
-    transform: translateY(0);
-}
-
-.notification.hide {
-    opacity: 0;
-    transform: translateY(-20px);
-}
-
-.notification-icon {
-    margin-right: 12px;
-    color: var(--weather-warning-color); /* Match the orange warning color */
-}
-
-.notification-message {
-    font-size: 14pt;
-    font-weight: 500;
-    color: #ff9500; /* Bright orange color for text */
-    white-space: nowrap; /* Ensure text stays on one line */
-}
-
-
-/* Spinner styling */
-
-.spinner-container {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    width: 100%;
-    height: 200px; /* Provide adequate height for the spinner */
-}
-
-.spinner {
-    width: 50px;
-    height: 50px;
-    border: 5px solid rgba(0, 119, 255, 0.2); /* Tesla blue with opacity */
-    border-radius: 50%;
-    border-top-color: var(--tesla-blue);
-    animation: spin 1s ease-in-out infinite;
-}
-
-@keyframes spin {
-    to { transform: rotate(360deg); }
-}
-
-
-/* Network status indicator */
 
 .network-status svg {
     width: 24px;
@@ -922,6 +814,129 @@ body.dark-mode .share-icon img {
 
 .gps-status.good {
     color: var(--status-good); /* Using the shared variable */
+}
+
+.gps-status {
+    color: var(--status-unavailable);
+}
+
+
+/* Rain Status Indicator */
+
+.rain-status {
+    color: var(--weather-warning-color); /* Changed to orange weather warning color */
+    animation: pulse-rain 2s infinite;
+}
+
+@keyframes pulse-rain {
+    0% {
+        opacity: 0.7;
+    }
+    50% {
+        opacity: 1;
+    }
+    100% {
+        opacity: 0.7;
+    }
+}
+
+
+/* Stock Status Indicator */
+
+.stock-status {
+    width: auto;
+    font-size: 12pt;
+    font-weight: 650;
+    transition: color 0.3s ease;
+    font-variant-numeric: tabular-nums;
+    margin-bottom: -2pt;
+}
+
+.stock-status.up {
+    color: var(--status-good);
+}
+
+.stock-status.down {
+    color: var(--stock-down);
+}
+
+.stock-status.neutral {
+    color: var(--stock-neutral);
+}
+
+
+/* Notification System */
+
+#notification-container {
+    position: fixed;
+    top: 20px;
+    left: 50%; /* Center horizontally */
+    transform: translateX(-50%); /* Offset by half width for true centering */
+    z-index: 9999;
+    max-width: 80%; /* Allow more width */
+    min-width: 200px;
+}
+
+.notification {
+    display: flex;
+    align-items: center;
+    background-color: rgba(0, 0, 0, 0.75);
+    padding: 12px 16px;
+    border-radius: 8px;
+    margin-bottom: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    opacity: 0;
+    transform: translateY(-20px);
+    transition: opacity 0.3s, transform 0.3s;
+    white-space: nowrap; /* Keep on one line */
+    width: auto; /* Size to content */
+    display: inline-flex; /* Only take needed width */
+}
+
+.notification.show {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+.notification.hide {
+    opacity: 0;
+    transform: translateY(-20px);
+}
+
+.notification-icon {
+    margin-right: 12px;
+    color: var(--weather-warning-color); /* Match the orange warning color */
+}
+
+.notification-message {
+    font-size: 14pt;
+    font-weight: 500;
+    color: #ff9500; /* Bright orange color for text */
+    white-space: nowrap; /* Ensure text stays on one line */
+}
+
+
+/* Spinner styling */
+
+.spinner-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    height: 200px; /* Provide adequate height for the spinner */
+}
+
+.spinner {
+    width: 50px;
+    height: 50px;
+    border: 5px solid rgba(0, 119, 255, 0.2); /* Tesla blue with opacity */
+    border-radius: 50%;
+    border-top-color: var(--tesla-blue);
+    animation: spin 1s ease-in-out infinite;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
 }
 
 
@@ -1256,30 +1271,6 @@ body.dark-mode .option-button:hover:not(.active) {
 
 .news-toggle-item {
     font-size: 15pt;
-}
-
-
-/* Stock Status Indicator */
-
-.stock-status {
-    min-width: 80px;
-    font-size: 12pt;
-    font-weight: 650;
-    transition: color 0.3s ease;
-    font-variant-numeric: tabular-nums;
-    margin-bottom: -1pt;
-}
-
-.stock-status.up {
-    color: var(--stock-up);
-}
-
-.stock-status.down {
-    color: var(--stock-down);
-}
-
-.stock-status.neutral {
-    color: var(--stock-neutral);
 }
 
 

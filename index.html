@@ -664,6 +664,17 @@
     <!-- Indicators and dark mode toggle -->
     <div class="control-container">
         <!-- Rain indicator will be inserted here dynamically when needed -->
+        <div id="gps-status" class="status-indicator gps-status unavailable" title="GPS Status">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24">
+                <!-- Outer circle -->
+                <circle cx="12" cy="12" r="8" fill="none" stroke="currentColor" stroke-width="2"/>
+                <!-- Inner circle -->
+                <circle cx="12" cy="12" r="3" fill="currentColor"/>
+            </svg>
+        </div>
+        <div id="stock-status" class="status-indicator stock-status neutral" title="S&P 500 Performance">
+            S&P <span id="stock-arrow"></span> <span id="stock-value">--%</span>
+        </div>
         <div id="network-status" class="status-indicator network-status unavailable" title="Network Status">
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24">
                 <!-- Bar 1 (smallest) -->
@@ -675,17 +686,6 @@
                 <!-- Bar 4 (tallest) -->
                 <rect class="network-bar bar-4" x="18" y="8" width="3" height="11"/>
             </svg>
-        </div>
-        <div id="gps-status" class="status-indicator gps-status unavailable" title="GPS Status">
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24">
-                <!-- Outer circle -->
-                <circle cx="12" cy="12" r="8" fill="none" stroke="currentColor" stroke-width="2"/>
-                <!-- Inner circle -->
-                <circle cx="12" cy="12" r="3" fill="currentColor"/>
-            </svg>
-        </div>
-        <div id="stock-status" class="status-indicator stock-status neutral" title="S&P 500 Performance">
-            S&P <span id="stock-arrow"></span> <span id="stock-value">--%</span>
         </div>
         <label class="toggle-label">Dark Mode</label>
         <label class="toggle-switch">

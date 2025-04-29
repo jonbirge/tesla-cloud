@@ -344,10 +344,13 @@ function handlePositionUpdate(position) {
             // Use CSS variable for unavailable GPS
             gpsStatusElement.style.color = 'var(--status-unavailable)';
             gpsStatusElement.title = 'GPS Unavailable';
-        } else {
+            gpsStatusElement.classList.remove('hidden'); // Show indicator when GPS is unavailable
+        } else if (acc > 10) { // Only show indicator when accuracy is worse than 25m
+            gpsStatusElement.classList.remove('hidden');
+            
             // Interpolate between yellow and green based on accuracy
             const maxAccuracy = 50;  // Yellow threshold
-            const minAccuracy = 1;   // Green threshold
+            const minAccuracy = 10;   // Green threshold
 
             // Clamp accuracy between min and max thresholds
             const clampedAcc = Math.min(Math.max(acc, minAccuracy), maxAccuracy);
@@ -362,6 +365,11 @@ function handlePositionUpdate(position) {
             }
 
             gpsStatusElement.title = `GPS Accuracy: ${Math.round(acc)}m`;
+        } else {
+            // Hide GPS status if accuracy is good
+            console.log('GPS accuracy is good, hiding status indicator');
+            gpsStatusElement.style.color = 'var(--status-good)';
+            gpsStatusElement.classList.add('hidden');
         }
     }
 
