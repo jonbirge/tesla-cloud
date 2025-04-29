@@ -388,7 +388,7 @@ body.dark-mode .img-white-transparent {
 }
 
 
-/* Indicator container and dark-mode toggle */
+/* Indicator container */
 
 .control-container {
     position: fixed;
@@ -403,60 +403,145 @@ body.dark-mode .img-white-transparent {
     opacity: 0.75;
 }
 
-.toggle-label {
-    color: var(--text-color);
-    font-size: 15pt;
-    font-weight: 600;
-    margin-right: 10px;
+.status-indicator {
+    width: 24px;
+    height: 24px;
+    margin-right: 22px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: color 0.3s ease;
 }
 
-.toggle-switch {
-    position: relative;
-    display: inline-block;
-    width: 48px; /* Reduced by 20% from 60px */
-    height: 27px; /* Reduced by 20% from 34px */
+
+/* Network Status Indicator */
+
+.network-status {
+    color: var(--status-unavailable);
 }
 
-.toggle-switch input {
-    opacity: 0;
-    width: 0;
-    height: 0;
+.network-status.unavailable {
+    color: var(--status-unavailable);
 }
 
-.toggle-slider {
-    position: absolute;
-    cursor: pointer;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background-color: #bbb;
-    transition: .4s;
-    border-radius: 34px;
+.network-status.poor {
+    color: var(--status-poor);
 }
 
-.toggle-slider:before {
-    position: absolute;
-    content: "";
-    height: 21px; /* Reduced by 20% from 26px */
-    width: 21px; /* Reduced by 20% from 26px */
-    left: 3px; /* Adjusted from 4px */
-    bottom: 3px; /* Adjusted from 4px */
-    background-color: white;
-    transition: .4s;
-    border-radius: 50%;
+.network-status.good {
+    color: var(--status-good);
 }
 
-input:checked + .toggle-slider {
-    background-color: #2196F3;
+.network-status svg {
+    width: 24px;
+    height: 24px;
 }
 
-input:focus + .toggle-slider {
-    box-shadow: 0 0 1px #2196F3;
+.network-status .network-bar {
+    transition: fill 0.3s ease;
 }
 
-input:checked + .toggle-slider:before {
-    transform: translateX(21px); /* Reduced by 20% from 26px */
+.network-status.unavailable .network-bar {
+    fill: var(--status-unavailable);
+}
+
+.network-status.poor .bar-1 {
+    fill: var(--status-poor);
+}
+
+.network-status.poor .bar-2,
+.network-status.poor .bar-3,
+.network-status.poor .bar-4 {
+    fill: var(--status-unavailable);
+}
+
+.network-status.fair .bar-1,
+.network-status.fair .bar-2 {
+    fill: var(--status-poor);
+}
+
+.network-status.fair .bar-3,
+.network-status.fair .bar-4 {
+    fill: var(--status-unavailable);
+}
+
+.network-status.good .bar-1,
+.network-status.good .bar-2,
+.network-status.good .bar-3 {
+    fill: var(--status-good);
+}
+
+.network-status.good .bar-4 {
+    fill: var(--status-unavailable);
+}
+
+.network-status.excellent .bar-1,
+.network-status.excellent .bar-2,
+.network-status.excellent .bar-3,
+.network-status.excellent .bar-4 {
+    fill: var(--status-good);
+}
+
+
+/* GPS Status Indicator */
+
+.gps-status.unavailable {
+    color: var(--status-unavailable); /* Using the shared variable */
+}
+
+.gps-status.poor {
+    color: var(--status-poor); /* Using the shared variable */
+}
+
+.gps-status.good {
+    color: var(--status-good); /* Using the shared variable */
+}
+
+.gps-status {
+    color: var(--status-unavailable);
+}
+
+
+/* Rain Status Indicator */
+
+.rain-status {
+    color: var(--weather-warning-color); /* Changed to orange weather warning color */
+    animation: pulse-rain 2s infinite;
+}
+
+@keyframes pulse-rain {
+    0% {
+        opacity: 0.7;
+    }
+    50% {
+        opacity: 1;
+    }
+    100% {
+        opacity: 0.7;
+    }
+}
+
+
+/* Stock Status Indicator */
+
+.stock-status {
+    width: auto;
+    font-size: 12pt;
+    font-weight: 650;
+    transition: color 0.3s ease;
+    font-variant-numeric: tabular-nums;
+}
+
+.stock-status.up {
+    color: var(--status-good);
+}
+
+.stock-status.down {
+    color: var(--stock-down);
+}
+
+.stock-status.neutral {
+    color: var(--stock-neutral);
 }
 
 
@@ -707,150 +792,6 @@ input:checked + .toggle-slider:before {
 
 body.dark-mode .share-icon img {
     filter: brightness(0) invert(0.8) grayscale(1);
-}
-
-
-/* Status Indicators - Unified Styling */
-
-.status-indicator {
-    width: 24px;
-    height: 24px;
-    margin-right: 22px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    transition: color 0.3s ease;
-}
-
-
-/* Network Status Indicator */
-
-.network-status {
-    color: var(--status-unavailable);
-}
-
-.network-status.unavailable {
-    color: var(--status-unavailable);
-}
-
-.network-status.poor {
-    color: var(--status-poor);
-}
-
-.network-status.good {
-    color: var(--status-good);
-}
-
-.network-status svg {
-    width: 24px;
-    height: 24px;
-}
-
-.network-status .network-bar {
-    transition: fill 0.3s ease;
-}
-
-.network-status.unavailable .network-bar {
-    fill: var(--status-unavailable);
-}
-
-.network-status.poor .bar-1 {
-    fill: var(--status-poor);
-}
-
-.network-status.poor .bar-2,
-.network-status.poor .bar-3,
-.network-status.poor .bar-4 {
-    fill: var(--status-unavailable);
-}
-
-.network-status.fair .bar-1,
-.network-status.fair .bar-2 {
-    fill: var(--status-poor);
-}
-
-.network-status.fair .bar-3,
-.network-status.fair .bar-4 {
-    fill: var(--status-unavailable);
-}
-
-.network-status.good .bar-1,
-.network-status.good .bar-2,
-.network-status.good .bar-3 {
-    fill: var(--status-good);
-}
-
-.network-status.good .bar-4 {
-    fill: var(--status-unavailable);
-}
-
-.network-status.excellent .bar-1,
-.network-status.excellent .bar-2,
-.network-status.excellent .bar-3,
-.network-status.excellent .bar-4 {
-    fill: var(--status-good);
-}
-
-
-/* GPS Status Indicator */
-
-.gps-status.unavailable {
-    color: var(--status-unavailable); /* Using the shared variable */
-}
-
-.gps-status.poor {
-    color: var(--status-poor); /* Using the shared variable */
-}
-
-.gps-status.good {
-    color: var(--status-good); /* Using the shared variable */
-}
-
-.gps-status {
-    color: var(--status-unavailable);
-}
-
-
-/* Rain Status Indicator */
-
-.rain-status {
-    color: var(--weather-warning-color); /* Changed to orange weather warning color */
-    animation: pulse-rain 2s infinite;
-}
-
-@keyframes pulse-rain {
-    0% {
-        opacity: 0.7;
-    }
-    50% {
-        opacity: 1;
-    }
-    100% {
-        opacity: 0.7;
-    }
-}
-
-
-/* Stock Status Indicator */
-
-.stock-status {
-    width: auto;
-    font-size: 12pt;
-    font-weight: 650;
-    transition: color 0.3s ease;
-    font-variant-numeric: tabular-nums;
-}
-
-.stock-status.up {
-    color: var(--status-good);
-}
-
-.stock-status.down {
-    color: var(--stock-down);
-}
-
-.stock-status.neutral {
-    color: var(--stock-neutral);
 }
 
 
@@ -1233,12 +1174,6 @@ body.dark-mode .settings-text-item input[type="text"]:disabled {
 
 body.dark-mode .option-button:hover:not(.active) {
     background-color: rgba(255, 255, 255, 0.1);
-}
-
-.settings-toggle-item.option-switch-container {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
 }
 
 
