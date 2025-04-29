@@ -367,7 +367,6 @@ function handlePositionUpdate(position) {
             gpsStatusElement.title = `GPS Accuracy: ${Math.round(acc)}m`;
         } else {
             // Hide GPS status if accuracy is good
-            console.log('GPS accuracy is good, hiding status indicator');
             gpsStatusElement.style.color = 'var(--status-good)';
             gpsStatusElement.classList.add('hidden');
         }
