@@ -446,7 +446,14 @@
                     <input type="checkbox" onchange="toggleSettingFrom(this)"><span
                         class="settings-toggle-slider"></span>
                 </div>
-            
+
+                <div class="settings-toggle-item" data-setting="dark-mode"
+                    onclick="this.querySelector('input').click()">
+                    <label>Dark Mode</label>
+                    <input type="checkbox" onchange="toggleSettingFrom(this)"><span
+                        class="settings-toggle-slider"></span>
+                </div>
+                
                 <div class="settings-toggle-item" data-setting="24-hour-time"
                     onclick="this.querySelector('input').click()">
                     <label>24-hour Time</label>
@@ -508,7 +515,7 @@
 
                 <div class="settings-toggle-item" data-setting="show-stock-indicator"
                     onclick="this.querySelector('input').click()">
-                    <label>S&P 500 Indicator</label>
+                    <label>Market Indicators</label>
                     <input type="checkbox" onchange="toggleSettingFrom(this)" checked><span
                         class="settings-toggle-slider"></span>
                 </div>
@@ -693,11 +700,6 @@
                 <rect class="network-bar bar-4" x="20" y="4" width="4" height="15"/>
             </svg>
         </div>
-        <label class="toggle-label">Dark Mode</label>
-        <label class="toggle-switch">
-            <input type="checkbox" id="darkModeToggle" onchange="toggleMode()">
-            <span class="toggle-slider"></span>
-        </label>
     </div>
 
     <!-- Load section icons -->
