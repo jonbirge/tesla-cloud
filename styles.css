@@ -794,16 +794,6 @@ body.dark-mode .share-icon img {
 
 /* GPS Status Indicator */
 
-.gps-status {
-    margin-right: 22px; /* Good separation from the Dark Mode text */
-    width: 24px;
-    height: 24px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    transition: color 0.3s ease;
-}
-
 .gps-status.unavailable {
     color: var(--status-unavailable); /* Using the shared variable */
 }
@@ -849,7 +839,6 @@ body.dark-mode .share-icon img {
     font-weight: 650;
     transition: color 0.3s ease;
     font-variant-numeric: tabular-nums;
-    margin-bottom: -2pt;
 }
 
 .stock-status.up {
