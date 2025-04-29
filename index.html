@@ -438,7 +438,7 @@
         <div id="settings" class="section">
             <button id="logout-button" class="logout-button hidden" onclick="handleLogout()">Logout</button>
         
-            <h2>Settings</h2>
+            <h2>General Settings</h2>
             <div class="settings-controls">
                 <div class="settings-toggle-item" data-setting="auto-dark-mode"
                     onclick="this.querySelector('input').click()">
@@ -488,7 +488,9 @@
                         <input type="checkbox" onchange="toggleSettingFrom(this)"><span
                             class="settings-toggle-slider"></span>
                     </div>
-                    <div class="settings-description">Allow forwarding news feed items to email</div>
+                    <div class="settings-description">
+                        Allow forwarding news feed items to email
+                    </div>
                 </div>
             
                 <div data-setting="news-forward-only">
@@ -497,7 +499,8 @@
                         <input type="checkbox" onchange="toggleSettingFrom(this)">
                         <span class="settings-toggle-slider"></span>
                     </div>
-                    <div class="settings-description">Forward news items instead of opening them in browser
+                    <div class="settings-description">
+                        Forward news items instead of opening them in browser
                     </div>
                 </div>
                 

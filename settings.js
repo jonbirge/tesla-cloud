@@ -80,7 +80,7 @@ export function leaveSettings() {
     }
 }
 
-// Automatically toggles dark mode based on sunrise and sunset times
+// Check for auto dark mode setting and implement it if enabled
 export function autoDarkMode(lat, long) {
     // if lat or long are null, then replace with last known values
     if (lat == null || long == null) {
@@ -429,14 +429,6 @@ async function fetchSettings() {
 
             // Initialize toggle states based on settings
             initializeSettings();
-            //updateRadarVisibility();
-
-            // Handle dark mode
-            // if (settings['dark-mode']) {
-            //     turnOnDarkMode();
-            // } else {
-            //     turnOffDarkMode();
-            // }
         } else {
             console.error('Error fetching settings: ', response.statusText);
         }
@@ -586,7 +578,7 @@ function initializeSettings() {
             updateSetting(key, value);
         }
     }
-    //updateRadarVisibility();
+    autoDarkMode();
 }
 
 // Helper function to get current domain for cookie namespacing
