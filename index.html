@@ -480,28 +480,19 @@
                             onclick="toggleOptionSetting(this)">ABRP</button>
                     </div>
                 </div>
-            
-                <div>
-                    <div class="settings-toggle-item" data-setting="news-forwarding"
-                        onclick="this.querySelector('input').click()">
-                        <label>Enable News Forwarding</label>
-                        <input type="checkbox" onchange="toggleSettingFrom(this)"><span
-                            class="settings-toggle-slider"></span>
-                    </div>
-                    <div class="settings-description">
-                        Allow forwarding news feed items to email
-                    </div>
+                
+                <div class="settings-toggle-item" data-setting="news-forwarding"
+                    onclick="this.querySelector('input').click()">
+                    <label>Enable News Forwarding</label>
+                    <input type="checkbox" onchange="toggleSettingFrom(this)"><span
+                        class="settings-toggle-slider"></span>
                 </div>
-            
-                <div data-setting="news-forward-only">
-                    <div class="settings-toggle-item" data-setting="news-forward-only" onclick="this.querySelector('input').click()">
-                        <label>Clicking News Anywhere Forwards</label>
-                        <input type="checkbox" onchange="toggleSettingFrom(this)">
-                        <span class="settings-toggle-slider"></span>
-                    </div>
-                    <div class="settings-description">
-                        Forward news items instead of opening them in browser
-                    </div>
+                
+                <div class="settings-toggle-item" data-setting="news-forward-only"
+                    onclick="this.querySelector('input').click()">
+                    <label>Clicking News Anywhere Forwards</label>
+                    <input type="checkbox" onchange="toggleSettingFrom(this)">
+                    <span class="settings-toggle-slider"></span>
                 </div>
                 
                 <div class="settings-toggle-item settings-text-item" data-setting="forwarding-email">
