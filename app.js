@@ -4,7 +4,8 @@ import { PositionSimulator } from './location.js';
 import { attemptLogin, leaveSettings, settings } from './settings.js';
 import { fetchPremiumWeatherData, SAT_URLS, forecastDataPrem } from './wx.js';
 import { updateNetworkInfo, updatePingChart, startPingTest } from './net.js';
-import { markAllNewsAsRead, startNewsTimeUpdates, stopNewsTimeUpdates } from './news.js';
+import { markAllNewsAsRead } from './news.js';
+import { startStockUpdates, stopStockUpdates } from './stock.js';
 
 // Parameters
 const LATLON_UPDATE_INTERVAL = 2; // seconds
@@ -169,7 +170,7 @@ function updateWindage(vehicleSpeed, vehicleHeading, windSpeed, windDirection) {
 
     // Helper function to draw arrow
     function drawArrow(fromX, fromY, toX, toY, color, headLength = 9) {
-        const angle = Math.atan2(toY - fromY, toX - fromX);
+        const angle = Math.atan2(toY - fromY, toX - fromY);
         const headAngle = Math.PI / 6; // 30 degrees
 
         radarContext.beginPath();
@@ -343,10 +344,13 @@ function handlePositionUpdate(position) {
             // Use CSS variable for unavailable GPS
             gpsStatusElement.style.color = 'var(--status-unavailable)';
             gpsStatusElement.title = 'GPS Unavailable';
-        } else {
+            gpsStatusElement.classList.remove('hidden'); // Show indicator when GPS is unavailable
+        } else if (acc > 10) { // Only show indicator when accuracy is worse than 25m
+            gpsStatusElement.classList.remove('hidden');
+            
             // Interpolate between yellow and green based on accuracy
             const maxAccuracy = 50;  // Yellow threshold
-            const minAccuracy = 1;   // Green threshold
+            const minAccuracy = 10;   // Green threshold
 
             // Clamp accuracy between min and max thresholds
             const clampedAcc = Math.min(Math.max(acc, minAccuracy), maxAccuracy);
@@ -361,6 +365,10 @@ function handlePositionUpdate(position) {
             }
 
             gpsStatusElement.title = `GPS Accuracy: ${Math.round(acc)}m`;
+        } else {
+            // Hide GPS status if accuracy is good
+            gpsStatusElement.style.color = 'var(--status-good)';
+            gpsStatusElement.classList.add('hidden');
         }
     }
 
@@ -536,6 +544,7 @@ function updateVersion() {
     }
 }
 
+// Function to update the src of an iframe
 window.updateMapFrame = function () {
     // Normal mode - ensure iframe is visible and test mode message is hidden
     const teslaWazeContainer = document.querySelector('.teslawaze-container');
@@ -656,11 +665,6 @@ window.showSection = function (sectionId) {
         if (newsButton) {
             newsButton.classList.remove('has-notification');
         }
-        // Start the timer that updates the "time ago" displays
-        startNewsTimeUpdates();
-    } else if (currentSection === 'news') {
-        // If we're leaving the news section, stop the time updates
-        stopNewsTimeUpdates();
     }
 
     // If switching to about section, clear the notification dot
@@ -734,8 +738,29 @@ window.showSection = function (sectionId) {
     currentSection = sectionId;
 };
 
-
-// ***** Main code *****
+// Function to handle scroll events on the right frame
+function handleScrollScale() {
+    const rightFrame = document.getElementById('rightFrame');
+    const controlContainer = document.querySelector('.control-container');
+    
+    // Define the threshold where scaling starts (pixels from top)
+    const scrollThreshold = 60;
+    
+    // Get current scroll position
+    const scrollTop = rightFrame.scrollTop;
+    
+    if (scrollTop < scrollThreshold) {
+        // Calculate scale factor between 1 and 2 based on scroll position
+        const scaleFactor = 1 + 0.25*((scrollThreshold - scrollTop) / scrollThreshold);
+        
+        // Apply transformation with top-right anchoring to keep both top and right positions fixed
+        controlContainer.style.transformOrigin = 'top right';
+        controlContainer.style.transform = `scale(${scaleFactor})`;
+    } else {
+        // Reset to normal size when scrolled past threshold
+        controlContainer.style.transform = 'scale(1)';
+    }
+}
 
 // Update link click event listener
 document.addEventListener('click', function (e) {
@@ -757,10 +782,12 @@ document.addEventListener('visibilitychange', () => {
         stopGPSUpdates();
         pauseNewsUpdates();
         pausePingTest();
+        stopStockUpdates();
     } else {
         startGPSUpdates();
         resumeNewsUpdates();
         resumePingTest();
+        startStockUpdates();
     }
 });
 
@@ -786,6 +813,9 @@ document.addEventListener('DOMContentLoaded', async function () {
 
     // Begin network sensing
     startPingTest();
+    
+    // Start stock market updates
+    startStockUpdates();
 
     // Get version from vers.php asyncly
     updateVersion();
@@ -800,6 +830,12 @@ document.addEventListener('DOMContentLoaded', async function () {
             handleLogin();
         }
     });
+    
+    // Add scroll event listener for control container scaling
+    document.getElementById('rightFrame').addEventListener('scroll', handleScrollScale);
+    
+    // Apply initial scaling on page load
+    handleScrollScale();
 
     // Show the initial section from URL parameter
     const urlParams = new URLSearchParams(window.location.search);

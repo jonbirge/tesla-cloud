@@ -1,7 +1,11 @@
 // Imports
 import { updateNews, setShareButtonsVisibility } from './news.js';
 import { updateChartAxisColors } from './net.js';
-import { autoDarkMode, updatePremiumWeatherDisplay } from './wx.js';
+import { updatePremiumWeatherDisplay } from './wx.js';
+import { startStockUpdates, stopStockUpdates } from './stock.js';
+
+// Import necessary variables from wx.js
+import { forecastDataPrem, lastLat, lastLong } from './wx.js';
 
 // Global variables
 let isLoggedIn = false;
@@ -24,6 +28,7 @@ const defaultSettings = {
     "imperial-units": true,
     "map-choice": 'waze',
     "show-wind-radar": true,
+    "show-stock-indicator": true, // New setting for S&P 500 indicator
     // News forwarding
     "news-forwarding": false,
     "news-forward-only": false,
@@ -75,22 +80,45 @@ export function leaveSettings() {
     }
 }
 
-// Turn on dark mode
-export function turnOnDarkMode() {
-    console.log('turnOnDarkMode() called');
-    document.body.classList.add('dark-mode');
-    document.getElementById('darkModeToggle').checked = true;
-    toggleSetting('dark-mode', true);
-    updateDarkModeDependants();
-}
+// Check for auto dark mode setting and implement it if enabled
+export function autoDarkMode(lat, long) {
+    // if lat or long are null, then replace with last known values
+    if (lat == null || long == null) {
+        if (lastLat && lastLong) {
+            lat = lastLat;
+            long = lastLong;
+        } else {
+            console.log('autoDarkMode: No coordinates available.');
+            return;
+        }
+    }
 
-// Turn off dark mode
-export function turnOffDarkMode() {
-    console.log('turnOffDarkMode() called');
-    document.body.classList.remove('dark-mode');
-    document.getElementById('darkModeToggle').checked = false;
-    toggleSetting('dark-mode', false);
-    updateDarkModeDependants();
+    console.log('Auto dark mode check for coordinates: ', lat, long);
+    const sunrise = forecastDataPrem?.current.sunrise * 1000;
+    const sunset = forecastDataPrem?.current.sunset * 1000;
+    if (!sunrise || !sunset) {
+        console.log('Auto dark mode: No sunrise/sunset data available.');
+        return;
+    }
+
+    if (settings && settings['auto-dark-mode']) {
+        const now = new Date();
+        const currentTime = now.getTime();
+        const sunriseTime = new Date(sunrise).getTime();
+        const sunsetTime = new Date(sunset).getTime();
+
+        if (currentTime >= sunsetTime || currentTime < sunriseTime) {
+            console.log('Applying dark mode based on sunset...');
+            //turnOnDarkMode();
+            updateSetting('dark-mode', true);
+        } else {
+            console.log('Applying light mode based on sunrise...');
+            //turnOffDarkMode();
+            updateSetting('dark-mode', false);
+        }
+    } else {
+        console.log('Auto dark mode disabled or coordinates not available.');
+    }
 }
 
 // Function to attempt login
@@ -117,11 +145,11 @@ export async function attemptLogin() {
             await fetchSettings();
         } else {
             console.log('No user IDs found, creating new auto-generated user...');
-            initializeSettings();
+            setDefaultSettings();
             const newAutoUser = await autoCreateUser(); // Create a new user and log them in
             if (await validateAutoUserId(newAutoUser)) {
                 for (const [key, value] of Object.entries(settings)) {
-                    await toggleSetting(key, value);
+                    await saveSetting(key, value);
                 }
             }
         }
@@ -136,13 +164,13 @@ export async function attemptLogin() {
     updateMapFrame();
 }
 
-// Function to toggle a setting (updates both local cache and server)
-export async function toggleSetting(key, value) {
+// Function to change a setting (updating both local cache and server)
+export async function saveSetting(key, value) {
     // Handle local settings
     settings[key] = value;
 
-    // Update toggle state visually
-    updateToggleVisualState(key, value);
+    // Update the interface
+    updateSetting(key, value);
 
     console.log(`Setting "${key}" updated to ${value} (local)`);
 
@@ -173,57 +201,47 @@ export async function toggleSetting(key, value) {
         }
     }
 
-    // If the setting is RSS-related, set the dirty flag
-    if (key.startsWith('rss-')) {
-        const isDrop = !value; // If unchecked, it's a drop
-        rssIsDirty = true;
-        rssDrop = rssDrop || isDrop; // Set the drop flag if this is a drop
-        console.log(`RSS setting "${key}" changed to ${value} (dirty: ${rssIsDirty}, drop: ${rssDrop})`);
-    }
+    // Handle special case interactions
 
-    // If the setting is unit/time-related, set the dirty flag
-    if (key === 'imperial-units' || key === '24-hour-time') {
-        unitIsDirty = true;
-        console.log(`Unit/time setting "${key}" changed to ${value} (dirty: ${unitIsDirty})`);
-    }
-
-    // If the setting is dark mode related, update the dark mode
-    if (key === 'auto-dark-mode') {
-        if (value) {
-            autoDarkMode();
-        }
-    } 
-
-    // Handle map choice setting
-    if (key === 'map-choice') {
-        updateMapFrame();
-    }
-
-    // If the setting is news forwarding, update the share buttons
-    if (key === 'news-forwarding') {
-        setShareButtonsVisibility();
-    }
-
-    // Show/hide radar if setting changes
-    if (key === 'show-wind-radar') {
-        updateRadarVisibility();
+    // If the setting is "dark-mode", turn off auto-dark-mode
+    if (key === 'dark-mode') {
+        saveSetting('auto-dark-mode', false);
+        console.log('Auto dark mode disabled due to manual dark mode setting.');
     }
 }
 
-// Function to initialize with defaults
-function initializeSettings() {
+// Turn on dark mode
+function turnOnDarkMode() {
+    console.log('turnOnDarkMode() called');
+    document.body.classList.add('dark-mode');
+    // document.getElementById('darkModeToggle').checked = true;
+    // saveSetting('dark-mode', true);
+    updateDarkModeDependants();
+}
+
+// Turn off dark mode
+function turnOffDarkMode() {
+    console.log('turnOffDarkMode() called');
+    document.body.classList.remove('dark-mode');
+    // document.getElementById('darkModeToggle').checked = false;
+    // saveSetting('dark-mode', false);
+    updateDarkModeDependants();
+}
+
+// Initialize settings with defaults
+function setDefaultSettings() {
     settings = { ...defaultSettings };
-    initializeToggleStates();
+    initializeSettings();
     updateRadarVisibility();
     console.log('Settings initialized: ', settings);
 }
 
-// Update things that depend on dark mode
+// Helper function to update things that depend on dark mode
 function updateDarkModeDependants() {
     updateChartAxisColors();
 }
 
-// Function to show/hide radar display based on setting
+// Helper function to show/hide radar display based on setting
 function updateRadarVisibility() {
     const radar = document.getElementById('radar-container');
     if (radar) {
@@ -280,6 +298,7 @@ async function validateHashedUserId(hashedId)
     }
 }
 
+// Function to validate auto-generated user ID
 async function validateAutoUserId(autoUserId) {
     if (await validateHashedUserId(autoUserId)) {
         setCookie('auto-userid', autoUserId);
@@ -332,7 +351,7 @@ async function createNewUser(userId, hashedId = null) {
         if (response.ok) {
             console.log('Created new user with default settings:', userId);
             for (const [key, value] of Object.entries(settings)) {
-                await toggleSetting(key, value);
+                await saveSetting(key, value);
             }
             return true;
         } else {
@@ -409,15 +428,7 @@ async function fetchSettings() {
             document.getElementById('settings-section').classList.remove('hidden');
 
             // Initialize toggle states based on settings
-            initializeToggleStates();
-            updateRadarVisibility();
-
-            // Handle dark mode
-            if (settings['dark-mode']) {
-                turnOnDarkMode();
-            } else {
-                turnOffDarkMode();
-            }
+            initializeSettings();
         } else {
             console.error('Error fetching settings: ', response.statusText);
         }
@@ -426,8 +437,10 @@ async function fetchSettings() {
     }
 }
 
-// Update visual state of a toggle or text input
-function updateToggleVisualState(key, value) {
+// Update UI state based on a specific setting
+function updateSetting(key, value) {
+    console.log(`Updating state for "${key}" to ${value}`);
+    
     const settingItems = document.querySelectorAll(`.settings-toggle-item[data-setting="${key}"]`);
 
     // Special compatibility cases
@@ -439,8 +452,8 @@ function updateToggleVisualState(key, value) {
             value = 'metric';
         }
     }
-
-    console.log(`Updating visual state for "${key}" to ${value}`);
+    
+    // Update UI elements based on the setting type
     if (settingItems && settingItems.length > 0) {
         settingItems.forEach(item => {
             // Handle checkbox toggle
@@ -467,13 +480,63 @@ function updateToggleVisualState(key, value) {
         });
     }
 
-    // Disable/enable forwarding-email input based on news-forwarding
-    if (key === 'news-forwarding') {
-        setControlEnable('forwarding-email', value);
-        setControlEnable('news-forward-only', value);
+    // Handle settings effects
+    switch (key) {
+        case 'imperial-units':
+        case '24-hour-time':
+            unitIsDirty = true;
+            console.log(`Unit/time setting "${key}" changed to ${value} (dirty: ${unitIsDirty})`);
+            break;
+            
+        case 'auto-dark-mode':
+            if (value) {
+                autoDarkMode();
+            }
+            break;
+            
+        case 'map-choice':
+            updateMapFrame();
+            break;
+            
+        case 'news-forwarding':
+            setShareButtonsVisibility();
+            setControlEnable('forwarding-email', value);
+            setControlEnable('news-forward-only', value);
+            break;
+            
+        case 'show-wind-radar':
+            updateRadarVisibility();
+            break;
+            
+        case 'show-stock-indicator':
+            if (value) {
+                startStockUpdates();
+            } else {
+                stopStockUpdates();
+            }
+            break;
+
+        case 'dark-mode':
+            if (value) {
+                turnOnDarkMode();
+            } else {
+                turnOffDarkMode();
+            }
+            break;
+            
+        default:
+            // Handle RSS-related settings
+            if (key.startsWith('rss-')) {
+                const isDrop = !value; // If unchecked, it's a drop
+                rssIsDirty = true;
+                rssDrop = rssDrop || isDrop; // Set the drop flag if this is a drop
+                console.log(`RSS setting "${key}" changed to ${value} (dirty: ${rssIsDirty}, drop: ${rssDrop})`);
+            }
+            break;
     }
 }
 
+// Function to enable/disable controls based on a setting
 function setControlEnable(key, enabled = true) {
     const settingItems = document.querySelectorAll(`div[data-setting="${key}"]`);
     if (settingItems && settingItems.length > 0) {
@@ -507,15 +570,15 @@ function setControlEnable(key, enabled = true) {
 }
 
 // Initialize all toggle and text states based on 'settings' dictionary
-function initializeToggleStates() {
+function initializeSettings() {
     // Iterate through all keys in the settings object
     for (const key in settings) {
         if (settings.hasOwnProperty(key)) {
             const value = settings[key];
-            updateToggleVisualState(key, value);
+            updateSetting(key, value);
         }
     }
-    updateRadarVisibility();
+    autoDarkMode();
 }
 
 // Helper function to get current domain for cookie namespacing
@@ -526,6 +589,7 @@ function getCurrentDomain() {
     return hostname.replace(/[^a-zA-Z0-9]/g, '_');
 }
 
+// Function to set a cookie with a specific name, value, and expiration in days
 function setCookie(name, value, days = 36500) { // Default to ~100 years (forever)
     // Namespace the cookie name with the current domain
     const domainSpecificName = `${getCurrentDomain()}_${name}`;
@@ -537,6 +601,7 @@ function setCookie(name, value, days = 36500) { // Default to ~100 years (foreve
     console.log(`Cookie set: ${domainSpecificName}=${value}, expires: ${d.toUTCString()}`);
 }
 
+// Function to get a cookie value by name
 function getCookie(name) {
     // Namespace the cookie name with the current domain
     const domainSpecificName = `${getCurrentDomain()}_${name}`;
@@ -561,6 +626,7 @@ function getCookie(name) {
     return "";
 }
 
+// Function to delete a cookie by name
 function deleteCookie(name) {
     // Namespace the cookie name with the current domain
     const domainSpecificName = `${getCurrentDomain()}_${name}`;
@@ -620,17 +686,6 @@ window.handleLogin = async function () {
     }
 }
 
-// Manually swap dark/light mode
-window.toggleMode = function () {
-    console.log('Toggling dark mode manually.');
-    toggleSetting('auto-dark-mode', false);
-    document.body.classList.toggle('dark-mode');
-    const darkMode = document.body.classList.contains('dark-mode');
-    document.getElementById('darkModeToggle').checked = darkMode;
-    toggleSetting('dark-mode', darkMode);
-    updateDarkModeDependants();
-}
-
 // Function called by the toggle UI elements
 window.toggleSettingFrom = function(element) {
     console.log('Toggle setting from UI element.');
@@ -640,11 +695,11 @@ window.toggleSettingFrom = function(element) {
     if (settingItem && settingItem.dataset.setting) {
         const key = settingItem.dataset.setting;
         const value = element.checked;
-        toggleSetting(key, value);
+        saveSetting(key, value);
     }
 }
 
-// Function for toggling option-based settings (like map-choice)
+// Function for toggling option-based settings (e.g. map-choice)
 window.toggleOptionSetting = function(button) {
     const settingItem = button.closest('.option-switch-container');
     if (!settingItem || !settingItem.dataset.setting) return;
@@ -659,7 +714,7 @@ window.toggleOptionSetting = function(button) {
     }
     
     // Store the setting
-    toggleSetting(key, value);
+    saveSetting(key, value);
     console.log(`Option setting "${key}" changed to "${value}"`);
 }
 
@@ -669,6 +724,6 @@ window.updateSettingFrom = function(element) {
     if (settingItem && settingItem.dataset.setting) {
         const key = settingItem.dataset.setting;
         const value = element.value.trim();
-        toggleSetting(key, value);
+        saveSetting(key, value);
     }
 }

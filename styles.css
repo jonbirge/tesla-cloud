@@ -19,6 +19,9 @@
     --status-rain: #00a1ff;    /* Blue for rain indicator */
     --heading-font-size: 17pt;
     --heading-font-weight: 700;
+    --stock-up: #28a745;       /* Green for positive market change */
+    --stock-down: #dc3545;     /* Red for negative market change */
+    --stock-neutral: #888888;  /* Gray for unchanged market */
 }
 
 body.dark-mode {
@@ -36,6 +39,9 @@ body.dark-mode {
     --status-good: #5eff19;    /* Green for good connection */
     --status-unavailable: #888888;  /* Gray for unavailable/bad connection */
     --status-rain: #4fb8ff;    /* Blue for rain indicator */
+    --stock-up: #3ad45b;       /* Brighter green for dark mode */
+    --stock-down: #ff4d5e;     /* Brighter red for dark mode */
+    --stock-neutral: #888888;  /* Same gray for unchanged market */
 }
 
 
@@ -169,7 +175,7 @@ hr {
 }
 
 .hidden {
-    display: none;
+    display: none !important;
 }
 
 /* External site container */
@@ -382,75 +388,164 @@ body.dark-mode .img-white-transparent {
 }
 
 
-/* Indicator container and dark-mode toggle */
+/* Indicator container */
 
 .control-container {
     position: fixed;
-    top: -5px; /* Changed from 10px to -5px to move above screen edge */
-    right: 20px;
+    top: -3px;
+    right: 11px;
     display: flex;
     align-items: center;
-    background-color: var(--bg-color); /* Semi-transparent light mode background */
+    background-color: var(--bg-color);
     border-radius: 5px;
-    padding: 8px 12px;
-    z-index: 100; /* Ensure it stays above other content */
-    opacity: 0.75;
+    padding: 8px 2px;
+    z-index: 100;
+    opacity: 0.80;
+    transition: transform 0.2s ease-out;
+    transform-origin: right center;
+    will-change: transform;
 }
 
-.toggle-label {
-    color: var(--text-color);
-    font-size: 15pt;
-    font-weight: 600;
-    margin-right: 10px;
+.status-indicator {
+    width: 24px;
+    height: 24px;
+    margin-right: 11px;
+    margin-left: 11px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: color 0.3s ease;
 }
 
-.toggle-switch {
-    position: relative;
-    display: inline-block;
-    width: 48px; /* Reduced by 20% from 60px */
-    height: 27px; /* Reduced by 20% from 34px */
+
+/* Network Status Indicator */
+
+.network-status {
+    color: var(--status-unavailable);
 }
 
-.toggle-switch input {
-    opacity: 0;
-    width: 0;
-    height: 0;
+.network-status.unavailable {
+    color: var(--status-unavailable);
 }
 
-.toggle-slider {
-    position: absolute;
-    cursor: pointer;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background-color: #bbb;
-    transition: .4s;
-    border-radius: 34px;
+.network-status.poor {
+    color: var(--status-poor);
 }
 
-.toggle-slider:before {
-    position: absolute;
-    content: "";
-    height: 21px; /* Reduced by 20% from 26px */
-    width: 21px; /* Reduced by 20% from 26px */
-    left: 3px; /* Adjusted from 4px */
-    bottom: 3px; /* Adjusted from 4px */
-    background-color: white;
-    transition: .4s;
-    border-radius: 50%;
+.network-status.good {
+    color: var(--status-good);
 }
 
-input:checked + .toggle-slider {
-    background-color: #2196F3;
+.network-status svg {
+    width: 24px;
+    height: 24px;
 }
 
-input:focus + .toggle-slider {
-    box-shadow: 0 0 1px #2196F3;
+.network-status .network-bar {
+    transition: fill 0.3s ease;
 }
 
-input:checked + .toggle-slider:before {
-    transform: translateX(21px); /* Reduced by 20% from 26px */
+.network-status.unavailable .network-bar {
+    fill: var(--status-unavailable);
+}
+
+.network-status.poor .bar-1 {
+    fill: var(--status-poor);
+}
+
+.network-status.poor .bar-2,
+.network-status.poor .bar-3,
+.network-status.poor .bar-4 {
+    fill: var(--status-unavailable);
+}
+
+.network-status.fair .bar-1,
+.network-status.fair .bar-2 {
+    fill: var(--status-poor);
+}
+
+.network-status.fair .bar-3,
+.network-status.fair .bar-4 {
+    fill: var(--status-unavailable);
+}
+
+.network-status.good .bar-1,
+.network-status.good .bar-2,
+.network-status.good .bar-3 {
+    fill: var(--status-good);
+}
+
+.network-status.good .bar-4 {
+    fill: var(--status-unavailable);
+}
+
+.network-status.excellent .bar-1,
+.network-status.excellent .bar-2,
+.network-status.excellent .bar-3,
+.network-status.excellent .bar-4 {
+    fill: var(--status-good);
+}
+
+
+/* GPS Status Indicator */
+
+.gps-status.unavailable {
+    color: var(--status-unavailable); /* Using the shared variable */
+}
+
+.gps-status.poor {
+    color: var(--status-poor); /* Using the shared variable */
+}
+
+.gps-status.good {
+    color: var(--status-good); /* Using the shared variable */
+}
+
+.gps-status {
+    color: var(--status-unavailable);
+}
+
+
+/* Rain Status Indicator */
+
+.rain-status {
+    color: var(--weather-warning-color); /* Changed to orange weather warning color */
+    animation: pulse-rain 2s infinite;
+}
+
+@keyframes pulse-rain {
+    0% {
+        opacity: 0.7;
+    }
+    50% {
+        opacity: 1;
+    }
+    100% {
+        opacity: 0.7;
+    }
+}
+
+
+/* Stock Status Indicator */
+
+.stock-status {
+    width: auto;
+    font-size: 12pt;
+    font-weight: 650;
+    transition: color 0.3s ease;
+    font-variant-numeric: tabular-nums;
+}
+
+.stock-status.up {
+    color: var(--status-good);
+}
+
+.stock-status.down {
+    color: var(--stock-down);
+}
+
+.stock-status.neutral {
+    color: var(--stock-neutral);
 }
 
 
@@ -704,70 +799,8 @@ body.dark-mode .share-icon img {
 }
 
 
-/* Status Indicators - Unified Styling */
-.status-indicator {
-    width: 24px;
-    height: 24px;
-    margin-right: 22px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    transition: color 0.3s ease;
-}
-
-/* Network Status Indicator */
-.network-status {
-    color: var(--status-unavailable);
-}
-
-.network-status.unavailable {
-    color: var(--status-unavailable);
-}
-
-.network-status.poor {
-    color: var(--status-poor);
-}
-
-.network-status.good {
-    color: var(--status-good);
-}
-
-/* GPS Status Indicator */
-.gps-status {
-    color: var(--status-unavailable);
-}
-
-.gps-status.unavailable {
-    color: var(--status-unavailable);
-}
-
-.gps-status.poor {
-    color: var(--status-poor);
-}
-
-.gps-status.good {
-    color: var(--status-good);
-}
-
-/* Rain Status Indicator */
-.rain-status {
-    color: var(--weather-warning-color); /* Changed to orange weather warning color */
-    animation: pulse-rain 2s infinite;
-}
-
-@keyframes pulse-rain {
-    0% {
-        opacity: 0.7;
-    }
-    50% {
-        opacity: 1;
-    }
-    100% {
-        opacity: 0.7;
-    }
-}
-
 /* Notification System */
+
 #notification-container {
     position: fixed;
     top: 20px;
@@ -838,84 +871,6 @@ body.dark-mode .share-icon img {
 
 @keyframes spin {
     to { transform: rotate(360deg); }
-}
-
-
-/* Network status indicator */
-
-.network-status svg {
-    width: 24px;
-    height: 24px;
-}
-
-.network-status .network-bar {
-    transition: fill 0.3s ease;
-}
-
-.network-status.unavailable .network-bar {
-    fill: var(--status-unavailable);
-}
-
-.network-status.poor .bar-1 {
-    fill: var(--status-poor);
-}
-
-.network-status.poor .bar-2,
-.network-status.poor .bar-3,
-.network-status.poor .bar-4 {
-    fill: var(--status-unavailable);
-}
-
-.network-status.fair .bar-1,
-.network-status.fair .bar-2 {
-    fill: var(--status-poor);
-}
-
-.network-status.fair .bar-3,
-.network-status.fair .bar-4 {
-    fill: var(--status-unavailable);
-}
-
-.network-status.good .bar-1,
-.network-status.good .bar-2,
-.network-status.good .bar-3 {
-    fill: var(--status-good);
-}
-
-.network-status.good .bar-4 {
-    fill: var(--status-unavailable);
-}
-
-.network-status.excellent .bar-1,
-.network-status.excellent .bar-2,
-.network-status.excellent .bar-3,
-.network-status.excellent .bar-4 {
-    fill: var(--status-good);
-}
-
-
-/* GPS Status Indicator */
-
-.gps-status {
-    margin-right: 22px; /* Good separation from the Dark Mode text */
-    width: 24px;
-    height: 24px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    transition: color 0.3s ease;
-}
-
-.gps-status.unavailable {
-    color: var(--status-unavailable); /* Using the shared variable */
-}
-
-.gps-status.poor {
-    color: var(--status-poor); /* Using the shared variable */
-}
-
-.gps-status.good {
-    color: var(--status-good); /* Using the shared variable */
 }
 
 
@@ -1048,7 +1003,8 @@ body.dark-mode .share-icon img {
     margin-top: 9px;
     max-width: 480px;
     font-weight: 550;
-    cursor: pointer; /* Add cursor pointer to indicate it's clickable */
+    cursor: pointer;
+    transition: background-color 0.3s, color 0.3s;
 }
 
 .settings-toggle-item label {
@@ -1224,12 +1180,6 @@ body.dark-mode .option-button:hover:not(.active) {
     background-color: rgba(255, 255, 255, 0.1);
 }
 
-.settings-toggle-item.option-switch-container {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-}
-
 
 /* News Source Grid */
 
@@ -1252,8 +1202,9 @@ body.dark-mode .option-button:hover:not(.active) {
     font-size: 15pt;
 }
 
+
 /* Mobile Landscape Mode */
-@media only screen and (max-width: 900px) and (orientation: landscape) {
+@media only screen and (max-width: 900px) {
     :root {
         --heading-font-size: 14pt;
         --heading-font-weight: 600;
@@ -1443,4 +1394,9 @@ body.dark-mode .option-button:hover:not(.active) {
         padding: 10px 15px;
         font-size: 14pt;
     }
+}
+
+/* Additional section-specific styling */
+#satellite {
+    padding-top: 30px;
 }

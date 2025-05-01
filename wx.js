@@ -1,6 +1,6 @@
 // Import required functions from app.js
 import { formatTime, highlightUpdate, testMode } from './common.js';
-import { settings, turnOffDarkMode, turnOnDarkMode } from './settings.js';
+import { settings } from './settings.js';
 
 // Parameters
 const SAT_URLS = {
@@ -18,48 +18,7 @@ let precipGraphUpdateInterval = null; // Timer for updating the precipitation gr
 let currentRainAlert = false; // Flag to track if we're currently under a rain alert
 
 // Export these variables for use in other modules
-export { SAT_URLS, forecastDataPrem };
-
-// Automatically toggles dark mode based on sunrise and sunset times
-// TODO: This should really go in the settings module!
-export function autoDarkMode(lat, long) {
-    // if lat or long are null, then replace with last known values
-    if (lat == null || long == null) {
-        if (lastLat && lastLong) {
-            lat = lastLat;
-            long = lastLong;
-        } else {
-            console.log('autoDarkMode: No coordinates available.');
-            return;
-        }
-    }
-
-    console.log('Auto dark mode check for coordinates: ', lat, long);
-    // Get sunrise and sunset times from forecastDataPrem
-    const sunrise = forecastDataPrem?.current.sunrise * 1000;
-    const sunset = forecastDataPrem?.current.sunset * 1000;
-    if (!sunrise || !sunset) {
-        console.log('Auto dark mode: No sunrise/sunset data available.');
-        return;
-    }
-
-    if (settings && settings['auto-dark-mode']) {
-        const now = new Date();
-        const currentTime = now.getTime();
-        const sunriseTime = new Date(sunrise).getTime();
-        const sunsetTime = new Date(sunset).getTime();
-
-        if (currentTime >= sunsetTime || currentTime < sunriseTime) {
-            console.log('Applying dark mode based on sunset...');
-            turnOnDarkMode();
-        } else {
-            console.log('Applying light mode based on sunrise...');
-            turnOffDarkMode();
-        }
-    } else {
-        console.log('Auto dark mode disabled or coordinates not available.');
-    }
-}
+export { SAT_URLS, forecastDataPrem, lastLat, lastLong };
 
 // Fetches premium weather data from OpenWeather API
 export function fetchPremiumWeatherData(lat, long, silentLoad = false) {
@@ -81,7 +40,7 @@ export function fetchPremiumWeatherData(lat, long, silentLoad = false) {
     }
 
     // Fetch and update weather data (single fetch)
-    fetch(`openwx_proxy.php/data/3.0/onecall?lat=${lat}&lon=${long}&units=imperial`)
+    fetch(`openwx.php/data/3.0/onecall?lat=${lat}&lon=${long}&units=imperial`)
         .then(response => response.json())
         .then(forecastDataLocal => {
             if (forecastDataLocal) {
@@ -133,13 +92,14 @@ export function fetchPremiumWeatherData(lat, long, silentLoad = false) {
                 
                 updatePremiumWeatherDisplay();
                 // autoDarkMode(lat, long);
+
                 // Update time and location of weather data, using FormatTime
                 const weatherUpdateTime = formatTime(new Date(forecastDataLocal.current.dt * 1000), {
                     hour: '2-digit',
                     minute: '2-digit'
                 });
                 // Get nearest city using OpenWeather GEOlocation API
-                fetch(`openwx_proxy.php/geo/1.0/reverse?lat=${lat}&lon=${long}&limit=1`)
+                fetch(`openwx.php/geo/1.0/reverse?lat=${lat}&lon=${long}&limit=1`)
                     .then(response => response.json())
                     .then(data => {
                         if (data && data.length > 0) {
@@ -292,7 +252,7 @@ export function updatePremiumWeatherDisplay() {
 
 // Function to update precipitation graph with current time-based x-axis
 function updatePrecipitationGraph() {
-    if (!forecastDataPrem || !forecastDataPrem.minutely) return;
+    if (!currentRainAlert || !forecastDataPrem || !forecastDataPrem.minutely) return;
     
     const minutely = forecastDataPrem.minutely || [];
     let hasMinutelyPrecip = false;
@@ -363,7 +323,6 @@ function updatePrecipitationGraph() {
                                     size: 18
                                 },
                                 callback: function(value) {
-                                    // Format as "+" for future minutes
                                     return "+" + value;
                                 }
                             } 
@@ -656,7 +615,7 @@ function getMoonPhaseName(phase) {
 
 // Fetches and updates the Air Quality Index (AQI) from openweather.org
 function updateAQI(lat, lon) {
-    fetch(`openwx_proxy.php/data/2.5/air_pollution?lat=${lat}&lon=${lon}`)
+    fetch(`openwx.php/data/2.5/air_pollution?lat=${lat}&lon=${lon}`)
         .then(response => response.json())
         .then(data => {
             const aqi = data.list[0].main.aqi;
