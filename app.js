@@ -170,7 +170,7 @@ function updateWindage(vehicleSpeed, vehicleHeading, windSpeed, windDirection) {
 
     // Helper function to draw arrow
     function drawArrow(fromX, fromY, toX, toY, color, headLength = 9) {
-        const angle = Math.atan2(toY - fromY, toX - fromX);
+        const angle = Math.atan2(toY - fromY, toX - fromY);
         const headAngle = Math.PI / 6; // 30 degrees
 
         radarContext.beginPath();
@@ -738,6 +738,30 @@ window.showSection = function (sectionId) {
     currentSection = sectionId;
 };
 
+// Function to handle scroll events on the right frame
+function handleScrollScale() {
+    const rightFrame = document.getElementById('rightFrame');
+    const controlContainer = document.querySelector('.control-container');
+    
+    // Define the threshold where scaling starts (pixels from top)
+    const scrollThreshold = 60;
+    
+    // Get current scroll position
+    const scrollTop = rightFrame.scrollTop;
+    
+    if (scrollTop < scrollThreshold) {
+        // Calculate scale factor between 1 and 2 based on scroll position
+        const scaleFactor = 1 + 0.25*((scrollThreshold - scrollTop) / scrollThreshold);
+        
+        // Apply transformation with top-right anchoring to keep both top and right positions fixed
+        controlContainer.style.transformOrigin = 'top right';
+        controlContainer.style.transform = `scale(${scaleFactor})`;
+    } else {
+        // Reset to normal size when scrolled past threshold
+        controlContainer.style.transform = 'scale(1)';
+    }
+}
+
 // Update link click event listener
 document.addEventListener('click', function (e) {
     if (e.target.tagName === 'A' && !e.target.closest('.section-buttons')) {
@@ -806,6 +830,12 @@ document.addEventListener('DOMContentLoaded', async function () {
             handleLogin();
         }
     });
+    
+    // Add scroll event listener for control container scaling
+    document.getElementById('rightFrame').addEventListener('scroll', handleScrollScale);
+    
+    // Apply initial scaling on page load
+    handleScrollScale();
 
     // Show the initial section from URL parameter
     const urlParams = new URLSearchParams(window.location.search);

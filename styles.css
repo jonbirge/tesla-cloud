@@ -401,6 +401,9 @@ body.dark-mode .img-white-transparent {
     padding: 8px 2px;
     z-index: 100;
     opacity: 0.80;
+    transition: transform 0.2s ease-out;
+    transform-origin: right center;
+    will-change: transform;
 }
 
 .status-indicator {
@@ -1391,4 +1394,9 @@ body.dark-mode .option-button:hover:not(.active) {
         padding: 10px 15px;
         font-size: 14pt;
     }
+}
+
+/* Additional section-specific styling */
+#satellite {
+    padding-top: 30px;
 }
