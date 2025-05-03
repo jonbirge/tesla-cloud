@@ -465,7 +465,7 @@ function toggleRainIndicator(show) {
         rainIndicator.title = 'Rain expected within 15 minutes';
         
         // Add img element for cloud icon using the external SVG file
-        rainIndicator.innerHTML = `<img src="cloud.svg" alt="Rain Alert" width="24" height="24">`;
+        rainIndicator.innerHTML = `<img src="assets/cloud.svg" alt="Rain Alert" width="24" height="24">`;
         
         // Insert at the beginning of the control container and center it horizontally
         const controlContainer = document.querySelector('.control-container');
@@ -495,7 +495,7 @@ function showNotification(message) {
     notification.className = 'notification';
     notification.innerHTML = `
         <div class="notification-icon">
-            <img src="cloud.svg" alt="Rain Alert" width="24" height="24">
+            <img src="assets/cloud.svg" alt="Rain Alert" width="24" height="24">
         </div>
         <div class="notification-message">${message}</div>
     `;

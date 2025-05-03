@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>teslas.cloud (beta)</title>
-    <link rel="icon" type="image/svg+xml" href="favicon.svg">
+    <link rel="icon" type="image/svg+xml" href="assets/favicon.svg">
     <link rel="preconnect" href="https://fonts.googleapis.com" crossorigin>
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap" rel="stylesheet">
@@ -166,21 +166,21 @@
                     <img class="forecast-icon" src="">
                     <div class="forecast-temp"></div>
                     <div class="forecast-desc"></div>
-                    <img class="forecast-alert hidden" src="warn.svg" alt="Warning Icon">
+                    <img class="forecast-alert hidden" src="assets/warn.svg" alt="Warning Icon">
                 </div>
                 <div class="forecast-day">
                     <div class="forecast-date"></div>
                     <img class="forecast-icon" src="">
                     <div class="forecast-temp"></div>
                     <div class="forecast-desc"></div>
-                    <img class="forecast-alert hidden" src="warn.svg" alt="Warning Icon">
+                    <img class="forecast-alert hidden" src="assets/warn.svg" alt="Warning Icon">
                 </div>
                 <div class="forecast-day">
                     <div class="forecast-date"></div>
                     <img class="forecast-icon" src="">
                     <div class="forecast-temp"></div>
                     <div class="forecast-desc"></div>
-                    <img class="forecast-alert hidden" src="warn.svg" alt="Warning Icon">
+                    <img class="forecast-alert hidden" src="assets/warn.svg" alt="Warning Icon">
                 </div>
                 <div class="forecast-day">
                     <div class="forecast-date"></div>
@@ -698,7 +698,7 @@
     <!-- Load section icons -->
     <script async>
         // Load SVG sprite file and inject it into the page
-        fetch('icons.svg')
+        fetch('assets/icons.svg')
             .then(response => response.text())
             .then(data => {
                 document.getElementById('sprites').innerHTML = data;

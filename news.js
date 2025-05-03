@@ -257,7 +257,7 @@ function generateHTMLforItem(item)
             </div>
             <div class="news-title">${item.title}</div>
             <button class="share-icon" onclick="shareNews('${item.title}','${item.link}','${item.source}'); event.stopPropagation();">
-                <img src="share.svg">
+                <img src="assets/share.svg">
             </button>
         </div>`;
 }
