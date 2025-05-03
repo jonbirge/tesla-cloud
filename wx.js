@@ -868,6 +868,14 @@ window.closePremiumPrecipPopup = function() {
     if (premPopup) premPopup.classList.remove('show');
 }
 
+// Attach event listeners for premium forecast popup close
+document.addEventListener('DOMContentLoaded', function () {
+    var premCloseBtn = document.getElementById('prem-forecast-popup-close');
+    if (premCloseBtn) {
+        premCloseBtn.onclick = window.closePremiumPrecipPopup;
+    }
+});
+
 // Switches the weather image based on the type provided
 window.switchWeatherImage = function (type) {
     const weatherImage = document.getElementById('weather-image');
