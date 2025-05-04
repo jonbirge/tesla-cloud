@@ -88,6 +88,9 @@ export function fetchPremiumWeatherData(lat, long, silentLoad = false) {
                             forecastDataPrem.minutely[i].precipitation = 2 + Math.random() * 3; // 2-5 mm/hr
                         }
                     }
+                    
+                    // Set currentRainAlert to true to ensure precipitation graph gets displayed
+                    currentRainAlert = true;
                 } // test mode
                 
                 updatePremiumWeatherDisplay();
@@ -253,7 +256,8 @@ export function updatePremiumWeatherDisplay() {
 
 // Function to update precipitation graph with current time-based x-axis
 function updatePrecipitationGraph() {
-    if (!currentRainAlert || !forecastDataPrem || !forecastDataPrem.minutely) return;
+    // In test mode, we allow precipitation data to be processed even if currentRainAlert is false
+    if ((!currentRainAlert && !testMode) || !forecastDataPrem || !forecastDataPrem.minutely) return;
     
     const minutely = forecastDataPrem.minutely || [];
     let hasMinutelyPrecip = false;
