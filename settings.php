@@ -367,7 +367,7 @@ function initializeUserIdEntry($userId, $auto_created = false): bool {
             $auto_created_bit = $auto_created ? 1 : 0;
             $insertStmt = $dbConnection->prepare("
                 INSERT INTO user_ids (user_id, initial_login, last_login, last_ip, login_count, auto_created) 
-                VALUES (?, ?, ?, ?, 1, ?)
+                VALUES (?, ?, ?, ?, 0, ?)
             ");
             $insertStmt->execute([$userId, $currentTime, $currentTime, getClientIP(), $auto_created_bit]);
             logMessage("Added user $userId to user_ids table with initial login at $currentTime");

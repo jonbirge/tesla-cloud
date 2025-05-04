@@ -28,7 +28,7 @@ const defaultSettings = {
     "imperial-units": true,
     "map-choice": 'waze',
     "show-wind-radar": true,
-    "show-stock-indicator": true, // New setting for S&P 500 indicator
+    "show-stock-indicator": true,
     // News forwarding
     "news-forwarding": false,
     "news-forward-only": false,
@@ -46,7 +46,7 @@ const defaultSettings = {
     "rss-bbc": false,
     "rss-economist": false,
     "rss-lemonde": false,
-    "rss-cnn": false,
+    "rss-cnn": true,
     "rss-notateslaapp": true,
     "rss-teslarati": true,
     "rss-insideevs": true,
@@ -55,7 +55,7 @@ const defaultSettings = {
     "rss-caranddriver": true,
     "rss-theverge": false,
     "rss-arstechnica": true,
-    "rss-engadget": false,
+    "rss-engadget": true,
     "rss-gizmodo": false,
     "rss-wired": false,
     "rss-spacenews": false,
