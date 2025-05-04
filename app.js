@@ -15,6 +15,7 @@ const WX_DISTANCE_THRESHOLD = 25000; // meters
 const WX_TIME_THRESHOLD = 60; // minutes
 const MAX_SPEED = 50; // Maximum speed for radar display (mph)
 const MIN_GPS_UPDATE_INTERVAL = 1000; // ms - minimum time between updates
+const WIKI_TYPES = ['event', 'airport', 'landmark']; // Types of Wikipedia data to fetch
 
 // Module variables
 let currentSection = null; // Track the current section
@@ -69,7 +70,9 @@ function fetchCityData(lat, long) {
 // Function to fetch nearby Wikipedia data based on coordinates
 async function fetchLandmarkData(lat, long) {
     console.log('Fetching Wikipedia data...');
-    const url = `https://secure.geonames.org/findNearbyWikipediaJSON?lat=${lat}&lng=${long}&maxRows=9&username=${GEONAMES_USERNAME}`;
+    const baseUrl = 'https://secure.geonames.org/findNearbyWikipediaJSON';
+    const url =
+    `${baseUrl}?lat=${lat}&lng=${long}&radius=15&maxRows=150&username=${GEONAMES_USERNAME}`;
     try {
         const response = await fetch(url);
         const data = await response.json();
@@ -77,8 +80,11 @@ async function fetchLandmarkData(lat, long) {
         if (data.geonames && data.geonames.length > 0) {
             let html = '<ul>';
             data.geonames.forEach(article => {
-                const pageUrl = article.wikipediaUrl.startsWith('http') ? article.wikipediaUrl : 'http://' + article.wikipediaUrl;
-                html += `<li><a href="${pageUrl}" target="_blank">${article.title}</a>: ${article.summary}</li>`;
+                // Add article if it matches the specified types
+                if (WIKI_TYPES.includes(article.feature)) {
+                    const pageUrl = article.wikipediaUrl.startsWith('http') ? article.wikipediaUrl : 'http://' + article.wikipediaUrl;
+                    html += `<li><a href="${pageUrl}" target="_blank">${article.title}</a>: ${article.summary}</li>`;
+                }
             });
             html += '</ul>';
             landmarkDiv.innerHTML = html;
