@@ -275,15 +275,7 @@ async function updateLocationData(lat, long) {
     neverUpdatedLocation = false;
 
     // Fire off API requests for external data
-    // updateTimeZone(lat, long);
     fetchCityData(lat, long);
-
-    // Update connectivity data iff the Network section is visible
-    // const networkSection = document.getElementById("network");
-    // if (networkSection.style.display === "block") {
-    //     console.log('Updating connectivity data...');
-    //     updateNetworkInfo();
-    // }
 
     // Update Wikipedia data iff the Landmarks section is visible
     const locationSection = document.getElementById("landmarks");
@@ -540,7 +532,26 @@ function updateVersion() {
         fetch('vers.php')
             .then(response => response.json())
             .then(data => {
-                const versionText = `${data.branch || 'unknown'}-${data.commit || 'unknown'}`;
+                let versionText = '';
+                
+                // Use tag if available, otherwise branch-commit
+                if (data.tag) {
+                    versionText = `${data.tag} (${data.commit || 'unknown'})`;
+                } else {
+                    versionText = `${data.branch || 'unknown'}-${data.commit || 'unknown'}`;
+                }
+                
+                // Add diagnostic tooltip if available
+                if (data.diagnostic) {
+                    const diagnosticInfo = `Method: ${data.diagnostic.method}, Git Available: ${data.diagnostic.git_available ? 'Yes' : 'No'}`;
+                    versionElement.title = diagnosticInfo;
+                    
+                    // Add error info if any errors occurred
+                    if (data.diagnostic.errors && data.diagnostic.errors.length > 0) {
+                        versionElement.title += `, Errors: ${data.diagnostic.errors.join(', ')}`;
+                    }
+                }
+                
                 versionElement.innerHTML = versionText;
             })
             .catch(error => {

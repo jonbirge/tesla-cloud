@@ -15,5 +15,6 @@ header('Content-Type: application/json');
 echo json_encode([
     'commit' => $gitInfo['commit'],
     'branch' => $gitInfo['branch'],
-    'tag' => $gitInfo['tag']
+    'tag' => $gitInfo['tag'],
+    'diagnostic' => $gitInfo['diagnostic']
 ]);
