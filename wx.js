@@ -1,6 +1,6 @@
 // Import required functions from app.js
 import { formatTime, highlightUpdate, testMode } from './common.js';
-import { settings } from './settings.js';
+import { autoDarkMode, settings } from './settings.js';
 
 // Parameters
 const SAT_URLS = {
@@ -88,10 +88,9 @@ export function fetchPremiumWeatherData(lat, long, silentLoad = false) {
                             forecastDataPrem.minutely[i].precipitation = 2 + Math.random() * 3; // 2-5 mm/hr
                         }
                     }
-                }
+                } // test mode
                 
                 updatePremiumWeatherDisplay();
-                // autoDarkMode(lat, long);
 
                 // Update time and location of weather data, using FormatTime
                 const weatherUpdateTime = formatTime(new Date(forecastDataLocal.current.dt * 1000), {
@@ -105,7 +104,6 @@ export function fetchPremiumWeatherData(lat, long, silentLoad = false) {
                         if (data && data.length > 0) {
                             const city = data[0].name;
                             const state = data[0].state;
-                            const country = data[0].country;
                             const stationStr = `${city}, ${state} @ ${weatherUpdateTime}`;
                             highlightUpdate('prem-station-info', stationStr);
                         } else {
@@ -130,6 +128,9 @@ export function fetchPremiumWeatherData(lat, long, silentLoad = false) {
             // Hide spinner and show forecast when data is loaded - only if not silent loading
             if (forecastContainer) forecastContainer.style.display = lastDisplayStyle;
             if (loadingSpinner) loadingSpinner.style.display = 'none';
+
+            // Update auto-dark mode if enabled
+            autoDarkMode(lat, long);
         })
         .catch(error => {
             console.error('Error fetching forecast data: ', error);
@@ -211,10 +212,10 @@ export function updatePremiumWeatherDisplay() {
             let windText;
             if (windGust && windGust > windSpeed) {
                 // Show wind-gust format
-                windText = `${formatWindSpeedRange(windSpeed, windGust)} at ${Math.round(windDir)}°`;
+                windText = `${formatWindSpeedRange(windSpeed, windGust)} @ ${Math.round(windDir)}°`;
             } else {
                 // Just show regular wind speed if no gust data
-                windText = `${formatWindSpeed(windSpeed)} at ${Math.round(windDir)}°`;
+                windText = `${formatWindSpeed(windSpeed)} @ ${Math.round(windDir)}°`;
             }
             highlightUpdate('prem-wind', windText);
         } else {
@@ -556,7 +557,7 @@ function formatWindSpeed(speedMS) {
 function formatWindSpeedRange(speedMS, gustMS) {
     if (!settings || settings["imperial-units"]) {
         // Convert m/s to mph
-        return `${Math.round(speedMS * 2.237)}-${Math.round(gustMS * 2.237)} MPH`;
+        return `${Math.round(speedMS * 2.237)}&ndash;${Math.round(gustMS * 2.237)} MPH`;
     } else {
         // Keep as m/s
         return `${Math.round(speedMS)}-${Math.round(gustMS)} m/s`;
