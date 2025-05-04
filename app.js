@@ -561,36 +561,76 @@ function updateVersion() {
     }
 }
 
+// Function to update scroll indicators
+function updateScrollIndicators() {
+    const rightFrame = document.getElementById('rightFrame');
+    const topFade = document.getElementById('top-fade');
+    const bottomFade = document.getElementById('bottom-fade');
+    
+    if (!rightFrame || !topFade || !bottomFade) return;
+    
+    // Check if we can scroll up (we've scrolled down from the top)
+    const canScrollUp = rightFrame.scrollTop > 5;
+    
+    // Check if we can scroll down (there's more content below)
+    const canScrollDown = (rightFrame.scrollHeight - rightFrame.clientHeight - rightFrame.scrollTop) > 5;
+    
+    // Update fade visibility
+    topFade.style.opacity = canScrollUp ? '1' : '0';
+    bottomFade.style.opacity = canScrollDown ? '1' : '0';
+}
+
+// Function to handle scroll events on the right frame
+function handleScrollScale() {
+    const rightFrame = document.getElementById('rightFrame');
+    const controlContainer = document.querySelector('.control-container');
+    
+    // Check if we're on a mobile screen
+    const isMobile = window.matchMedia("only screen and (max-width: 900px)").matches;
+    
+    // Update scroll indicators regardless of device type
+    updateScrollIndicators();
+    
+    // If mobile, maintain a fixed small scale and exit
+    if (isMobile) {
+        // Keep consistent small scale on mobile devices
+        controlContainer.style.transformOrigin = 'top right';
+        return; // Exit early, let CSS handle the fixed scaling
+    }
+    
+    // Desktop behavior continues below
+    // Define the threshold where scaling starts (pixels from top)
+    const scrollThreshold = 60;
+    
+    // Get current scroll position
+    const scrollTop = rightFrame.scrollTop;
+    
+    if (scrollTop < scrollThreshold) {
+        // Calculate scale factor between 1 and 2 based on scroll position
+        const scaleFactor = 1 + 0.25*((scrollThreshold - scrollTop) / scrollThreshold);
+        
+        // Apply transformation with top-right anchoring to keep both top and right positions fixed
+        controlContainer.style.transformOrigin = 'top right';
+        controlContainer.style.transform = `scale(${scaleFactor})`;
+    } else {
+        // Reset to normal size when scrolled past threshold
+        controlContainer.style.transform = 'scale(1)';
+    }
+}
+
 // Function to update the src of an iframe
 window.updateMapFrame = function () {
     // Normal mode - ensure iframe is visible and test mode message is hidden
     const teslaWazeContainer = document.querySelector('.teslawaze-container');
     const iframe = teslaWazeContainer.querySelector('iframe');
     let testModeMsg = teslaWazeContainer.querySelector('.test-mode-message');
-    if (!testMode) {
-        if (settings["map-choice"] === 'waze') {
-            srcUpdate("teslawaze", "https://teslawaze.azurewebsites.net/");
-        } else {
-            srcUpdate("teslawaze", "https://abetterrouteplanner.com/");
-        }
-        iframe.style.display = '';
-        if (testModeMsg) testModeMsg.style.display = 'none';
+    if (settings["map-choice"] === 'waze') {
+        srcUpdate("teslawaze", "https://teslawaze.azurewebsites.net/");
     } else {
-        // In test mode, replace TeslaWaze iframe with "TESTING MODE" message
-        iframe.src = "";
-        iframe.style.display = 'none';
-        // Check if our test mode message already exists
-        if (!testModeMsg) {
-            // Create and add the test mode message
-            testModeMsg = document.createElement('div');
-            testModeMsg.className = 'test-mode-message';
-            testModeMsg.style.cssText = 'display: flex; justify-content: center; align-items: center; height: 100%; font-size: 32px; font-weight: bold;';
-            testModeMsg.textContent = 'TESTING MODE';
-            teslaWazeContainer.appendChild(testModeMsg);
-        } else {
-            testModeMsg.style.display = 'flex';
-        }
+        srcUpdate("teslawaze", "https://abetterrouteplanner.com/");
     }
+    iframe.style.display = '';
+    if (testModeMsg) testModeMsg.style.display = 'none';
 }
 
 // Function to load an external URL in a new tab or frame
@@ -760,63 +800,6 @@ window.showSection = function (sectionId) {
     // Update scroll indicators after a small delay to let content render
     setTimeout(updateScrollIndicators, 100);
 };
-
-// Function to update scroll indicators
-function updateScrollIndicators() {
-    const rightFrame = document.getElementById('rightFrame');
-    const topFade = document.getElementById('top-fade');
-    const bottomFade = document.getElementById('bottom-fade');
-    
-    if (!rightFrame || !topFade || !bottomFade) return;
-    
-    // Check if we can scroll up (we've scrolled down from the top)
-    const canScrollUp = rightFrame.scrollTop > 5;
-    
-    // Check if we can scroll down (there's more content below)
-    const canScrollDown = (rightFrame.scrollHeight - rightFrame.clientHeight - rightFrame.scrollTop) > 5;
-    
-    // Update fade visibility
-    topFade.style.opacity = canScrollUp ? '1' : '0';
-    bottomFade.style.opacity = canScrollDown ? '1' : '0';
-}
-
-// Function to handle scroll events on the right frame
-function handleScrollScale() {
-    const rightFrame = document.getElementById('rightFrame');
-    const controlContainer = document.querySelector('.control-container');
-    
-    // Check if we're on a mobile screen
-    const isMobile = window.matchMedia("only screen and (max-width: 900px)").matches;
-    
-    // Update scroll indicators regardless of device type
-    updateScrollIndicators();
-    
-    // If mobile, maintain a fixed small scale and exit
-    if (isMobile) {
-        // Keep consistent small scale on mobile devices
-        controlContainer.style.transformOrigin = 'top right';
-        return; // Exit early, let CSS handle the fixed scaling
-    }
-    
-    // Desktop behavior continues below
-    // Define the threshold where scaling starts (pixels from top)
-    const scrollThreshold = 60;
-    
-    // Get current scroll position
-    const scrollTop = rightFrame.scrollTop;
-    
-    if (scrollTop < scrollThreshold) {
-        // Calculate scale factor between 1 and 2 based on scroll position
-        const scaleFactor = 1 + 0.25*((scrollThreshold - scrollTop) / scrollThreshold);
-        
-        // Apply transformation with top-right anchoring to keep both top and right positions fixed
-        controlContainer.style.transformOrigin = 'top right';
-        controlContainer.style.transform = `scale(${scaleFactor})`;
-    } else {
-        // Reset to normal size when scrolled past threshold
-        controlContainer.style.transform = 'scale(1)';
-    }
-}
 
 // Update link click event listener
 document.addEventListener('click', function (e) {
