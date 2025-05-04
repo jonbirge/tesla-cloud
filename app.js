@@ -742,7 +742,32 @@ window.showSection = function (sectionId) {
 
     // Update the current section variable
     currentSection = sectionId;
+    
+    // Reset scroll position to top
+    rightFrame.scrollTop = 0;
+    
+    // Update scroll indicators after a small delay to let content render
+    setTimeout(updateScrollIndicators, 100);
 };
+
+// Function to update scroll indicators
+function updateScrollIndicators() {
+    const rightFrame = document.getElementById('rightFrame');
+    const topFade = document.getElementById('top-fade');
+    const bottomFade = document.getElementById('bottom-fade');
+    
+    if (!rightFrame || !topFade || !bottomFade) return;
+    
+    // Check if we can scroll up (we've scrolled down from the top)
+    const canScrollUp = rightFrame.scrollTop > 5;
+    
+    // Check if we can scroll down (there's more content below)
+    const canScrollDown = (rightFrame.scrollHeight - rightFrame.clientHeight - rightFrame.scrollTop) > 5;
+    
+    // Update fade visibility
+    topFade.style.opacity = canScrollUp ? '1' : '0';
+    bottomFade.style.opacity = canScrollDown ? '1' : '0';
+}
 
 // Function to handle scroll events on the right frame
 function handleScrollScale() {
@@ -751,6 +776,9 @@ function handleScrollScale() {
     
     // Check if we're on a mobile screen
     const isMobile = window.matchMedia("only screen and (max-width: 900px)").matches;
+    
+    // Update scroll indicators regardless of device type
+    updateScrollIndicators();
     
     // If mobile, maintain a fixed small scale and exit
     if (isMobile) {
@@ -853,6 +881,9 @@ document.addEventListener('DOMContentLoaded', async function () {
     
     // Apply initial scaling on page load
     handleScrollScale();
+    
+    // Update scroll indicators when window is resized
+    window.addEventListener('resize', updateScrollIndicators);
 
     // Show the initial section from URL parameter
     const urlParams = new URLSearchParams(window.location.search);
