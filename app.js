@@ -749,6 +749,17 @@ function handleScrollScale() {
     const rightFrame = document.getElementById('rightFrame');
     const controlContainer = document.querySelector('.control-container');
     
+    // Check if we're on a mobile screen
+    const isMobile = window.matchMedia("only screen and (max-width: 900px)").matches;
+    
+    // If mobile, maintain a fixed small scale and exit
+    if (isMobile) {
+        // Keep consistent small scale on mobile devices
+        controlContainer.style.transformOrigin = 'top right';
+        return; // Exit early, let CSS handle the fixed scaling
+    }
+    
+    // Desktop behavior continues below
     // Define the threshold where scaling starts (pixels from top)
     const scrollThreshold = 60;
     

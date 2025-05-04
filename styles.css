@@ -1202,6 +1202,11 @@ body.dark-mode .option-button:hover:not(.active) {
     font-size: 15pt;
 }
 
+/* Additional section-specific styling */
+#satellite {
+    padding-top: 30px;
+}
+
 
 /* Mobile Landscape Mode */
 @media only screen and (max-width: 900px) {
@@ -1351,7 +1356,7 @@ body.dark-mode .option-button:hover:not(.active) {
     
     .settings-toggle-item {
         padding: 8px 10px;
-        font-size: 13pt;
+        font-size: 12pt;
     }
     
     .settings-toggle-item span.settings-toggle-slider {
@@ -1368,13 +1373,38 @@ body.dark-mode .option-button:hover:not(.active) {
         transform: translateX(22px);
     }
     
+    /* Text input fields in settings */
+    .settings-text-item input[type="text"] {
+        width: 200px;
+        height: 16px;
+        padding: 6px 12px;
+        font-size: 12pt; 
+    }
+    
+    /* Option Switch adjustments for mobile */
+    .option-button {
+        font-size: 11pt;
+        padding: 6px 10px;
+    }
+    
+    #in-map-toggle .option-button {
+        font-size: 10pt;
+        font-weight: 600;
+    }
+    
+    /* Logout button adjustment */
+    .logout-button {
+        font-size: 14pt;
+        padding: 12px 16px;
+    }
+    
     /* News sources grid */
     .news-source-grid {
         grid-template-columns: repeat(auto-fill, 240px);
     }
     
     .news-toggle-item {
-        font-size: 13pt;
+        font-size: 11pt;
     }
     
     /* Control container (top right) */
@@ -1382,6 +1412,10 @@ body.dark-mode .option-button:hover:not(.active) {
         top: 85px;
         right: 10px;
         padding: 5px 10px;
+        transform: scale(0.8); /* Always keep in shrunk mode */
+        opacity: 0.8; /* Consistent opacity */
+        transition: none; /* Disable transitions */
+        will-change: auto; /* Disable will-change optimization */
     }
     
     .toggle-label {
@@ -1394,9 +1428,4 @@ body.dark-mode .option-button:hover:not(.active) {
         padding: 10px 15px;
         font-size: 14pt;
     }
-}
-
-/* Additional section-specific styling */
-#satellite {
-    padding-top: 30px;
 }
