@@ -243,10 +243,10 @@ hr {
 .section-button {
     color: var(--text-color);
     border-radius: var(--button-radius);
-    background-color: transparent;
-    font-size: 20pt;
     font-weight: 500;
     letter-spacing: 0.025em;
+    background-color: var(--bg-color);
+    font-size: 19pt;
     padding: 16px 20px;
     border: none;
     cursor: pointer;
@@ -255,6 +255,12 @@ hr {
     display: flex;
     align-items: center;
     transition: background-color 0.3s, color 0.3s;
+}
+
+/* Section button that also has disabled class */
+.section-button.disabled {
+    opacity: 0.25;
+    cursor: not-allowed;
 }
 
 .logout-button {
