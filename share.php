@@ -1,6 +1,12 @@
 <?php
 require '/var/www/html/vendor/autoload.php';
 
+// Save the error log to /tmp/share_php.log
+ini_set('error_log', '/tmp/share_php.log');
+// Set the error reporting level
+error_reporting(E_ALL);
+ini_set('display_errors', 1);
+
 // Load .env variables from a JSON file
 $envFilePath = __DIR__ . '/.env';
 if (file_exists($envFilePath)) {
@@ -46,7 +52,7 @@ $subject = $input['subject'] ?? 'Article forwarded from teslas.cloud';
 $htmlContent = $input['html'];
 
 $email = new \SendGrid\Mail\Mail(); 
-$email->setFrom("feedback@birgefuller.com", "Birge & Fuller, LLC");
+$email->setFrom("feedback@teslas.cloud", "teslas.cloud");
 $email->setSubject($subject);
 $email->addTo($to);
 $email->addContent("text/plain", strip_tags($htmlContent));
