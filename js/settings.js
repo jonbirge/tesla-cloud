@@ -3,19 +3,17 @@ import { updateNews, setShareButtonsVisibility } from './news.js';
 import { updateChartAxisColors } from './net.js';
 import { updatePremiumWeatherDisplay } from './wx.js';
 import { startStockUpdates, stopStockUpdates } from './stock.js';
-
-// Import necessary variables from wx.js
 import { forecastDataPrem, lastLat, lastLong } from './wx.js';
 
 // Global variables
-let isDriving = null; // The vehicle is not parked
-let isLoggedIn = false;
-let currentUser = null; // Will be NULL if not logged in OR if using auto-generated ID
-let hashedUser = null; // The hashed version of the user ID
-let rssIsDirty = false; // Flag to indicate if RSS settings have changed
-let rssDrop = false; // Flag to indicate if an RSS feed has been dropped
-let unitIsDirty = false; // Flag to indicate if unit/time settings have changed
-let settings = {}; // Initialize settings object
+let isDriving = false;      // The vehicle is not parked
+let isLoggedIn = false;     // User is logged in
+let currentUser = null;     // Will be NULL if not logged in OR if using auto-generated ID
+let hashedUser = null;      // The hashed version of the user ID
+let rssIsDirty = false;     // Flag to indicate if RSS settings have changed
+let rssDrop = false;        // Flag to indicate if an RSS feed has been dropped
+let unitIsDirty = false;    // Flag to indicate if unit/time settings have changed
+let settings = {};          // Initialize settings object
 
 // Export settings object so it's accessible to other modules
 export { settings, currentUser, isLoggedIn, hashedUser, isDriving };
@@ -63,6 +61,11 @@ const defaultSettings = {
     "rss-defensenews": false,
     "rss-aviationweek": false,
 };
+
+// Function that sets driving state
+export function setDrivingState(state) {
+    isDriving = state;
+}
 
 // Settings section is being left
 export function leaveSettings() {

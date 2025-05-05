@@ -1,7 +1,7 @@
 // Imports
 import { highlightUpdate, srcUpdate, testMode, updateTimeZone, GEONAMES_USERNAME } from './common.js';
 import { PositionSimulator } from './location.js';
-import { attemptLogin, leaveSettings, settings, isDriving } from './settings.js';
+import { attemptLogin, leaveSettings, settings, isDriving, setDrivingState } from './settings.js';
 import { fetchPremiumWeatherData, SAT_URLS, forecastDataPrem } from './wx.js';
 import { updateNetworkInfo, updatePingChart, startPingTest } from './net.js';
 import { markAllNewsAsRead } from './news.js';
@@ -18,8 +18,8 @@ const MIN_GPS_UPDATE_INTERVAL = 1000; // ms - minimum time between updates
 const WIKI_TYPES = ['event', 'airport', 'landmark']; // Types of Wikipedia data to fetch
 
 // Module variables
-let currentSection = null; // Track the current section
-let lastUpdate = 0; // Timestamp of last location update
+let currentSection = null;          // Track the current section
+let lastUpdate = 0;                 // Timestamp of last location update
 let lat = null;
 let long = null;
 let alt = null;
@@ -35,7 +35,7 @@ let neverUpdatedLocation = true;
 let radarContext = null;
 let gpsIntervalId = null;
 let lastGPSUpdate = 0;
-let networkInfoUpdated = false; // Track if network info has been updated
+let networkInfoUpdated = false;     // Track if network info has been updated
 const positionSimulator = new PositionSimulator(); // TODO: only create if needed
 
 // Function to calculate the distance between two coordinates
@@ -420,9 +420,15 @@ function handlePositionUpdate(position) {
 
     // Handle whether or not we're driving
     if (speed > 1) {
-        isDriving = true;
+        if (!isDriving) {
+            startedDriving();
+        }
+        setDrivingState(true);
     } else {
-        isDriving = false;
+        if (isDriving) {
+            stoppedDriving();
+        }
+        setDrivingState(false);
     }
 
     // Short distance updates (happens often)
@@ -440,6 +446,30 @@ function handlePositionUpdate(position) {
         lastWxUpdateLat = lat;
         lastWxUpdateLong = long;
         lastWxUpdate = Date.now();
+    }
+}
+
+// Function called when user starts driving
+function startedDriving() {
+    console.log('*** Started driving ***');
+    // Disable the "About" section button
+    const aboutButton = document.querySelector('.section-button[onclick="showSection(\'about\')"]');
+    if (aboutButton) {
+        console.log('Disabling About button...');
+        aboutButton.classList.add('disabled');
+        aboutButton.disabled = true;
+    }
+}
+
+// Function called when user stops driving
+function stoppedDriving() {
+    console.log('*** Stopped driving ***');
+    // Enable the "About" section button
+    const aboutButton = document.querySelector('.section-button[onclick="showSection(\'about\')"]');
+    if (aboutButton) {
+        console.log('Enabling About button...');
+        aboutButton.classList.remove('disabled');
+        aboutButton.disabled = false;
     }
 }
 
