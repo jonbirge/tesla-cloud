@@ -1,5 +1,5 @@
 // Imports
-import { settings } from './settings.js';
+import { settings, isDriving } from './settings.js';
 
 // Constants
 const NEWS_REFRESH_INTERVAL = 5; // minutes
@@ -219,11 +219,10 @@ function generateTimeAgoText(timestamp) {
 // Generate unique IDs for news items
 function genItemID(item)
 {
-    // Create a unique ID based on title and source
     return `${item.source}-${item.title.substring(0, 40)}`;
 }
 
-// Takes news item and generates HTML for it
+// Take news item and generate HTML
 function generateHTMLforItem(item)
 {
     // If the item is unread, add a class to highlight it
@@ -262,8 +261,9 @@ function generateHTMLforItem(item)
         </div>`;
 }
 
+// User clicks on a news item
 window.clickNews = async function (title, link, source) {
-    if (settings["news-forward-only"]) {
+    if (settings["news-forward-only"] && isDriving) {
         await shareNews(title, link, source);
     }
     else {
@@ -271,7 +271,7 @@ window.clickNews = async function (title, link, source) {
     }
 }
 
-// Forwards the news item link to the share function
+// User clicks on the share button
 window.shareNews = async function (title, link, source) {
     console.log('Sharing news item:', title, link);
 
