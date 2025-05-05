@@ -8,6 +8,7 @@ import { startStockUpdates, stopStockUpdates } from './stock.js';
 import { forecastDataPrem, lastLat, lastLong } from './wx.js';
 
 // Global variables
+let isDriving = null; // The vehicle is not parked
 let isLoggedIn = false;
 let currentUser = null; // Will be NULL if not logged in OR if using auto-generated ID
 let hashedUser = null; // The hashed version of the user ID
@@ -17,7 +18,7 @@ let unitIsDirty = false; // Flag to indicate if unit/time settings have changed
 let settings = {}; // Initialize settings object
 
 // Export settings object so it's accessible to other modules
-export { settings, currentUser, isLoggedIn, hashedUser };
+export { settings, currentUser, isLoggedIn, hashedUser, isDriving };
 
 // Default settings that will be used when no user is logged in
 const defaultSettings = {

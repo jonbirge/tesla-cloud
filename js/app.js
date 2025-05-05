@@ -1,7 +1,7 @@
 // Imports
 import { highlightUpdate, srcUpdate, testMode, updateTimeZone, GEONAMES_USERNAME } from './common.js';
 import { PositionSimulator } from './location.js';
-import { attemptLogin, leaveSettings, settings } from './settings.js';
+import { attemptLogin, leaveSettings, settings, isDriving } from './settings.js';
 import { fetchPremiumWeatherData, SAT_URLS, forecastDataPrem } from './wx.js';
 import { updateNetworkInfo, updatePingChart, startPingTest } from './net.js';
 import { markAllNewsAsRead } from './news.js';
@@ -336,7 +336,7 @@ function handlePositionUpdate(position) {
         lastKnownHeading = position.coords.heading;
     }
 
-    // Update GPS status indicator with color gradient based on accuracy
+    // Update GPS status indicator based on GPS accuracy
     const gpsStatusElement = document.getElementById('gps-status');
     if (gpsStatusElement) {
         if (lat === null || long === null) {
@@ -371,7 +371,7 @@ function handlePositionUpdate(position) {
         }
     }
 
-    // Update radar display with current speed and heading if nav section is visible
+    // Update wind display if nav section is visible
     const navigationSection = document.getElementById("navigation");
     if (navigationSection.style.display === "block") {
         // Update heading displays
@@ -419,7 +419,14 @@ function handlePositionUpdate(position) {
         }
     }
 
-    // Short distance updates
+    // Handle whether or not we're driving
+    if (speed > 1) {
+        isDriving = true;
+    } else {
+        isDriving = false;
+    }
+
+    // Short distance updates (happens often)
     if (shouldUpdateShortRangeData()) {
         updateLocationData(lat, long);
         fetchPremiumWeatherData(lat, long);
@@ -428,7 +435,7 @@ function handlePositionUpdate(position) {
         lastUpdate = Date.now();
     }
 
-    // Long distance updates
+    // Long distance updates (happens rarely)
     if (shouldUpdateLongRangeData()) {
         updateTimeZone(lat, long);
         lastWxUpdateLat = lat;
