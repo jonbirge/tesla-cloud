@@ -452,25 +452,23 @@ function handlePositionUpdate(position) {
 // Function called when user starts driving
 function startedDriving() {
     console.log('*** Started driving ***');
-    // Disable the "About" section button
-    const aboutButton = document.querySelector('.section-button[onclick="showSection(\'about\')"]');
-    if (aboutButton) {
-        console.log('Disabling About button...');
-        aboutButton.classList.add('disabled');
-        aboutButton.disabled = true;
-    }
+    // Find all buttons with class "no-driving" and disable them
+    const noDrivingButtons = document.querySelectorAll('.no-driving');
+    noDrivingButtons.forEach(button => {
+        button.classList.add('disabled');
+        button.disabled = true;
+    });
 }
 
 // Function called when user stops driving
 function stoppedDriving() {
     console.log('*** Stopped driving ***');
-    // Enable the "About" section button
-    const aboutButton = document.querySelector('.section-button[onclick="showSection(\'about\')"]');
-    if (aboutButton) {
-        console.log('Enabling About button...');
-        aboutButton.classList.remove('disabled');
-        aboutButton.disabled = false;
-    }
+    // Find all buttons with class "no-driving" and enable them
+    const noDrivingButtons = document.querySelectorAll('.no-driving');
+    noDrivingButtons.forEach(button => {
+        button.classList.remove('disabled');
+        button.disabled = false;
+    });
 }
 
 // Function to update GPS data
