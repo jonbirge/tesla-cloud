@@ -8,14 +8,15 @@ import { markAllNewsAsRead } from './news.js';
 import { startStockUpdates, stopStockUpdates } from './stock.js';
 
 // Parameters
-const LATLON_UPDATE_INTERVAL = 2; // seconds
-const UPDATE_DISTANCE_THRESHOLD = 2500; // meters
-const UPDATE_TIME_THRESHOLD = 10; // minutes
-const WX_DISTANCE_THRESHOLD = 25000; // meters
-const WX_TIME_THRESHOLD = 60; // minutes
-const MAX_SPEED = 50; // Maximum speed for radar display (mph)
-const MIN_GPS_UPDATE_INTERVAL = 1000; // ms - minimum time between updates
-const WIKI_TYPES = ['event', 'airport', 'landmark']; // Types of Wikipedia data to fetch
+const DEFAULT_SECTION = 'navigation';               // Default section to show
+const LATLON_UPDATE_INTERVAL = 2;                   // seconds
+const UPDATE_DISTANCE_THRESHOLD = 2500;             // meters
+const UPDATE_TIME_THRESHOLD = 10;                   // minutes
+const WX_DISTANCE_THRESHOLD = 25000;                // meters
+const WX_TIME_THRESHOLD = 60;                       // minutes
+const MAX_SPEED = 50;                               // Max speed for wind display (mph)
+const MIN_GPS_UPDATE_INTERVAL = 1000;               // ms - minimum time between updates
+const WIKI_TYPES = ['event','airport','landmark'];  // Types of Wikipedia data to fetch
 
 // Module variables
 let currentSection = null; // Track the current section
@@ -881,6 +882,6 @@ document.addEventListener('DOMContentLoaded', async function () {
 
     // Show the initial section from URL parameter
     const urlParams = new URLSearchParams(window.location.search);
-    const initialSection = urlParams.get('section') || 'news';
+    const initialSection = urlParams.get('section') || DEFAULT_SECTION;
     showSection(initialSection);
 });
