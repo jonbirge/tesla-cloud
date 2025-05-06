@@ -2,6 +2,7 @@
 :root {
     --bg-color: #efefef;
     --text-color: #777777;
+    --disabled-text-color: #cccccc;
     --active-section-bg: white;
     --separator-color: #cccccc;
     --button-bg: #dddddd;
@@ -27,6 +28,7 @@
 body.dark-mode {
     --bg-color: #1d1d1d;
     --text-color: #777777;
+    --disabled-text-color: #444444;
     --active-section-bg: #333333;
     --separator-color: #444444;
     --button-bg: #333333;
@@ -259,8 +261,12 @@ hr {
 
 /* Section button that also has disabled class */
 .section-button.disabled {
-    opacity: 0.25;
+    color: var(--disabled-text-color) !important;
     cursor: not-allowed;
+}
+
+.section-button.disabled:hover {
+    background-color: var(--bg-color);
 }
 
 .logout-button {
