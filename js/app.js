@@ -408,7 +408,7 @@ function handlePositionUpdate(position) {
         // Update headwind/crosswind labels
         if (!settings || settings["imperial-units"]) {
             document.getElementById('headwind-label').innerText =
-                document.getElementById('headwind-label').innerText.replace("(MPH)", "(MPH)");
+                document.getElementById('headwind-label').innerText;
             document.querySelector('.stat-box:nth-child(4) .stat-label').innerText =
                 document.querySelector('.stat-box:nth-child(4) .stat-label').innerText.replace("(MPH)", "(MPH)");
         } else {
