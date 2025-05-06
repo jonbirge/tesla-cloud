@@ -409,8 +409,7 @@ function handlePositionUpdate(position) {
         if (!settings || settings["imperial-units"]) {
             document.getElementById('headwind-label').innerText =
                 document.getElementById('headwind-label').innerText.replace("(MPH)", "(MPH)");
-            document.querySelector('.stat-box:nth-child(4) .stat-label').innerText =
-                document.querySelector('.stat-box:nth-child(4) .stat-label').innerText.replace("(MPH)", "(MPH)");
+            document.querySelector('.stat-box:nth-child(4) .stat-label').innerText = "(MPH)";
         } else {
             document.getElementById('headwind-label').innerText =
                 document.getElementById('headwind-label').innerText.replace("(MPH)", "(M/S)");
