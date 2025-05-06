@@ -404,19 +404,6 @@ function handlePositionUpdate(position) {
         }
 
         document.getElementById('accuracy').innerText = acc ? Math.round(acc) + ' m' : '--';
-
-        // Update headwind/crosswind labels
-        if (!settings || settings["imperial-units"]) {
-            document.getElementById('headwind-label').innerText =
-                document.getElementById('headwind-label').innerText.replace("(MPH)", "(MPH)");
-            document.querySelector('.stat-box:nth-child(4) .stat-label').innerText =
-                document.querySelector('.stat-box:nth-child(4) .stat-label').innerText.replace("(MPH)", "(MPH)");
-        } else {
-            document.getElementById('headwind-label').innerText =
-                document.getElementById('headwind-label').innerText.replace("(MPH)", "(M/S)");
-            document.querySelector('.stat-box:nth-child(4) .stat-label').innerText =
-                document.querySelector('.stat-box:nth-child(4) .stat-label').innerText.replace("(MPH)", "(M/S)");
-        }
     }
 
     // Handle whether or not we're driving
