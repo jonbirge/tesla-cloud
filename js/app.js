@@ -2,7 +2,7 @@
 import { highlightUpdate, srcUpdate, testMode, updateTimeZone, GEONAMES_USERNAME } from './common.js';
 import { PositionSimulator } from './location.js';
 import { attemptLogin, leaveSettings, settings, isDriving, setDrivingState } from './settings.js';
-import { fetchPremiumWeatherData, SAT_URLS, forecastDataPrem } from './wx.js';
+import { fetchPremiumWeatherData, fetchCityData, SAT_URLS, forecastDataPrem } from './wx.js';
 import { updateNetworkInfo, updatePingChart, startPingTest } from './net.js';
 import { markAllNewsAsRead } from './news.js';
 import { startStockUpdates, stopStockUpdates } from './stock.js';
@@ -29,9 +29,9 @@ let speed = null;
 let lastUpdateLat = null;
 let lastUpdateLong = null;
 let lastKnownHeading = null;
-let lastWxUpdate = 0;
-let lastWxUpdateLat = null;
-let lastWxUpdateLong = null;
+let lastLongUpdate = 0;
+let lastLongUpdateLat = null;
+let lastLongUpdateLong = null;
 let neverUpdatedLocation = true;
 let radarContext = null;
 let gpsIntervalId = null;
@@ -52,20 +52,6 @@ function calculateDistance(lat1, lon1, lat2, lon2) {
         Math.sin(Δλ / 2) * Math.sin(Δλ / 2);
     const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
     return R * c; // returns distance in meters
-}
-
-// Function to fetch city data based on latitude and longitude
-function fetchCityData(lat, long) {
-    fetch(`https://secure.geonames.org/findNearbyPlaceNameJSON?lat=${lat}&lng=${long}&username=${GEONAMES_USERNAME}`)
-        .then(response => response.json())
-        .then(cityData => {
-            const place = cityData.geonames && cityData.geonames[0];
-            highlightUpdate('city', place ? (place.name || 'N/A') : 'N/A'); // Highlight the city update
-            highlightUpdate('state', place ? (place.adminName1 || 'N/A') : 'N/A'); // Highlight the state update
-        })
-        .catch(error => {
-            console.error('Error fetching city data:', error);
-        });
 }
 
 // Function to fetch nearby Wikipedia data based on coordinates
@@ -302,20 +288,20 @@ function shouldUpdateShortRangeData() {
 // Function to determine if long-range data should be updated
 function shouldUpdateLongRangeData() {
     // Check if we've never updated weather data
-    if (lastWxUpdate === 0 || lastWxUpdateLat === null || lastWxUpdateLong === null) {
+    if (lastLongUpdate === 0 || lastLongUpdateLat === null || lastLongUpdateLong === null) {
         return true;
     }
 
     // Check time threshold using WX_TIME_THRESHOLD constant
     const now = Date.now();
-    const timeSinceLastUpdate = now - lastWxUpdate;
+    const timeSinceLastUpdate = now - lastLongUpdate;
     if (timeSinceLastUpdate >= WX_TIME_THRESHOLD * 60 * 1000) { // Convert minutes to milliseconds
         return true;
     }
 
     // Check distance threshold using WX_DISTANCE_THRESHOLD constant
     if (lat !== null && long !== null) {
-        const distance = calculateDistance(lat, long, lastWxUpdateLat, lastWxUpdateLong);
+        const distance = calculateDistance(lat, long, lastLongUpdateLat, lastLongUpdateLong);
         if (distance >= WX_DISTANCE_THRESHOLD) { // Use constant for meters
             return true;
         }
@@ -431,9 +417,9 @@ function handlePositionUpdate(position) {
     // Long distance updates (happens rarely)
     if (shouldUpdateLongRangeData()) {
         updateTimeZone(lat, long);
-        lastWxUpdateLat = lat;
-        lastWxUpdateLong = long;
-        lastWxUpdate = Date.now();
+        lastLongUpdateLat = lat;
+        lastLongUpdateLong = long;
+        lastLongUpdate = Date.now();
     }
 }
 

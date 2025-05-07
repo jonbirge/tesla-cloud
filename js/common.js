@@ -31,22 +31,19 @@ export async function updateTimeZone(lat, long) {
 export function highlightUpdate(id, content = null) {
     const element = document.getElementById(id);
     if (content !== null) {
-        if (element.innerHTML === content) {
-            return; // Exit if content is the same
+        if (element.textContent === content) {
+            return; // exit if content is the same
         }
-        element.innerHTML = content;
+        element.textContent = content;
     }
     const highlightColor = getComputedStyle(document.documentElement).getPropertyValue('--tesla-blue').trim();
-    // const originalFontWeight = getComputedStyle(element).fontWeight;
 
     element.style.transition = 'color 0.5s, font-weight 0.5s';
     element.style.color = highlightColor;
-    // element.style.fontWeight = '800';
 
     setTimeout(() => {
         element.style.transition = 'color 2s, font-weight 2s';
         element.style.color = ''; // Reset to default color
-        // element.style.fontWeight = ''; // Reset to original font weight
     }, 2000);
 }
 
