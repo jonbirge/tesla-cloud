@@ -16,9 +16,13 @@ let lastLong = null;
 let minutelyPrecipChart = null;
 let precipGraphUpdateInterval = null; // Timer for updating the precipitation graph
 let currentRainAlert = false; // Flag to track if we're currently under a rain alert
+let city = null; // Variable to store the city name
+let state = null; // Variable to store the state name
+let country = null; // Variable to store the country name
+let inCONUS = null; // Variable to store if the location is in the continental US (CONUS)
 
 // Export these variables for use in other modules
-export { SAT_URLS, forecastDataPrem, lastLat, lastLong };
+export { SAT_URLS, forecastDataPrem, lastLat, lastLong, city, state };
 
 // Fetches premium weather data from OpenWeather API
 export function fetchPremiumWeatherData(lat, long, silentLoad = false) {
@@ -100,23 +104,16 @@ export function fetchPremiumWeatherData(lat, long, silentLoad = false) {
                     hour: '2-digit',
                     minute: '2-digit'
                 });
-                // Get nearest city using OpenWeather GEOlocation API
-                fetch(`openwx.php/geo/1.0/reverse?lat=${lat}&lon=${long}&limit=1`)
-                    .then(response => response.json())
-                    .then(data => {
-                        if (data && data.length > 0) {
-                            const city = data[0].name;
-                            const state = data[0].state;
-                            const stationStr = `${city}, ${state} @ ${weatherUpdateTime}`;
-                            highlightUpdate('prem-station-info', stationStr);
-                        } else {
-                            console.log('No location data available.');
-                        }
-                    })
-                    .catch(error => {
-                        console.error('Error fetching location data: ', error);
-                    });
-                
+
+                // Update station info robustly
+                if (city && state) {
+                    const stationStr = `${city}, ${state} @ ${weatherUpdateTime}`;
+                    highlightUpdate('prem-station-info', stationStr);
+                } else {
+                    const stationStr = `${weatherUpdateTime}`;
+                    highlightUpdate('prem-station-info', stationStr);
+                }
+
                 // Start auto-refresh for precipitation graph
                 startPrecipGraphAutoRefresh();
             } else {
@@ -142,6 +139,42 @@ export function fetchPremiumWeatherData(lat, long, silentLoad = false) {
             if (!silentLoad) {
                 if (loadingSpinner) loadingSpinner.style.display = 'none';
             }
+        });
+}
+
+// Fetch city data based on latitude and longitude
+export function fetchCityData(lat, long) {
+    fetch(`openwx.php/geo/1.0/reverse?lat=${lat}&lon=${long}&limit=1`)
+        .then(response => response.json())
+        .then(data => {
+            if (data && data.length > 0) {
+                city = data[0].name;
+                state = data[0].state;
+                country = data[0].country;
+                // Check if we're in the US but NOT in Hawaii or Alaska
+                inCONUS = (country === 'US' && state !== 'HI' && state !== 'AK');
+
+                // Update the location display
+                highlightUpdate('city', city);
+                highlightUpdate('state', state);
+
+                // If we're in CONUS, show the "sat-section" button
+                const satSection = document.getElementById('sat-section');
+                if (satSection) {
+                    if (inCONUS) {
+                        console.log('Location is in CONUS');
+                        satSection.classList.remove('hidden');
+                    } else {
+                        console.log('Location is NOT in CONUS');
+                        satSection.classList.add('hidden');
+                    }
+                }
+            } else {
+                console.log('No location data available.');
+            }
+        })
+        .catch(error => {
+            console.error('Error fetching location data: ', error);
         });
 }
 
@@ -394,7 +427,7 @@ function startPrecipGraphAutoRefresh() {
     }, 30000); // Update every 30 seconds
 }
 
-// New function: Check for imminent rain (next 15 minutes)
+// Check for imminent rain (next 15 minutes)
 function checkImminentRain(minutelyData) {
     if (!minutelyData || minutelyData.length === 0) {
         toggleRainIndicator(false);
@@ -457,7 +490,7 @@ function checkImminentRain(minutelyData) {
     return hasImminentRain;
 }
 
-// New function: Toggle the rain indicator
+// Toggle the rain indicator
 function toggleRainIndicator(show) {
     // Get or create the rain indicator element
     let rainIndicator = document.getElementById('rain-indicator');
@@ -483,7 +516,7 @@ function toggleRainIndicator(show) {
     }
 }
 
-// New function: Show a temporary notification
+// Show a temporary notification
 function showNotification(message) {
     // Check if a notification container already exists
     let notificationContainer = document.getElementById('notification-container');
@@ -536,7 +569,7 @@ function extractPremiumDailyForecast(dailyList) {
     return dailyList.slice(0, 5);
 }
 
-// Consolidated: Format temperature based on user settings
+// Format temperature based on user settings
 function formatTemperature(tempF) {
     if (!settings || settings["imperial-units"]) {
         return Math.round(tempF) + "°";
@@ -546,7 +579,7 @@ function formatTemperature(tempF) {
     }
 }
 
-// Consolidated: Format wind speed based on user settings
+// Format wind speed based on user settings
 function formatWindSpeed(speedMS) {
     if (!settings || settings["imperial-units"]) {
         // Convert m/s to mph
@@ -557,7 +590,7 @@ function formatWindSpeed(speedMS) {
     }
 }
 
-// Add this new helper function before the end of the file, near the other formatting functions
+// Helper: Format wind speed range
 function formatWindSpeedRange(speedMS, gustMS) {
     if (!settings || settings["imperial-units"]) {
         // Convert m/s to mph
