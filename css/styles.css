@@ -18,7 +18,7 @@
     --status-unavailable: #888888;  /* Gray for unavailable/bad connection */
     --status-rain: #00a1ff;    /* Blue for rain indicator */
     --heading-font-size: 17pt;
-    --heading-font-weight: 700;
+    --heading-font-weight: 500;
     --stock-up: #28a745;       /* Green for positive market change */
     --stock-down: #dc3545;     /* Red for negative market change */
     --stock-neutral: #888888;  /* Gray for unchanged market */
@@ -59,13 +59,13 @@ body {
     font-size: 16pt;
     padding: 0;
     text-align: left;
-    font-weight: 500;
+    /* font-weight: 400; */
 }
 
 a {
     color: var(--tesla-blue);
     text-decoration: none;
-    font-weight: 575;
+    font-weight: 500;
 }
 
 h1 {
@@ -128,7 +128,7 @@ hr {
     border-radius: var(--button-radius);
     padding: 18px;
     font-style: none;
-    font-weight: 700;
+    font-weight: 600;
     text-align: center;
     /* text-transform: uppercase; */
     max-width: 840px;
@@ -244,14 +244,14 @@ hr {
     color: var(--text-color);
     border-radius: var(--button-radius);
     background-color: transparent;
-    font-size: 19pt;
-    font-weight: 675;
-    letter-spacing: 0.02em;
+    font-size: 20pt;
+    font-weight: 500;
+    letter-spacing: 0.025em;
     padding: 16px 20px;
     border: none;
     cursor: pointer;
     text-align: left;
-    margin-bottom: 5px;
+    margin-bottom: 3px;
     display: flex;
     align-items: center;
     transition: background-color 0.3s, color 0.3s;
@@ -356,7 +356,7 @@ hr {
     padding-right: 9px;
     transition: background-color 0.3s;
     width: auto;
-    font-weight: 600;
+    /* font-weight: 500; */
     height: 40px;
     align-items: center;
     justify-content: center;
@@ -549,7 +549,7 @@ body.dark-mode .img-white-transparent {
 .stock-status {
     width: auto;
     font-size: 12pt;
-    font-weight: 650;
+    font-weight: 600;
     transition: color 0.3s ease;
     font-variant-numeric: tabular-nums;
 }
@@ -646,7 +646,7 @@ body.dark-mode .img-white-transparent {
 .stat-value {
     color: var(--button-text);
     font-size: 48pt;
-    font-weight: 600;
+    /* font-weight: 600; */
     display: inline;
     font-variant-numeric: tabular-nums;
 }
@@ -654,7 +654,7 @@ body.dark-mode .img-white-transparent {
 .stat-unit {
     color: var(--text-color);
     font-size: 24pt;
-    font-weight: 650;
+    /* font-weight: 650; */
     font-family: sans-serif;
     display: inline;
     margin-left: 5px; /* Add some spacing between value and unit */
@@ -663,7 +663,7 @@ body.dark-mode .img-white-transparent {
 .stat-label {
     color: var(--text-color);
     font-size: 13pt;
-    font-weight: 650;
+    font-weight: 500;
     margin-top: 0px;
     display: block; /* Ensure it's on its own line */
     clear: both; /* Clear the float to ensure it appears below */
@@ -788,7 +788,7 @@ body.dark-mode .img-white-transparent {
     padding-bottom: 5px;
     margin-right: 55px; /* avoid indicators */
     font-size: 16pt;
-    font-weight: 550;
+    /* font-weight: 500; */
 }
 
 .news-favicon {
@@ -1230,12 +1230,12 @@ body.dark-mode .option-button:hover:not(.active) {
 @media only screen and (max-width: 900px) {
     :root {
         --heading-font-size: 14pt;
-        --heading-font-weight: 600;
+        --heading-font-weight: 500;
         --button-radius: 10px;
     }
     
     body {
-        font-size: 13pt;
+        font-size: 12pt;
     }
     
     h1 {
@@ -1244,7 +1244,7 @@ body.dark-mode .option-button:hover:not(.active) {
     }
     
     h2 {
-        margin-top: 15px;
+        margin-top: 14px;
         margin-bottom: 7px;
     }
     
@@ -1274,7 +1274,7 @@ body.dark-mode .option-button:hover:not(.active) {
         flex-direction: row;
         min-width: min-content;
         width: auto;
-        height: 80px;
+        /* height: 80px; */
         overflow-x: auto;
     }
     
@@ -1284,10 +1284,10 @@ body.dark-mode .option-button:hover:not(.active) {
     
     .section-button {
         font-size: 14pt;
-        padding: 8px 15px;
-        margin: 0 3px;
+        padding: 0px 9px;
+        /* margin: 0 3px; */
         white-space: nowrap;
-        height: 60px;
+        height: 40px;
     }
     
     .button-icon {
@@ -1363,7 +1363,7 @@ body.dark-mode .option-button:hover:not(.active) {
     }
     
     .news-title {
-        font-size: 14pt;
+        font-size: 13pt;
         margin-right: 40px;
     }
     
