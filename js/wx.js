@@ -245,14 +245,7 @@ export function updatePremiumWeatherDisplay() {
         const windDir = forecastDataPrem.current.wind_deg;
         highlightUpdate('prem-humidity', `${humidity}%`);
         if (windSpeed && windDir !== undefined) {
-            let windText;
-            if (windGust && windGust > windSpeed) {
-                // Show wind-gust format
-                windText = `${formatWindSpeedRange(windSpeed, windGust)} @ ${Math.round(windDir)}°`;
-            } else {
-                // Just show regular wind speed if no gust data
-                windText = `${formatWindSpeed(windSpeed)} @ ${Math.round(windDir)}°`;
-            }
+            const windText = `${formatWindSpeedRange(windSpeed, windGust)} @ ${Math.round(windDir)}°`;
             highlightUpdate('prem-wind', windText);
         } else {
             highlightUpdate('prem-wind', '--');
@@ -579,25 +572,25 @@ function formatTemperature(tempF) {
     }
 }
 
-// Format wind speed based on user settings
-function formatWindSpeed(speedMS) {
-    if (!settings || settings["imperial-units"]) {
-        // Convert m/s to mph
-        return Math.round(speedMS * 2.237) + " MPH";
-    } else {
-        // Keep as m/s
-        return Math.round(speedMS) + " m/s";
-    }
-}
-
 // Helper: Format wind speed range
-function formatWindSpeedRange(speedMS, gustMS) {
-    if (!settings || settings["imperial-units"]) {
-        // Convert m/s to mph
-        return `${Math.round(speedMS * 2.237)}&ndash;${Math.round(gustMS * 2.237)} MPH`;
+function formatWindSpeedRange(speedMS, gustMS = null) {
+    const isImperial = !settings || settings["imperial-units"];
+    if (gustMS && gustMS > speedMS) {
+        if (isImperial) {
+            // Convert m/s to mph
+            return `${Math.round(speedMS * 2.237)}–${Math.round(gustMS * 2.237)} MPH`;
+        } else {
+            // Keep as m/s
+            return `${Math.round(speedMS)}–${Math.round(gustMS)} m/s`;
+        }
     } else {
-        // Keep as m/s
-        return `${Math.round(speedMS)}-${Math.round(gustMS)} m/s`;
+        if (isImperial) {
+            // Convert m/s to mph
+            return Math.round(speedMS * 2.237) + " MPH";
+        } else {
+            // Keep as m/s
+            return Math.round(speedMS) + " m/s";
+        }
     }
 }
 
