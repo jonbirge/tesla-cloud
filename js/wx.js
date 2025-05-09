@@ -273,6 +273,13 @@ export function updatePremiumWeatherDisplay() {
     // Update precipitation graph with time-based x-axis
     updatePrecipitationGraph();
 
+    // Log minutely data for debugging
+    if (forecastDataPrem.minutely) {
+        console.log('Minutely data:', forecastDataPrem.minutely);
+    } else {
+        console.log('No minutely data available.');
+    }
+
     // Hide spinner, show forecast
     const forecastContainer = document.getElementById('prem-forecast-container');
     const loadingSpinner = document.getElementById('prem-forecast-loading');
@@ -283,8 +290,8 @@ export function updatePremiumWeatherDisplay() {
 // Function to update precipitation graph with current time-based x-axis
 function updatePrecipitationGraph() {
     // In test mode, we allow precipitation data to be processed even if currentRainAlert is false
-    if ((!currentRainAlert && !testMode) || !forecastDataPrem || !forecastDataPrem.minutely) return;
-    
+    if (testMode || !forecastDataPrem || !forecastDataPrem.minutely) return;
+
     const minutely = forecastDataPrem.minutely || [];
     let hasMinutelyPrecip = false;
     
@@ -317,7 +324,7 @@ function updatePrecipitationGraph() {
         const minutelyContainer = document.getElementById('minutely-precip-container');
         const minutelyChartCanvas = document.getElementById('minutely-precip-chart');
         
-        if (hasMinutelyPrecip && minutelyContainer && minutelyChartCanvas) {
+        if (hasMinutelyPrecip) {
             minutelyContainer.style.display = '';
             
             // Draw or update the chart
@@ -380,7 +387,7 @@ function updatePrecipitationGraph() {
                     }
                 }
             });
-        } else {
+        } else { // No precipitation found
             // Hide the graph if no precipitation data
             if (minutelyContainer) minutelyContainer.style.display = 'none';
             if (minutelyPrecipChart) {
@@ -407,7 +414,7 @@ function startPrecipGraphAutoRefresh() {
     // Clear any existing interval first
     clearInterval(precipGraphUpdateInterval);
     
-    console.log('Starting precipitation graph auto-refresh');
+    console.log('Starting precipitation graph auto-refresh...');
     
     // Initial update
     // updatePrecipitationGraph();
@@ -509,6 +516,46 @@ function toggleRainIndicator(show) {
     }
 }
 
+// Fetches and updates the Air Quality Index (AQI) from openweather.org
+function updateAQI(lat, lon) {
+    fetch(`openwx.php/data/2.5/air_pollution?lat=${lat}&lon=${lon}`)
+        .then(response => response.json())
+        .then(data => {
+            const aqi = data.list[0].main.aqi;
+            let aqiText = '';
+            let color = '';
+
+            switch (aqi) {
+                case 1:
+                    aqiText = 'Good';
+                    color = 'green';
+                    break;
+                case 2:
+                    aqiText = 'Fine';
+                    color = 'lightgreen';
+                    break;
+                case 3:
+                    aqiText = 'Moderate';
+                    color = 'orange';
+                    break;
+                case 4:
+                    aqiText = 'Poor';
+                    color = 'orangered';
+                    break;
+                case 5:
+                    aqiText = 'Very Poor';
+                    color = 'red';
+                    break;
+                default:
+                    aqiText = 'Unknown';
+                    color = 'gray';
+            }
+
+            highlightUpdate('prem-aqi', aqiText);
+            document.getElementById('prem-aqi-dot').style.backgroundColor = color;
+        });
+}
+
 // Show a temporary notification
 function showNotification(message) {
     // Check if a notification container already exists
@@ -526,7 +573,7 @@ function showNotification(message) {
     notification.className = 'notification';
     notification.innerHTML = `
         <div class="notification-icon">
-            <img src="assets/cloud.svg" alt="Rain Alert" width="24" height="24">
+            <img src="assets/cloud.svg" alt="Alert" width="24" height="24">
         </div>
         <div class="notification-message">${message}</div>
     `;
@@ -552,7 +599,7 @@ function showNotification(message) {
             if (notificationContainer.children.length === 0) {
                 notificationContainer.remove();
             }
-        }, 300);
+        }, 500);
     }, 5000);
 }
 
@@ -562,7 +609,7 @@ function extractPremiumDailyForecast(dailyList) {
     return dailyList.slice(0, 5);
 }
 
-// Format temperature based on user settings
+// Helper: Format temperature based on user settings
 function formatTemperature(tempF) {
     if (!settings || settings["imperial-units"]) {
         return Math.round(tempF) + "°";
@@ -604,7 +651,7 @@ function premiumDayHasHazards(day) {
     );
 }
 
-// Generate CSS styling for the moon phase icon based on phase value
+// Helper: Generate CSS styling for the moon phase icon based on phase value
 function getMoonPhaseIcon(phase) {
     // Create CSS for the moon icon based on the phase value (0 to 1)
     // 0 = new moon (fully dark), 0.5 = full moon (fully light), 1 = new moon again
@@ -629,7 +676,7 @@ function getMoonPhaseIcon(phase) {
     return style;
 }
 
-// Return string description of the closest moon phase
+// Helper: Return string description of the closest moon phase
 function getMoonPhaseName(phase) {
     if (phase < 0.05) {
         return 'New';
@@ -644,47 +691,7 @@ function getMoonPhaseName(phase) {
     }
 }
 
-// Fetches and updates the Air Quality Index (AQI) from openweather.org
-function updateAQI(lat, lon) {
-    fetch(`openwx.php/data/2.5/air_pollution?lat=${lat}&lon=${lon}`)
-        .then(response => response.json())
-        .then(data => {
-            const aqi = data.list[0].main.aqi;
-            let aqiText = '';
-            let color = '';
-
-            switch (aqi) {
-                case 1:
-                    aqiText = 'Good';
-                    color = 'green';
-                    break;
-                case 2:
-                    aqiText = 'Fine';
-                    color = 'lightgreen';
-                    break;
-                case 3:
-                    aqiText = 'Moderate';
-                    color = 'orange';
-                    break;
-                case 4:
-                    aqiText = 'Poor';
-                    color = 'orangered';
-                    break;
-                case 5:
-                    aqiText = 'Very Poor';
-                    color = 'red';
-                    break;
-                default:
-                    aqiText = 'Unknown';
-                    color = 'gray';
-            }
-
-            highlightUpdate('prem-aqi', aqiText);
-            document.getElementById('prem-aqi-dot').style.backgroundColor = color;
-        });
-}
-
-// Show precipitation graph for a premium forecast day
+// Show forecast window (used to be a graph) for a premium forecast day
 window.showPremiumPrecipGraph = function(dayIndex) {
     if (!forecastDataPrem) return;
 
@@ -893,7 +900,7 @@ window.showPremiumPrecipGraph = function(dayIndex) {
     }
 };
 
-// Premium popup close handler
+// Close forecast window
 window.closePremiumPrecipPopup = function() {
     const premPopup = document.querySelector('#prem-weather .forecast-popup');
     if (premPopup) premPopup.classList.remove('show');
