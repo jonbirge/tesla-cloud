@@ -143,39 +143,39 @@ export function fetchPremiumWeatherData(lat, long, silentLoad = false) {
 }
 
 // Fetch city data based on latitude and longitude
-export function fetchCityData(lat, long) {
-    fetch(`openwx.php/geo/1.0/reverse?lat=${lat}&lon=${long}&limit=1`)
-        .then(response => response.json())
-        .then(data => {
-            if (data && data.length > 0) {
-                city = data[0].name;
-                state = data[0].state;
-                country = data[0].country;
-                // Check if we're in the US but NOT in Hawaii or Alaska
-                inCONUS = (country === 'US' && state !== 'HI' && state !== 'AK');
+export async function fetchCityData(lat, long) {
+    try {
+        const response = await fetch(`openwx.php/geo/1.0/reverse?lat=${lat}&lon=${long}&limit=1`);
+        const data = await response.json();
+        
+        if (data && data.length > 0) {
+            city = data[0].name;
+            state = data[0].state;
+            country = data[0].country;
+            // Check if we're in the US but NOT in Hawaii or Alaska
+            inCONUS = (country === 'US' && state !== 'HI' && state !== 'AK');
 
-                // Update the location display
-                highlightUpdate('city', city);
-                highlightUpdate('state', state);
+            // Update the location display
+            highlightUpdate('city', city);
+            highlightUpdate('state', state);
 
-                // If we're in CONUS, show the "sat-section" button
-                const satSection = document.getElementById('sat-section');
-                if (satSection) {
-                    if (inCONUS) {
-                        console.log('Location is in CONUS');
-                        satSection.classList.remove('hidden');
-                    } else {
-                        console.log('Location is NOT in CONUS');
-                        satSection.classList.add('hidden');
-                    }
+            // If we're in CONUS, show the "sat-section" button
+            const satSection = document.getElementById('sat-section');
+            if (satSection) {
+                if (inCONUS) {
+                    console.log('Location is in CONUS');
+                    satSection.classList.remove('hidden');
+                } else {
+                    console.log('Location is NOT in CONUS');
+                    satSection.classList.add('hidden');
                 }
-            } else {
-                console.log('No location data available.');
             }
-        })
-        .catch(error => {
-            console.error('Error fetching location data: ', error);
-        });
+        } else {
+            console.log('No location data available.');
+        }
+    } catch (error) {
+        console.error('Error fetching location data: ', error);
+    }
 }
 
 // Updates the forecast display with premium data

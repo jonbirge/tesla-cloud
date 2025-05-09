@@ -312,7 +312,7 @@ function shouldUpdateLongRangeData() {
 }
 
 // Function to handle position updates from GPS
-function handlePositionUpdate(position) {
+async function handlePositionUpdate(position) {
     lat = position.coords.latitude;
     long = position.coords.longitude;
     alt = position.coords.altitude;
@@ -405,21 +405,21 @@ function handlePositionUpdate(position) {
         setDrivingState(false);
     }
 
+    // Long distance updates (happens rarely)
+    if (shouldUpdateLongRangeData()) {
+        await updateTimeZone(lat, long);
+        lastLongUpdateLat = lat;
+        lastLongUpdateLong = long;
+        lastLongUpdate = Date.now();
+    }
+
     // Short distance updates (happens often)
     if (shouldUpdateShortRangeData()) {
-        updateLocationData(lat, long);
+        await updateLocationData(lat, long);
         fetchPremiumWeatherData(lat, long);
         lastUpdateLat = lat;
         lastUpdateLong = long;
         lastUpdate = Date.now();
-    }
-
-    // Long distance updates (happens rarely)
-    if (shouldUpdateLongRangeData()) {
-        updateTimeZone(lat, long);
-        lastLongUpdateLat = lat;
-        lastLongUpdateLong = long;
-        lastLongUpdate = Date.now();
     }
 }
 
