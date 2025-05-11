@@ -10,16 +10,16 @@ const SAT_URLS = {
 };
 
 // Module variables
-let forecastDataPrem = null; // has both current and forecast data
+let forecastDataPrem = null;            // Has both current and forecast data
 let lastLat = null;
 let lastLong = null;
 let minutelyPrecipChart = null;
-let precipGraphUpdateInterval = null; // Timer for updating the precipitation graph
-let currentRainAlert = false; // Flag to track if we're currently under a rain alert
-let city = null; // Variable to store the city name
-let state = null; // Variable to store the state name
-let country = null; // Variable to store the country name
-let inCONUS = null; // Variable to store if the location is in the continental US (CONUS)
+let precipGraphUpdateInterval = null;   // Timer for updating the precipitation graph
+let currentRainAlert = false;           // Flag to track if we're currently under a rain alert
+let city = null;                        // Variable to store the city name
+let state = null;                       // Variable to store the state name
+let country = null;                     // Variable to store the country name
+let inCONUS = null;                     // Variable to store if the location is in the continental US (CONUS)
 
 // Export these variables for use in other modules
 export { SAT_URLS, forecastDataPrem, lastLat, lastLong, city, state };
@@ -43,7 +43,7 @@ export function fetchPremiumWeatherData(lat, long, silentLoad = false) {
         if (loadingSpinner) loadingSpinner.style.display = 'flex';
     }
 
-    // Fetch and update weather data (single fetch)
+    // Fetch and update weather data
     fetch(`openwx.php/data/3.0/onecall?lat=${lat}&lon=${long}&units=imperial`)
         .then(response => response.json())
         .then(forecastDataLocal => {
@@ -92,9 +92,6 @@ export function fetchPremiumWeatherData(lat, long, silentLoad = false) {
                             forecastDataPrem.minutely[i].precipitation = 2 + Math.random() * 3; // 2-5 mm/hr
                         }
                     }
-                    
-                    // Set currentRainAlert to true to ensure precipitation graph gets displayed
-                    currentRainAlert = true;
                 } // test mode
                 
                 updatePremiumWeatherDisplay();
@@ -106,7 +103,10 @@ export function fetchPremiumWeatherData(lat, long, silentLoad = false) {
                 });
 
                 // Update station info robustly
-                if (city && state) {
+                if (testMode) {
+                    const stationStr = `TEST WX @ ${weatherUpdateTime}`;
+                    highlightUpdate('prem-station-info', stationStr);
+                } else if (city && state) {
                     const stationStr = `${city}, ${state} @ ${weatherUpdateTime}`;
                     highlightUpdate('prem-station-info', stationStr);
                 } else {
@@ -269,69 +269,64 @@ export function updatePremiumWeatherDisplay() {
             }
         }
     }
-
-    // Update precipitation graph with time-based x-axis
-    updatePrecipitationGraph();
-
-    // Log minutely data for debugging
-    if (forecastDataPrem.minutely) {
-        console.log('Minutely data:', forecastDataPrem.minutely);
-    } else {
-        console.log('No minutely data available.');
-    }
-
     // Hide spinner, show forecast
     const forecastContainer = document.getElementById('prem-forecast-container');
     const loadingSpinner = document.getElementById('prem-forecast-loading');
     if (forecastContainer) forecastContainer.classList.remove('hidden');
     if (loadingSpinner) loadingSpinner.style.display = 'none';
+
+    // Update precipitation graph with time-based x-axis
+    updatePrecipitationGraph();
+
+    // Log minutely data for debugging
+    // if (forecastDataPrem.minutely) {
+    //     console.log('Minutely data:', forecastDataPrem.minutely);
+    // } else {
+    //     console.log('No minutely data available.');
+    // }
 }
 
 // Function to update precipitation graph with current time-based x-axis
 function updatePrecipitationGraph() {
-    // In test mode, we allow precipitation data to be processed even if currentRainAlert is false
-    if (testMode || !forecastDataPrem || !forecastDataPrem.minutely) return;
+    if (!forecastDataPrem || !forecastDataPrem.minutely) return;
 
     const minutely = forecastDataPrem.minutely || [];
     let hasMinutelyPrecip = false;
-    
+
     if (minutely.length > 0) {
         const currentTime = new Date();
         console.log(`Updating precipitation graph at: ${currentTime.toLocaleTimeString()}`);
-        
+
         // Calculate time offsets relative to now and filter out past times
         const precipData = minutely.map(m => {
             const minuteTime = new Date(m.dt * 1000);
             const timeDiffMinutes = Math.round((minuteTime - currentTime) / (60 * 1000));
-            
+
             return {
                 x: timeDiffMinutes,
                 y: m.precipitation || 0,
                 time: minuteTime
             };
         }).filter(item => item.x >= 0); // Filter out past times (negative values)
-        
+
+        // Check for rain in the next 15 minutes and show alert if detected
+        checkImminentRain(minutely);
+
         // Extract data for chart
         const labels = precipData.map(item => item.x);
         const values = precipData.map(item => item.y);
-        
-        // Check if any precipitation values are greater than 0
+
+        // Handle rain if any precipitation values are finite
         hasMinutelyPrecip = values.some(val => val > 0);
-        
-        // Check for rain in the next 15 minutes and show alert if detected
-        checkImminentRain(minutely);
-        
         const minutelyContainer = document.getElementById('minutely-precip-container');
         const minutelyChartCanvas = document.getElementById('minutely-precip-chart');
-        
         if (hasMinutelyPrecip) {
-            minutelyContainer.style.display = '';
-            
+            minutelyContainer.style.display = ''; // Show the graph container
+
             // Draw or update the chart
             if (minutelyPrecipChart) {
                 minutelyPrecipChart.destroy();
             }
-            
             minutelyPrecipChart = new Chart(minutelyChartCanvas.getContext('2d'), {
                 type: 'bar',
                 data: {
@@ -347,33 +342,31 @@ function updatePrecipitationGraph() {
                         legend: { display: false }
                     },
                     scales: {
-                        x: { 
-                            title: { 
-                                display: true, 
+                        x: {
+                            title: {
+                                display: true,
                                 text: 'Minutes from now',
                                 font: {
                                     size: 22,
-                                    weight: 650
                                 }
                             },
                             ticks: {
                                 font: {
                                     size: 18
                                 },
-                                callback: function(value) {
+                                callback: function (value) {
                                     return "+" + value;
                                 }
-                            } 
+                            }
                         },
-                        y: { 
-                            title: { 
-                                display: true, 
+                        y: {
+                            title: {
+                                display: true,
                                 text: 'Precipitation (mm/hr)',
                                 font: {
                                     size: 22,
-                                    weight: 650
                                 }
-                            }, 
+                            },
                             beginAtZero: true,
                             ticks: {
                                 font: {
@@ -388,23 +381,20 @@ function updatePrecipitationGraph() {
                 }
             });
         } else { // No precipitation found
-            // Hide the graph if no precipitation data
+            // Hide the graph
             if (minutelyContainer) minutelyContainer.style.display = 'none';
             if (minutelyPrecipChart) {
                 minutelyPrecipChart.destroy();
                 minutelyPrecipChart = null;
             }
-            // Don't stop the timer here - we should keep checking for precipitation
-            // Just log that there's no data currently
-            console.log('No precipitation data to display, but continuing to monitor');
+            console.log('No precipitation data to display; continuing to monitor.');
         }
-    } else {
-        // If no minutely data available, hide the rain indicator
+    } else { // No minutely data available
+        // Hide the rain indicator
         toggleRainIndicator(false);
-        // Don't stop the refresh here - data might become available later
-        console.log('No minutely precipitation data available, continuing to monitor');
+        console.log('No minutely precipitation data available; continuing to monitor.');
     }
-    
+
     // Return true if the refresh should continue
     return true;
 }
@@ -427,8 +417,10 @@ function startPrecipGraphAutoRefresh() {
     }, 30000); // Update every 30 seconds
 }
 
-// Check for imminent rain (next 15 minutes)
+// Check for imminent rain (next 15 minutes) and alert user if so
 function checkImminentRain(minutelyData) {
+    console.log('Checking for imminent rain...');
+
     if (!minutelyData || minutelyData.length === 0) {
         toggleRainIndicator(false);
         currentRainAlert = false; // Reset alert flag when no data
@@ -442,7 +434,6 @@ function checkImminentRain(minutelyData) {
     const next15MinData = minutelyData.filter(minute => {
         const minuteTime = new Date(minute.dt * 1000);
         const timeDiffMinutes = (minuteTime - currentTime) / (60 * 1000);
-        // Include only future times within the next 15 minutes
         return timeDiffMinutes >= 0 && timeDiffMinutes <= 15;
     });
     
@@ -452,6 +443,9 @@ function checkImminentRain(minutelyData) {
     const hasImminentRain = next15MinData.some(minute => 
         (minute.precipitation || 0) > precipThreshold
     );
+
+    console.log(`Imminent rain detection: ${hasImminentRain}`);     // TODO: Delete after debugging is done!
+    console.log(`Rain alert status:`, currentRainAlert);            // TODO: Delete after debugging is done!
     
     // Toggle the rain indicator based on our findings
     toggleRainIndicator(hasImminentRain);
@@ -465,7 +459,7 @@ function checkImminentRain(minutelyData) {
         
         // Find the maximum precipitation intensity in the next 15 minutes
         const maxPrecip = Math.max(...next15MinData.map(minute => minute.precipitation || 0));
-        
+
         // Create the notification message
         let message;
         if (rainStartIndex === 0) {
@@ -475,18 +469,16 @@ function checkImminentRain(minutelyData) {
             const minutesUntilRain = Math.round((minuteTime - currentTime) / (60 * 1000));
             message = `Rain expected in ${minutesUntilRain} minute${minutesUntilRain > 1 ? 's' : ''} (${maxPrecip.toFixed(1)} mm/hr)`;
         }
-        
-        if (message) {
-            // Show the notification
-            showNotification(message);
-            // Set flag that we're under an active rain alert
-            currentRainAlert = true;
-        }
+
+        // Show the notification
+        showNotification(message);
+        // Set flag that we're under an active rain alert
+        currentRainAlert = true;
     } else if (!hasImminentRain) {
         // Reset the alert flag when there's no longer imminent rain
         currentRainAlert = false;
     }
-    
+
     return hasImminentRain;
 }
 
@@ -557,6 +549,7 @@ function updateAQI(lat, lon) {
 }
 
 // Show a temporary notification
+// TODO: Move this to common.js
 function showNotification(message) {
     // Check if a notification container already exists
     let notificationContainer = document.getElementById('notification-container');

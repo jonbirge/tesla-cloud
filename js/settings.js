@@ -176,7 +176,7 @@ export async function saveSetting(key, value) {
     // Update the interface
     updateSetting(key, value);
 
-    console.log(`Setting "${key}" updated to ${value} (local)`);
+    // console.log(`Setting "${key}" updated to ${value} (local)`);
 
     // Update server if logged in
     if (isLoggedIn && hashedUser) {
@@ -206,6 +206,7 @@ export async function saveSetting(key, value) {
     }
 
     // Handle special case interactions
+    // TODO: Is this still needed here or could it be moved to the updateSetting function?
 
     // If the setting is "dark-mode", turn off auto-dark-mode
     if (key === 'dark-mode') {
