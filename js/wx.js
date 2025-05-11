@@ -53,45 +53,7 @@ export function fetchPremiumWeatherData(lat, long, silentLoad = false) {
                 // If in test mode, generate random precipitation data for minutely forecast
                 if (testMode) {
                     console.log('TEST MODE: Generating random precipitation data');
-                    // Create minutely data if it doesn't exist
-                    if (!forecastDataPrem.minutely || forecastDataPrem.minutely.length < 60) {
-                        forecastDataPrem.minutely = [];
-                        
-                        // Current timestamp in seconds, minus a random offset of 0-10 minutes
-                        const randomOffsetMinutes = Math.floor(Math.random() * 11); // 0-10 minutes
-                        const nowSec = Math.floor(Date.now() / 1000) - (randomOffsetMinutes * 60);
-                        console.log(`TEST MODE: Setting initial time to ${randomOffsetMinutes} minutes in the past`);
-                        
-                        // Generate 60 minutes of data
-                        for (let i = 0; i < 60; i++) {
-                            // First 18 data points have zero precipitation
-                            const precipitation = i < 18 ? 0 : Math.random() * 5;
-                            
-                            forecastDataPrem.minutely.push({
-                                dt: nowSec + (i * 60),
-                                precipitation: precipitation
-                            });
-                        }
-                    } else {
-                        // Modify existing minutely data
-                        const randomOffsetMinutes = Math.floor(Math.random() * 11); // 0-10 minutes
-                        const nowSec = Math.floor(Date.now() / 1000) - (randomOffsetMinutes * 60);
-                        console.log(`TEST MODE: Setting initial time to ${randomOffsetMinutes} minutes in the past`);
-                        
-                        forecastDataPrem.minutely.forEach((minute, index) => {
-                            minute.dt = nowSec + (index * 60);
-                            // First 18 data points have zero precipitation
-                            minute.precipitation = index < 18 ? 0 : Math.random() * 5;
-                        });
-                    }
-                    
-                    // Make sure at least some values are non-zero to trigger display
-                    // Set a few minutes after the initial 18 to have definite precipitation
-                    for (let i = 25; i < 40; i++) {
-                        if (i < forecastDataPrem.minutely.length) {
-                            forecastDataPrem.minutely[i].precipitation = 2 + Math.random() * 3; // 2-5 mm/hr
-                        }
-                    }
+                    generateTestMinutelyData(forecastDataPrem);
                 } // test mode
                 
                 updatePremiumWeatherDisplay();
@@ -277,13 +239,6 @@ export function updatePremiumWeatherDisplay() {
 
     // Update precipitation graph with time-based x-axis
     updatePrecipitationGraph();
-
-    // Log minutely data for debugging
-    // if (forecastDataPrem.minutely) {
-    //     console.log('Minutely data:', forecastDataPrem.minutely);
-    // } else {
-    //     console.log('No minutely data available.');
-    // }
 }
 
 // Function to update precipitation graph with current time-based x-axis
@@ -940,6 +895,51 @@ window.showPremiumPrecipGraph = function(dayIndex) {
         hourlyContainer.innerHTML = timelineHTML;
     }
 };
+
+// Helper: Generate test minutely precipitation data for testing
+function generateTestMinutelyData(forecastData) {
+    // Create minutely data if it doesn't exist
+    if (!forecastData.minutely || forecastData.minutely.length < 60) {
+        forecastData.minutely = [];
+        
+        // Current timestamp in seconds, minus a random offset of 0-10 minutes
+        const randomOffsetMinutes = Math.floor(Math.random() * 11); // 0-10 minutes
+        const nowSec = Math.floor(Date.now() / 1000) - (randomOffsetMinutes * 60);
+        console.log(`TEST MODE: Setting initial time to ${randomOffsetMinutes} minutes in the past`);
+        
+        // Generate 60 minutes of data
+        for (let i = 0; i < 60; i++) {
+            // First 18 data points have zero precipitation
+            const precipitation = i < 18 ? 0 : Math.random() * 5;
+            
+            forecastData.minutely.push({
+                dt: nowSec + (i * 60),
+                precipitation: precipitation
+            });
+        }
+    } else {
+        // Modify existing minutely data
+        const randomOffsetMinutes = Math.floor(Math.random() * 11); // 0-10 minutes
+        const nowSec = Math.floor(Date.now() / 1000) - (randomOffsetMinutes * 60);
+        console.log(`TEST MODE: Setting initial time to ${randomOffsetMinutes} minutes in the past`);
+        
+        forecastData.minutely.forEach((minute, index) => {
+            minute.dt = nowSec + (index * 60);
+            // First 18 data points have zero precipitation
+            minute.precipitation = index < 18 ? 0 : Math.random() * 5;
+        });
+    }
+    
+    // Make sure at least some values are non-zero to trigger display
+    // Set a few minutes after the initial 18 to have definite precipitation
+    for (let i = 25; i < 40; i++) {
+        if (i < forecastData.minutely.length) {
+            forecastData.minutely[i].precipitation = 2 + Math.random() * 3; // 2-5 mm/hr
+        }
+    }
+    
+    return forecastData;
+}
 
 // Close forecast window
 window.closePremiumPrecipPopup = function() {
