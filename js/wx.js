@@ -325,10 +325,8 @@ function updatePrecipitationGraph() {
             minutelyContainer.style.display = ''; // Show the graph container
 
             if (minutelyPrecipChart) {
-                // Update existing chart with new data instead of destroying it
-                minutelyPrecipChart.data.labels = labels;
-                minutelyPrecipChart.data.datasets[0].data = values;
-                minutelyPrecipChart.update();
+                // Enhanced animated update for existing chart
+                updateChartWithAnimation(minutelyPrecipChart, labels, values);
             } else {
                 // Create new chart if it doesn't exist
                 minutelyPrecipChart = new Chart(minutelyChartCanvas.getContext('2d'), {
@@ -404,12 +402,62 @@ function updatePrecipitationGraph() {
     return true;
 }
 
+// Function to update chart data with sequential animation
+function updateChartWithAnimation(chart, newLabels, newValues) {
+    // First update the labels if needed
+    chart.data.labels = newLabels;
+    
+    // If there's an ongoing animation, cancel it
+    if (chart.animationTimer) {
+        clearTimeout(chart.animationTimer);
+    }
+    
+    // const originalValues = [...chart.data.datasets[0].data];
+    const valuesCount = newValues.length;
+    
+    // Ensure data arrays are the same length
+    while (chart.data.datasets[0].data.length < valuesCount) {
+        chart.data.datasets[0].data.push(0);
+    }
+    
+    // Animation function to update values one by one
+    let index = 0;
+    
+    function updateNextValue() {
+        if (index < valuesCount) {
+            // Update the current data point
+            chart.data.datasets[0].data[index] = newValues[index];
+            
+            // Apply minimal animation for this update
+            const updateOptions = {
+                duration: 30,
+                easing: 'easeOutQuad'
+            };
+            
+            chart.update(updateOptions);
+            
+            // Schedule the next update
+            index++;
+            chart.animationTimer = setTimeout(updateNextValue, 30);
+        } else {
+            // Final update with nice animation
+            // chart.update();
+            chart.animationTimer = null;
+        }
+    }
+    
+    // Start the sequential updates
+    updateNextValue();
+}
+
 // Function to start auto-refresh for precipitation graph
 function startPrecipGraphAutoRefresh() {
-    // Clear any existing interval first
-    clearInterval(precipGraphUpdateInterval);
+    const GRAPH_DELAY = 30; // seconds
     
     console.log('Starting precipitation graph auto-refresh...');
+    
+    // Clear any existing interval first
+    clearInterval(precipGraphUpdateInterval);
     
     // Initial update
     // updatePrecipitationGraph();
@@ -419,7 +467,7 @@ function startPrecipGraphAutoRefresh() {
         // Log refresh state
         console.log('Running precipitation graph refresh check...');
         updatePrecipitationGraph();
-    }, 30000); // Update every 30 seconds
+    }, GRAPH_DELAY*1000); // Update every n seconds
 }
 
 // Check for imminent rain (next 15 minutes) and alert user if so
