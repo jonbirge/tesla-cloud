@@ -320,66 +320,71 @@ function updatePrecipitationGraph() {
         hasMinutelyPrecip = values.some(val => val > 0);
         const minutelyContainer = document.getElementById('minutely-precip-container');
         const minutelyChartCanvas = document.getElementById('minutely-precip-chart');
+        
         if (hasMinutelyPrecip) {
             minutelyContainer.style.display = ''; // Show the graph container
 
-            // Draw or update the chart
             if (minutelyPrecipChart) {
-                minutelyPrecipChart.destroy();
-            }
-            minutelyPrecipChart = new Chart(minutelyChartCanvas.getContext('2d'), {
-                type: 'bar',
-                data: {
-                    labels: labels,
-                    datasets: [{
-                        label: 'Precipitation (mm/hr)',
-                        data: values,
-                        backgroundColor: 'rgba(255, 119, 0, 0.6)'
-                    }]
-                },
-                options: {
-                    plugins: {
-                        legend: { display: false }
+                // Update existing chart with new data instead of destroying it
+                minutelyPrecipChart.data.labels = labels;
+                minutelyPrecipChart.data.datasets[0].data = values;
+                minutelyPrecipChart.update();
+            } else {
+                // Create new chart if it doesn't exist
+                minutelyPrecipChart = new Chart(minutelyChartCanvas.getContext('2d'), {
+                    type: 'bar',
+                    data: {
+                        labels: labels,
+                        datasets: [{
+                            label: 'Precipitation (mm/hr)',
+                            data: values,
+                            backgroundColor: 'rgba(255, 119, 0, 0.6)'
+                        }]
                     },
-                    scales: {
-                        x: {
-                            title: {
-                                display: true,
-                                text: 'Minutes from now',
-                                font: {
-                                    size: 22,
+                    options: {
+                        plugins: {
+                            legend: { display: false }
+                        },
+                        scales: {
+                            x: {
+                                title: {
+                                    display: true,
+                                    text: 'Minutes from now',
+                                    font: {
+                                        size: 22,
+                                    }
+                                },
+                                ticks: {
+                                    font: {
+                                        size: 18
+                                    },
+                                    callback: function (value) {
+                                        return "+" + value;
+                                    }
                                 }
                             },
-                            ticks: {
-                                font: {
-                                    size: 18
+                            y: {
+                                title: {
+                                    display: true,
+                                    text: 'Precipitation (mm/hr)',
+                                    font: {
+                                        size: 22,
+                                    }
                                 },
-                                callback: function (value) {
-                                    return "+" + value;
+                                beginAtZero: true,
+                                ticks: {
+                                    font: {
+                                        size: 18
+                                    }
                                 }
                             }
                         },
-                        y: {
-                            title: {
-                                display: true,
-                                text: 'Precipitation (mm/hr)',
-                                font: {
-                                    size: 22,
-                                }
-                            },
-                            beginAtZero: true,
-                            ticks: {
-                                font: {
-                                    size: 18
-                                }
-                            }
+                        animation: {
+                            duration: 200 // Fast animation for updates
                         }
-                    },
-                    animation: {
-                        duration: 200 // Fast animation for updates
                     }
-                }
-            });
+                });
+            }
         } else { // No precipitation found
             // Hide the graph
             if (minutelyContainer) minutelyContainer.style.display = 'none';
