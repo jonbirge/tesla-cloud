@@ -25,7 +25,7 @@ body.dark-mode {
 }
 
 
-/* Weather Switch Elements */
+/* Sat Weather Switch Elements */
 
 .weather-switch-container {
     display: flex;
@@ -112,9 +112,9 @@ body.dark-mode {
 
 .hourly-avail {
     /* box-shadow: 5px 5px 9px 0px rgba(0, 0, 0, 0.5); */
-    border-color: var(--tesla-blue);
-    border-width: 2.5pt;
-    border-style: solid;
+    /* border-color: var(--tesla-blue); */
+    /* border-width: 2pt; */
+    /* border-style: solid; */
     cursor: pointer;
 }
 
@@ -207,6 +207,10 @@ body.dark-mode .forecast-day.rain img.forecast-icon {
     font-weight: 650;
     text-transform: uppercase;
     color: var(--button-text);
+}
+
+.hourly-avail .forecast-date {
+    color: var(--tesla-blue);
 }
 
 .forecast-icon {
