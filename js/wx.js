@@ -472,8 +472,6 @@ function startPrecipGraphAutoRefresh() {
 
 // Check for imminent rain (next 15 minutes) and alert user if so
 function checkImminentRain(minutelyData) {
-    console.log('Checking for imminent rain...');
-
     if (!minutelyData || minutelyData.length === 0) {
         toggleRainIndicator(false);
         currentRainAlert = false; // Reset alert flag when no data
@@ -497,9 +495,6 @@ function checkImminentRain(minutelyData) {
         (minute.precipitation || 0) > precipThreshold
     );
 
-    console.log(`Imminent rain detection: ${hasImminentRain}`);     // TODO: Delete after debugging is done!
-    console.log(`Rain alert status:`, currentRainAlert);            // TODO: Delete after debugging is done!
-    
     // Toggle the rain indicator based on our findings
     toggleRainIndicator(hasImminentRain);
     

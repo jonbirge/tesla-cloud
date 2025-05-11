@@ -170,13 +170,13 @@ export async function attemptLogin() {
 
 // Function to change a setting (updating both local cache and server)
 export async function saveSetting(key, value) {
+    console.log(`Setting "${key}" updated to ${value} (local)`);
+    
     // Handle local settings
     settings[key] = value;
 
     // Update the interface
     updateSetting(key, value);
-
-    // console.log(`Setting "${key}" updated to ${value} (local)`);
 
     // Update server if logged in
     if (isLoggedIn && hashedUser) {
@@ -444,7 +444,7 @@ async function fetchSettings() {
 
 // Update UI state based on a specific setting
 function updateSetting(key, value) {
-    console.log(`Updating state for "${key}" to ${value}`);
+    // console.log(`Updating state for "${key}" to ${value}`);
     
     const settingItems = document.querySelectorAll(`.settings-toggle-item[data-setting="${key}"]`);
 
@@ -490,7 +490,7 @@ function updateSetting(key, value) {
         case 'imperial-units':
         case '24-hour-time':
             unitIsDirty = true;
-            console.log(`Unit/time setting "${key}" changed to ${value} (dirty: ${unitIsDirty})`);
+            // console.log(`Unit/time setting "${key}" changed to ${value} (dirty: ${unitIsDirty})`);
             break;
             
         case 'auto-dark-mode':
@@ -535,7 +535,7 @@ function updateSetting(key, value) {
                 const isDrop = !value; // If unchecked, it's a drop
                 rssIsDirty = true;
                 rssDrop = rssDrop || isDrop; // Set the drop flag if this is a drop
-                console.log(`RSS setting "${key}" changed to ${value} (dirty: ${rssIsDirty}, drop: ${rssDrop})`);
+                // console.log(`RSS setting "${key}" changed to ${value} (dirty: ${rssIsDirty}, drop: ${rssDrop})`);
             }
             break;
     }
@@ -706,6 +706,8 @@ window.toggleSettingFrom = function(element) {
 
 // Function for toggling option-based settings (e.g. map-choice)
 window.toggleOptionSetting = function(button) {
+    // console.log(`Option setting "${key}" changed to "${value}"`);
+    
     const settingItem = button.closest('.option-switch-container');
     if (!settingItem || !settingItem.dataset.setting) return;
 
@@ -720,7 +722,6 @@ window.toggleOptionSetting = function(button) {
     
     // Store the setting
     saveSetting(key, value);
-    console.log(`Option setting "${key}" changed to "${value}"`);
 }
 
 // Function called by the text input UI elements for text-based settings
