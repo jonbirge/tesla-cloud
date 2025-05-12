@@ -57,13 +57,25 @@ function calculateDistance(lat1, lon1, lat2, lon2) {
 // Function to fetch nearby Wikipedia data based on coordinates
 async function fetchLandmarkData(lat, long) {
     console.log('Fetching Wikipedia data...');
+    
+    // Show loading spinner and hide content
+    const landmarkDiv = document.getElementById('landmark-items');
+    const loadingSpinner = document.getElementById('landmarks-loading');
+    
+    if (loadingSpinner) loadingSpinner.style.display = 'flex';
+    if (landmarkDiv) landmarkDiv.style.display = 'none';
+    
     const baseUrl = 'https://secure.geonames.org/findNearbyWikipediaJSON';
     const url =
     `${baseUrl}?lat=${lat}&lng=${long}&radius=15&maxRows=150&username=${GEONAMES_USERNAME}`;
     try {
         const response = await fetch(url);
         const data = await response.json();
-        const landmarkDiv = document.getElementById('landmark-items');
+        
+        // Hide loading spinner and show content
+        if (loadingSpinner) loadingSpinner.style.display = 'none';
+        if (landmarkDiv) landmarkDiv.style.display = 'block';
+        
         if (data.geonames && data.geonames.length > 0) {
             let html = '<ul>';
             data.geonames.forEach(article => {
@@ -80,7 +92,13 @@ async function fetchLandmarkData(lat, long) {
         }
     } catch (error) {
         console.error('Error fetching Wikipedia data:', error);
-        document.getElementById('landmark-items').innerHTML = '<p><em>Error loading landmark data.</em></p>';
+        
+        // Hide loading spinner and show error message
+        if (loadingSpinner) loadingSpinner.style.display = 'none';
+        if (landmarkDiv) {
+            landmarkDiv.style.display = 'block';
+            landmarkDiv.innerHTML = '<p><em>Error loading landmark data.</em></p>';
+        }
     }
 }
 
@@ -770,6 +788,9 @@ window.showSection = function (sectionId) {
             fetchLandmarkData(lat, long);
         } else {
             console.log('Location not available for Wikipedia data.');
+            document.getElementById('landmarks-loading').style.display = 'none';
+            document.getElementById('landmark-items').style.display = 'block';
+            document.getElementById('landmark-items').innerHTML = '<p><em>Location data not available. Please enable GPS.</em></p>';
         }
     }
 

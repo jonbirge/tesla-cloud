@@ -1,5 +1,5 @@
 // Import required functions from app.js
-import { formatTime, highlightUpdate, testMode } from './common.js';
+import { formatTime, highlightUpdate, testMode, showSpinner, hideSpinner, showNotification } from './common.js';
 import { autoDarkMode, settings } from './settings.js';
 
 // Parameters
@@ -33,14 +33,9 @@ export function fetchPremiumWeatherData(lat, long, silentLoad = false) {
     lastLong = long;
 
     // Show loading spinner, hide forecast container - only if not silent loading
-    const forecastContainer = document.getElementById('prem-forecast-container');
-    const loadingSpinner = document.getElementById('prem-forecast-loading');
-
-    // Remember display style of forecast container
-    let lastDisplayStyle = forecastContainer.style.display;
     if (!silentLoad) {
-        if (forecastContainer) forecastContainer.style.display = 'none';
-        if (loadingSpinner) loadingSpinner.style.display = 'flex';
+        showSpinner('prem-forecast-loading');
+        document.getElementById('prem-forecast-container').style.display = 'none';
     }
 
     // Fetch and update weather data
@@ -88,8 +83,11 @@ export function fetchPremiumWeatherData(lat, long, silentLoad = false) {
             }
 
             // Hide spinner and show forecast when data is loaded - only if not silent loading
-            if (forecastContainer) forecastContainer.style.display = lastDisplayStyle;
-            if (loadingSpinner) loadingSpinner.style.display = 'none';
+            if (!silentLoad) {
+                hideSpinner('prem-forecast-loading');
+                document.getElementById('prem-forecast-container').style.display = '';
+                document.getElementById('prem-forecast-container').classList.remove('hidden');
+            }
 
             // Update auto-dark mode if enabled
             autoDarkMode(lat, long);
@@ -97,9 +95,9 @@ export function fetchPremiumWeatherData(lat, long, silentLoad = false) {
         .catch(error => {
             console.error('Error fetching forecast data: ', error);
 
-            // In case of error, hide spinner and show error message - only if not silent loading
+            // In case of error, hide spinner - only if not silent loading
             if (!silentLoad) {
-                if (loadingSpinner) loadingSpinner.style.display = 'none';
+                hideSpinner('prem-forecast-loading');
             }
         });
 }
@@ -262,7 +260,7 @@ function updatePrecipitationGraph() {
                 y: m.precipitation || 0,
                 time: minuteTime
             };
-        }).filter(item => item.x >= 0); // Filter out past times (negative values)
+        }).filter(item => item.x >= 0); // Filter out past times
 
         // Check for rain in the next 15 minutes and show alert if detected
         checkImminentRain(minutely);
@@ -549,54 +547,6 @@ function updateAQI(lat, lon) {
             highlightUpdate('prem-aqi', aqiText);
             document.getElementById('prem-aqi-dot').style.backgroundColor = color;
         });
-}
-
-// Show a temporary notification
-// TODO: Move this to common.js
-function showNotification(message) {
-    // Check if a notification container already exists
-    let notificationContainer = document.getElementById('notification-container');
-    
-    if (!notificationContainer) {
-        // Create a notification container if it doesn't exist
-        notificationContainer = document.createElement('div');
-        notificationContainer.id = 'notification-container';
-        document.body.appendChild(notificationContainer);
-    }
-    
-    // Create the notification element
-    const notification = document.createElement('div');
-    notification.className = 'notification';
-    notification.innerHTML = `
-        <div class="notification-icon">
-            <img src="assets/cloud.svg" alt="Alert" width="24" height="24">
-        </div>
-        <div class="notification-message">${message}</div>
-    `;
-    
-    // Add the notification to the container
-    notificationContainer.appendChild(notification);
-    
-    // Make the notification visible with a fade-in effect
-    setTimeout(() => {
-        notification.classList.add('show');
-    }, 10);
-    
-    // Remove the notification after 5 seconds
-    setTimeout(() => {
-        notification.classList.remove('show');
-        notification.classList.add('hide');
-        
-        // Remove the element after the fade-out animation completes
-        setTimeout(() => {
-            notification.remove();
-            
-            // Remove the container if there are no more notifications
-            if (notificationContainer.children.length === 0) {
-                notificationContainer.remove();
-            }
-        }, 500);
-    }, 5000);
 }
 
 // Helper: Extract 5 daily summaries from OpenWeather 3.0 API

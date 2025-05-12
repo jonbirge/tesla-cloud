@@ -1,5 +1,6 @@
 // Imports
 import { settings, isDriving } from './settings.js';
+import { showSpinner, hideSpinner, showNotification } from './common.js';
 
 // Constants
 const NEWS_REFRESH_INTERVAL = 5; // minutes
@@ -47,7 +48,9 @@ export async function updateNews(clear = false) {
                        newsContainer.innerHTML.trim() === '';
         
         if (isEmpty) {
-            newsContainer.innerHTML = '<div class="spinner-container"><div class="spinner"></div></div>';
+            // Show the static spinner instead of creating one dynamically
+            document.getElementById('news-loading').style.display = 'flex';
+            newsContainer.style.display = 'none';
         }
         
         console.log('Fetching news headlines...');
@@ -67,11 +70,9 @@ export async function updateNews(clear = false) {
         });
         const loadedItems = await response.json();
         
-        // Remove the spinner when data arrives
-        const spinnerContainer = newsContainer.querySelector('.spinner-container');
-        if (spinnerContainer) {
-            spinnerContainer.remove();
-        }
+        // Hide the spinner when data arrives
+        document.getElementById('news-loading').style.display = 'none';
+        newsContainer.style.display = 'block';
         
         // Create list of new items
         let hasNewItems = false;
@@ -124,13 +125,12 @@ export async function updateNews(clear = false) {
         console.error('Error fetching news:', error);
         console.log('Error fetching news:', error);
         
+        // Make sure to hide the spinner even in case of an error
+        document.getElementById('news-loading').style.display = 'none';
+        document.getElementById('newsHeadlines').style.display = 'block';
+        
         const newsContainer = document.getElementById('newsHeadlines');
-        // Make sure to remove the spinner even in case of an error
         if (newsContainer) {
-            const spinnerContainer = newsContainer.querySelector('.spinner-container');
-            if (spinnerContainer) {
-                spinnerContainer.remove();
-            }
             newsContainer.innerHTML = '<p><em>Error loading headlines</em></p>';
         }
     }
