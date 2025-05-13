@@ -10,6 +10,8 @@ const MAX_AGE_DAYS = 2; // Maximum age in days for seen news IDs
 // Variables
 let newsUpdateInterval = null;
 let newsTimeUpdateInterval = null; // Interval for updating "time ago" displays
+let newsObserver = null; // Intersection Observer for tracking visible news items
+let pendingReadItems = new Set(); // Track items that are currently visible but not yet marked as read
 
 // Helper functions for localStorage management
 function getSeenNewsIds() {
@@ -128,10 +130,10 @@ export async function updateNews(clear = false) {
                 // Check if this is a new item using localStorage
                 item.isUnread = !isNewsSeen(item.id);
                 
-                // If this is a new item, mark it as seen now
+                // Track if we have new items but don't mark them as seen yet
+                // They'll be marked as seen when they become visible via the observer
                 if (item.isUnread) {
                     hasNewItems = true;
-                    markNewsSeen(item.id);
                 }
             });
             
@@ -154,6 +156,9 @@ export async function updateNews(clear = false) {
         // Update the news container with the new items
         if (loadedItems.length > 0) {
             newsContainer.innerHTML = loadedItems.map(generateHTMLforItem).join('');
+            
+            // Set up the observer to track visible news items
+            setupNewsObserver();
         } else {
             newsContainer.innerHTML = '<p><em>No headlines available</em></p>';
         }
@@ -224,6 +229,14 @@ export function stopNewsTimeUpdates() {
 export function markAllNewsAsRead() {
     console.log('Marking all news as read');
     
+    // Disconnect observer temporarily
+    if (newsObserver) {
+        newsObserver.disconnect();
+    }
+    
+    // Clear pending items set
+    pendingReadItems.clear();
+    
     // Find all visible news items and mark them as read
     const newsItems = document.querySelectorAll('.news-item');
     if (newsItems.length) {
@@ -236,11 +249,20 @@ export function markAllNewsAsRead() {
                 // Update UI - remove "new" styling from time elements
                 const timeElement = element.querySelector('.news-time');
                 if (timeElement) {
-                    timeElement.classList.remove('news-new-time');
+                    timeElement.classList.add('news-seen-transition');
+                    
+                    // After a brief delay, remove the new-time class
+                    setTimeout(() => {
+                        timeElement.classList.remove('news-new-time');
+                        timeElement.classList.remove('news-seen-transition');
+                    }, 500); // Shorter delay for marking all as read
                 }
             }
         });
     }
+    
+    // Reconnect observer after a delay to allow transitions to complete
+    setTimeout(setupNewsObserver, 600);
 }
 
 // Utility function to generate "time ago" text from a timestamp
@@ -305,18 +327,129 @@ function generateHTMLforItem(item)
         </div>`;
 }
 
+// Function to set up intersection observer for news items
+export function setupNewsObserver() {
+    // Disconnect any existing observer
+    if (newsObserver) {
+        newsObserver.disconnect();
+    }
+    
+    // Clear any pending items
+    pendingReadItems.clear();
+    
+    // Create new intersection observer
+    newsObserver = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            const newsItem = entry.target;
+            const id = newsItem.getAttribute('data-id');
+            const timeElement = newsItem.querySelector('.news-time');
+            
+            if (!id || !timeElement) return;
+            
+            // If the item is visible (intersecting)
+            if (entry.isIntersecting) {
+                // Only track unread items
+                if (timeElement.classList.contains('news-new-time')) {
+                    // Add to pending set (don't mark as read yet)
+                    pendingReadItems.add(id);
+                }
+            } 
+            // Item is no longer visible
+            else {
+                // If it was in our pending set, now mark it as read
+                if (pendingReadItems.has(id) && timeElement.classList.contains('news-new-time')) {
+                    console.log(`News item scrolled out of view, marking as read: ${id}`);
+                    // Mark as seen in localStorage
+                    markNewsSeen(id);
+                    
+                    // Remove from pending set
+                    pendingReadItems.delete(id);
+                    
+                    // Add transition class for smooth fade out
+                    timeElement.classList.add('news-seen-transition');
+                    
+                    // After transition completes, remove the new-time class
+                    setTimeout(() => {
+                        timeElement.classList.remove('news-new-time');
+                        timeElement.classList.remove('news-seen-transition');
+                    }, 1500); // Match this to the CSS transition time
+                }
+            }
+        });
+    }, {
+        root: null, // Use viewport as root
+        rootMargin: '0px',
+        threshold: 0.7 // Item must be 70% visible to count as "readPending"
+    });
+    
+    // Observe all news items
+    document.querySelectorAll('.news-item').forEach(item => {
+        newsObserver.observe(item);
+    });
+    
+    console.log('News observer set up, watching for visible news items');
+}
+
+// Clean up resources when leaving the news section
+export function cleanupNewsObserver() {
+    // Mark only pending items as read before disconnecting
+    if (pendingReadItems.size > 0) {
+        console.log(`Marking ${pendingReadItems.size} pending news items as read on section exit`);
+        
+        // Process each pending item
+        pendingReadItems.forEach(id => {
+            // Mark as seen in localStorage
+            markNewsSeen(id);
+            
+            // Update UI if possible
+            const element = document.querySelector(`.news-item[data-id="${id}"]`);
+            if (element) {
+                const timeElement = element.querySelector('.news-time');
+                if (timeElement && timeElement.classList.contains('news-new-time')) {
+                    // Apply fade transition
+                    timeElement.classList.add('news-seen-transition');
+                    timeElement.classList.remove('news-new-time');
+                }
+            }
+        });
+        
+        // Clear the pending set
+        pendingReadItems.clear();
+    } else {
+        console.log('No pending news items to mark as read');
+    }
+    
+    // Disconnect the observer
+    if (newsObserver) {
+        console.log('Disconnecting news observer');
+        newsObserver.disconnect();
+        newsObserver = null;
+    }
+}
+
 // User clicks on a news item
 window.clickNews = async function (title, link, source, id) {
     // Mark the news item as read when clicked
     if (id) {
+        // Remove from pending items if it was there
+        pendingReadItems.delete(id);
+        
+        // Mark as read directly in localStorage
         markNewsSeen(id);
         
-        // Update the UI - remove the "new" styling
+        // Update the UI - add transition and remove "new" styling
         const element = document.querySelector(`.news-item[data-id="${id}"]`);
         if (element) {
             const timeElement = element.querySelector('.news-time');
-            if (timeElement) {
-                timeElement.classList.remove('news-new-time');
+            if (timeElement && timeElement.classList.contains('news-new-time')) {
+                // Add transition class first
+                timeElement.classList.add('news-seen-transition');
+                
+                // Let the transition start before loading the URL
+                setTimeout(() => {
+                    timeElement.classList.remove('news-new-time');
+                    // The transition class will remain during navigation but that's OK
+                }, 100);
             }
         }
     }
@@ -325,7 +458,10 @@ window.clickNews = async function (title, link, source, id) {
         await shareNews(title, link, source);
     }
     else {
-        loadExternalUrl(link);
+        // Slight delay to allow the transition to be visible before loading URL
+        setTimeout(() => {
+            loadExternalUrl(link);
+        }, 200);
     }
 }
 
@@ -425,4 +561,11 @@ window.clearSeenNewsStorage = function() {
     localStorage.removeItem(SEEN_NEWS_STORAGE_KEY);
     console.log('Cleared all seen news data from localStorage');
     return true;
+}
+
+// Debug function to check pending items
+window.checkPendingNewsItems = function() {
+    console.log(`Currently pending read items: ${pendingReadItems.size}`);
+    console.log('Pending IDs:', Array.from(pendingReadItems));
+    return Array.from(pendingReadItems);
 }

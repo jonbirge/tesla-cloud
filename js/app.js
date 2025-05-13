@@ -4,7 +4,7 @@ import { PositionSimulator } from './location.js';
 import { attemptLogin, leaveSettings, settings, isDriving, setDrivingState } from './settings.js';
 import { fetchPremiumWeatherData, fetchCityData, SAT_URLS, forecastDataPrem } from './wx.js';
 import { updateNetworkInfo, updatePingChart, startPingTest } from './net.js';
-import { markAllNewsAsRead } from './news.js';
+import { markAllNewsAsRead, cleanupNewsObserver, setupNewsObserver, startNewsTimeUpdates, stopNewsTimeUpdates } from './news.js';
 import { startStockUpdates, stopStockUpdates } from './stock.js';
 
 // Parameters
@@ -734,14 +734,14 @@ window.showSection = function (sectionId) {
         leaveSettings();
     }
 
-    // Clear "new" markers from news items and clear unread flags from data
+    // Clean up news section when leaving it
     if (currentSection === 'news') {
-        // Update to target the news-new-time class on time elements
-        const newNewsTimeElements = document.querySelectorAll('.news-new-time');
-        newNewsTimeElements.forEach(item => {
-            item.classList.remove('news-new-time');
-        });
-        markAllNewsAsRead();
+        // Only process pending read items, don't mark everything as read
+        // This ensures unseen items remain highlighted when returning later
+        
+        // Clean up resources - this will also process pending read items
+        cleanupNewsObserver();
+        stopNewsTimeUpdates();
     }
 
     // If switching to news section, clear the notification dot and start time updates
@@ -750,6 +750,12 @@ window.showSection = function (sectionId) {
         if (newsButton) {
             newsButton.classList.remove('has-notification');
         }
+        
+        // Set up the observer for visible news items and start time updates
+        setTimeout(() => {
+            setupNewsObserver();
+            startNewsTimeUpdates();
+        }, 100);
     }
 
     // If switching to about section, clear the notification dot
