@@ -736,9 +736,10 @@ window.showSection = function (sectionId) {
 
     // Clear "new" markers from news items and clear unread flags from data
     if (currentSection === 'news') {
-        const newNewsItems = document.querySelectorAll('.news-new');
-        newNewsItems.forEach(item => {
-            item.classList.remove('news-new');
+        // Update to target the news-new-time class on time elements
+        const newNewsTimeElements = document.querySelectorAll('.news-new-time');
+        newNewsTimeElements.forEach(item => {
+            item.classList.remove('news-new-time');
         });
         markAllNewsAsRead();
     }

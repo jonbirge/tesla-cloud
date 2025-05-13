@@ -225,13 +225,8 @@ function genItemID(item)
 // Take news item and generate HTML
 function generateHTMLforItem(item)
 {
-    // If the item is unread, add a class to highlight it
-    let classList = null;
-    if (item.isUnread) {
-        classList = 'news-item news-new';
-    } else {
-        classList = 'news-item';
-    }
+    // Determine if the timestamp should have the news-new-time class
+    let timeClass = item.isUnread ? 'news-time news-new-time' : 'news-time';
 
     // Extract domain for favicon either from the item.icon or from item.link if available
     let faviconUrl = '';
@@ -248,11 +243,11 @@ function generateHTMLforItem(item)
     }
 
     return `
-        <div class="${classList}" data-id="${item.id}" onclick="clickNews('${item.title}','${item.link}','${item.source}')">
+        <div class="news-item" data-id="${item.id}" onclick="clickNews('${item.title}','${item.link}','${item.source}')">
             <img src="${faviconUrl}" class="news-favicon" onerror="this.style.display='none'">
             <div>
                 <span class="news-source">${item.source.toUpperCase()}</span>
-                <span class="news-time" data-timestamp="${item.date}">${generateTimeAgoText(item.date)}</span>
+                <span class="${timeClass}" data-timestamp="${item.date}">${generateTimeAgoText(item.date)}</span>
             </div>
             <div class="news-title">${item.title}</div>
             <button class="share-icon" onclick="shareNews('${item.title}','${item.link}','${item.source}'); event.stopPropagation();">

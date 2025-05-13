@@ -741,39 +741,6 @@ body.dark-mode .img-white-transparent {
     position: relative;  /* Added for absolute positioning of the favicon */
 }
 
-.news-new {
-    position: relative;
-}
-
-.news-new::after {
-    content: "";
-    position: absolute;
-    top: 50%;
-    right: 15px;
-    transform: translateY(-50%);
-    width: 8px;
-    height: 8px;
-    background-color: var(--tesla-blue);
-    border-radius: 50%;
-    animation: news-pulse 1.5s 1;
-    animation-fill-mode: forwards;
-}
-
-@keyframes news-pulse {
-    0% {
-        opacity: 0.7;
-        transform: translateY(-50%) scale(0.7);
-    }
-    50% {
-        opacity: 1;
-        transform: translateY(-50%) scale(1.3);
-    }
-    100% {
-        opacity: 1;
-        transform: translateY(-50%) scale(1);
-    }
-}
-
 .news-item:hover {
     background-color: var(--button-bg); /* Keep the hover color consistent */
 }
@@ -792,6 +759,12 @@ body.dark-mode .img-white-transparent {
     font-size: 12.5pt;
     margin-left: 5px;
     font-weight: 500;
+}
+
+/* Add styling for new article timestamps */
+.news-time.news-new-time {
+    color: var(--tesla-blue);
+    font-weight: 600;
 }
 
 .news-title {
