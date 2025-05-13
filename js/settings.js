@@ -30,6 +30,7 @@ const defaultSettings = {
     "show-stock-indicator": true,
     "show-stock-spy": true,     // S&P 500
     "show-stock-dia": true,     // Dow Jones
+    "show-stock-iwm": false,    // Russell 2000
     "show-stock-ief": true,     // Treasury Bonds
     "show-stock-btco": false,   // Bitcoin
     "show-stock-tsla": false,   // Tesla
@@ -518,21 +519,12 @@ function updateSetting(key, value) {
             updateRadarVisibility();
             break;
             
-        case 'show-stock-indicator':
-            // We keep this case for backward compatibility
-            // But now we always start/restart stock updates when this changes
-            if (value) {
-                startStockUpdates();
-            } else {
-                stopStockUpdates();
-            }
-            break;
-            
         case 'show-stock-spy':
         case 'show-stock-dia':
         case 'show-stock-ief':
         case 'show-stock-btco':
         case 'show-stock-tsla':
+        case 'show-stock-iwm':
             // For active indicators, adjust visibility and restart updates if needed
             if (value && settings["show-stock-indicator"] !== false) {
                 // Start updates if this is a newly enabled indicator

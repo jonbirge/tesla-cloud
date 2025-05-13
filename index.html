@@ -529,7 +529,14 @@
                 
                 <div class="settings-toggle-item" data-setting="show-stock-dia"
                     onclick="this.querySelector('input').click()">
-                    <label>Dow Jones Index</label>
+                    <label>Dow Jones Industrials</label>
+                    <input type="checkbox" onchange="toggleSettingFrom(this)" checked><span
+                        class="settings-toggle-slider"></span>
+                </div>
+
+                <div class="settings-toggle-item" data-setting="show-stock-iwm"
+                    onclick="this.querySelector('input').click()">
+                    <label>Russell 2000</label>
                     <input type="checkbox" onchange="toggleSettingFrom(this)" checked><span
                         class="settings-toggle-slider"></span>
                 </div>
@@ -721,6 +728,9 @@
         </div>
         <div id="stock-status-dia" class="status-indicator stock-status neutral">
             DOW<span id="stock-arrow"></span><span id="stock-value">--%</span>
+        </div>
+        <div id="stock-status-iwm" class="status-indicator stock-status neutral">
+            RUT<span id="stock-arrow"></span><span id="stock-value">--%</span>
         </div>
         <div id="stock-status-ief" class="status-indicator stock-status neutral">
             10Y<span id="stock-arrow"></span><span id="stock-value">--%</span>
