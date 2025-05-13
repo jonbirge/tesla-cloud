@@ -12,6 +12,7 @@ let newsUpdateInterval = null;
 let newsTimeUpdateInterval = null; // Interval for updating "time ago" displays
 let newsObserver = null; // Intersection Observer for tracking visible news items
 let pendingReadItems = new Set(); // Track items that are currently visible but not yet marked as read
+let hasUnreadNewsItems = false; // Track if there are any unread news items
 
 // Helper functions for localStorage management
 function getSeenNewsIds() {
@@ -159,6 +160,9 @@ export async function updateNews(clear = false) {
             
             // Set up the observer to track visible news items
             setupNewsObserver();
+            
+            // Update notification dot status based on unread items
+            updateNewsNotificationDot();
         } else {
             newsContainer.innerHTML = '<p><em>No headlines available</em></p>';
         }
@@ -260,6 +264,11 @@ export function markAllNewsAsRead() {
             }
         });
     }
+    
+    // Update notification dot since we've marked all as read
+    setTimeout(() => {
+        updateNewsNotificationDot();
+    }, 600);
     
     // Reconnect observer after a delay to allow transitions to complete
     setTimeout(setupNewsObserver, 600);
@@ -372,6 +381,9 @@ export function setupNewsObserver() {
                     setTimeout(() => {
                         timeElement.classList.remove('news-new-time');
                         timeElement.classList.remove('news-seen-transition');
+                        
+                        // Update notification dot after marking item as read
+                        updateNewsNotificationDot();
                     }, 1500); // Match this to the CSS transition time
                 }
             }
@@ -392,31 +404,13 @@ export function setupNewsObserver() {
 
 // Clean up resources when leaving the news section
 export function cleanupNewsObserver() {
-    // Mark only pending items as read before disconnecting
+    // We no longer mark items as read when leaving the section,
+    // but we still need to clean up the observer
+    
+    // Just clear the pending set without marking items as read
     if (pendingReadItems.size > 0) {
-        console.log(`Marking ${pendingReadItems.size} pending news items as read on section exit`);
-        
-        // Process each pending item
-        pendingReadItems.forEach(id => {
-            // Mark as seen in localStorage
-            markNewsSeen(id);
-            
-            // Update UI if possible
-            const element = document.querySelector(`.news-item[data-id="${id}"]`);
-            if (element) {
-                const timeElement = element.querySelector('.news-time');
-                if (timeElement && timeElement.classList.contains('news-new-time')) {
-                    // Apply fade transition
-                    timeElement.classList.add('news-seen-transition');
-                    timeElement.classList.remove('news-new-time');
-                }
-            }
-        });
-        
-        // Clear the pending set
+        console.log(`Preserving unread status for ${pendingReadItems.size} news items on section exit`);
         pendingReadItems.clear();
-    } else {
-        console.log('No pending news items to mark as read');
     }
     
     // Disconnect the observer
@@ -425,6 +419,9 @@ export function cleanupNewsObserver() {
         newsObserver.disconnect();
         newsObserver = null;
     }
+    
+    // Make sure to update the notification dot before leaving
+    updateNewsNotificationDot();
 }
 
 // User clicks on a news item
@@ -449,6 +446,9 @@ window.clickNews = async function (title, link, source, id) {
                 setTimeout(() => {
                     timeElement.classList.remove('news-new-time');
                     // The transition class will remain during navigation but that's OK
+                    
+                    // Update notification dot status after marking item as read
+                    updateNewsNotificationDot();
                 }, 100);
             }
         }
@@ -568,4 +568,27 @@ window.checkPendingNewsItems = function() {
     console.log(`Currently pending read items: ${pendingReadItems.size}`);
     console.log('Pending IDs:', Array.from(pendingReadItems));
     return Array.from(pendingReadItems);
+}
+
+// Function to check if there are any unread news items and update notification dot
+export function updateNewsNotificationDot() {
+    // Check if there are any unread news items in the DOM
+    const unreadItems = document.querySelectorAll('.news-time.news-new-time');
+    const hasUnread = unreadItems.length > 0;
+    
+    // Update our tracking variable
+    hasUnreadNewsItems = hasUnread;
+    
+    // Get the news section button
+    const newsButton = document.querySelector('.section-button[onclick="showSection(\'news\')"]');
+    if (!newsButton) return;
+    
+    // Update notification dot based on unread status
+    if (hasUnread) {
+        newsButton.classList.add('has-notification');
+        console.log(`News notification dot added (${unreadItems.length} unread items)`);
+    } else {
+        newsButton.classList.remove('has-notification');
+        console.log('News notification dot removed (no unread items)');
+    }
 }

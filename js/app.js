@@ -744,13 +744,8 @@ window.showSection = function (sectionId) {
         stopNewsTimeUpdates();
     }
 
-    // If switching to news section, clear the notification dot and start time updates
+    // If switching to news section, set up observer and start time updates
     if (sectionId === 'news') {
-        const newsButton = document.querySelector('.section-button[onclick="showSection(\'news\')"]');
-        if (newsButton) {
-            newsButton.classList.remove('has-notification');
-        }
-        
         // Set up the observer for visible news items and start time updates
         setTimeout(() => {
             setupNewsObserver();
