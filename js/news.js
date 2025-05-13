@@ -4,12 +4,56 @@ import { showSpinner, hideSpinner, showNotification } from './common.js';
 
 // Constants
 const NEWS_REFRESH_INTERVAL = 5; // minutes
+const SEEN_NEWS_STORAGE_KEY = 'seenNewsIds'; // localStorage key for seen news IDs
+const MAX_AGE_DAYS = 2; // Maximum age in days for seen news IDs
 
 // Variables
-let newsItems = null; // Current array of news items
 let newsUpdateInterval = null;
-let seenNewsIds = new Set(); // Track news IDs we've already seen
 let newsTimeUpdateInterval = null; // Interval for updating "time ago" displays
+
+// Helper functions for localStorage management
+function getSeenNewsIds() {
+    const storedData = localStorage.getItem(SEEN_NEWS_STORAGE_KEY);
+    if (!storedData) {
+        return {};
+    }
+    try {
+        return JSON.parse(storedData);
+    } catch (error) {
+        console.error('Error parsing seen news IDs from localStorage:', error);
+        return {};
+    }
+}
+
+function saveSeenNewsIds(seenIds) {
+    try {
+        // Clean up old entries (older than MAX_AGE_DAYS)
+        const now = Date.now();
+        const cleanedIds = {};
+        
+        Object.entries(seenIds).forEach(([id, timestamp]) => {
+            const ageInDays = (now - timestamp) / (1000 * 60 * 60 * 24);
+            if (ageInDays < MAX_AGE_DAYS) {
+                cleanedIds[id] = timestamp;
+            }
+        });
+        
+        localStorage.setItem(SEEN_NEWS_STORAGE_KEY, JSON.stringify(cleanedIds));
+    } catch (error) {
+        console.error('Error saving seen news IDs to localStorage:', error);
+    }
+}
+
+function markNewsSeen(id) {
+    const seenIds = getSeenNewsIds();
+    seenIds[id] = Date.now();
+    saveSeenNewsIds(seenIds);
+}
+
+function isNewsSeen(id) {
+    const seenIds = getSeenNewsIds();
+    return id in seenIds;
+}
 
 // Updates the news headlines, optionally clearing existing ones
 export async function updateNews(clear = false) {
@@ -38,8 +82,6 @@ export async function updateNews(clear = false) {
         if (clear) {
             console.log('Clearing news headlines...');
             newsContainer.innerHTML = '';
-            seenNewsIds.clear(); // Clear seen news IDs
-            newsItems = null; // Clear news items
         }
 
         // Show loading spinner if no items are displayed yet or only showing a message
@@ -74,21 +116,22 @@ export async function updateNews(clear = false) {
         document.getElementById('news-loading').style.display = 'none';
         newsContainer.style.display = 'block';
         
-        // Create list of new items
+        // Track if we have new items
         let hasNewItems = false;
-        const newItems = [];
+        
         if (loadedItems.length > 0) {
-            // Generate unique IDs for each news item 
+            // Generate unique IDs for each news item and check against localStorage
             loadedItems.forEach(item => {
                 // Create a unique ID based on title and source
                 item.id = genItemID(item);
                 
-                // Check if this is a new item
-                if (!seenNewsIds.has(item.id)) {
-                    item.isUnread = true; // Mark as unread
+                // Check if this is a new item using localStorage
+                item.isUnread = !isNewsSeen(item.id);
+                
+                // If this is a new item, mark it as seen now
+                if (item.isUnread) {
                     hasNewItems = true;
-                    newItems.push(item);
-                    seenNewsIds.add(item.id);
+                    markNewsSeen(item.id);
                 }
             });
             
@@ -105,19 +148,12 @@ export async function updateNews(clear = false) {
             }
         }
 
-        // Merge new items with existing ones
-        if (newsItems) {
-            newsItems = [...newItems, ...newsItems];
-        } else {
-            newsItems = newItems;
-        }
-
-        // Sort items by date
-        newsItems.sort((a, b) => b.date - a.date);
+        // Sort items by date - newest first
+        loadedItems.sort((a, b) => b.date - a.date);
 
         // Update the news container with the new items
-        if (newsItems.length > 0) {
-            newsContainer.innerHTML = newsItems.map(generateHTMLforItem).join('');
+        if (loadedItems.length > 0) {
+            newsContainer.innerHTML = loadedItems.map(generateHTMLforItem).join('');
         } else {
             newsContainer.innerHTML = '<p><em>No headlines available</em></p>';
         }
@@ -187,9 +223,22 @@ export function stopNewsTimeUpdates() {
 // Mark all current news items as read
 export function markAllNewsAsRead() {
     console.log('Marking all news as read');
-    if (newsItems) {
-        newsItems.forEach(item => {
-            item.isUnread = false;
+    
+    // Find all visible news items and mark them as read
+    const newsItems = document.querySelectorAll('.news-item');
+    if (newsItems.length) {
+        newsItems.forEach(element => {
+            const id = element.getAttribute('data-id');
+            if (id) {
+                // Mark as read in localStorage
+                markNewsSeen(id);
+                
+                // Update UI - remove "new" styling from time elements
+                const timeElement = element.querySelector('.news-time');
+                if (timeElement) {
+                    timeElement.classList.remove('news-new-time');
+                }
+            }
         });
     }
 }
@@ -243,7 +292,7 @@ function generateHTMLforItem(item)
     }
 
     return `
-        <div class="news-item" data-id="${item.id}" onclick="clickNews('${item.title}','${item.link}','${item.source}')">
+        <div class="news-item" data-id="${item.id}" onclick="clickNews('${item.title}','${item.link}','${item.source}','${item.id}')">
             <img src="${faviconUrl}" class="news-favicon" onerror="this.style.display='none'">
             <div>
                 <span class="news-source">${item.source.toUpperCase()}</span>
@@ -257,7 +306,21 @@ function generateHTMLforItem(item)
 }
 
 // User clicks on a news item
-window.clickNews = async function (title, link, source) {
+window.clickNews = async function (title, link, source, id) {
+    // Mark the news item as read when clicked
+    if (id) {
+        markNewsSeen(id);
+        
+        // Update the UI - remove the "new" styling
+        const element = document.querySelector(`.news-item[data-id="${id}"]`);
+        if (element) {
+            const timeElement = element.querySelector('.news-time');
+            if (timeElement) {
+                timeElement.classList.remove('news-new-time');
+            }
+        }
+    }
+    
     if (settings["news-forward-only"] && isDriving) {
         await shareNews(title, link, source);
     }
@@ -337,4 +400,29 @@ window.resumeNewsUpdates = function () {
         newsUpdateInterval = setInterval(updateNews, 60000 * NEWS_REFRESH_INTERVAL);
         console.log('News updates resumed');
     }
+}
+
+// Debug function to check localStorage news data
+window.checkSeenNewsStorage = function() {
+    const seenIds = getSeenNewsIds();
+    const count = Object.keys(seenIds).length;
+    const oldestTimestamp = Math.min(...Object.values(seenIds));
+    const oldestDate = new Date(oldestTimestamp);
+    
+    console.log(`Seen news items in storage: ${count}`);
+    console.log(`Oldest item from: ${oldestDate.toLocaleString()}`);
+    console.log('Sample items:', Object.keys(seenIds).slice(0, 5));
+    
+    return {
+        count,
+        oldest: oldestDate,
+        sample: Object.keys(seenIds).slice(0, 5)
+    };
+}
+
+// Clear all seen news data from localStorage
+window.clearSeenNewsStorage = function() {
+    localStorage.removeItem(SEEN_NEWS_STORAGE_KEY);
+    console.log('Cleared all seen news data from localStorage');
+    return true;
 }
