@@ -77,7 +77,8 @@ body.dark-mode {
 }
 
 .weather-image {
-    width: 1250px;
+    width: 100%;
+    max-width: 1250px;
     opacity: 0;
     display: none;
     border-radius: var(--button-radius);
