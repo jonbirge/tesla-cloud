@@ -3,21 +3,20 @@ import { updateNews, setShareButtonsVisibility } from './news.js';
 import { updateChartAxisColors } from './net.js';
 import { updatePremiumWeatherDisplay } from './wx.js';
 import { startStockUpdates, stopStockUpdates } from './stock.js';
-
-// Import necessary variables from wx.js
 import { forecastDataPrem, lastLat, lastLong } from './wx.js';
 
 // Global variables
-let isLoggedIn = false;
-let currentUser = null; // Will be NULL if not logged in OR if using auto-generated ID
-let hashedUser = null; // The hashed version of the user ID
-let rssIsDirty = false; // Flag to indicate if RSS settings have changed
-let rssDrop = false; // Flag to indicate if an RSS feed has been dropped
-let unitIsDirty = false; // Flag to indicate if unit/time settings have changed
-let settings = {}; // Initialize settings object
+let isDriving = false;      // The vehicle is not parked
+let isLoggedIn = false;     // User is logged in
+let currentUser = null;     // Will be NULL if not logged in OR if using auto-generated ID
+let hashedUser = null;      // The hashed version of the user ID
+let rssIsDirty = false;     // Flag to indicate if RSS settings have changed
+let rssDrop = false;        // Flag to indicate if an RSS feed has been dropped
+let unitIsDirty = false;    // Flag to indicate if unit/time settings have changed
+let settings = {};          // Initialize settings object
 
 // Export settings object so it's accessible to other modules
-export { settings, currentUser, isLoggedIn, hashedUser };
+export { settings, currentUser, isLoggedIn, hashedUser, isDriving };
 
 // Default settings that will be used when no user is logged in
 const defaultSettings = {
@@ -62,6 +61,11 @@ const defaultSettings = {
     "rss-defensenews": false,
     "rss-aviationweek": false,
 };
+
+// Function that sets driving state
+export function setDrivingState(state) {
+    isDriving = state;
+}
 
 // Settings section is being left
 export function leaveSettings() {
@@ -166,13 +170,13 @@ export async function attemptLogin() {
 
 // Function to change a setting (updating both local cache and server)
 export async function saveSetting(key, value) {
+    console.log(`Setting "${key}" updated to ${value} (local)`);
+    
     // Handle local settings
     settings[key] = value;
 
     // Update the interface
     updateSetting(key, value);
-
-    console.log(`Setting "${key}" updated to ${value} (local)`);
 
     // Update server if logged in
     if (isLoggedIn && hashedUser) {
@@ -202,6 +206,7 @@ export async function saveSetting(key, value) {
     }
 
     // Handle special case interactions
+    // TODO: Is this still needed here or could it be moved to the updateSetting function?
 
     // If the setting is "dark-mode", turn off auto-dark-mode
     if (key === 'dark-mode') {
@@ -439,7 +444,7 @@ async function fetchSettings() {
 
 // Update UI state based on a specific setting
 function updateSetting(key, value) {
-    console.log(`Updating state for "${key}" to ${value}`);
+    // console.log(`Updating state for "${key}" to ${value}`);
     
     const settingItems = document.querySelectorAll(`.settings-toggle-item[data-setting="${key}"]`);
 
@@ -485,7 +490,7 @@ function updateSetting(key, value) {
         case 'imperial-units':
         case '24-hour-time':
             unitIsDirty = true;
-            console.log(`Unit/time setting "${key}" changed to ${value} (dirty: ${unitIsDirty})`);
+            // console.log(`Unit/time setting "${key}" changed to ${value} (dirty: ${unitIsDirty})`);
             break;
             
         case 'auto-dark-mode':
@@ -530,7 +535,7 @@ function updateSetting(key, value) {
                 const isDrop = !value; // If unchecked, it's a drop
                 rssIsDirty = true;
                 rssDrop = rssDrop || isDrop; // Set the drop flag if this is a drop
-                console.log(`RSS setting "${key}" changed to ${value} (dirty: ${rssIsDirty}, drop: ${rssDrop})`);
+                // console.log(`RSS setting "${key}" changed to ${value} (dirty: ${rssIsDirty}, drop: ${rssDrop})`);
             }
             break;
     }
@@ -701,6 +706,8 @@ window.toggleSettingFrom = function(element) {
 
 // Function for toggling option-based settings (e.g. map-choice)
 window.toggleOptionSetting = function(button) {
+    // console.log(`Option setting "${key}" changed to "${value}"`);
+    
     const settingItem = button.closest('.option-switch-container');
     if (!settingItem || !settingItem.dataset.setting) return;
 
@@ -715,7 +722,6 @@ window.toggleOptionSetting = function(button) {
     
     // Store the setting
     saveSetting(key, value);
-    console.log(`Option setting "${key}" changed to "${value}"`);
 }
 
 // Function called by the text input UI elements for text-based settings

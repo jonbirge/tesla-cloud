@@ -2,6 +2,7 @@
 :root {
     --bg-color: #efefef;
     --text-color: #777777;
+    --disabled-text-color: #cccccc;
     --active-section-bg: white;
     --separator-color: #cccccc;
     --button-bg: #dddddd;
@@ -13,13 +14,13 @@
     --button-radius: 13px;
     --weather-switch-slider: #ffffff;
     --weather-warning-color: #ff7700;
-    --status-poor: #ff9100;    /* Yellow for poor connection */
-    --status-good: #00d000;    /* Green for good connection */
+    --status-poor: #E65100;    /* Yellow for poor connection */
+    --status-good: #0fa215;    /* Green for good connection */
     --status-unavailable: #888888;  /* Gray for unavailable/bad connection */
     --status-rain: #00a1ff;    /* Blue for rain indicator */
     --heading-font-size: 17pt;
     --heading-font-weight: 500;
-    --stock-up: #28a745;       /* Green for positive market change */
+    --stock-up: #0fa215;       /* Green for positive market change */
     --stock-down: #dc3545;     /* Red for negative market change */
     --stock-neutral: #888888;  /* Gray for unchanged market */
 }
@@ -27,6 +28,7 @@
 body.dark-mode {
     --bg-color: #1d1d1d;
     --text-color: #777777;
+    --disabled-text-color: #444444;
     --active-section-bg: #333333;
     --separator-color: #444444;
     --button-bg: #333333;
@@ -128,7 +130,7 @@ hr {
     border-radius: var(--button-radius);
     padding: 18px;
     font-style: none;
-    font-weight: 600;
+    font-weight: 500;
     text-align: center;
     /* text-transform: uppercase; */
     max-width: 840px;
@@ -233,9 +235,9 @@ hr {
     position: relative;
     display: flex;
     flex-direction: column;
-    margin: 0;
-    padding: 0;
-    width: 250px;
+    /* margin: 0; */
+    /* padding: 0; */
+    width: auto;
     max-height: 100%; /* Ensure it doesn't exceed the container height */
     box-sizing: border-box; /* Include padding in height calculations */
 }
@@ -243,18 +245,28 @@ hr {
 .section-button {
     color: var(--text-color);
     border-radius: var(--button-radius);
-    background-color: transparent;
-    font-size: 20pt;
-    font-weight: 500;
-    letter-spacing: 0.025em;
+    font-weight: 600;
+    /* letter-spacing: 0.025em; */
+    background-color: var(--bg-color);
+    font-size: 19pt;
     padding: 16px 20px;
     border: none;
     cursor: pointer;
-    text-align: left;
+    /* text-align: left; */
     margin-bottom: 3px;
     display: flex;
     align-items: center;
     transition: background-color 0.3s, color 0.3s;
+}
+
+/* Section button that also has disabled class */
+.section-button.disabled {
+    color: var(--disabled-text-color) !important;
+    cursor: not-allowed;
+}
+
+.section-button.disabled:hover {
+    background-color: var(--bg-color);
 }
 
 .logout-button {
@@ -277,11 +289,11 @@ hr {
 }
 
 .button-icon {
-    width: 20px;
-    height: 20px;
-    margin-right: 12px;
+    width: 24px;
+    height: 24px;
+    margin-right: 14px;
     stroke: currentColor;
-    flex-shrink: 0;
+    /* flex-shrink: 0; */
 }
 
 .section-button.active {
@@ -293,7 +305,7 @@ hr {
     background-color: var(--active-section-bg);
 }
 
-/* Notification dot for news section */
+/* Notification dot section */
 .section-button.has-notification {
   position: relative;
 }
@@ -336,7 +348,7 @@ hr {
     margin-top: 0;
     display: grid;
     grid-template-columns: repeat(auto-fill, 280px);
-    gap: 16px;
+    gap: 15px;
     justify-content: start;
     max-width: calc(280px * 5 + 16px * 4); /* Limit to 5 columns */
 }
@@ -350,18 +362,18 @@ hr {
     background-color: var(--button-bg);
     border-radius: var(--button-radius);
     display: flex;
-    padding-top: 24px;
-    padding-bottom: 24px;
-    padding-left: 9px;
-    padding-right: 9px;
+    padding-top: 23px;
+    padding-bottom: 23px;
+    padding-left: 5px;
+    padding-right: 5px;
     transition: background-color 0.3s;
     width: auto;
-    /* font-weight: 500; */
-    height: 40px;
+    font-weight: 600;
+    /* height: 40px; */
     align-items: center;
     justify-content: center;
-    gap: 10px;
-    text-align: center;
+    gap: 11px;
+    /* text-align: center; */
 }
 
 .button-list a img {
@@ -868,27 +880,40 @@ body.dark-mode .share-icon img {
 }
 
 
-/* Spinner styling */
-
-.spinner-container {
-    display: flex;
+/* Loading Spinner */
+.loading-container {
+    display: flex; /* Initially visible */
     justify-content: center;
     align-items: center;
-    width: 100%;
-    height: 200px; /* Provide adequate height for the spinner */
+    height: 200px;
+    margin: 20px 0;
 }
 
 .spinner {
     width: 50px;
     height: 50px;
-    border: 5px solid rgba(0, 119, 255, 0.2); /* Tesla blue with opacity */
+    border: 5px solid rgba(0, 0, 0, 0.1);
     border-radius: 50%;
     border-top-color: var(--tesla-blue);
-    animation: spin 1s ease-in-out infinite;
+    animation: spin 1s linear infinite;
+}
+
+body.dark-mode .spinner {
+    border-color: rgba(255, 255, 255, 0.1);
+    border-top-color: var(--tesla-blue);
 }
 
 @keyframes spin {
-    to { transform: rotate(360deg); }
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+.content-loading {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 200px;
+    margin: 20px 0;
 }
 
 

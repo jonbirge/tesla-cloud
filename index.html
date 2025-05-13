@@ -23,7 +23,7 @@
     <!-- Section menu -->
     <div class="left-frame">
         <div class="section-buttons">
-            <h1>teslas.cloud (beta)</h1>
+            <h1>teslas.cloud</h1>
             <button class="section-button" onclick="showSection('navigation')">
                 <svg class="button-icon"><use href="#icon-dashboard"></use></svg>
                 Dashboard
@@ -36,7 +36,7 @@
                 <svg class="button-icon"><use href="#icon-weather"></use></svg>
                 Weather
             </button>
-            <button id="sat-section" class="section-button" onclick="showSection('satellite')">
+            <button id="sat-section" class="section-button hidden" onclick="showSection('satellite')">
                 <svg class="button-icon"><use href="#icon-satellite"></use></svg>
                 Satellite
             </button>
@@ -44,27 +44,27 @@
                 <svg class="button-icon"><use href="#icon-landmarks"></use></svg>
                 Landmarks
             </button>
-            <button class="section-button" onclick="showSection('travel')">
-                <svg class="button-icon"><use href="#icon-travel"></use></svg>
-                Travel
-            </button>
-            <button class="section-button" onclick="showSection('media')">
-                <svg class="button-icon"><use href="#icon-media"></use></svg>
-                Media
-            </button>
-            <button class="section-button" onclick="showSection('reference')">
-                <svg class="button-icon"><use href="#icon-reference"></use></svg>
-                Reference
-            </button>
             <button class="section-button" onclick="showSection('network')">
                 <svg class="button-icon"><use href="#icon-network"></use></svg>
                 Network
             </button>
-            <button class="section-button" onclick="showSection('toys')">
+            <button class="section-button no-driving" onclick="showSection('travel')">
+                <svg class="button-icon"><use href="#icon-travel"></use></svg>
+                Travel
+            </button>
+            <button class="section-button no-driving" onclick="showSection('media')">
+                <svg class="button-icon"><use href="#icon-media"></use></svg>
+                Media
+            </button>
+            <button class="section-button no-driving" onclick="showSection('reference')">
+                <svg class="button-icon"><use href="#icon-reference"></use></svg>
+                Reference
+            </button>
+            <button class="section-button no-driving" onclick="showSection('toys')">
                 <svg class="button-icon"><use href="#icon-toys"></use></svg>
                 Toys
             </button>
-            <button class="section-button" onclick="showSection('about')">
+            <button class="section-button no-driving" onclick="showSection('about')">
                 <svg class="button-icon"><use href="#icon-about"></use></svg>
                 About
             </button>
@@ -72,8 +72,8 @@
                 <svg class="button-icon"><use href="#icon-settings"></use></svg>
                 Settings
             </button>
-            <button id="login-button" class="login-button" onclick="showLoginModal()">Login</button>
         </div> <!-- End of section buttons -->
+        <button id="login-button" class="login-button" onclick="showLoginModal()">Login</button>
     </div> <!-- End of left frame -->
     
     <!-- Section content -->
@@ -146,6 +146,9 @@
         </div>
 
         <div id="news" class="section">
+            <div id="news-loading" class="content-loading">
+                <div class="spinner"></div>
+            </div>
             <div id="newsHeadlines" class="news-headlines">
                 <p><em>Headlines...</em></p>
             </div>
@@ -153,7 +156,7 @@
 
         <div id="prem-weather" class="section">
             <h2>Extended Forecast</h2>
-            <div id="prem-forecast-loading" class="forecast-loading">
+            <div id="prem-forecast-loading" class="content-loading">
                 <div class="spinner"></div>
             </div>
             <div id="prem-forecast-container" class="forecast-container hidden">
@@ -195,7 +198,7 @@
             </div>
             <div id="minutely-precip-container" class="minutely-precip" style="display:none;">
                 <h2>Precipitation Forecast</h2>
-                <canvas id="minutely-precip-chart" width="420" height="180"></canvas>
+                <canvas id="minutely-precip-chart"></canvas>
             </div>
             <!-- Add popup elements -->
             <div class="forecast-popup">
@@ -255,7 +258,10 @@
 
         <div id="landmarks" class="section">
             <h2>Nearby Landmarks</h2>
-            <div id="landmark-items"><em>Landmark information loading...</em></div>
+            <div id="landmarks-loading" class="content-loading">
+                <div class="spinner"></div>
+            </div>
+            <div id="landmark-items"></div>
         </div>
 
         <div id="travel" class="section">
@@ -494,7 +500,7 @@
                 
                 <div class="settings-toggle-item" data-setting="news-forward-only"
                     onclick="this.querySelector('input').click()">
-                    <label>Clicking News Anywhere Forwards</label>
+                    <label>Always Forward News When Driving</label>
                     <input type="checkbox" onchange="toggleSettingFrom(this)">
                     <span class="settings-toggle-slider"></span>
                 </div>

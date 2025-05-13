@@ -25,7 +25,7 @@ body.dark-mode {
 }
 
 
-/* Weather Switch Elements */
+/* Sat Weather Switch Elements */
 
 .weather-switch-container {
     display: flex;
@@ -112,9 +112,9 @@ body.dark-mode {
 
 .hourly-avail {
     /* box-shadow: 5px 5px 9px 0px rgba(0, 0, 0, 0.5); */
-    border-color: var(--tesla-blue);
-    border-width: 2.5pt;
-    border-style: solid;
+    /* border-color: var(--tesla-blue); */
+    /* border-width: 2pt; */
+    /* border-style: solid; */
     cursor: pointer;
 }
 
@@ -124,33 +124,6 @@ body.dark-mode {
 
 #minutely-precip-container {
     max-width: 1100px;
-}
-
-
-/* Loading spinner */
-
-.forecast-loading {
-    display: flex; /* Initially visible */
-    justify-content: center;
-    align-items: center;
-    height: 200px;
-    margin: 20px 0;
-}
-.spinner {
-    width: 50px;
-    height: 50px;
-    border: 5px solid rgba(0, 0, 0, 0.1);
-    border-radius: 50%;
-    border-top-color: var(--tesla-blue);
-    animation: spin 1s linear infinite;
-}
-body.dark-mode .spinner {
-    border-color: rgba(255, 255, 255, 0.1);
-    border-top-color: var(--tesla-blue);
-}
-@keyframes spin {
-    0% { transform: rotate(0deg); }
-    100% { transform: rotate(360deg); }
 }
 
 
@@ -207,6 +180,10 @@ body.dark-mode .forecast-day.rain img.forecast-icon {
     font-weight: 650;
     text-transform: uppercase;
     color: var(--button-text);
+}
+
+.hourly-avail .forecast-date {
+    color: var(--tesla-blue);
 }
 
 .forecast-icon {
@@ -478,11 +455,6 @@ body.dark-mode .moon-phase-icon {
     .moon-phase-icon {
         width: 14px;
         height: 14px;
-    }
-    
-    /* Loading spinner */
-    .forecast-loading {
-        height: 150px;
     }
 }
 

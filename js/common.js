@@ -31,22 +31,19 @@ export async function updateTimeZone(lat, long) {
 export function highlightUpdate(id, content = null) {
     const element = document.getElementById(id);
     if (content !== null) {
-        if (element.innerHTML === content) {
-            return; // Exit if content is the same
+        if (element.textContent === content) {
+            return; // exit if content is the same
         }
-        element.innerHTML = content;
+        element.textContent = content;
     }
     const highlightColor = getComputedStyle(document.documentElement).getPropertyValue('--tesla-blue').trim();
-    // const originalFontWeight = getComputedStyle(element).fontWeight;
 
     element.style.transition = 'color 0.5s, font-weight 0.5s';
     element.style.color = highlightColor;
-    // element.style.fontWeight = '800';
 
     setTimeout(() => {
         element.style.transition = 'color 2s, font-weight 2s';
         element.style.color = ''; // Reset to default color
-        // element.style.fontWeight = ''; // Reset to original font weight
     }, 2000);
 }
 
@@ -87,6 +84,92 @@ function browserTimeZone() {
     const tz = Intl.DateTimeFormat().resolvedOptions().timeZone;
     console.log('Browser timezone: ', tz);
     return tz;
+}
+
+// Show spinner within the specified container element
+export function showSpinner(containerId) {
+    const container = document.getElementById(containerId);
+    if (!container) return;
+    
+    // Find an existing spinner in the container
+    const existingSpinner = container.querySelector('.spinner-container');
+    
+    // If a spinner already exists, just make it visible
+    if (existingSpinner) {
+        existingSpinner.style.display = 'flex';
+        return;
+    }
+    
+    // If no spinner exists, create one
+    const spinnerContainer = document.createElement('div');
+    spinnerContainer.className = 'spinner-container';
+    
+    const spinner = document.createElement('div');
+    spinner.className = 'spinner';
+    
+    spinnerContainer.appendChild(spinner);
+    container.appendChild(spinnerContainer);
+}
+
+// Hide spinner within the specified container element
+export function hideSpinner(containerId) {
+    const container = document.getElementById(containerId);
+    if (!container) return;
+    
+    // Find an existing spinner in the container
+    const existingSpinner = container.querySelector('.spinner-container');
+    
+    // If a spinner exists, hide it
+    if (existingSpinner) {
+        existingSpinner.style.display = 'none';
+    }
+}
+
+// Show a notification with the specified message
+export function showNotification(message) {
+    // Check if a notification container already exists
+    let notificationContainer = document.getElementById('notification-container');
+    
+    if (!notificationContainer) {
+        // Create a notification container if it doesn't exist
+        notificationContainer = document.createElement('div');
+        notificationContainer.id = 'notification-container';
+        document.body.appendChild(notificationContainer);
+    }
+    
+    // Create the notification element
+    const notification = document.createElement('div');
+    notification.className = 'notification';
+    notification.innerHTML = `
+        <div class="notification-icon">
+            <img src="assets/cloud.svg" alt="Alert" width="24" height="24">
+        </div>
+        <div class="notification-message">${message}</div>
+    `;
+    
+    // Add the notification to the container
+    notificationContainer.appendChild(notification);
+    
+    // Make the notification visible with a fade-in effect
+    setTimeout(() => {
+        notification.classList.add('show');
+    }, 10);
+    
+    // Remove the notification after 5 seconds
+    setTimeout(() => {
+        notification.classList.remove('show');
+        notification.classList.add('hide');
+        
+        // Remove the element after the fade-out animation completes
+        setTimeout(() => {
+            notification.remove();
+            
+            // Remove the container if there are no more notifications
+            if (notificationContainer.children.length === 0) {
+                notificationContainer.remove();
+            }
+        }, 500);
+    }, 5000);
 }
 
 // ***** Initialization *****

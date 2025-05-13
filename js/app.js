@@ -1,8 +1,8 @@
 // Imports
 import { highlightUpdate, srcUpdate, testMode, updateTimeZone, GEONAMES_USERNAME } from './common.js';
 import { PositionSimulator } from './location.js';
-import { attemptLogin, leaveSettings, settings } from './settings.js';
-import { fetchPremiumWeatherData, SAT_URLS, forecastDataPrem } from './wx.js';
+import { attemptLogin, leaveSettings, settings, isDriving, setDrivingState } from './settings.js';
+import { fetchPremiumWeatherData, fetchCityData, SAT_URLS, forecastDataPrem } from './wx.js';
 import { updateNetworkInfo, updatePingChart, startPingTest } from './net.js';
 import { markAllNewsAsRead } from './news.js';
 import { startStockUpdates, stopStockUpdates } from './stock.js';
@@ -19,8 +19,8 @@ const MIN_GPS_UPDATE_INTERVAL = 1000;               // ms - minimum time between
 const WIKI_TYPES = ['event','airport','landmark'];  // Types of Wikipedia data to fetch
 
 // Module variables
-let currentSection = null; // Track the current section
-let lastUpdate = 0; // Timestamp of last location update
+let currentSection = null;          // Track the current section
+let lastUpdate = 0;                 // Timestamp of last location update
 let lat = null;
 let long = null;
 let alt = null;
@@ -29,14 +29,14 @@ let speed = null;
 let lastUpdateLat = null;
 let lastUpdateLong = null;
 let lastKnownHeading = null;
-let lastWxUpdate = 0;
-let lastWxUpdateLat = null;
-let lastWxUpdateLong = null;
+let lastLongUpdate = 0;
+let lastLongUpdateLat = null;
+let lastLongUpdateLong = null;
 let neverUpdatedLocation = true;
 let radarContext = null;
 let gpsIntervalId = null;
 let lastGPSUpdate = 0;
-let networkInfoUpdated = false; // Track if network info has been updated
+let networkInfoUpdated = false;     // Track if network info has been updated
 const positionSimulator = new PositionSimulator(); // TODO: only create if needed
 
 // Function to calculate the distance between two coordinates
@@ -54,30 +54,28 @@ function calculateDistance(lat1, lon1, lat2, lon2) {
     return R * c; // returns distance in meters
 }
 
-// Function to fetch city data based on latitude and longitude
-function fetchCityData(lat, long) {
-    fetch(`https://secure.geonames.org/findNearbyPlaceNameJSON?lat=${lat}&lng=${long}&username=${GEONAMES_USERNAME}`)
-        .then(response => response.json())
-        .then(cityData => {
-            const place = cityData.geonames && cityData.geonames[0];
-            highlightUpdate('city', place ? (place.name || 'N/A') : 'N/A'); // Highlight the city update
-            highlightUpdate('state', place ? (place.adminName1 || 'N/A') : 'N/A'); // Highlight the state update
-        })
-        .catch(error => {
-            console.error('Error fetching city data:', error);
-        });
-}
-
 // Function to fetch nearby Wikipedia data based on coordinates
 async function fetchLandmarkData(lat, long) {
     console.log('Fetching Wikipedia data...');
+    
+    // Show loading spinner and hide content
+    const landmarkDiv = document.getElementById('landmark-items');
+    const loadingSpinner = document.getElementById('landmarks-loading');
+    
+    if (loadingSpinner) loadingSpinner.style.display = 'flex';
+    if (landmarkDiv) landmarkDiv.style.display = 'none';
+    
     const baseUrl = 'https://secure.geonames.org/findNearbyWikipediaJSON';
     const url =
     `${baseUrl}?lat=${lat}&lng=${long}&radius=15&maxRows=150&username=${GEONAMES_USERNAME}`;
     try {
         const response = await fetch(url);
         const data = await response.json();
-        const landmarkDiv = document.getElementById('landmark-items');
+        
+        // Hide loading spinner and show content
+        if (loadingSpinner) loadingSpinner.style.display = 'none';
+        if (landmarkDiv) landmarkDiv.style.display = 'block';
+        
         if (data.geonames && data.geonames.length > 0) {
             let html = '<ul>';
             data.geonames.forEach(article => {
@@ -94,7 +92,13 @@ async function fetchLandmarkData(lat, long) {
         }
     } catch (error) {
         console.error('Error fetching Wikipedia data:', error);
-        document.getElementById('landmark-items').innerHTML = '<p><em>Error loading landmark data.</em></p>';
+        
+        // Hide loading spinner and show error message
+        if (loadingSpinner) loadingSpinner.style.display = 'none';
+        if (landmarkDiv) {
+            landmarkDiv.style.display = 'block';
+            landmarkDiv.innerHTML = '<p><em>Error loading landmark data.</em></p>';
+        }
     }
 }
 
@@ -302,20 +306,20 @@ function shouldUpdateShortRangeData() {
 // Function to determine if long-range data should be updated
 function shouldUpdateLongRangeData() {
     // Check if we've never updated weather data
-    if (lastWxUpdate === 0 || lastWxUpdateLat === null || lastWxUpdateLong === null) {
+    if (lastLongUpdate === 0 || lastLongUpdateLat === null || lastLongUpdateLong === null) {
         return true;
     }
 
     // Check time threshold using WX_TIME_THRESHOLD constant
     const now = Date.now();
-    const timeSinceLastUpdate = now - lastWxUpdate;
+    const timeSinceLastUpdate = now - lastLongUpdate;
     if (timeSinceLastUpdate >= WX_TIME_THRESHOLD * 60 * 1000) { // Convert minutes to milliseconds
         return true;
     }
 
     // Check distance threshold using WX_DISTANCE_THRESHOLD constant
     if (lat !== null && long !== null) {
-        const distance = calculateDistance(lat, long, lastWxUpdateLat, lastWxUpdateLong);
+        const distance = calculateDistance(lat, long, lastLongUpdateLat, lastLongUpdateLong);
         if (distance >= WX_DISTANCE_THRESHOLD) { // Use constant for meters
             return true;
         }
@@ -326,7 +330,7 @@ function shouldUpdateLongRangeData() {
 }
 
 // Function to handle position updates from GPS
-function handlePositionUpdate(position) {
+async function handlePositionUpdate(position) {
     lat = position.coords.latitude;
     long = position.coords.longitude;
     alt = position.coords.altitude;
@@ -336,7 +340,7 @@ function handlePositionUpdate(position) {
         lastKnownHeading = position.coords.heading;
     }
 
-    // Update GPS status indicator with color gradient based on accuracy
+    // Update GPS status indicator based on GPS accuracy
     const gpsStatusElement = document.getElementById('gps-status');
     if (gpsStatusElement) {
         if (lat === null || long === null) {
@@ -371,7 +375,7 @@ function handlePositionUpdate(position) {
         }
     }
 
-    // Update radar display with current speed and heading if nav section is visible
+    // Update wind display if nav section is visible
     const navigationSection = document.getElementById("navigation");
     if (navigationSection.style.display === "block") {
         // Update heading displays
@@ -404,37 +408,59 @@ function handlePositionUpdate(position) {
         }
 
         document.getElementById('accuracy').innerText = acc ? Math.round(acc) + ' m' : '--';
-
-        // Update headwind/crosswind labels
-        if (!settings || settings["imperial-units"]) {
-            document.getElementById('headwind-label').innerText =
-                document.getElementById('headwind-label').innerText.replace("(MPH)", "(MPH)");
-            document.querySelector('.stat-box:nth-child(4) .stat-label').innerText =
-                document.querySelector('.stat-box:nth-child(4) .stat-label').innerText.replace("(MPH)", "(MPH)");
-        } else {
-            document.getElementById('headwind-label').innerText =
-                document.getElementById('headwind-label').innerText.replace("(MPH)", "(M/S)");
-            document.querySelector('.stat-box:nth-child(4) .stat-label').innerText =
-                document.querySelector('.stat-box:nth-child(4) .stat-label').innerText.replace("(MPH)", "(M/S)");
-        }
     }
 
-    // Short distance updates
+    // Handle whether or not we're driving
+    if (speed > 1) {
+        if (!isDriving) {
+            startedDriving();
+        }
+        setDrivingState(true);
+    } else {
+        if (isDriving) {
+            stoppedDriving();
+        }
+        setDrivingState(false);
+    }
+
+    // Long distance updates (happens rarely)
+    if (shouldUpdateLongRangeData()) {
+        await updateTimeZone(lat, long);
+        lastLongUpdateLat = lat;
+        lastLongUpdateLong = long;
+        lastLongUpdate = Date.now();
+    }
+
+    // Short distance updates (happens often)
     if (shouldUpdateShortRangeData()) {
-        updateLocationData(lat, long);
+        await updateLocationData(lat, long);
         fetchPremiumWeatherData(lat, long);
         lastUpdateLat = lat;
         lastUpdateLong = long;
         lastUpdate = Date.now();
     }
+}
 
-    // Long distance updates
-    if (shouldUpdateLongRangeData()) {
-        updateTimeZone(lat, long);
-        lastWxUpdateLat = lat;
-        lastWxUpdateLong = long;
-        lastWxUpdate = Date.now();
-    }
+// Function called when user starts driving
+function startedDriving() {
+    console.log('*** Started driving ***');
+    // Find all buttons with class "no-driving" and disable them
+    const noDrivingButtons = document.querySelectorAll('.no-driving');
+    noDrivingButtons.forEach(button => {
+        button.classList.add('disabled');
+        button.disabled = true;
+    });
+}
+
+// Function called when user stops driving
+function stoppedDriving() {
+    console.log('*** Stopped driving ***');
+    // Find all buttons with class "no-driving" and enable them
+    const noDrivingButtons = document.querySelectorAll('.no-driving');
+    noDrivingButtons.forEach(button => {
+        button.classList.remove('disabled');
+        button.disabled = false;
+    });
 }
 
 // Function to update GPS data
@@ -762,6 +788,9 @@ window.showSection = function (sectionId) {
             fetchLandmarkData(lat, long);
         } else {
             console.log('Location not available for Wikipedia data.');
+            document.getElementById('landmarks-loading').style.display = 'none';
+            document.getElementById('landmark-items').style.display = 'block';
+            document.getElementById('landmark-items').innerHTML = '<p><em>Location data not available. Please enable GPS.</em></p>';
         }
     }
 

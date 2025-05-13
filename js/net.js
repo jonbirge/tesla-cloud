@@ -2,7 +2,8 @@
 import { hashedUser } from './settings.js';
 
 // Global variables
-const pingWait = 10*1000; // 10 seconds
+const MAX_PING_MS = 500; // Maximum ping display value in milliseconds
+const PING_WAIT = 10*1000; // 10 seconds
 let pingInterval = null;
 let pingChart = null;
 let pingData = [];
@@ -88,7 +89,7 @@ export function startPingTest() {
 
     // Start pinging every 5 seconds if not already running
     if (!pingInterval) {
-        pingInterval = setInterval(pingTestServer, pingWait);
+        pingInterval = setInterval(pingTestServer, PING_WAIT);
         
         // Run a ping immediately
         pingTestServer();
@@ -124,7 +125,7 @@ function initializePingChart() {
     // Create gradient
     const gradient = ctx.createLinearGradient(0, 0, 0, 400);
     gradient.addColorStop(0, teslaBlue + '50');  // 25% opacity at top
-    gradient.addColorStop(0.5, teslaBlue + '00');  // 0% opacity at bottom
+    gradient.addColorStop(0.75, teslaBlue + '00');  // 0% opacity at bottom
     gradient.addColorStop(1, teslaBlue + '00');  // 0% opacity at bottom
     
     pingChart = new Chart(ctx, {
@@ -173,6 +174,7 @@ function initializePingChart() {
                 y: {
                     display: true,
                     beginAtZero: true,
+                    max: MAX_PING_MS,
                     grid: {
                         color: 'black'
                     },
@@ -307,6 +309,12 @@ async function pingTestServer() {
 // Updates the ping chart with current data, with optional animation
 export function updatePingChart(animated = false) {
     if (pingChart) {
+        // Determine the maximum Y value for the chart based on data
+        let maxValue = Math.max(...pingData);
+        
+        // Cap the maximum value at MAX_PING_MS
+        pingChart.options.scales.y.max = Math.min(Math.ceil(maxValue * 1.2), MAX_PING_MS);
+        
         pingChart.data.labels = Array.from({ length: pingData.length }, (_, i) => i);
         if (animated) {
             pingChart.update();
@@ -358,7 +366,7 @@ window.resumePingTest = function() {
         // Ping the server immediately
         pingTestServer();
         // Resume pinging every 10 seconds
-        pingInterval = setInterval(pingTestServer, pingWait);
+        pingInterval = setInterval(pingTestServer, PING_WAIT);
         console.log('Network ping testing resumed');
     }
 }
