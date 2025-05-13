@@ -28,6 +28,11 @@ const defaultSettings = {
     "map-choice": 'waze',
     "show-wind-radar": true,
     "show-stock-indicator": true,
+    "show-stock-spy": true,     // S&P 500
+    "show-stock-dia": true,     // Dow Jones
+    "show-stock-ief": true,     // Treasury Bonds
+    "show-stock-btco": false,   // Bitcoin
+    "show-stock-tsla": false,   // Tesla
     // News forwarding
     "news-forwarding": false,
     "news-forward-only": false,
@@ -514,10 +519,31 @@ function updateSetting(key, value) {
             break;
             
         case 'show-stock-indicator':
+            // We keep this case for backward compatibility
+            // But now we always start/restart stock updates when this changes
             if (value) {
                 startStockUpdates();
             } else {
                 stopStockUpdates();
+            }
+            break;
+            
+        case 'show-stock-spy':
+        case 'show-stock-dia':
+        case 'show-stock-ief':
+        case 'show-stock-btco':
+        case 'show-stock-tsla':
+            // For active indicators, adjust visibility and restart updates if needed
+            if (value && settings["show-stock-indicator"] !== false) {
+                // Start updates if this is a newly enabled indicator
+                startStockUpdates();
+            } else {
+                // Just update visibility for all
+                import('./stock.js').then(stockModule => {
+                    if (typeof stockModule.updateStockIndicatorVisibility === 'function') {
+                        stockModule.updateStockIndicatorVisibility();
+                    }
+                });
             }
             break;
 

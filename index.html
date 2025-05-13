@@ -516,11 +516,42 @@
                     <input type="checkbox" onchange="toggleSettingFrom(this)" checked><span
                         class="settings-toggle-slider"></span>
                 </div>
+            </div>
 
-                <div class="settings-toggle-item" data-setting="show-stock-indicator"
+            <h2>Market Indicators</h2>
+            <div class="settings-controls">
+                <div class="settings-toggle-item" data-setting="show-stock-spy"
                     onclick="this.querySelector('input').click()">
-                    <label>Market Indicators</label>
+                    <label>S&P 500 Index</label>
                     <input type="checkbox" onchange="toggleSettingFrom(this)" checked><span
+                        class="settings-toggle-slider"></span>
+                </div>
+                
+                <div class="settings-toggle-item" data-setting="show-stock-dia"
+                    onclick="this.querySelector('input').click()">
+                    <label>Dow Jones Index</label>
+                    <input type="checkbox" onchange="toggleSettingFrom(this)" checked><span
+                        class="settings-toggle-slider"></span>
+                </div>
+                
+                <div class="settings-toggle-item" data-setting="show-stock-ief"
+                    onclick="this.querySelector('input').click()">
+                    <label>10-Year Treasury</label>
+                    <input type="checkbox" onchange="toggleSettingFrom(this)" checked><span
+                        class="settings-toggle-slider"></span>
+                </div>
+                
+                <div class="settings-toggle-item" data-setting="show-stock-btco"
+                    onclick="this.querySelector('input').click()">
+                    <label>BITC</label>
+                    <input type="checkbox" onchange="toggleSettingFrom(this)"><span
+                        class="settings-toggle-slider"></span>
+                </div>
+                
+                <div class="settings-toggle-item" data-setting="show-stock-tsla"
+                    onclick="this.querySelector('input').click()">
+                    <label>TSLA</label>
+                    <input type="checkbox" onchange="toggleSettingFrom(this)"><span
                         class="settings-toggle-slider"></span>
                 </div>
             </div>

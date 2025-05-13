@@ -8,15 +8,29 @@ import { settings } from './settings.js';
 
 // Function to start periodic updates
 export function startStockUpdates() {
-    // Check if stock indicator should be visible
+    // Check if any stock indicators should be visible
     updateStockIndicatorVisibility();
     
-    // Fetch data immediately
-    fetchStockData();
+    // Check if any stock indicators are enabled
+    const anyEnabled = ['spy', 'dia', 'ief', 'btco', 'tsla'].some(ticker => 
+        settings[`show-stock-${ticker}`] !== false
+    );
     
-    // Set up periodic updates
-    if (stockUpdateTimer) clearInterval(stockUpdateTimer);
-    stockUpdateTimer = setInterval(fetchStockData, UPDATE_INTERVAL);
+    // Only fetch data if at least one indicator is enabled
+    if (anyEnabled) {
+        // Fetch data immediately
+        fetchStockData();
+        
+        // Set up periodic updates
+        if (stockUpdateTimer) clearInterval(stockUpdateTimer);
+        stockUpdateTimer = setInterval(fetchStockData, UPDATE_INTERVAL);
+    } else {
+        // Stop updates if no indicators are enabled
+        if (stockUpdateTimer) {
+            clearInterval(stockUpdateTimer);
+            stockUpdateTimer = null;
+        }
+    }
 }
 
 // Function to stop periodic updates
@@ -108,11 +122,21 @@ function updateStockDisplay(elementId, percentChange) {
 }
 
 // Function to update stock indicator visibility based on settings
-function updateStockIndicatorVisibility() {
+export function updateStockIndicatorVisibility() {
     const stockIndicators = document.querySelectorAll('[id^="stock-status-"]');
     stockIndicators.forEach(indicator => {
         if (indicator) {
-            indicator.style.display = (settings && settings["show-stock-indicator"] === false) ? 'none' : '';
+            // Get the specific stock ticker from the ID
+            const ticker = indicator.id.replace('stock-status-', '');
+            const specificSetting = `show-stock-${ticker}`;
+            
+            // Primary check - individual setting
+            // With backward compatibility via master switch
+            const masterOk = settings["show-stock-indicator"] !== false; // For compatibility
+            const specificOk = settings[specificSetting] !== false;
+            
+            // Only show if specifically enabled
+            indicator.style.display = (masterOk && specificOk) ? '' : 'none';
         }
     });
 }
