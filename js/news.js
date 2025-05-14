@@ -299,7 +299,27 @@ function generateTimeAgoText(timestamp) {
 // Generate unique IDs for news items
 function genItemID(item)
 {
-    return `${item.source}-${item.title.substring(0, 40)}`;
+    // Combine all relevant item properties into a single string
+    const dataToHash = `${item.source}${item.title}${item.date}`;
+    
+    // Generate a hash - first convert string to a numerical hash
+    let hash = 0;
+    for (let i = 0; i < dataToHash.length; i++) {
+        const char = dataToHash.charCodeAt(i);
+        hash = ((hash << 5) - hash) + char;
+        hash = hash & hash; // Convert to 32bit integer
+    }
+    
+    // Convert numerical hash to a 16-character hexadecimal string
+    // Use absolute value to handle negative numbers
+    let hexHash = Math.abs(hash).toString(16);
+    
+    // If longer than 16 chars, truncate
+    if (hexHash.length > 16) {
+        hexHash = hexHash.substring(0, 16);
+    }
+    
+    return hexHash;
 }
 
 // Take news item and generate HTML
