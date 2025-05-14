@@ -29,8 +29,13 @@ function getRequestPath() {
         $path = substr($path, strlen($scriptName));
     }
     
+    // If path is empty, treat it as root path '/'
+    if (empty($path)) {
+        return '/';
+    }
+    
     // Ensure path starts with /
-    if (empty($path) || $path[0] !== '/') {
+    if ($path[0] !== '/') {
         $path = '/' . $path;
     }
     
@@ -275,39 +280,61 @@ if ($method === 'POST') {
 } elseif ($method === 'GET') {
     $path = ltrim($uri, '/');
 
-    if (substr($path, -1) === '/') {
+    if (substr($uri, -1) === '/' || $uri === '/') {
         // GET /dir/ - list all keys under this directory
+        // Special handling for root directory
         $prefix = rtrim($path, '/');
         
-        // First check if the directory itself exists
-        $stmt = $pdo->prepare("SELECT COUNT(*) as count FROM key_value WHERE `key` = ? AND `value` IS NULL");
-        $stmt->execute([$prefix]);
-        $dirExists = $stmt->fetch(PDO::FETCH_ASSOC)['count'] > 0;
+        // For root directory, we don't need to check if it exists
+        $dirExists = true;
         
-        if (!$dirExists && !empty($prefix)) {
-            // Directory doesn't exist
-            $stmt = $pdo->prepare("SELECT COUNT(*) as count FROM key_value WHERE `key` = ?");
+        if (!empty($prefix)) {
+            // Not root directory, check if it exists
+            $stmt = $pdo->prepare("SELECT COUNT(*) as count FROM key_value WHERE `key` = ? AND `value` IS NULL");
             $stmt->execute([$prefix]);
-            $keyExists = $stmt->fetch(PDO::FETCH_ASSOC)['count'] > 0;
+            $dirExists = $stmt->fetch(PDO::FETCH_ASSOC)['count'] > 0;
             
-            if ($keyExists) {
-                // This is a key, not a directory
-                sendJsonResponse(['error' => "$prefix is a key, not a directory"], 400);
-            } else {
-                sendJsonResponse(['error' => "Directory not found: $prefix"], 404);
+            if (!$dirExists) {
+                // Directory doesn't exist
+                $stmt = $pdo->prepare("SELECT COUNT(*) as count FROM key_value WHERE `key` = ?");
+                $stmt->execute([$prefix]);
+                $keyExists = $stmt->fetch(PDO::FETCH_ASSOC)['count'] > 0;
+                
+                if ($keyExists) {
+                    // This is a key, not a directory
+                    sendJsonResponse(['error' => "$prefix is a key, not a directory"], 400);
+                } else {
+                    sendJsonResponse(['error' => "Directory not found: $prefix"], 404);
+                }
             }
         }
         
-        // Get all keys under this prefix
-        $stmt = $pdo->prepare("SELECT `key`, `value` FROM key_value WHERE `key` LIKE ? OR `key` = ?");
-        $stmt->execute([$prefix . '/%', $prefix]);
+        // Get all keys under this prefix - special case for root
+        if (empty($prefix)) {
+            // For root listing, get ALL entries in the database
+            $stmt = $pdo->prepare("SELECT `key`, `value` FROM key_value");
+            $stmt->execute();
+        } else {
+            // For non-root directories, use the standard prefix search
+            $stmt = $pdo->prepare("SELECT `key`, `value` FROM key_value WHERE `key` LIKE ? OR `key` = ?");
+            $stmt->execute([$prefix . '/%', $prefix]);
+        }
+        
         $results = $stmt->fetchAll(PDO::FETCH_ASSOC);
         
         // Transform results into a more useful structure with directory information
         $transformed = [];
         foreach ($results as $item) {
             $isDir = $item['value'] === null;
-            $relativePath = $item['key'] === $prefix ? '.' : substr($item['key'], strlen($prefix) + 1);
+            
+            // Calculate the relative path
+            if (empty($prefix)) {
+                // For root listing, the relative path is the same as the key
+                $relativePath = $item['key'];
+            } else {
+                // For non-root directories, calculate the relative path
+                $relativePath = $item['key'] === $prefix ? '.' : substr($item['key'], strlen($prefix) + 1);
+            }
             
             $transformed[] = [
                 'key' => $item['key'],
@@ -317,7 +344,8 @@ if ($method === 'POST') {
             ];
         }
 
-        if (count($results) > 0) {
+        if (count($results) > 0 || empty($prefix)) {
+            // Always return success for root directory, even if empty
             sendJsonResponse($transformed);
         } else {
             sendJsonResponse(['error' => "No keys found under $prefix/"], 404);
