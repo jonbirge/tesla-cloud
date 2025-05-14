@@ -1,9 +1,11 @@
 <?php
+
 /**
  * Get Git repository information including commit hash, branch name, and tag
  * 
  * @return array Associative array with 'commit', 'branch', 'tag', and 'diagnostic' keys
  */
+
 function getGitInfo() {
     $gitInfo = [
         'commit' => 'unknown',

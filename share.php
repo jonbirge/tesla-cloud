@@ -1,5 +1,7 @@
 <?php
+
 require '/var/www/html/vendor/autoload.php';
+require_once 'dotenv.php';
 
 // Save the error log to /tmp/share_php.log
 ini_set('error_log', '/tmp/share_php.log');
@@ -7,22 +9,11 @@ ini_set('error_log', '/tmp/share_php.log');
 error_reporting(E_ALL);
 ini_set('display_errors', 1);
 
-// Load .env variables from a JSON file
-$envFilePath = __DIR__ . '/.env';
-if (file_exists($envFilePath)) {
-    $envContent = file_get_contents($envFilePath);
-    $envVariables = json_decode($envContent, true);
+// Load the .env file (default path is './.env')
+$dotenv = new DotEnv();
 
-    if (json_last_error() === JSON_ERROR_NONE) {
-        foreach ($envVariables as $key => $value) {
-            $_ENV[$key] = $value;
-        }
-    } else {
-        error_log("Failed to parse .env file: " . json_last_error_msg());
-    }
-} else {
-    error_log(".env file not found at $envFilePath");
-}
+// Get all variables as an associative array
+$_ENV = $dotenv->getAll();
 
 // Check if API key is set
 if (!isset($_ENV['SENDGRID_KEY'])) {

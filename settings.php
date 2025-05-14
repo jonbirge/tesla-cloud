@@ -1,4 +1,7 @@
 <?php
+
+require_once 'dotenv.php';
+
 // Settings management API
 // Provides a simple RESTful key-value store for user settings
 // Format: settings.php/{userId}[/{key}]
@@ -21,22 +24,21 @@ $defaultSettings = [
     "version" => "1"
 ];
 
-// Load .env variables from a JSON file
-$envFilePath = __DIR__ . '/.env';
-if (file_exists($envFilePath)) {
-    $envContent = file_get_contents($envFilePath);
-    $envVariables = json_decode($envContent, true);
+// Load the .env file (default path is './.env')
+$dotenv = new DotEnv();
 
-    if (json_last_error() === JSON_ERROR_NONE) {
-        foreach ($envVariables as $key => $value) {
-            $_ENV[$key] = $value;
-        }
-    } else {
-        error_log("Failed to parse .env file: " . json_last_error_msg());
-    }
-} else {
-    error_log(".env file not found at $envFilePath");
-}
+// Retrieve a specific variable
+// $dbHost = $dotenv->get('DB_HOST');
+
+// Get all variables as an associative array
+$_ENV = $dotenv->getAll();
+
+// SQL database configuration
+$dbName = $_ENV['SQL_DB_NAME'] ?? 'teslacloud';
+$dbHost = $_ENV['SQL_HOST'] ?? null;
+$dbUser = $_ENV['SQL_USER'] ?? null;
+$dbPass = $_ENV['SQL_PASS'] ?? null;
+$dbPort = $_ENV['SQL_PORT'] ?? '3306';
 
 // Function to get client IP address accounting for proxies
 function getClientIP() {
@@ -50,13 +52,6 @@ function getClientIP() {
     }
     return filter_var($ip, FILTER_VALIDATE_IP) ? $ip : 'unknown';
 }
-
-// SQL database configuration
-$dbName = $_ENV['SQL_DB_NAME'] ?? 'teslacloud';
-$dbHost = $_ENV['SQL_HOST'] ?? null;
-$dbUser = $_ENV['SQL_USER'] ?? null;
-$dbPass = $_ENV['SQL_PASS'] ?? null;
-$dbPort = $_ENV['SQL_PORT'] ?? '3306';
 
 // Establish database connection
 if (!$dbHost || !$dbName || !$dbUser) {
@@ -141,7 +136,6 @@ if (count($uriParts) > 1) {
         $userId = $uriParts[$scriptPos + 1];
         
         // Check if we also have a key
-        // TODO: Just return all the rest of the parts concatenated
         if (isset($uriParts[$scriptPos + 2])) {
             $key = $uriParts[$scriptPos + 2];
         }

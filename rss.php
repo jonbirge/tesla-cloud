@@ -1,6 +1,12 @@
 <?php
+
 // Include the git info function
 require_once __DIR__ . '/git_info.php';
+
+// Set the content type and add headers to prevent caching
+header('Cache-Control: no-cache, no-store, must-revalidate');
+header('Expires: 0');
+header('Content-Type: application/json');
 
 // Get version information directly using the function
 // TODO: Remove this once deployment is containerized
@@ -74,11 +80,6 @@ register_shutdown_function(function() {
         error_log($message);
     }
 });
-
-// Set the content type and add headers to prevent caching
-header('Cache-Control: no-cache, no-store, must-revalidate');
-header('Expires: 0');
-header('Content-Type: application/json');
 
 // Check if we're receiving a POST request with included feeds
 $includedFeeds = [];

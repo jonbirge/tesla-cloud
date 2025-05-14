@@ -4,22 +4,13 @@
 // This script acts as a proxy for OpenWeatherMap API requests.
 // It reads the API key from a .env file and forwards requests to the OpenWeatherMap API.
 
-// Load .env variables from a JSON file
-$envFilePath = __DIR__ . '/.env';
-if (file_exists($envFilePath)) {
-    $envContent = file_get_contents($envFilePath);
-    $envVariables = json_decode($envContent, true);
+require_once 'dotenv.php';
 
-    if (json_last_error() === JSON_ERROR_NONE) {
-        foreach ($envVariables as $key => $value) {
-            $_ENV[$key] = $value;
-        }
-    } else {
-        error_log("Failed to parse .env file: " . json_last_error_msg());
-    }
-} else {
-    error_log(".env file not found at $envFilePath");
-}
+// Load the .env file (default path is './.env')
+$dotenv = new DotEnv();
+
+// Get all variables as an associative array
+$_ENV = $dotenv->getAll();
 
 // Check if API key is set
 if (!isset($_ENV['OPENWX_KEY'])) {

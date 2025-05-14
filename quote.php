@@ -1,4 +1,7 @@
 <?php
+
+require_once 'dotenv.php';
+
 // Set headers for JSON response and CORS
 header('Content-Type: application/json');
 header('Cache-Control: no-cache, no-store, must-revalidate');
@@ -8,22 +11,11 @@ header('Expires: 0');
 // Cache configuration
 $cacheLifetimeMinutes = 5; // Default cache lifetime in minutes
 
-// Load .env variables from a JSON file
-$envFilePath = __DIR__ . '/.env';
-if (file_exists($envFilePath)) {
-    $envContent = file_get_contents($envFilePath);
-    $envVariables = json_decode($envContent, true);
+// Load the .env file (default path is './.env')
+$dotenv = new DotEnv();
 
-    if (json_last_error() === JSON_ERROR_NONE) {
-        foreach ($envVariables as $key => $value) {
-            $_ENV[$key] = $value;
-        }
-    } else {
-        error_log("Failed to parse .env file: " . json_last_error_msg());
-    }
-} else {
-    error_log(".env file not found at $envFilePath");
-}
+// Get all variables as an associative array
+$_ENV = $dotenv->getAll();
 
 // Check if API key is set
 if (!isset($_ENV['FINNHUB_KEY'])) {
