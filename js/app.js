@@ -4,7 +4,7 @@ import { PositionSimulator } from './location.js';
 import { attemptLogin, leaveSettings, settings, isDriving, setDrivingState } from './settings.js';
 import { fetchPremiumWeatherData, fetchCityData, SAT_URLS, forecastDataPrem } from './wx.js';
 import { updateNetworkInfo, updatePingChart, startPingTest } from './net.js';
-import { markAllNewsAsRead, cleanupNewsObserver, setupNewsObserver, startNewsTimeUpdates, stopNewsTimeUpdates } from './news.js';
+import { markAllNewsAsRead, cleanupNewsObserver, setupNewsObserver, startNewsTimeUpdates, stopNewsTimeUpdates, initializeNewsStorage } from './news.js';
 import { startStockUpdates, stopStockUpdates } from './stock.js';
 
 // Parameters
@@ -869,6 +869,9 @@ document.addEventListener('DOMContentLoaded', async function () {
 
     // Attempt login from URL parameter or cookie
     await attemptLogin();
+    
+    // Initialize news storage system (create user directory if needed)
+    await initializeNewsStorage();
 
     // Check for NOTE file and display if present
     updateServerNote();

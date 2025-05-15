@@ -1,11 +1,55 @@
 // Imports
-import { settings, isDriving } from './settings.js';
+import { settings, isDriving, hashedUser, isLoggedIn } from './settings.js';
 import { showSpinner, hideSpinner, showNotification } from './common.js';
 
 // Constants
 const NEWS_REFRESH_INTERVAL = 5; // minutes
-const SEEN_NEWS_STORAGE_KEY = 'seenNewsIds'; // localStorage key for seen news IDs
 const MAX_AGE_DAYS = 2; // Maximum age in days for seen news IDs
+
+// Export function to ensure user directory exists (used by app.js during startup)
+export async function initializeNewsStorage() {
+    // Reset the cache when initializing
+    cachedSeenNewsIds = null;
+    directoryInitialized = false;
+    lastDirectoryCheckTime = 0;
+    
+    console.log('Initializing news storage system...');
+    
+    // If user is logged in, ensure directory exists and clean up old entries
+    if (isLoggedIn && hashedUser) {
+        console.log(`Initializing news storage for user: ${hashedUser}`);
+        
+        // Try to create user directory with maximum retry attempts
+        const success = await ensureUserDirectoryExists(3); // Try up to 4 times with increasing delays
+        
+        if (success) {
+            console.log('News storage directory initialized successfully');
+            
+            try {
+                // Verify we can access the directory by getting the current entries
+                const seenIds = await getSeenNewsIds();
+                const count = Object.keys(seenIds).length;
+                console.log(`Successfully accessed news storage with ${count} existing entries`);
+                
+                // Clean up old entries during initialization
+                await cleanupOldSeenIds();
+                return true;
+            } catch (error) {
+                console.error('Error during news storage verification:', error);
+                // We'll continue despite verification error since directory exists
+                return true;
+            }
+        } else {
+            console.error('Failed to initialize news storage after multiple attempts');
+            // Add fallback mechanism to local storage if restdb fails repeatedly
+            console.warn('Using in-memory storage only as fallback');
+            return false;
+        }
+    } else {
+        console.log('User not logged in, skipping news storage initialization');
+        return false;
+    }
+}
 
 // Variables
 let newsUpdateInterval = null;
@@ -13,54 +57,402 @@ let newsTimeUpdateInterval = null; // Interval for updating "time ago" displays
 let newsObserver = null; // Intersection Observer for tracking visible news items
 let pendingReadItems = new Set(); // Track items that are currently visible but not yet marked as read
 let hasUnreadNewsItems = false; // Track if there are any unread news items
+let cachedSeenNewsIds = null; // Cache for seen news IDs to reduce API calls
+let directoryInitialized = false; // Track if we've successfully initialized the directory in this session
 
-// Helper functions for localStorage management
-function getSeenNewsIds() {
-    const storedData = localStorage.getItem(SEEN_NEWS_STORAGE_KEY);
-    if (!storedData) {
+// Track when we last tried to ensure the directory exists
+let lastDirectoryCheckTime = 0;
+const DIRECTORY_CHECK_INTERVAL = 60000; // Only try once per minute at most
+
+// Helper functions for restdb.php management
+async function ensureUserDirectoryExists(retryCount = 2) {
+    // Skip if not logged in
+    if (!isLoggedIn || !hashedUser) {
+        return false;
+    }
+    
+    // If we've already successfully initialized the directory in this session
+    // and a forced check isn't requested, skip the check
+    if (directoryInitialized && retryCount === 2) {
+        console.log('Skipping directory check - already initialized in this session');
+        return true;
+    }
+    
+    // Avoid excessive calls - only check once per minute unless forced with retryCount > 0
+    const now = Date.now();
+    if (retryCount === 2 && now - lastDirectoryCheckTime < DIRECTORY_CHECK_INTERVAL) {
+        console.log('Skipping directory check - checked recently');
+        return true; // Assume it exists if we checked recently
+    }
+    
+    try {
+        console.log(`Ensuring user directory exists for: ${hashedUser}`);
+        const baseUrl = '.';
+        
+        // First check if the directory exists via GET
+        let directoryExists = false;
+        try {
+            const checkResponse = await fetch(`${baseUrl}/restdb.php/${hashedUser}/`, {
+                method: 'GET'
+            });
+            
+            // If response is 404, directory doesn't exist
+            // If response is 200, directory exists and is empty or has content
+            directoryExists = checkResponse.ok;
+            
+            if (directoryExists) {
+                console.log('Directory exists, verified via GET');
+                directoryInitialized = true;
+                lastDirectoryCheckTime = now;
+                return true;
+            }
+        } catch (error) {
+            // Ignore check errors, we'll still try to create
+            console.warn('Error checking if directory exists:', error);
+        }
+        
+        // If not exists or check failed, use POST to create the directory
+        console.log('Attempting to create directory via POST');
+        const response = await fetch(`${baseUrl}/restdb.php/${hashedUser}/`, {
+            method: 'POST'
+        });
+        
+        // Update check timestamp
+        lastDirectoryCheckTime = now;
+        
+        // Check response
+        if (response.ok) {
+            console.log('User directory created successfully');
+            directoryInitialized = true; // Mark directory as initialized
+            return true;
+        } 
+        // If directory already exists, that's fine (HTTP 409 Conflict or 200 with message)
+        else if (response.status === 409 || response.status === 200) {
+            try {
+                const data = await response.json();
+                if (data.message && data.message.includes('already exists')) {
+                    console.log('User directory already exists');
+                    directoryInitialized = true;
+                    return true;
+                }
+            } catch (e) {
+                // If we can't parse the response, assume it exists
+                console.log('Assuming directory exists (got response but could not parse)');
+                directoryInitialized = true;
+                return true;
+            }
+            
+            // Just in case the JSON parse fails but it was a 409/200
+            if (response.status === 409 || response.status === 200) {
+                console.log(`User directory likely exists (got ${response.status})`);
+                directoryInitialized = true;
+                return true;
+            }
+        }
+        // Server error (5xx) - maybe retry
+        else if (response.status >= 500 && retryCount > 0) {
+            console.warn(`Server error (${response.status}) when creating directory, retrying...`);
+            // Wait a bit before retrying (exponential backoff)
+            await new Promise(resolve => setTimeout(resolve, 1000 * (3 - retryCount)));
+            return ensureUserDirectoryExists(retryCount - 1);
+        }
+        // Any other error
+        else {
+            console.error(`Failed to create user directory: ${response.status}`);
+            // Try to get more details from the error response
+            try {
+                const errorData = await response.json();
+                console.error('Error details:', errorData);
+            } catch (e) {
+                // Ignore if we can't parse the error response
+            }
+            return false;
+        }
+    } catch (error) {
+        console.error('Error creating user directory:', error);
+        
+        // Network errors might be transient, try again if we have retries left
+        if (retryCount > 0) {
+            console.warn('Retrying after network error...');
+            await new Promise(resolve => setTimeout(resolve, 1000 * (3 - retryCount)));
+            return ensureUserDirectoryExists(retryCount - 1);
+        }
+        
+        return false;
+    }
+}
+
+async function getSeenNewsIds() {
+    // If not logged in, return empty object
+    if (!isLoggedIn || !hashedUser) {
+        console.log('User not logged in, returning empty seen news IDs');
         return {};
     }
+    
+    // If we have cached data, return it
+    if (cachedSeenNewsIds !== null) {
+        return cachedSeenNewsIds;
+    }
+    
     try {
-        return JSON.parse(storedData);
+        // Ensure the user directory exists before trying to fetch data
+        const directoryExists = await ensureUserDirectoryExists();
+        if (!directoryExists) {
+            console.warn('Failed to ensure user directory exists, using empty news IDs');
+            return {};
+        }
+        
+        // Get the base URL of the current page
+        const baseUrl = '.';
+        
+        // Log the request for debugging
+        console.log(`Fetching news IDs from: ${baseUrl}/restdb.php/${hashedUser}/`);
+        
+        // Get the directory contents
+        const response = await fetch(`${baseUrl}/restdb.php/${hashedUser}/`);
+        
+        // Special response code handling
+        if (!response.ok) {
+            // Special case for 404 - could mean the directory exists but is empty
+            if (response.status === 404) {
+                console.log('No seen news data found (empty directory)');
+                cachedSeenNewsIds = {}; // Cache empty result
+                return {};
+            } else if (response.status === 400) {
+                // If we get a 400 error, it might be that what we think is a directory is actually a key
+                console.warn('Got 400 error - might be attempting to treat a key as directory');
+                // Reset initialization flags to force recreation
+                directoryInitialized = false;
+                lastDirectoryCheckTime = 0;
+                
+                // Try to recreate the directory with a more aggressive approach
+                const recreated = await ensureUserDirectoryExists(2);
+                if (recreated) {
+                    console.log('Successfully recreated directory, trying again');
+                    // If directory recreation succeeded, try fetching again
+                    const retryResponse = await fetch(`${baseUrl}/restdb.php/${hashedUser}/`);
+                    if (retryResponse.ok) {
+                        const retryData = await retryResponse.json();
+                        // Process the data as before
+                        const retryResult = {};
+                        if (Array.isArray(retryData)) {
+                            retryData.forEach(item => {
+                                const articleId = item.key.split('/').pop();
+                                const timestamp = JSON.parse(item.value);
+                                retryResult[articleId] = timestamp;
+                            });
+                        }
+                        cachedSeenNewsIds = retryResult;
+                        return retryResult;
+                    }
+                }
+            }
+            
+            console.error('Error fetching seen news IDs:', response.status);
+            return {};
+        }
+        
+        // Process the response data
+        const data = await response.json();
+        
+        // Convert the array of keys/values to an object format
+        const result = {};
+        if (Array.isArray(data)) {
+            data.forEach(item => {
+                // Extract the article ID from the path
+                const articleId = item.key.split('/').pop();
+                // Parse the timestamp from the JSON string
+                try {
+                    const timestamp = JSON.parse(item.value);
+                    result[articleId] = timestamp;
+                } catch (e) {
+                    console.warn(`Could not parse timestamp for article ${articleId}:`, e);
+                    // Use current time as fallback
+                    result[articleId] = Date.now();
+                }
+            });
+            console.log(`Processed ${Object.keys(result).length} article IDs from restdb`);
+        } else {
+            console.warn('Unexpected response format from restdb (not an array):', data);
+        }
+        
+        // Cache the result
+        cachedSeenNewsIds = result;
+        return result;
     } catch (error) {
-        console.error('Error parsing seen news IDs from localStorage:', error);
+        console.error('Error fetching seen news IDs:', error);
         return {};
     }
 }
 
-function saveSeenNewsIds(seenIds) {
+async function cleanupOldSeenIds() {
+    // If not logged in, nothing to clean up
+    if (!isLoggedIn || !hashedUser) {
+        return;
+    }
+    
     try {
-        // Clean up old entries (older than MAX_AGE_DAYS)
-        const now = Date.now();
-        const cleanedIds = {};
+        console.log(`Starting cleanup of old seen news IDs (older than ${MAX_AGE_DAYS} days)...`);
         
-        Object.entries(seenIds).forEach(([id, timestamp]) => {
+        // First make sure the directory exists
+        const directoryExists = await ensureUserDirectoryExists(0);
+        if (!directoryExists) {
+            console.warn('Cannot clean up old news IDs: directory creation failed');
+            return;
+        }
+        
+        // Get all seen news IDs
+        const seenIds = await getSeenNewsIds();
+        const now = Date.now();
+        
+        // Log the number of items before cleanup
+        const totalItems = Object.keys(seenIds).length;
+        console.log(`Found ${totalItems} stored article IDs before cleanup`);
+        
+        // Count items that need deletion
+        const oldItemCount = Object.entries(seenIds).filter(([id, timestamp]) => {
             const ageInDays = (now - timestamp) / (1000 * 60 * 60 * 24);
-            if (ageInDays < MAX_AGE_DAYS) {
-                cleanedIds[id] = timestamp;
+            return ageInDays >= MAX_AGE_DAYS;
+        }).length;
+        
+        if (oldItemCount === 0) {
+            console.log('No old articles to clean up');
+            return;
+        }
+        
+        console.log(`Cleaning up ${oldItemCount} articles older than ${MAX_AGE_DAYS} days`);
+        
+        // Check each ID and delete if too old
+        const baseUrl = '.'
+        let successCount = 0;
+        let errorCount = 0;
+        
+        const deletePromises = Object.entries(seenIds).map(async ([id, timestamp]) => {
+            const ageInDays = (now - timestamp) / (1000 * 60 * 60 * 24);
+            if (ageInDays >= MAX_AGE_DAYS) {
+                try {
+                    // Delete this entry
+                    const response = await fetch(`${baseUrl}/restdb.php/${hashedUser}/${id}`, {
+                        method: 'DELETE'
+                    });
+                    
+                    if (!response.ok) {
+                        console.error(`Failed to delete old news item ${id}:`, response.status);
+                        errorCount++;
+                    } else {
+                        // Remove from cache if it exists
+                        if (cachedSeenNewsIds && id in cachedSeenNewsIds) {
+                            delete cachedSeenNewsIds[id];
+                        }
+                        successCount++;
+                    }
+                } catch (error) {
+                    console.error(`Error deleting old news item ${id}:`, error);
+                    errorCount++;
+                }
             }
         });
         
-        localStorage.setItem(SEEN_NEWS_STORAGE_KEY, JSON.stringify(cleanedIds));
+        // Wait for all delete operations to complete
+        await Promise.all(deletePromises);
+        console.log(`Cleanup completed. Successfully deleted: ${successCount}, Failed: ${errorCount}`);
     } catch (error) {
-        console.error('Error saving seen news IDs to localStorage:', error);
+        console.error('Error cleaning up old seen news IDs:', error);
     }
 }
 
-function markNewsSeen(id) {
-    const seenIds = getSeenNewsIds();
-    seenIds[id] = Date.now();
-    saveSeenNewsIds(seenIds);
+async function markNewsSeen(id) {
+    // If not logged in, don't persist
+    if (!isLoggedIn || !hashedUser) {
+        return;
+    }
+    
+    try {
+        // Ensure directory exists first
+        const directoryExists = await ensureUserDirectoryExists(1); // Only retry once for performance
+        if (!directoryExists) {
+            console.warn(`Cannot mark news item ${id} as seen: directory creation failed`);
+            return;
+        }
+        
+        const timestamp = Date.now();
+        const baseUrl ='.';
+        
+        // Store the timestamp as JSON
+        const response = await fetch(`${baseUrl}/restdb.php/${hashedUser}/${id}`, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(timestamp)
+        });
+        
+        if (!response.ok) {
+            console.error(`Failed to mark news item ${id} as seen:`, response.status);
+            
+            // If we get a 409 error or a 404, the directory might not exist despite our check
+            if (response.status === 409 || response.status === 404) {
+                console.warn('Directory might not actually exist, trying to force creation');
+                
+                // Force directory creation and retry the PUT if successful
+                const recreated = await ensureUserDirectoryExists(2); // Try harder this time
+                
+                if (recreated) {
+                    console.log(`Retrying PUT for article ${id} after directory recreation`);
+                    // Retry the PUT request
+                    const retryResponse = await fetch(`${baseUrl}/restdb.php/${hashedUser}/${id}`, {
+                        method: 'PUT',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify(timestamp)
+                    });
+                    
+                    if (retryResponse.ok) {
+                        console.log(`Successfully marked article ${id} as seen after retry`);
+                        // Update the cache
+                        if (cachedSeenNewsIds !== null) {
+                            cachedSeenNewsIds[id] = timestamp;
+                        }
+                        return;
+                    } else {
+                        console.error(`Retry also failed for article ${id}:`, retryResponse.status);
+                    }
+                }
+            }
+            return;
+        }
+        
+        // Update the cache
+        if (cachedSeenNewsIds !== null) {
+            cachedSeenNewsIds[id] = timestamp;
+        }
+    } catch (error) {
+        console.error(`Error marking news item ${id} as seen:`, error);
+    }
 }
 
-function isNewsSeen(id) {
-    const seenIds = getSeenNewsIds();
+async function isNewsSeen(id) {
+    const seenIds = await getSeenNewsIds();
     return id in seenIds;
 }
 
 // Updates the news headlines, optionally clearing existing ones
 export async function updateNews(clear = false) {
     try {
+        // Run cleanup of old articles once per app session
+        if (isLoggedIn && hashedUser) {
+            // Only run cleanup occasionally to reduce API load
+            const now = Date.now();
+            const lastCleanup = sessionStorage.getItem('lastNewsCleanup') || 0;
+            
+            if (now - lastCleanup > 3600000) { // Run cleanup once per hour at most
+                console.log('Running cleanup of old seen news IDs...');
+                await cleanupOldSeenIds();
+                sessionStorage.setItem('lastNewsCleanup', now.toString());
+            }
+        }
+
         // Collect included RSS feeds from user settings
         const includedFeeds = [];
         if (settings) {
@@ -123,13 +515,21 @@ export async function updateNews(clear = false) {
         let hasNewItems = false;
         
         if (loadedItems.length > 0) {
-            // Generate unique IDs for each news item and check against localStorage
-            loadedItems.forEach(item => {
+            // Generate unique IDs for each news item and check against our database
+            // Since isNewsSeen is now async, we need to check all items in a batch
+            const itemIds = loadedItems.map(item => {
                 // Create a unique ID based on title and source
                 item.id = genItemID(item);
-                
-                // Check if this is a new item using localStorage
-                item.isUnread = !isNewsSeen(item.id);
+                return item.id;
+            });
+            
+            // Get all seen IDs in one go
+            const seenIds = await getSeenNewsIds();
+            
+            // Mark each item's read status
+            loadedItems.forEach(item => {
+                // Check if this is a new item
+                item.isUnread = !(item.id in seenIds);
                 
                 // Track if we have new items but don't mark them as seen yet
                 // They'll be marked as seen when they become visible via the observer
@@ -230,7 +630,7 @@ export function stopNewsTimeUpdates() {
 }
 
 // Mark all current news items as read
-export function markAllNewsAsRead() {
+export async function markAllNewsAsRead() {
     console.log('Marking all news as read');
     
     // Disconnect observer temporarily
@@ -244,23 +644,30 @@ export function markAllNewsAsRead() {
     // Find all visible news items and mark them as read
     const newsItems = document.querySelectorAll('.news-item');
     if (newsItems.length) {
+        // Collect all IDs first
+        const ids = [];
         newsItems.forEach(element => {
             const id = element.getAttribute('data-id');
             if (id) {
-                // Mark as read in localStorage
-                markNewsSeen(id);
+                ids.push(id);
+            }
+        });
+        
+        // Mark all as read in parallel
+        const markPromises = ids.map(id => markNewsSeen(id));
+        await Promise.all(markPromises);
+        
+        // Update UI for all items
+        newsItems.forEach(element => {
+            const timeElement = element.querySelector('.news-time');
+            if (timeElement) {
+                timeElement.classList.add('news-seen-transition');
                 
-                // Update UI - remove "new" styling from time elements
-                const timeElement = element.querySelector('.news-time');
-                if (timeElement) {
-                    timeElement.classList.add('news-seen-transition');
-                    
-                    // After a brief delay, remove the new-time class
-                    setTimeout(() => {
-                        timeElement.classList.remove('news-new-time');
-                        timeElement.classList.remove('news-seen-transition');
-                    }, 500); // Shorter delay for marking all as read
-                }
+                // After a brief delay, remove the new-time class
+                setTimeout(() => {
+                    timeElement.classList.remove('news-new-time');
+                    timeElement.classList.remove('news-seen-transition');
+                }, 500); // Shorter delay for marking all as read
             }
         });
     }
@@ -388,11 +795,13 @@ export function setupNewsObserver() {
                 // If it was in our pending set, now mark it as read
                 if (pendingReadItems.has(id) && timeElement.classList.contains('news-new-time')) {
                     console.log(`News item scrolled out of view, marking as read: ${id}`);
-                    // Mark as seen in localStorage
-                    markNewsSeen(id);
-                    
-                    // Remove from pending set
-                    pendingReadItems.delete(id);
+                    // Mark as seen in restdb.php
+                    markNewsSeen(id).then(() => {
+                        // Remove from pending set
+                        pendingReadItems.delete(id);
+                    }).catch(error => {
+                        console.error('Error marking news as read:', error);
+                    });
                     
                     // Add transition class for smooth fade out
                     timeElement.classList.add('news-seen-transition');
@@ -451,8 +860,8 @@ window.clickNews = async function (title, link, source, id) {
         // Remove from pending items if it was there
         pendingReadItems.delete(id);
         
-        // Mark as read directly in localStorage
-        markNewsSeen(id);
+        // Mark as read in restdb.php
+        await markNewsSeen(id);
         
         // Update the UI - add transition and remove "new" styling
         const element = document.querySelector(`.news-item[data-id="${id}"]`);
@@ -558,14 +967,18 @@ window.resumeNewsUpdates = function () {
     }
 }
 
-// Debug function to check localStorage news data
-window.checkSeenNewsStorage = function() {
-    const seenIds = getSeenNewsIds();
+// Debug function to check restdb.php news data
+window.checkSeenNewsStorage = async function() {
+    const seenIds = await getSeenNewsIds();
     const count = Object.keys(seenIds).length;
-    const oldestTimestamp = Math.min(...Object.values(seenIds));
+    
+    let oldestTimestamp = Date.now();
+    if (Object.keys(seenIds).length > 0) {
+        oldestTimestamp = Math.min(...Object.values(seenIds));
+    }
     const oldestDate = new Date(oldestTimestamp);
     
-    console.log(`Seen news items in storage: ${count}`);
+    console.log(`Seen news items in restdb: ${count}`);
     console.log(`Oldest item from: ${oldestDate.toLocaleString()}`);
     console.log('Sample items:', Object.keys(seenIds).slice(0, 5));
     
@@ -576,11 +989,37 @@ window.checkSeenNewsStorage = function() {
     };
 }
 
-// Clear all seen news data from localStorage
-window.clearSeenNewsStorage = function() {
-    localStorage.removeItem(SEEN_NEWS_STORAGE_KEY);
-    console.log('Cleared all seen news data from localStorage');
-    return true;
+// Clear all seen news data from restdb.php
+window.clearSeenNewsStorage = async function() {
+    // Only perform if user is logged in
+    if (!isLoggedIn || !hashedUser) {
+        console.log('User not logged in, nothing to clear');
+        return false;
+    }
+    
+    try {
+        // Get all article IDs
+        const seenIds = await getSeenNewsIds();
+        const baseUrl = '.';
+        
+        // Delete each article ID
+        const deletePromises = Object.keys(seenIds).map(id => {
+            return fetch(`${baseUrl}/restdb.php/${hashedUser}/${id}`, {
+                method: 'DELETE'
+            });
+        });
+        
+        await Promise.all(deletePromises);
+        
+        // Clear the cache
+        cachedSeenNewsIds = {};
+        
+        console.log('Cleared all seen news data from restdb.php');
+        return true;
+    } catch (error) {
+        console.error('Error clearing seen news data:', error);
+        return false;
+    }
 }
 
 // Debug function to check pending items
@@ -588,6 +1027,118 @@ window.checkPendingNewsItems = function() {
     console.log(`Currently pending read items: ${pendingReadItems.size}`);
     console.log('Pending IDs:', Array.from(pendingReadItems));
     return Array.from(pendingReadItems);
+}
+
+// Diagnostic function to test directory creation
+window.testNewsDirectory = async function() {
+    console.log('Testing news directory creation...');
+    
+    if (!isLoggedIn || !hashedUser) {
+        console.warn('Not logged in, cannot test directory creation');
+        return { status: 'error', message: 'Not logged in' };
+    }
+    
+    // Force directory creation, bypassing all caching
+    directoryInitialized = false;
+    lastDirectoryCheckTime = 0;
+    
+    const baseUrl = '.';
+    const results = {};
+    
+    // Test 1: Basic directory creation
+    console.log('Test 1: Basic directory creation');
+    try {
+        const createResult = await ensureUserDirectoryExists(2);
+        results.basicCreation = {
+            success: createResult,
+            message: createResult ? 'Directory created/verified' : 'Directory creation failed'
+        };
+    } catch (error) {
+        results.basicCreation = {
+            success: false,
+            message: `Error during creation: ${error.message}`
+        };
+    }
+    
+    // Test 2: Test special endpoint
+    console.log('Test 2: Using special test endpoint');
+    try {
+        const testResponse = await fetch(`${baseUrl}/restdb.php/_test_directory/${hashedUser}`);
+        const testData = await testResponse.json();
+        results.testEndpoint = {
+            success: testResponse.ok,
+            message: testResponse.ok ? 'Test endpoint success' : 'Test endpoint failed',
+            status: testResponse.status,
+            data: testData
+        };
+    } catch (error) {
+        results.testEndpoint = {
+            success: false,
+            message: `Error with test endpoint: ${error.message}`
+        };
+    }
+    
+    // Test 3: Create and read a test article
+    console.log('Test 3: Creating and reading a test article');
+    const testArticleId = `test_article_${Date.now()}`;
+    const timestamp = Date.now();
+    
+    try {
+        // Create test article
+        const putResponse = await fetch(`${baseUrl}/restdb.php/${hashedUser}/${testArticleId}`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(timestamp)
+        });
+        
+        // Read it back
+        const getResponse = await fetch(`${baseUrl}/restdb.php/${hashedUser}/${testArticleId}`);
+        let readTimestamp = null;
+        
+        if (getResponse.ok) {
+            readTimestamp = await getResponse.json();
+        }
+        
+        // Delete the test entry
+        const deleteResponse = await fetch(`${baseUrl}/restdb.php/${hashedUser}/${testArticleId}`, {
+            method: 'DELETE'
+        });
+        
+        results.testArticle = {
+            success: putResponse.ok && getResponse.ok && deleteResponse.ok,
+            message: putResponse.ok && getResponse.ok && deleteResponse.ok ? 
+                'Test article created, read, and deleted successfully' : 
+                'Test article operations failed',
+            details: {
+                put: { status: putResponse.status, ok: putResponse.ok },
+                get: { status: getResponse.status, ok: getResponse.ok },
+                delete: { status: deleteResponse.status, ok: deleteResponse.ok },
+                timestampMatch: readTimestamp === timestamp
+            }
+        };
+    } catch (error) {
+        results.testArticle = {
+            success: false,
+            message: `Error with test article: ${error.message}`
+        };
+    }
+    
+    const allSucceeded = 
+        results.basicCreation.success && 
+        results.testEndpoint.success && 
+        results.testArticle.success;
+        
+    console.log(`Directory tests ${allSucceeded ? 'ALL PASSED' : 'FAILED'}`);
+    console.log('Test results:', results);
+        
+    return {
+        status: allSucceeded ? 'success' : 'error',
+        message: allSucceeded ? 
+            'All directory tests passed' : 
+            'One or more directory tests failed',
+        results: results,
+        hashedUser: hashedUser
+    };
 }
 
 // Function to check if there are any unread news items and update notification dot

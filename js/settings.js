@@ -1,5 +1,5 @@
 // Imports
-import { updateNews, setShareButtonsVisibility } from './news.js';
+import { updateNews, setShareButtonsVisibility, initializeNewsStorage } from './news.js';
 import { updateChartAxisColors } from './net.js';
 import { updatePremiumWeatherDisplay } from './wx.js';
 import { startStockUpdates, stopStockUpdates } from './stock.js';
@@ -701,6 +701,10 @@ window.handleLogin = async function () {
         if (await validateUserId(userId)) {
             console.log('User ID validated successfully.');
             await fetchSettings();
+            
+            // Initialize news storage for the newly logged in user
+            await initializeNewsStorage();
+            
             console.log('Login successful, updating news feed...');
             updateNews(true); // Update news feed after login
         }
