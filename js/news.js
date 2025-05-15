@@ -195,13 +195,6 @@ async function getSeenNewsIds() {
     }
     
     try {
-        // Ensure the user directory exists before trying to fetch data
-        const directoryExists = await ensureUserDirectoryExists();
-        if (!directoryExists) {
-            console.warn('Failed to ensure user directory exists, using empty news IDs');
-            return {};
-        }
-        
         // Get the base URL of the current page
         const baseUrl = '.';
         
@@ -294,13 +287,6 @@ async function cleanupOldSeenIds() {
     try {
         console.log(`Starting cleanup of old seen news IDs (older than ${MAX_AGE_DAYS} days)...`);
         
-        // First make sure the directory exists
-        const directoryExists = await ensureUserDirectoryExists(0);
-        if (!directoryExists) {
-            console.warn('Cannot clean up old news IDs: directory creation failed');
-            return;
-        }
-        
         // Get all seen news IDs
         const seenIds = await getSeenNewsIds();
         const now = Date.now();
@@ -368,13 +354,6 @@ async function markNewsSeen(id) {
     }
     
     try {
-        // Ensure directory exists first
-        const directoryExists = await ensureUserDirectoryExists(1); // Only retry once for performance
-        if (!directoryExists) {
-            console.warn(`Cannot mark news item ${id} as seen: directory creation failed`);
-            return;
-        }
-        
         const timestamp = Date.now();
         const baseUrl ='.';
         
@@ -432,10 +411,10 @@ async function markNewsSeen(id) {
     }
 }
 
-async function isNewsSeen(id) {
-    const seenIds = await getSeenNewsIds();
-    return id in seenIds;
-}
+// async function isNewsSeen(id) {
+//     const seenIds = await getSeenNewsIds();
+//     return id in seenIds;
+// }
 
 // Updates the news headlines, optionally clearing existing ones
 export async function updateNews(clear = false) {
@@ -1027,118 +1006,6 @@ window.checkPendingNewsItems = function() {
     console.log(`Currently pending read items: ${pendingReadItems.size}`);
     console.log('Pending IDs:', Array.from(pendingReadItems));
     return Array.from(pendingReadItems);
-}
-
-// Diagnostic function to test directory creation
-window.testNewsDirectory = async function() {
-    console.log('Testing news directory creation...');
-    
-    if (!isLoggedIn || !hashedUser) {
-        console.warn('Not logged in, cannot test directory creation');
-        return { status: 'error', message: 'Not logged in' };
-    }
-    
-    // Force directory creation, bypassing all caching
-    directoryInitialized = false;
-    lastDirectoryCheckTime = 0;
-    
-    const baseUrl = '.';
-    const results = {};
-    
-    // Test 1: Basic directory creation
-    console.log('Test 1: Basic directory creation');
-    try {
-        const createResult = await ensureUserDirectoryExists(2);
-        results.basicCreation = {
-            success: createResult,
-            message: createResult ? 'Directory created/verified' : 'Directory creation failed'
-        };
-    } catch (error) {
-        results.basicCreation = {
-            success: false,
-            message: `Error during creation: ${error.message}`
-        };
-    }
-    
-    // Test 2: Test special endpoint
-    console.log('Test 2: Using special test endpoint');
-    try {
-        const testResponse = await fetch(`${baseUrl}/restdb.php/_test_directory/${hashedUser}`);
-        const testData = await testResponse.json();
-        results.testEndpoint = {
-            success: testResponse.ok,
-            message: testResponse.ok ? 'Test endpoint success' : 'Test endpoint failed',
-            status: testResponse.status,
-            data: testData
-        };
-    } catch (error) {
-        results.testEndpoint = {
-            success: false,
-            message: `Error with test endpoint: ${error.message}`
-        };
-    }
-    
-    // Test 3: Create and read a test article
-    console.log('Test 3: Creating and reading a test article');
-    const testArticleId = `test_article_${Date.now()}`;
-    const timestamp = Date.now();
-    
-    try {
-        // Create test article
-        const putResponse = await fetch(`${baseUrl}/restdb.php/${hashedUser}/${testArticleId}`, {
-            method: 'PUT',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(timestamp)
-        });
-        
-        // Read it back
-        const getResponse = await fetch(`${baseUrl}/restdb.php/${hashedUser}/${testArticleId}`);
-        let readTimestamp = null;
-        
-        if (getResponse.ok) {
-            readTimestamp = await getResponse.json();
-        }
-        
-        // Delete the test entry
-        const deleteResponse = await fetch(`${baseUrl}/restdb.php/${hashedUser}/${testArticleId}`, {
-            method: 'DELETE'
-        });
-        
-        results.testArticle = {
-            success: putResponse.ok && getResponse.ok && deleteResponse.ok,
-            message: putResponse.ok && getResponse.ok && deleteResponse.ok ? 
-                'Test article created, read, and deleted successfully' : 
-                'Test article operations failed',
-            details: {
-                put: { status: putResponse.status, ok: putResponse.ok },
-                get: { status: getResponse.status, ok: getResponse.ok },
-                delete: { status: deleteResponse.status, ok: deleteResponse.ok },
-                timestampMatch: readTimestamp === timestamp
-            }
-        };
-    } catch (error) {
-        results.testArticle = {
-            success: false,
-            message: `Error with test article: ${error.message}`
-        };
-    }
-    
-    const allSucceeded = 
-        results.basicCreation.success && 
-        results.testEndpoint.success && 
-        results.testArticle.success;
-        
-    console.log(`Directory tests ${allSucceeded ? 'ALL PASSED' : 'FAILED'}`);
-    console.log('Test results:', results);
-        
-    return {
-        status: allSucceeded ? 'success' : 'error',
-        message: allSucceeded ? 
-            'All directory tests passed' : 
-            'One or more directory tests failed',
-        results: results,
-        hashedUser: hashedUser
-    };
 }
 
 // Function to check if there are any unread news items and update notification dot
