@@ -836,7 +836,8 @@ export function cleanupNewsObserver() {
 export function updateNewsNotificationDot() {
     // Check if there are any unread news items in the DOM
     const unreadItems = document.querySelectorAll('.news-time.news-new-time');
-    const hasUnread = unreadItems.length > 0;
+    const unreadCount = unreadItems.length;
+    const hasUnread = unreadCount > 0;
     
     // Update our tracking variable
     hasUnreadNewsItems = hasUnread;
@@ -845,13 +846,16 @@ export function updateNewsNotificationDot() {
     const newsButton = document.querySelector('.section-button[onclick="showSection(\'news\')"]');
     if (!newsButton) return;
     
-    // Update notification dot based on unread status
+    // Update notification counter based on unread status
     if (hasUnread) {
         newsButton.classList.add('has-notification');
-        console.log(`News notification dot added (${unreadItems.length} unread items)`);
+        // Set the data-count attribute for CSS to use as content
+        newsButton.setAttribute('data-count', unreadCount);
+        console.log(`News notification counter updated (${unreadCount} unread items)`);
     } else {
         newsButton.classList.remove('has-notification');
-        console.log('News notification dot removed (no unread items)');
+        newsButton.removeAttribute('data-count');
+        console.log('News notification counter removed (no unread items)');
     }
 }
 

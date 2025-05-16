@@ -182,9 +182,9 @@ body.dark-mode .forecast-day.rain img.forecast-icon {
     color: var(--button-text);
 }
 
-.hourly-avail .forecast-date {
+/* .hourly-avail .forecast-date {
     color: var(--tesla-blue);
-}
+} */
 
 .forecast-icon {
     width: 64px;
