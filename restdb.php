@@ -63,6 +63,7 @@ try {
         $pdo->exec("CREATE TABLE key_value (
             `key` VARCHAR(255) NOT NULL PRIMARY KEY,
             `value` TEXT NULL,
+            'expire_at' TIMESTAMP NULL,
             `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
             `updated_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
         )");
@@ -327,19 +328,9 @@ if ($method === 'POST') {
         foreach ($results as $item) {
             $isDir = $item['value'] === null;
             
-            // Calculate the relative path
-            if (empty($prefix)) {
-                // For root listing, the relative path is the same as the key
-                $relativePath = $item['key'];
-            } else {
-                // For non-root directories, calculate the relative path
-                $relativePath = $item['key'] === $prefix ? '.' : substr($item['key'], strlen($prefix) + 1);
-            }
-            
             $transformed[] = [
                 'key' => $item['key'],
-                'relativePath' => $relativePath,
-                'isDirectory' => $isDir,
+                'isDir' => $isDir,
                 'value' => $isDir ? null : $item['value']
             ];
         }

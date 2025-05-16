@@ -832,6 +832,29 @@ export function cleanupNewsObserver() {
     updateNewsNotificationDot();
 }
 
+// Function to check if there are any unread news items and update notification dot
+export function updateNewsNotificationDot() {
+    // Check if there are any unread news items in the DOM
+    const unreadItems = document.querySelectorAll('.news-time.news-new-time');
+    const hasUnread = unreadItems.length > 0;
+    
+    // Update our tracking variable
+    hasUnreadNewsItems = hasUnread;
+    
+    // Get the news section button
+    const newsButton = document.querySelector('.section-button[onclick="showSection(\'news\')"]');
+    if (!newsButton) return;
+    
+    // Update notification dot based on unread status
+    if (hasUnread) {
+        newsButton.classList.add('has-notification');
+        console.log(`News notification dot added (${unreadItems.length} unread items)`);
+    } else {
+        newsButton.classList.remove('has-notification');
+        console.log('News notification dot removed (no unread items)');
+    }
+}
+
 // User clicks on a news item
 window.clickNews = async function (title, link, source, id) {
     // Mark the news item as read when clicked
@@ -1006,27 +1029,4 @@ window.checkPendingNewsItems = function() {
     console.log(`Currently pending read items: ${pendingReadItems.size}`);
     console.log('Pending IDs:', Array.from(pendingReadItems));
     return Array.from(pendingReadItems);
-}
-
-// Function to check if there are any unread news items and update notification dot
-export function updateNewsNotificationDot() {
-    // Check if there are any unread news items in the DOM
-    const unreadItems = document.querySelectorAll('.news-time.news-new-time');
-    const hasUnread = unreadItems.length > 0;
-    
-    // Update our tracking variable
-    hasUnreadNewsItems = hasUnread;
-    
-    // Get the news section button
-    const newsButton = document.querySelector('.section-button[onclick="showSection(\'news\')"]');
-    if (!newsButton) return;
-    
-    // Update notification dot based on unread status
-    if (hasUnread) {
-        newsButton.classList.add('has-notification');
-        console.log(`News notification dot added (${unreadItems.length} unread items)`);
-    } else {
-        newsButton.classList.remove('has-notification');
-        console.log('News notification dot removed (no unread items)');
-    }
 }
