@@ -5,6 +5,17 @@ import { showSpinner, hideSpinner, showNotification } from './common.js';
 // Constants
 const NEWS_REFRESH_INTERVAL = 5; // minutes
 const MAX_AGE_DAYS = 2; // Maximum age in days for seen news IDs
+const DIRECTORY_CHECK_INTERVAL = 60000; // Only try once per minute at most
+
+// Variables
+let newsUpdateInterval = null;
+let newsTimeUpdateInterval = null; // Interval for updating "time ago" displays
+let newsObserver = null; // Intersection Observer for tracking visible news items
+let pendingReadItems = new Set(); // Track items that are currently visible but not yet marked as read
+let cachedSeenNewsIds = null; // Cache for seen news IDs to reduce API calls
+let directoryInitialized = false; // Track if we've successfully initialized the directory in this session
+let lastDirectoryCheckTime = 0;
+let hasUnreadNewsItems = false; // Track if there are any unread news items
 
 // Export function to ensure user directory exists (used by app.js during startup)
 export async function initializeNewsStorage() {
@@ -50,19 +61,6 @@ export async function initializeNewsStorage() {
         return false;
     }
 }
-
-// Variables
-let newsUpdateInterval = null;
-let newsTimeUpdateInterval = null; // Interval for updating "time ago" displays
-let newsObserver = null; // Intersection Observer for tracking visible news items
-let pendingReadItems = new Set(); // Track items that are currently visible but not yet marked as read
-let hasUnreadNewsItems = false; // Track if there are any unread news items
-let cachedSeenNewsIds = null; // Cache for seen news IDs to reduce API calls
-let directoryInitialized = false; // Track if we've successfully initialized the directory in this session
-
-// Track when we last tried to ensure the directory exists
-let lastDirectoryCheckTime = 0;
-const DIRECTORY_CHECK_INTERVAL = 60000; // Only try once per minute at most
 
 // Helper functions for restdb.php management
 async function ensureUserDirectoryExists(retryCount = 2) {
@@ -182,6 +180,7 @@ async function ensureUserDirectoryExists(retryCount = 2) {
     }
 }
 
+// Get seen news IDs from restdb.php
 async function getSeenNewsIds() {
     // If not logged in, return empty object
     if (!isLoggedIn || !hashedUser) {
@@ -205,42 +204,7 @@ async function getSeenNewsIds() {
         const response = await fetch(`${baseUrl}/restdb.php/${hashedUser}/`);
         
         // Special response code handling
-        if (!response.ok) {
-            // Special case for 404 - could mean the directory exists but is empty
-            if (response.status === 404) {
-                console.log('No seen news data found (empty directory)');
-                cachedSeenNewsIds = {}; // Cache empty result
-                return {};
-            } else if (response.status === 400) {
-                // If we get a 400 error, it might be that what we think is a directory is actually a key
-                console.warn('Got 400 error - might be attempting to treat a key as directory');
-                // Reset initialization flags to force recreation
-                directoryInitialized = false;
-                lastDirectoryCheckTime = 0;
-                
-                // Try to recreate the directory with a more aggressive approach
-                const recreated = await ensureUserDirectoryExists(2);
-                if (recreated) {
-                    console.log('Successfully recreated directory, trying again');
-                    // If directory recreation succeeded, try fetching again
-                    const retryResponse = await fetch(`${baseUrl}/restdb.php/${hashedUser}/`);
-                    if (retryResponse.ok) {
-                        const retryData = await retryResponse.json();
-                        // Process the data as before
-                        const retryResult = {};
-                        if (Array.isArray(retryData)) {
-                            retryData.forEach(item => {
-                                const articleId = item.key.split('/').pop();
-                                const timestamp = JSON.parse(item.value);
-                                retryResult[articleId] = timestamp;
-                            });
-                        }
-                        cachedSeenNewsIds = retryResult;
-                        return retryResult;
-                    }
-                }
-            }
-            
+        if (!response.ok) { 
             console.error('Error fetching seen news IDs:', response.status);
             return {};
         }
@@ -252,6 +216,9 @@ async function getSeenNewsIds() {
         const result = {};
         if (Array.isArray(data)) {
             data.forEach(item => {
+                if (item.isDir) {
+                    return; // Skip directories
+                }
                 // Extract the article ID from the path
                 const articleId = item.key.split('/').pop();
                 // Parse the timestamp from the JSON string
@@ -260,8 +227,6 @@ async function getSeenNewsIds() {
                     result[articleId] = timestamp;
                 } catch (e) {
                     console.warn(`Could not parse timestamp for article ${articleId}:`, e);
-                    // Use current time as fallback
-                    result[articleId] = Date.now();
                 }
             });
             console.log(`Processed ${Object.keys(result).length} article IDs from restdb`);
@@ -278,6 +243,7 @@ async function getSeenNewsIds() {
     }
 }
 
+// Clean up old seen news IDs
 async function cleanupOldSeenIds() {
     // If not logged in, nothing to clean up
     if (!isLoggedIn || !hashedUser) {
@@ -290,63 +256,60 @@ async function cleanupOldSeenIds() {
         // Get all seen news IDs
         const seenIds = await getSeenNewsIds();
         const now = Date.now();
+
+        // Go through each ID and print the ID and timestamp to the console for debugging
+        for (const [id, timestamp] of Object.entries(seenIds)) {
+            const ageInDays = (now - timestamp) / (1000 * 60 * 60 * 24);
+            if (ageInDays > MAX_AGE_DAYS) {
+                console.log(`Age of ID ${id}: ${ageInDays.toFixed(2)} days`);
+                deleteSeenNewsId(id);
+            }
+        }
         
         // Log the number of items before cleanup
         const totalItems = Object.keys(seenIds).length;
         console.log(`Found ${totalItems} stored article IDs before cleanup`);
-        
-        // Count items that need deletion
-        const oldItemCount = Object.entries(seenIds).filter(([id, timestamp]) => {
-            const ageInDays = (now - timestamp) / (1000 * 60 * 60 * 24);
-            return ageInDays >= MAX_AGE_DAYS;
-        }).length;
-        
-        if (oldItemCount === 0) {
-            console.log('No old articles to clean up');
-            return;
-        }
-        
-        console.log(`Cleaning up ${oldItemCount} articles older than ${MAX_AGE_DAYS} days`);
-        
-        // Check each ID and delete if too old
-        const baseUrl = '.'
-        let successCount = 0;
-        let errorCount = 0;
-        
-        const deletePromises = Object.entries(seenIds).map(async ([id, timestamp]) => {
-            const ageInDays = (now - timestamp) / (1000 * 60 * 60 * 24);
-            if (ageInDays >= MAX_AGE_DAYS) {
-                try {
-                    // Delete this entry
-                    const response = await fetch(`${baseUrl}/restdb.php/${hashedUser}/${id}`, {
-                        method: 'DELETE'
-                    });
-                    
-                    if (!response.ok) {
-                        console.error(`Failed to delete old news item ${id}:`, response.status);
-                        errorCount++;
-                    } else {
-                        // Remove from cache if it exists
-                        if (cachedSeenNewsIds && id in cachedSeenNewsIds) {
-                            delete cachedSeenNewsIds[id];
-                        }
-                        successCount++;
-                    }
-                } catch (error) {
-                    console.error(`Error deleting old news item ${id}:`, error);
-                    errorCount++;
-                }
-            }
-        });
-        
-        // Wait for all delete operations to complete
-        await Promise.all(deletePromises);
-        console.log(`Cleanup completed. Successfully deleted: ${successCount}, Failed: ${errorCount}`);
-    } catch (error) {
-        console.error('Error cleaning up old seen news IDs:', error);
+    }
+    catch (error) {
+        console.error('Error during cleanup of seen news IDs:', error);
+        return;
     }
 }
 
+// Delete given news ID from restdb.php
+async function deleteSeenNewsId(id) {
+    // If not logged in, don't persist
+    if (!isLoggedIn || !hashedUser) {
+        return;
+    }
+    
+    try {
+        const baseUrl = '.';
+        
+        // Delete the news ID
+        const response = await fetch(`${baseUrl}/restdb.php/${hashedUser}/${id}`, {
+            method: 'DELETE'
+        });
+        
+        if (!response.ok) {
+            console.error(`Failed to delete news item ${id}:`, response.status);
+            return false;
+        }
+        
+        // Remove from cache if it exists
+        if (cachedSeenNewsIds && id in cachedSeenNewsIds) {
+            delete cachedSeenNewsIds[id];
+        }
+        
+        console.log(`Deleted news item ${id} successfully`);
+        return true;
+    } catch (error) {
+        console.error(`Error deleting news item ${id}:`, error);
+        return false;
+    }
+}
+
+// Mark a news item as seen
 async function markNewsSeen(id) {
     // If not logged in, don't persist
     if (!isLoggedIn || !hashedUser) {
@@ -410,11 +373,6 @@ async function markNewsSeen(id) {
         console.error(`Error marking news item ${id} as seen:`, error);
     }
 }
-
-// async function isNewsSeen(id) {
-//     const seenIds = await getSeenNewsIds();
-//     return id in seenIds;
-// }
 
 // Updates the news headlines, optionally clearing existing ones
 export async function updateNews(clear = false) {
