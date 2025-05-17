@@ -734,15 +734,8 @@ window.showSection = function (sectionId) {
         leaveSettings();
     }
 
-    // Clean up news section when leaving it
-    if (currentSection === 'news') {
-        // Only process pending read items, don't mark everything as read
-        // This ensures unseen items remain highlighted when returning later
-        
-        // Clean up resources - this will also process pending read items
-        cleanupNewsObserver();
-        stopNewsTimeUpdates();
-    }
+    // We no longer need to clean up news section when leaving
+    // This allows news state to persist even when navigating away
 
     // If switching to news section, set up observer and start time updates
     if (sectionId === 'news') {

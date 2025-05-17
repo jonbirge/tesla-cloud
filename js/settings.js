@@ -75,13 +75,7 @@ export function setDrivingState(state) {
 
 // Settings section is being left
 export function leaveSettings() {
-    if (rssIsDirty) {
-        console.log('RSS settings are dirty, updating news feed.')
-        // If RSS is dirty, update the news feed
-        updateNews(rssDrop);
-        rssIsDirty = false; // Reset the dirty flag
-        rssDrop = false; // Reset the drop flag
-    }
+    // RSS settings are now updated immediately when changed, no need to handle here
 
     if (unitIsDirty) {
         console.log('Unit/time settings are dirty, updating weather display.')
@@ -551,9 +545,13 @@ function updateSetting(key, value) {
             // Handle RSS-related settings
             if (key.startsWith('rss-')) {
                 const isDrop = !value; // If unchecked, it's a drop
-                rssIsDirty = true;
-                rssDrop = rssDrop || isDrop; // Set the drop flag if this is a drop
-                // console.log(`RSS setting "${key}" changed to ${value} (dirty: ${rssIsDirty}, drop: ${rssDrop})`);
+                // Instead of setting dirty flags, update news immediately
+                console.log(`RSS setting "${key}" changed to ${value}, updating news feed immediately`);
+                import('./news.js').then(newsModule => {
+                    if (typeof newsModule.updateNews === 'function') {
+                        newsModule.updateNews(isDrop);
+                    }
+                });
             }
             break;
     }
