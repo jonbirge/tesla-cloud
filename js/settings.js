@@ -14,9 +14,10 @@ let rssIsDirty = false;     // Flag to indicate if RSS settings have changed
 let rssDrop = false;        // Flag to indicate if an RSS feed has been dropped
 let unitIsDirty = false;    // Flag to indicate if unit/time settings have changed
 let settings = {};          // Initialize settings object
+let live_news_updates = false; // Flag to control whether news updates should be triggered immediately
 
 // Export settings object so it's accessible to other modules
-export { settings, currentUser, isLoggedIn, hashedUser, isDriving };
+export { settings, currentUser, isLoggedIn, hashedUser, isDriving, live_news_updates };
 
 // Default settings that will be used when no user is logged in
 const defaultSettings = {
@@ -75,7 +76,17 @@ export function setDrivingState(state) {
 
 // Settings section is being left
 export function leaveSettings() {
-    // RSS settings are now updated immediately when changed, no need to handle here
+    // Handle RSS settings if any were changed but not automatically updated
+    if (rssIsDirty) {
+        console.log('RSS settings are dirty, updating news feed now');
+        import('./news.js').then(newsModule => {
+            if (typeof newsModule.updateNews === 'function') {
+                newsModule.updateNews(rssDrop);
+            }
+        });
+        rssIsDirty = false; // Reset the dirty flag
+        rssDrop = false;    // Reset the drop flag
+    }
 
     if (unitIsDirty) {
         console.log('Unit/time settings are dirty, updating weather display.')
@@ -513,6 +524,22 @@ function updateSetting(key, value) {
             updateRadarVisibility();
             break;
             
+        case 'show-stock-indicator':
+            // Special handling for the master switch
+            // If it's being enabled, start updates
+            if (value) {
+                startStockUpdates();
+            } else {
+                stopStockUpdates();
+            }
+            // Update visibility state for all indicators
+            import('./stock.js').then(stockModule => {
+                if (typeof stockModule.updateStockIndicatorVisibility === 'function') {
+                    stockModule.updateStockIndicatorVisibility();
+                }
+            });
+            break;
+            
         case 'show-stock-spy':
         case 'show-stock-dia':
         case 'show-stock-ief':
@@ -545,13 +572,21 @@ function updateSetting(key, value) {
             // Handle RSS-related settings
             if (key.startsWith('rss-')) {
                 const isDrop = !value; // If unchecked, it's a drop
-                // Instead of setting dirty flags, update news immediately
-                console.log(`RSS setting "${key}" changed to ${value}, updating news feed immediately`);
-                import('./news.js').then(newsModule => {
-                    if (typeof newsModule.updateNews === 'function') {
-                        newsModule.updateNews(isDrop);
-                    }
-                });
+                
+                // Only update news immediately if live_news_updates is true
+                if (live_news_updates) {
+                    console.log(`RSS setting "${key}" changed to ${value}, updating news feed immediately`);
+                    import('./news.js').then(newsModule => {
+                        if (typeof newsModule.updateNews === 'function') {
+                            newsModule.updateNews(isDrop);
+                        }
+                    });
+                } else {
+                    console.log(`RSS setting "${key}" changed to ${value}, will update later (live_news_updates is false)`);
+                    // Mark RSS as dirty so we can update after all settings are loaded
+                    rssIsDirty = true;
+                    rssDrop = rssDrop || isDrop; // If any feed was dropped, set flag
+                }
             }
             break;
     }
@@ -708,6 +743,24 @@ window.handleLogin = async function () {
         }
     } catch (error) {
         console.error('Error fetching settings: ', error);
+    }
+}
+
+// Function to enable live news updates and trigger initial update
+export function enableLiveNewsUpdates() {
+    console.log('Enabling live news updates');
+    live_news_updates = true;
+    
+    // If any RSS settings were changed during startup, update now
+    if (rssIsDirty) {
+        console.log('RSS settings were changed during startup, triggering update now');
+        import('./news.js').then(newsModule => {
+            if (typeof newsModule.updateNews === 'function') {
+                newsModule.updateNews(rssDrop);
+            }
+        });
+        rssIsDirty = false;
+        rssDrop = false;
     }
 }
 

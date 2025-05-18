@@ -262,7 +262,7 @@ async function cleanupOldSeenIds() {
             const ageInDays = (now - timestamp) / (1000 * 60 * 60 * 24);
             if (ageInDays > MAX_AGE_DAYS) {
                 console.log(`Age of ID ${id}: ${ageInDays.toFixed(2)} days`);
-                deleteSeenNewsId(id);
+                await deleteSeenNewsId(id);  // avoid sending too many requests at once
             }
         }
         

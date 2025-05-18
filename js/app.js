@@ -1,7 +1,7 @@
 // Imports
 import { srcUpdate, testMode, updateTimeZone, GEONAMES_USERNAME } from './common.js';
 import { PositionSimulator } from './location.js';
-import { attemptLogin, leaveSettings, settings, isDriving, setDrivingState } from './settings.js';
+import { attemptLogin, leaveSettings, settings, isDriving, setDrivingState, enableLiveNewsUpdates } from './settings.js';
 import { fetchPremiumWeatherData, fetchCityData, SAT_URLS, forecastDataPrem } from './wx.js';
 import { updateNetworkInfo, updatePingChart, startPingTest } from './net.js';
 import { markAllNewsAsRead, cleanupNewsObserver, setupNewsObserver, startNewsTimeUpdates, stopNewsTimeUpdates, initializeNewsStorage } from './news.js';
@@ -866,6 +866,9 @@ document.addEventListener('DOMContentLoaded', async function () {
     // Initialize news storage system (create user directory if needed)
     await initializeNewsStorage();
 
+    // Enable live news updates to allow RSS setting changes to trigger immediate updates
+    enableLiveNewsUpdates();
+    
     // Check for NOTE file and display if present
     updateServerNote();
 
