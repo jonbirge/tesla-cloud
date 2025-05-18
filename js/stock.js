@@ -1,7 +1,7 @@
 // Configuration
 const STOCK_API_ENDPOINT = 'quote.php?symbol='; // Prefix for internal stock REST API
-const UPDATE_INTERVAL = 5 * 60 * 1000; // 5 minutes in milliseconds
-const CACHE_AGE_LIMIT = 60 * 1000; // 1 minute in milliseconds
+const UPDATE_INTERVAL = 1 * 60 * 1000; // 5 minutes in milliseconds
+const CACHE_AGE_LIMIT = 1 * 60 * 1000; // 1 minute in milliseconds
 let stockUpdateTimer = null;
 let stockDataCache = {}; // Cache object to store stock data by ticker
 

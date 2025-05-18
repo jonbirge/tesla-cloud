@@ -24,11 +24,15 @@ $cacheDir = '/tmp';
 $cacheTimestampFile = $cacheDir . '/rss_cache_timestamp_' . $version . '.json';
 $logFile = $cacheDir . '/rss_php_' . $version . '.log';
 $maxStories = 512;
-$maxSingleSource = 16;
+$maxSingleSource = 32;
 
 // Get number of stories to return
 $numStories = isset($_GET['n']) ? intval($_GET['n']) : $maxStories;
 $numStories = max(1, min($maxStories, $numStories));
+
+// Get maximum age in days (default: 2 days)
+$maxAgeDays = isset($_GET['age']) ? floatval($_GET['age']) : 2.0;
+$maxAgeSeconds = $maxAgeDays * 86400; // Convert days to seconds
 
 // List of RSS feeds to fetch - now with individual cache durations in minutes
 $feeds = [
@@ -162,6 +166,9 @@ logMessage("Total stories fetched: $totalStories");
 
 // Apply inclusion filters to data
 $outputItems = applyInclusionFilters($allItems, $requestedFeeds);
+
+// Filter items by age
+$outputItems = applyAgeFilter($outputItems, $maxAgeSeconds);
 
 // Limit number of stories if needed
 $outputItems = array_slice($outputItems, 0, $numStories);
@@ -333,6 +340,24 @@ function applyInclusionFilters($items, $includedFeeds) {
     // Re-index array after filtering
     $filteredItems = array_values($filteredItems);
     logMessage("After filtering: " . count($filteredItems) . " items remain");
+    
+    return $filteredItems;
+}
+
+// Function to filter items by age
+function applyAgeFilter($items, $maxAgeSeconds) {
+    $currentTime = time();
+    $filteredItems = array_filter($items, function($item) use ($currentTime, $maxAgeSeconds) {
+        // Calculate how old the item is in seconds
+        $ageInSeconds = $currentTime - $item['date'];
+        // Keep items that are newer than the maximum age
+        return ($ageInSeconds <= $maxAgeSeconds);
+    });
+    
+    // Re-index array after filtering
+    $filteredItems = array_values($filteredItems);
+    logMessage("After age filtering: " . count($filteredItems) . " items remain (max age: " . 
+               round($maxAgeSeconds/86400, 2) . " days)");
     
     return $filteredItems;
 }
