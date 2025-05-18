@@ -1,7 +1,9 @@
 // Configuration
 const STOCK_API_ENDPOINT = 'quote.php?symbol='; // Prefix for internal stock REST API
 const UPDATE_INTERVAL = 5 * 60 * 1000; // 5 minutes in milliseconds
+const CACHE_AGE_LIMIT = 60 * 1000; // 1 minute in milliseconds
 let stockUpdateTimer = null;
+let stockDataCache = {}; // Cache object to store stock data by ticker
 
 // Import settings to check visibility setting
 import { settings } from './settings.js';
@@ -45,6 +47,7 @@ export function stopStockUpdates() {
 // Function to fetch stock data for all indicators
 function fetchStockData() {
     console.log('Fetching financial data...');
+    const currentTime = Date.now();
     
     // Find all stock indicators
     const stockElements = document.querySelectorAll('[id^="stock-status-"]');
@@ -54,6 +57,17 @@ function fetchStockData() {
         // Extract ticker from the element ID and capitalize it
         // Example: 'stock-status-aapl' -> 'AAPL'
         const ticker = element.id.replace('stock-status-', '').toUpperCase();
+        
+        // Check if we have valid cached data
+        if (stockDataCache[ticker] && 
+            currentTime - stockDataCache[ticker].timestamp < CACHE_AGE_LIMIT) {
+            // Use cached data
+            console.log(`Using cached data for ${ticker}`);
+            updateStockDisplay(element.id, stockDataCache[ticker].percentChange);
+            return;
+        }
+        
+        // Cache miss or expired, fetch fresh data
         console.log(`Fetching data for ${ticker}`);
         
         // Create and execute fetch promise without awaiting
@@ -67,6 +81,12 @@ function fetchStockData() {
             .then(data => {
                 // Extract values from our simplified API response
                 const percentChange = data.percentChange;
+                
+                // Cache the data with current timestamp
+                stockDataCache[ticker] = {
+                    percentChange: percentChange,
+                    timestamp: Date.now()
+                };
                 
                 // Update the stock status indicator
                 updateStockDisplay(element.id, percentChange);
