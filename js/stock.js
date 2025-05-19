@@ -48,19 +48,39 @@ export function stopStockUpdates() {
 function fetchStockData() {
     console.log('Fetching financial data...');
     const currentTime = Date.now();
+
+    // Flag to indicate if US markets are open
+    let usMarketsOpen;
+    // Check if US markets are open (9:30 AM to 4:00 PM ET)
+    const now = new Date();
+    const startOfDay = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 9, 30);
+    const endOfDay = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 16, 0);
+    if (now >= startOfDay && now <= endOfDay) {
+        usMarketsOpen = true;
+    } else {
+        usMarketsOpen = false;
+    }
+    console.log(`US markets open: ${usMarketsOpen}`);
     
     // Find all stock indicators
     const stockElements = document.querySelectorAll('[id^="stock-status-"]');
     
     // Process each stock element independently using promises
     stockElements.forEach(element => {
+        // Skip if the element is not visible
+        if (element.style.display === 'none') {
+            console.log(`Skipping hidden element: ${element.id}`);
+            return;
+        }
+
         // Extract ticker from the element ID and capitalize it
         // Example: 'stock-status-aapl' -> 'AAPL'
         const ticker = element.id.replace('stock-status-', '').toUpperCase();
         
         // Check if we have valid cached data
         if (stockDataCache[ticker] && 
-            currentTime - stockDataCache[ticker].timestamp < CACHE_AGE_LIMIT) {
+            (((currentTime - stockDataCache[ticker].timestamp) < CACHE_AGE_LIMIT) ||
+            !usMarketsOpen)) {
             // Use cached data
             console.log(`Using cached data for ${ticker}`);
             updateStockDisplay(element.id, stockDataCache[ticker].percentChange);
