@@ -3,7 +3,7 @@ import { settings, isDriving, hashedUser, isLoggedIn } from './settings.js';
 import { showSpinner, hideSpinner, showNotification } from './common.js';
 
 // Constants
-const BASE_URL = 'rss.php?n=128';
+const BASE_URL = 'news.php?n=128';
 const NEWS_REFRESH_INTERVAL = 2.5; // minutes
 const MAX_AGE_DAYS = 2; // Maximum age in days for seen news IDs
 const DIRECTORY_CHECK_INTERVAL = 60000; // Only try once per minute at most
