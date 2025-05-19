@@ -314,24 +314,24 @@ hr {
 }
 
 .section-button.has-notification::after {
-    content: attr(data-count);  /* Use the data-count attribute for the counter text */
+    content: attr(data-count);      /* Use the data-count attribute for counter text */
     position: absolute;
-    top: 50%;                   /* Center vertically */
-    right: 10px;                /* Position to the right of text instead of left */
-    transform: translateY(-50%); /* Perfect vertical centering */
-    min-width: 20px;            /* Minimum width for the counter */
-    height: 26px;               /* Taller to accommodate text */
+    top: 50%;                       /* Center vertically */
+    right: 10px;                    /* Position to the right of text instead of left */
+    transform: translateY(-50%);    /* Perfect vertical centering */
+    min-width: 20px;                /* Minimum width for the counter */
+    height: 26px;                   /* Taller to accommodate text */
     background-color: var(--tesla-blue);
-    border-radius: 13px;        /* Rounded pill shape */
-    display: flex;              /* Use flex to center the counter text */
-    justify-content: center;    /* Center horizontally */
-    align-items: center;        /* Center vertically */
-    color: white;             /* White text */
-    font-size: 12pt;            /* Small font size */
-    font-weight: 600;          /* Bold text */
-    padding: 0px 7px;             /* Add some padding on the sides */
-    animation: pulse 2s 1;      /* Changed from 3 pulses to 1 */
-    animation-fill-mode: forwards; /* Keep final state */
+    border-radius: 13px;            /* Rounded pill shape */
+    display: flex;                  /* Use flex to center the counter text */
+    justify-content: center;        /* Center horizontally */
+    align-items: center;            /* Center vertically */
+    color: white;                 /* White text */
+    font-size: 12pt;                /* Small font size */
+    font-weight: 600;               /* Bold text */
+    padding: 0px 7px;               /* Add some padding on the sides */
+    animation: pulse 2s 1;          /* Changed from 3 pulses to 1 */
+    animation-fill-mode: forwards;  /* Keep final state */
 }
 
 @keyframes pulse {

@@ -873,7 +873,7 @@ export function updateNewsNotificationDot() {
     hasUnreadNewsItems = hasUnread;
     
     // Get the news section button
-    const newsButton = document.querySelector('.section-button[onclick="showSection(\'news\')"]');
+    const newsButton = document.getElementById('news-section');
     if (!newsButton) return;
     
     // Update notification counter based on unread status

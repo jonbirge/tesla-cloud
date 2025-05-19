@@ -518,13 +518,9 @@ function updateServerNote() {
             return response.text();
         })
         .then(content => {
-            // Sanitize the content to prevent XSS
-            const sanitizedContent = document.createElement('div');
-            sanitizedContent.textContent = content;
-
-            // Update the note paragraph with the sanitized content in italic
+            // Update the note paragraph with the content in italic
             const noteElement = document.getElementById('note');
-            noteElement.innerHTML = sanitizedContent.innerHTML;
+            noteElement.innerHTML = content;
 
             // Show the announcement section
             const announcementSection = document.getElementById('announcement');
@@ -532,13 +528,11 @@ function updateServerNote() {
                 announcementSection.style.display = 'block';
             }
 
-            // Add notification dot to About section if it's not the current section
-            const aboutSection = document.getElementById('about');
-            if (aboutSection && aboutSection.style.display !== 'block') {
-                const aboutButton = document.querySelector('.section-button[onclick="showSection(\'about\')"]');
-                if (aboutButton) {
-                    aboutButton.classList.add('has-notification');
-                }
+            // Add notification dot to About section button if it's not the current section
+            const aboutButton = document.getElementById('about-section');
+            if (aboutButton) {
+                aboutButton.classList.add('has-notification');
+                aboutButton.setAttribute('data-count', '1'); // Set count to 1
             }
         })
         .catch(error => {
@@ -734,9 +728,6 @@ window.showSection = function (sectionId) {
         leaveSettings();
     }
 
-    // We no longer need to clean up news section when leaving
-    // This allows news state to persist even when navigating away
-
     // If switching to news section, set up observer and start time updates
     if (sectionId === 'news') {
         // Set up the observer for visible news items and start time updates
@@ -748,14 +739,14 @@ window.showSection = function (sectionId) {
 
     // If switching to about section, clear the notification dot
     if (sectionId === 'about') {
-        const aboutButton = document.querySelector('.section-button[onclick="showSection(\'about\')"]');
+        const aboutButton = document.getElementById('about-section');
         if (aboutButton) {
             aboutButton.classList.remove('has-notification');
+            aboutButton.removeAttribute('data-count'); // Remove count attribute
         }
     }
 
     // Satellite section
-    // TODO: This stuff should either be in wx.js or SAT_URLS moved here.
     if (sectionId === 'satellite') {
         // Load weather image when satellite section is shown
         const weatherImage = document.getElementById('weather-image');
