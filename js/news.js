@@ -3,6 +3,7 @@ import { settings, isDriving, hashedUser, isLoggedIn } from './settings.js';
 import { showSpinner, hideSpinner, showNotification } from './common.js';
 
 // Constants
+const BASE_URL = 'rss.php?n=128';
 const NEWS_REFRESH_INTERVAL = 2.5; // minutes
 const MAX_AGE_DAYS = 2; // Maximum age in days for seen news IDs
 const DIRECTORY_CHECK_INTERVAL = 60000; // Only try once per minute at most
@@ -403,9 +404,6 @@ export async function updateNews(clear = false) {
             }
         }
         
-        // Allows for adding options to the URL for future use
-        const baseUrl = 'rss.php?n=128';
-        
         // Get the news container element
         const newsContainer = document.getElementById('newsHeadlines');
         if (!newsContainer) return;
@@ -435,7 +433,7 @@ export async function updateNews(clear = false) {
         }
         
         // Send the request with included feeds in the body
-        const response = await fetch(baseUrl, {
+        const response = await fetch(BASE_URL, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
@@ -450,7 +448,6 @@ export async function updateNews(clear = false) {
         
         // Track if we have new items
         let hasNewItems = false;
-        
         if (loadedItems.length > 0) {
             // Generate unique IDs for each news item and check against our database
             // Since isNewsSeen is now async, we need to check all items in a batch
@@ -490,6 +487,13 @@ export async function updateNews(clear = false) {
 
         // Sort items by date - newest first
         loadedItems.sort((a, b) => b.date - a.date);
+
+        // Move all unread items to the top of the list
+        loadedItems.sort((a, b) => {
+            if (a.isUnread && !b.isUnread) return -1; // Unread items first
+            if (!a.isUnread && b.isUnread) return 1; // Read items last
+            return 0; // Keep original order for same read status
+        });
 
         // Update the news container with the new items
         if (loadedItems.length > 0) {
