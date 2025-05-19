@@ -4,6 +4,7 @@ import { showSpinner, hideSpinner, showNotification } from './common.js';
 
 // Constants
 const BASE_URL = 'news.php?n=128';
+const RESTDB_URL = 'rest_db.php';
 const NEWS_REFRESH_INTERVAL = 2.5; // minutes
 const MAX_AGE_DAYS = 2; // Maximum age in days for seen news IDs
 const DIRECTORY_CHECK_INTERVAL = 60000; // Only try once per minute at most
@@ -63,7 +64,7 @@ export async function initializeNewsStorage() {
     }
 }
 
-// Helper functions for restdb.php management
+// Helper functions for rest_db.php management
 async function ensureUserDirectoryExists(retryCount = 2) {
     // Skip if not logged in
     if (!isLoggedIn || !hashedUser) {
@@ -86,12 +87,11 @@ async function ensureUserDirectoryExists(retryCount = 2) {
     
     try {
         console.log(`Ensuring user directory exists for: ${hashedUser}`);
-        const baseUrl = '.';
         
         // First check if the directory exists via GET
         let directoryExists = false;
         try {
-            const checkResponse = await fetch(`${baseUrl}/restdb.php/${hashedUser}/`, {
+            const checkResponse = await fetch(`${RESTDB_URL}/${hashedUser}/`, {
                 method: 'GET'
             });
             
@@ -112,7 +112,7 @@ async function ensureUserDirectoryExists(retryCount = 2) {
         
         // If not exists or check failed, use POST to create the directory
         console.log('Attempting to create directory via POST');
-        const response = await fetch(`${baseUrl}/restdb.php/${hashedUser}/`, {
+        const response = await fetch(`${RESTDB_URL}/${hashedUser}/`, {
             method: 'POST'
         });
         
@@ -181,7 +181,7 @@ async function ensureUserDirectoryExists(retryCount = 2) {
     }
 }
 
-// Get seen news IDs from restdb.php
+// Get seen news IDs from rest_db.php
 async function getSeenNewsIds() {
     // If not logged in, return empty object
     if (!isLoggedIn || !hashedUser) {
@@ -194,15 +194,12 @@ async function getSeenNewsIds() {
         return cachedSeenNewsIds;
     }
     
-    try {
-        // Get the base URL of the current page
-        const baseUrl = '.';
-        
+    try {        
         // Log the request for debugging
-        console.log(`Fetching news IDs from: ${baseUrl}/restdb.php/${hashedUser}/`);
+        console.log(`Fetching news IDs from: ${RESTDB_URL}/${hashedUser}/`);
         
         // Get the directory contents
-        const response = await fetch(`${baseUrl}/restdb.php/${hashedUser}/`);
+        const response = await fetch(`${RESTDB_URL}/${hashedUser}/`);
         
         // Special response code handling
         if (!response.ok) { 
@@ -277,18 +274,16 @@ async function cleanupOldSeenIds() {
     }
 }
 
-// Delete given news ID from restdb.php
+// Delete given news ID from ${RESTDB_URL}
 async function deleteSeenNewsId(id) {
     // If not logged in, don't persist
     if (!isLoggedIn || !hashedUser) {
         return;
     }
     
-    try {
-        const baseUrl = '.';
-        
+    try {        
         // Delete the news ID
-        const response = await fetch(`${baseUrl}/restdb.php/${hashedUser}/${id}`, {
+        const response = await fetch(`${RESTDB_URL}/${hashedUser}/${id}`, {
             method: 'DELETE'
         });
         
@@ -319,10 +314,9 @@ async function markNewsSeen(id) {
     
     try {
         const timestamp = Date.now();
-        const baseUrl ='.';
         
         // Store the timestamp as JSON
-        const response = await fetch(`${baseUrl}/restdb.php/${hashedUser}/${id}`, {
+        const response = await fetch(`${RESTDB_URL}/${hashedUser}/${id}`, {
             method: 'PUT',
             headers: {
                 'Content-Type': 'application/json'
@@ -343,7 +337,7 @@ async function markNewsSeen(id) {
                 if (recreated) {
                     console.log(`Retrying PUT for article ${id} after directory recreation`);
                     // Retry the PUT request
-                    const retryResponse = await fetch(`${baseUrl}/restdb.php/${hashedUser}/${id}`, {
+                    const retryResponse = await fetch(`${RESTDB_URL}/${hashedUser}/${id}`, {
                         method: 'PUT',
                         headers: {
                             'Content-Type': 'application/json'
@@ -738,7 +732,7 @@ export function setupNewsObserver() {
                 // If it was in our pending set, now mark it as read
                 if (pendingReadItems.has(id) && timeElement.classList.contains('news-new-time')) {
                     console.log(`News item scrolled out of view, marking as read: ${id}`);
-                    // Mark as seen in restdb.php
+                    // Mark as seen in ${RESTDB_URL}
                     markNewsSeen(id).then(() => {
                         // Remove from pending set
                         pendingReadItems.delete(id);
@@ -900,7 +894,7 @@ window.clickNews = async function (title, link, source, id) {
         // Remove from pending items if it was there
         pendingReadItems.delete(id);
         
-        // Mark as read in restdb.php
+        // Mark as read in ${RESTDB_URL}
         await markNewsSeen(id);
         
         // Update the UI - add transition and remove "new" styling
@@ -1007,7 +1001,7 @@ window.resumeNewsUpdates = function () {
     }
 }
 
-// Debug function to check restdb.php news data
+// Debug function to check ${RESTDB_URL} news data
 window.checkSeenNewsStorage = async function() {
     const seenIds = await getSeenNewsIds();
     const count = Object.keys(seenIds).length;
@@ -1029,7 +1023,7 @@ window.checkSeenNewsStorage = async function() {
     };
 }
 
-// Clear all seen news data from restdb.php
+// Clear all seen news data from ${RESTDB_URL}
 window.clearSeenNewsStorage = async function() {
     // Only perform if user is logged in
     if (!isLoggedIn || !hashedUser) {
@@ -1040,11 +1034,10 @@ window.clearSeenNewsStorage = async function() {
     try {
         // Get all article IDs
         const seenIds = await getSeenNewsIds();
-        const baseUrl = '.';
         
         // Delete each article ID
         const deletePromises = Object.keys(seenIds).map(id => {
-            return fetch(`${baseUrl}/restdb.php/${hashedUser}/${id}`, {
+            return fetch(`${RESTDB_URL}/${hashedUser}/${id}`, {
                 method: 'DELETE'
             });
         });
@@ -1054,7 +1047,7 @@ window.clearSeenNewsStorage = async function() {
         // Clear the cache
         cachedSeenNewsIds = {};
         
-        console.log('Cleared all seen news data from restdb.php');
+        console.log('Cleared all seen news data from rest_db.php');
         return true;
     } catch (error) {
         console.error('Error clearing seen news data:', error);
