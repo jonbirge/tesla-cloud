@@ -3,7 +3,7 @@ import { settings, isDriving, hashedUser, isLoggedIn } from './settings.js';
 import { showSpinner, hideSpinner, showNotification } from './common.js';
 
 // Constants
-const NEWS_REFRESH_INTERVAL = 5; // minutes
+const NEWS_REFRESH_INTERVAL = 2.5; // minutes
 const MAX_AGE_DAYS = 2; // Maximum age in days for seen news IDs
 const DIRECTORY_CHECK_INTERVAL = 60000; // Only try once per minute at most
 
@@ -643,8 +643,9 @@ function generateTimeAgoText(timestamp) {
 // Generate unique IDs for news items
 function genItemID(item)
 {
-    // Combine all relevant item properties into a single string
-    const dataToHash = `${item.source}${item.title}${item.date}`;
+    // Combine all relevant item properties into a single string,
+    // excluding the date to avoid getting fooled by minor updates
+    const dataToHash = `${item.source}${item.title}`;
     
     // Generate a hash - first convert string to a numerical hash
     let hash = 0;
