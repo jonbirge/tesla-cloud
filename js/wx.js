@@ -22,7 +22,7 @@ let country = null;                     // Variable to store the country name
 let inCONUS = null;                     // Variable to store if the location is in the continental US (CONUS)
 
 // Export these variables for use in other modules
-export { SAT_URLS, forecastDataPrem, lastLat, lastLong, city, state };
+export { SAT_URLS, forecastDataPrem, lastLat, lastLong, city, state, currentRainAlert };
 
 // Fetches premium weather data from OpenWeather API
 export function fetchPremiumWeatherData(lat, long, silentLoad = false) {
@@ -423,7 +423,7 @@ function startPrecipGraphAutoRefresh() {
     }, GRAPH_DELAY*1000); // Update every n seconds
 }
 
-// Check for imminent rain (next 15 minutes) and alert user if so
+// Check for imminent rain (next 10 minutes) and alert user if so
 function checkImminentRain(minutelyData) {
     if (!minutelyData || minutelyData.length === 0) {
         toggleRainIndicator(false);
@@ -434,11 +434,11 @@ function checkImminentRain(minutelyData) {
     // Get current time
     const currentTime = new Date();
     
-    // Filter and process only the next 15 minutes of data
+    // Filter and process only the next 10 minutes of data
     const next15MinData = minutelyData.filter(minute => {
         const minuteTime = new Date(minute.dt * 1000);
         const timeDiffMinutes = (minuteTime - currentTime) / (60 * 1000);
-        return timeDiffMinutes >= 0 && timeDiffMinutes <= 15;
+        return timeDiffMinutes >= 0 && timeDiffMinutes <= 10;
     });
     
     // Determine if any precipitation is expected in the next 15 minutes
@@ -474,6 +474,7 @@ function checkImminentRain(minutelyData) {
         // Show the notification
         showNotification(message);
         // Set flag that we're under an active rain alert
+        // This flag is also used to trigger more frequent weather updates
         currentRainAlert = true;
     } else if (!hasImminentRain) {
         // Reset the alert flag when there's no longer imminent rain

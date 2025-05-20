@@ -2,7 +2,7 @@
 import { srcUpdate, testMode, updateTimeZone, GEONAMES_USERNAME } from './common.js';
 import { PositionSimulator } from './location.js';
 import { attemptLogin, leaveSettings, settings, isDriving, setDrivingState, enableLiveNewsUpdates } from './settings.js';
-import { fetchPremiumWeatherData, fetchCityData, SAT_URLS, forecastDataPrem } from './wx.js';
+import { fetchPremiumWeatherData, fetchCityData, SAT_URLS, forecastDataPrem, currentRainAlert } from './wx.js';
 import { updateNetworkInfo, updatePingChart, startPingTest } from './net.js';
 import { markAllNewsAsRead, cleanupNewsObserver, setupNewsObserver, startNewsTimeUpdates, stopNewsTimeUpdates, initializeNewsStorage } from './news.js';
 import { startStockUpdates, stopStockUpdates } from './stock.js';
@@ -12,6 +12,7 @@ const DEFAULT_SECTION = 'navigation';               // Default section to show
 const LATLON_UPDATE_INTERVAL = 2;                   // seconds
 const UPDATE_DISTANCE_THRESHOLD = 2500;             // meters
 const UPDATE_TIME_THRESHOLD = 10;                   // minutes
+const UPDATE_TIME_THRESHOLD_RAIN = 2;               // minutes (when rain is predicted)
 const WX_DISTANCE_THRESHOLD = 25000;                // meters
 const WX_TIME_THRESHOLD = 60;                       // minutes
 const MAX_SPEED = 50;                               // Max speed for wind display (mph)
@@ -299,8 +300,16 @@ function shouldUpdateShortRangeData() {
     const now = Date.now();
     const timeSinceLastUpdate = (now - lastUpdate) / (1000 * 60); // Convert to minutes
     const distance = calculateDistance(lat, long, lastUpdateLat, lastUpdateLong);
-
-    return distance >= UPDATE_DISTANCE_THRESHOLD || timeSinceLastUpdate >= UPDATE_TIME_THRESHOLD;
+    
+    // Use shorter time threshold when rain is predicted in the minutely forecast
+    const timeThreshold = currentRainAlert ? UPDATE_TIME_THRESHOLD_RAIN : UPDATE_TIME_THRESHOLD;
+    
+    // Log when we're using the rain-based update interval
+    if (currentRainAlert && timeSinceLastUpdate >= timeThreshold) {
+        console.log(`Rain detected: Using shorter weather update interval (${UPDATE_TIME_THRESHOLD_RAIN} minutes)`);
+    }
+    
+    return distance >= UPDATE_DISTANCE_THRESHOLD || timeSinceLastUpdate >= timeThreshold;
 }
 
 // Function to determine if long-range data should be updated

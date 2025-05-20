@@ -667,18 +667,18 @@ body.dark-mode .img-white-transparent {
 
 .stat-value {
     color: var(--button-text);
-    font-size: 48pt;
-    /* font-weight: 600; */
-    display: inline;
+    font-size: 52pt;
+    font-weight: 500;
+    /* display: inline; */
     font-variant-numeric: tabular-nums;
 }
 
 .stat-unit {
     color: var(--text-color);
     font-size: 24pt;
-    /* font-weight: 650; */
+    font-weight: 600;
     font-family: sans-serif;
-    display: inline;
+    /* display: inline; */
     margin-left: 5px; /* Add some spacing between value and unit */
 }
 
