@@ -3,21 +3,23 @@ import { settings, isDriving, hashedUser, isLoggedIn } from './settings.js';
 import { showSpinner, hideSpinner, showNotification } from './common.js';
 
 // Constants
-const BASE_URL = 'news.php?n=128';
+const BASE_URL = 'news.php?n=256';
 const RESTDB_URL = 'rest_db.php';
-const NEWS_REFRESH_INTERVAL = 2.5; // minutes
-const MAX_AGE_DAYS = 2; // Maximum age in days for seen news IDs
-const DIRECTORY_CHECK_INTERVAL = 60000; // Only try once per minute at most
+const NEWS_REFRESH_INTERVAL = 2.5;  // minutes
+const CLEANUP_INTERVAL = 120;       // minutes
+const MAX_AGE_DAYS = 2;             // Maximum age in days for seen news IDs
 
 // Variables
 let newsUpdateInterval = null;
-let newsTimeUpdateInterval = null; // Interval for updating "time ago" displays
-let newsObserver = null; // Intersection Observer for tracking visible news items
-let pendingReadItems = new Set(); // Track items that are currently visible but not yet marked as read
-let cachedSeenNewsIds = null; // Cache for seen news IDs to reduce API calls
-let directoryInitialized = false; // Track if we've successfully initialized the directory in this session
+let newsTimeUpdateInterval = null;  // Interval for updating "time ago" displays
+let newsObserver = null;            // Intersection Observer for tracking visible news items
+let pendingReadItems = new Set();   // Track items that are currently visible but not yet marked as read
+let cachedSeenNewsIds = null;       // Cache for seen news IDs to reduce API calls
+let directoryInitialized = false;   // Track if we've successfully initialized the directory in this session
 let lastDirectoryCheckTime = 0;
-let hasUnreadNewsItems = false; // Track if there are any unread news items
+let displayedItems = [];            // Store loaded news items
+let hasUnreadNewsItems = false;     // Track if there are any unread news items
+let updatingNews = false;
 
 // Export function to ensure user directory exists (used by app.js during startup)
 export async function initializeNewsStorage() {
@@ -66,6 +68,8 @@ export async function initializeNewsStorage() {
 
 // Helper functions for rest_db.php management
 async function ensureUserDirectoryExists(retryCount = 2) {
+    const DIRECTORY_CHECK_INTERVAL = 60000; // Only try once per minute at most
+
     // Skip if not logged in
     if (!isLoggedIn || !hashedUser) {
         return false;
@@ -311,11 +315,10 @@ async function markNewsSeen(id) {
     if (!isLoggedIn || !hashedUser) {
         return;
     }
-    
+
     try {
-        const timestamp = Date.now();
-        
         // Store the timestamp as JSON
+        const timestamp = Date.now();     
         const response = await fetch(`${RESTDB_URL}/${hashedUser}/${id}`, {
             method: 'PUT',
             headers: {
@@ -323,62 +326,38 @@ async function markNewsSeen(id) {
             },
             body: JSON.stringify(timestamp)
         });
-        
-        if (!response.ok) {
-            console.error(`Failed to mark news item ${id} as seen:`, response.status);
-            
-            // If we get a 409 error or a 404, the directory might not exist despite our check
-            if (response.status === 409 || response.status === 404) {
-                console.warn('Directory might not actually exist, trying to force creation');
-                
-                // Force directory creation and retry the PUT if successful
-                const recreated = await ensureUserDirectoryExists(2); // Try harder this time
-                
-                if (recreated) {
-                    console.log(`Retrying PUT for article ${id} after directory recreation`);
-                    // Retry the PUT request
-                    const retryResponse = await fetch(`${RESTDB_URL}/${hashedUser}/${id}`, {
-                        method: 'PUT',
-                        headers: {
-                            'Content-Type': 'application/json'
-                        },
-                        body: JSON.stringify(timestamp)
-                    });
-                    
-                    if (retryResponse.ok) {
-                        console.log(`Successfully marked article ${id} as seen after retry`);
-                        // Update the cache
-                        if (cachedSeenNewsIds !== null) {
-                            cachedSeenNewsIds[id] = timestamp;
-                        }
-                        return;
-                    } else {
-                        console.error(`Retry also failed for article ${id}:`, retryResponse.status);
-                    }
-                }
+
+        if (response.ok) {
+            console.log(`Successfully marked article ${id} as seen.`);
+            // Update the cache
+            if (cachedSeenNewsIds !== null) {
+                cachedSeenNewsIds[id] = timestamp;
             }
-            return;
-        }
-        
-        // Update the cache
-        if (cachedSeenNewsIds !== null) {
-            cachedSeenNewsIds[id] = timestamp;
+        } else {
+            console.log(`Something went wrong marking article ${id} as seen...`);
         }
     } catch (error) {
-        console.error(`Error marking news item ${id} as seen:`, error);
+        console.error(`Error caught marking news item ${id} as seen:`, error);
     }
 }
 
 // Updates the news headlines, optionally clearing existing ones
 export async function updateNews(clear = false) {
+    if (updatingNews) {
+        console.log('*** Already updating news! Quitting...');
+        return;
+    } else {
+        updatingNews = true;
+    }
+
     try {
-        // Run cleanup of old articles once per app session
+        // Run loading/cleanup of server-stored articles once per app session
         if (isLoggedIn && hashedUser) {
             // Only run cleanup occasionally to reduce API load
             const now = Date.now();
             const lastCleanup = sessionStorage.getItem('lastNewsCleanup') || 0;
             
-            if (now - lastCleanup > 3600000) { // Run cleanup once per hour at most
+            if (now - lastCleanup > (CLEANUP_INTERVAL * 1000 * 60)) { // Run cleanup once per hour at most
                 console.log('Running cleanup of old seen news IDs...');
                 await cleanupOldSeenIds();
                 sessionStorage.setItem('lastNewsCleanup', now.toString());
@@ -400,32 +379,31 @@ export async function updateNews(clear = false) {
         
         // Get the news container element
         const newsContainer = document.getElementById('newsHeadlines');
-        if (!newsContainer) return;
 
         // Clear the news container as needed
         if (clear) {
             console.log('Clearing news headlines...');
             newsContainer.innerHTML = '';
+            displayedItems = [];
         }
 
         // Show loading spinner if no items are displayed yet or only showing a message
-        const isEmpty = !newsContainer.innerHTML || 
-                       newsContainer.innerHTML.includes('<em>') || 
-                       newsContainer.innerHTML.trim() === '';
-        
+        const isEmpty = !newsContainer.innerHTML || newsContainer.innerHTML.trim() === '';
         if (isEmpty) {
-            // Show the static spinner instead of creating one dynamically
             document.getElementById('news-loading').style.display = 'flex';
             newsContainer.style.display = 'none';
         }
         
         console.log('Fetching news headlines...');
-        if (includedFeeds.length > 0) {
-            console.log('Including RSS feeds:', includedFeeds);
-        } else {
-            console.log('No RSS feeds selected, showing all available feeds');
-        }
+        // if (includedFeeds.length > 0) {
+        //     console.log('Including RSS feeds:', includedFeeds);
+        // } else {
+        //     console.log('No RSS feeds selected, showing all available feeds');
+        // }
         
+        // Copy displayedItems to oldDisplayedItems
+        let oldDisplayedItems = [...displayedItems];
+
         // Send the request with included feeds in the body
         const response = await fetch(BASE_URL, {
             method: 'POST',
@@ -434,70 +412,77 @@ export async function updateNews(clear = false) {
             },
             body: JSON.stringify({ includedFeeds })
         });
-        const loadedItems = await response.json();
+        let loadedItems = await response.json();
+        console.log('...Done! Count: ', loadedItems.length);
         
         // Hide the spinner when data arrives
         document.getElementById('news-loading').style.display = 'none';
         newsContainer.style.display = 'block';
+
+        // Add a unique ID to each item
+        loadedItems.forEach(item => {
+            // Create a unique ID based on title and source
+            item.id = genItemID(item);
+        });
         
-        // Track if we have new items
-        let hasNewItems = false;
-        if (loadedItems.length > 0) {
-            // Generate unique IDs for each news item and check against our database
-            // Since isNewsSeen is now async, we need to check all items in a batch
-            const itemIds = loadedItems.map(item => {
-                // Create a unique ID based on title and source
-                item.id = genItemID(item);
-                return item.id;
+        // Filter out items where the ID can be found in oldDisplayedItems
+        const nLoaded = loadedItems.length;
+        // Create a Set of oldDisplayedIds for O(1) lookups instead of O(n) with Array.includes()
+        const oldDisplayedIdsSet = new Set(oldDisplayedItems.map(item => item.id));
+        // Filter using the Set for much faster lookups
+        loadedItems = loadedItems.filter(item => !oldDisplayedIdsSet.has(item.id));
+        const nFiltered = loadedItems.length;
+        console.log(`Left with ${nFiltered} out of ${nLoaded} loaded items after filtering existing displayed items`);
+
+        // Clean items from oldDisplayedItems from sources that are not in includedFeeds
+        if (includedFeeds.length > 0) {
+            const includedSources = new Set(includedFeeds);
+            oldDisplayedItems = oldDisplayedItems.filter(item => {
+                return includedSources.has(item.source);
             });
-            
-            // Get all seen IDs in one go
-            const seenIds = await getSeenNewsIds();
-            
+        }
+        
+        // Track if we have unread items among newly loaded items...
+        if (loadedItems.length > 0) {            
             // Mark each item's read status
             loadedItems.forEach(item => {
                 // Check if this is a new item
-                item.isUnread = !(item.id in seenIds);
-                
-                // Track if we have new items but don't mark them as seen yet
-                // They'll be marked as seen when they become visible via the observer
-                if (item.isUnread) {
-                    hasNewItems = true;
-                }
+                item.isUnread = !(item.id in cachedSeenNewsIds);
             });
-            
-            // If we have new items, update notification dot
-            if (hasNewItems) {
-                // Add notification dot if news section is not currently displayed
-                const newsSection = document.getElementById('news');
-                if (newsSection && newsSection.style.display !== 'block') {
-                    const newsButton = document.querySelector('.section-button[onclick="showSection(\'news\')"]');
-                    if (newsButton) {
-                        newsButton.classList.add('has-notification');
-                    }
-                }
-            }
+
+            // Remove items that have isUnread flag set to false
+            loadedItems = loadedItems.filter(item => item.isUnread);
         }
 
-        // Sort items by date - newest first
-        loadedItems.sort((a, b) => b.date - a.date);
+        // ...and update the read status of old displayed items
+        if (oldDisplayedItems.length > 0) {
+            oldDisplayedItems.forEach(item => {
+                // Check if this is a new item
+                item.isUnread = !(item.id in cachedSeenNewsIds);
+            });
+        }
 
-        // Move all unread items to the top of the list
-        loadedItems.sort((a, b) => {
-            if (a.isUnread && !b.isUnread) return -1; // Unread items first
-            if (!a.isUnread && b.isUnread) return 1; // Read items last
-            return 0; // Keep original order for same read status
-        });
+        // If anything has made it past all the filters, sort by date
+        if (loadedItems.length > 0) {
+            console.log('We have unread items among newly loaded items!');
+            loadedItems.sort((a, b) => b.date - a.date);
+        }
+
+        // Create new displayed items array by joining loadedItems and oldDisplayedItems
+        displayedItems = [...loadedItems, ...oldDisplayedItems];
 
         // Update the news container with the new items
-        if (loadedItems.length > 0) {
-            newsContainer.innerHTML = loadedItems.map(generateHTMLforItem).join('');
+        if (displayedItems.length > 0) {
+            newsContainer.innerHTML = displayedItems.map(generateHTMLforItem).join('');
             
             // Set up the observer to track visible news items
             setupNewsObserver();
             
             // Update notification dot status based on unread items
             updateNewsNotificationDot();
+
+            // Update the visibility of share buttons
+            setShareButtonsVisibility();
         } else {
             newsContainer.innerHTML = '<p><em>No headlines available</em></p>';
         }
@@ -515,8 +500,7 @@ export async function updateNews(clear = false) {
         }
     }
 
-    // Update the visibility of share buttons
-    setShareButtonsVisibility();
+    updatingNews = false;
 }
 
 // Set visibility of the share buttons based on settings
@@ -724,7 +708,7 @@ export function setupNewsObserver() {
                 if (timeElement.classList.contains('news-new-time')) {
                     // Add to pending set (don't mark as read yet)
                     pendingReadItems.add(id);
-                    console.log(`News item now visible, added to pending: ${id} (Total pending: ${pendingReadItems.size})`);
+                    //console.log(`News item now visible, added to pending: ${id} (Total pending: ${pendingReadItems.size})`);
                 }
             } 
             // Item is no longer visible
@@ -767,7 +751,7 @@ export function setupNewsObserver() {
     
     console.log('News observer set up, watching for visible news items');
     
-    // Immediately identify initially visible unread items
+    // Immediately (and asynchronously) identify initially visible unread items
     setTimeout(() => {
         // Use a different method to find initially visible items
         // since IntersectionObserver might not fire immediately

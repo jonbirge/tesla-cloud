@@ -753,7 +753,7 @@ export function enableLiveNewsUpdates() {
     
     // If any RSS settings were changed during startup, update now
     if (rssIsDirty) {
-        console.log('RSS settings were changed during startup, triggering update now');
+        console.log('RSS settings were changed, triggering update now');
         import('./news.js').then(newsModule => {
             if (typeof newsModule.updateNews === 'function') {
                 newsModule.updateNews(rssDrop);
