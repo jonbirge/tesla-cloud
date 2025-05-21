@@ -1,7 +1,7 @@
 // Configuration
 const STOCK_API_ENDPOINT = 'quote.php?symbol='; // Prefix for internal stock REST API
-const UPDATE_INTERVAL = 1 * 60 * 1000; // 5 minutes in milliseconds
-const CACHE_AGE_LIMIT = 1 * 60 * 1000; // 1 minute in milliseconds
+const UPDATE_INTERVAL = 1 * 60 * 1000; // minutes in milliseconds
+const CACHE_AGE_LIMIT = 1 * 60 * 1000; // minute in milliseconds
 let stockUpdateTimer = null;
 let stockDataCache = {}; // Cache object to store stock data by ticker
 
@@ -12,20 +12,18 @@ import { settings } from './settings.js';
 export function startStockUpdates() {
     // Check if any stock indicators should be visible
     updateStockIndicatorVisibility();
-    
+
     // Check if any stock indicators are enabled
-    const anyEnabled = ['spy', 'dia', 'ief', 'btco', 'tsla'].some(ticker => 
+    const anyEnabled = ['spy', 'dia', 'ief', 'btco', 'tsla'].some(ticker =>
         settings[`show-stock-${ticker}`] !== false
     );
-    
+
     // Only fetch data if at least one indicator is enabled
     if (anyEnabled) {
-        // Fetch data immediately
-        fetchStockData();
-        
-        // Set up periodic updates
-        if (stockUpdateTimer) clearInterval(stockUpdateTimer);
-        stockUpdateTimer = setInterval(fetchStockData, UPDATE_INTERVAL);
+        if (!stockUpdateTimer) {
+            fetchStockData();
+            stockUpdateTimer = setInterval(fetchStockData, UPDATE_INTERVAL);
+        }
     } else {
         // Stop updates if no indicators are enabled
         if (stockUpdateTimer) {
@@ -78,6 +76,7 @@ function fetchStockData() {
         const ticker = element.id.replace('stock-status-', '').toUpperCase();
         
         // Check if we have valid cached data
+        console.log('Cache age: ', (currentTime - (stockDataCache[ticker] ? stockDataCache[ticker].timestamp : 0)) / 1000, 'seconds');
         if (stockDataCache[ticker] && 
             (((currentTime - stockDataCache[ticker].timestamp) < CACHE_AGE_LIMIT) ||
             !usMarketsOpen)) {
@@ -105,6 +104,7 @@ function fetchStockData() {
                 // Cache the data with current timestamp
                 stockDataCache[ticker] = {
                     percentChange: percentChange,
+                    price: data.price,
                     timestamp: Date.now()
                 };
                 
@@ -116,7 +116,8 @@ function fetchStockData() {
                 // If there's an error, show dashes
                 updateStockDisplay(element.id, null);
             });
-    });
+    }); // for each ticker
+    console.log('Stock cache:', stockDataCache);
 }
 
 // Function to update the stock display with the percentage change

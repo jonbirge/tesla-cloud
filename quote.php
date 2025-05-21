@@ -9,7 +9,7 @@ header('Pragma: no-cache');
 header('Expires: 0');
 
 // Cache configuration
-$cacheLifetimeMinutes = 5; // Default cache lifetime in minutes
+$cacheLifetimeMinutes = 1; // Default cache lifetime in minutes
 
 // Load the .env file (default path is './.env')
 $dotenv = new DotEnv();
@@ -27,7 +27,7 @@ if (!isset($_ENV['FINNHUB_KEY'])) {
 // Get the API key from environment variables
 $api_key = $_ENV['FINNHUB_KEY'];
 
-// Default ticker is S&P 500 (^GSPC)
+// Default ticker is S&P 500
 $ticker = isset($_GET['symbol']) ? $_GET['symbol'] : 'SPY'; // Using SPY ETF as a proxy for S&P 500
 
 // Validate ticker to prevent injection
