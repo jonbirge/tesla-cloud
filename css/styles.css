@@ -328,25 +328,20 @@ hr {
     align-items: center;            /* Center vertically */
     color: white;                 /* White text */
     font-size: 12pt;                /* Small font size */
-    font-weight: 600;               /* Bold text */
-    padding: 0px 7px;               /* Add some padding on the sides */
-    animation: pulse 2s 1;          /* Changed from 3 pulses to 1 */
-    animation-fill-mode: forwards;  /* Keep final state */
+    font-weight: 750;
+    padding: 0px 9px;
+    opacity: 1;                     /* Full opacity by default */
+    transition: opacity 0.5s ease;  /* Smooth transition for opacity */
 }
 
-@keyframes pulse {
-    0% {
-        transform: translateY(-50%) scale(0.9);
-        opacity: 0.7;
-    }
-    50% {
-        transform: translateY(-50%) scale(1.2);
-        opacity: 1;
-    }
-    100% {
-        transform: translateY(-50%) scale(1);
-        opacity: 1;
-    }
+/* Add fade-out effect for the notification dot */
+.section-button.notification-transition {
+    position: relative;
+}
+
+.section-button.notification-transition::after {
+    opacity: 0;                    /* Fade to transparent */
+    transition: opacity 0.5s ease;  /* Smooth transition for opacity */
 }
 
 

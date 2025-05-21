@@ -860,14 +860,29 @@ export function updateNewsNotificationDot() {
     
     // Update notification counter based on unread status
     if (hasUnread) {
-        newsButton.classList.add('has-notification');
-        // Set the data-count attribute for CSS to use as content
-        newsButton.setAttribute('data-count', unreadCount);
-        console.log(`News notification counter updated (${unreadCount} unread items)`);
+        // Remove transition class if it's being shown again
+        newsButton.classList.remove('notification-transition');
+        
+        // Small delay before showing to ensure transition works if toggled rapidly
+        setTimeout(() => {
+            newsButton.classList.add('has-notification');
+            // Set the data-count attribute for CSS to use as content
+            newsButton.setAttribute('data-count', unreadCount);
+            console.log(`News notification counter updated (${unreadCount} unread items)`);
+        }, 50);
     } else {
-        newsButton.classList.remove('has-notification');
-        newsButton.removeAttribute('data-count');
-        console.log('News notification counter removed (no unread items)');
+        if (newsButton.classList.contains('has-notification')) {
+            // Add transition class to trigger fade-out
+            newsButton.classList.add('notification-transition');
+            
+            // Let the fade-out animation complete before removing the class
+            setTimeout(() => {
+                newsButton.classList.remove('has-notification');
+                newsButton.removeAttribute('data-count');
+                newsButton.classList.remove('notification-transition');
+                console.log('News notification counter removed (no unread items)');
+            }, 600); // Should match the CSS transition time + small buffer
+        }
     }
 }
 
