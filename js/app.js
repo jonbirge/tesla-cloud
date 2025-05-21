@@ -878,14 +878,8 @@ document.addEventListener('DOMContentLoaded', async function () {
     // Start location services
     startGPSUpdates();
 
-    // Start news updates
-    resumeNewsUpdates();
-
     // Begin network sensing
     startPingTest();
-    
-    // Start stock market updates
-    startStockUpdates();
 
     // Get version from vers.php asyncly
     updateVersion();
