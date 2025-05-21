@@ -466,9 +466,8 @@ body.dark-mode .moon-phase-icon {
     margin-bottom: 10px;
     border-radius: 10px;
     box-shadow: 0 3px 10px rgba(0, 0, 0, 0.2);
-    transform: translateX(120%);
-    transition: transform 0.3s ease;
-    opacity: 0.95;
+    opacity: 0;
+    transition: opacity 0.3s ease;
     /* Light mode defaults */
     background-color: rgba(255, 255, 255, 0.85);
     color: #cc6600; /* Darker orange for light mode */
@@ -480,11 +479,11 @@ body.dark-mode .notification {
 }
 
 .notification.show {
-    transform: translateX(0);
+    opacity: 0.95;
 }
 
 .notification.hide {
-    transform: translateX(120%);
+    opacity: 0;
 }
 
 .notification-message {
