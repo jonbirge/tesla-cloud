@@ -6,15 +6,15 @@ import { startStockUpdates, stopStockUpdates } from './stock.js';
 import { forecastDataPrem, lastLat, lastLong } from './wx.js';
 
 // Global variables
-let isDriving = false;      // The vehicle is not parked
-let isLoggedIn = false;     // User is logged in
-let currentUser = null;     // Will be NULL if not logged in OR if using auto-generated ID
-let hashedUser = null;      // The hashed version of the user ID
-let rssIsDirty = false;     // Flag to indicate if RSS settings have changed
-let rssDrop = false;        // Flag to indicate if an RSS feed has been dropped
-let unitIsDirty = false;    // Flag to indicate if unit/time settings have changed
-let settings = {};          // Initialize settings object
-let live_news_updates = false; // Flag to control whether news updates should be triggered immediately
+let isDriving = false;          // The vehicle is not parked
+let isLoggedIn = false;         // User is logged in
+let currentUser = null;         // Will be NULL if not logged in OR if using auto-generated ID
+let hashedUser = null;          // The hashed version of the user ID
+let rssIsDirty = false;         // Flag to indicate if RSS settings have changed
+let rssDrop = false;            // Flag to indicate if an RSS feed has been dropped
+let unitIsDirty = false;        // Flag to indicate if unit/time settings have changed
+let settings = {};              // Initialize settings object
+let live_news_updates = false;  // Flag to control whether news updates should be triggered immediately
 
 // Export settings object so it's accessible to other modules
 export { settings, currentUser, isLoggedIn, hashedUser, isDriving, live_news_updates };
@@ -28,18 +28,20 @@ const defaultSettings = {
     "imperial-units": true,
     "map-choice": 'waze',
     "show-wind-radar": true,
+    // Stocks
+    "show-price-alt": false,
     "show-stock-indicator": true,
-    "show-stock-spy": true,     // S&P 500
-    "show-stock-dia": true,     // Dow Jones
+    "show-stock-spy": false,    // S&P 500
+    "show-stock-dia": false,    // Dow Jones
     "show-stock-iwm": false,    // Russell 2000
-    "show-stock-ief": true,     // Treasury Bonds
+    "show-stock-ief": false,    // Treasury Bonds
     "show-stock-btco": false,   // Bitcoin
     "show-stock-tsla": false,   // Tesla
     // News forwarding
     "news-forwarding": false,
     "news-forward-only": false,
     "forwarding-email": "",
-    // News source settings
+    // News sources
     "rss-wsj": true,
     "rss-nyt": true,
     "rss-wapo": true,
@@ -455,9 +457,9 @@ async function fetchSettings() {
 
 // Update UI state based on a specific setting
 function updateSetting(key, value) {
-    // console.log(`Updating state for "${key}" to ${value}`);
-    
     const settingItems = document.querySelectorAll(`.settings-toggle-item[data-setting="${key}"]`);
+    
+    // console.log(`Updating state for "${key}" to ${value}`);
 
     // Special compatibility cases
     if (key === 'imperial-units') {

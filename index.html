@@ -508,6 +508,13 @@
                     <label>Email</label>
                     <input type="text" placeholder="Enter e-mail address" onchange="updateSettingFrom(this)">
                 </div>
+
+                <div class="settings-toggle-item" data-setting="show-price-alt"
+                    onclick="this.querySelector('input').click()">
+                    <label>Alternate Stock Price and % Change</label>
+                    <input type="checkbox" onchange="toggleSettingFrom(this)">
+                    <span class="settings-toggle-slider"></span>
+                </div>
             
                 <div class="settings-toggle-item" data-setting="show-wind-radar"
                     onclick="this.querySelector('input').click()">
@@ -517,7 +524,7 @@
                 </div>
             </div>
 
-            <h2>Market Indicators</h2>
+            <h2>Market Indicators & Stocks</h2>
             <div class="settings-controls">
                 <div class="settings-toggle-item" data-setting="show-stock-spy"
                     onclick="this.querySelector('input').click()">

@@ -1,9 +1,12 @@
 // Configuration
 const STOCK_API_ENDPOINT = 'quote.php?symbol='; // Prefix for internal stock REST API
-const UPDATE_INTERVAL = 1 * 60 * 1000; // minutes in milliseconds
+const UPDATE_INTERVAL = 0.2 * 60 * 1000; // minutes in milliseconds
 const CACHE_AGE_LIMIT = 1 * 60 * 1000; // minute in milliseconds
+
+// Global variables
 let stockUpdateTimer = null;
 let stockDataCache = {}; // Cache object to store stock data by ticker
+let showChange = true; // Flag to show change in stock price
 
 // Import settings to check visibility setting
 import { settings } from './settings.js';
@@ -82,7 +85,10 @@ function fetchStockData() {
             !usMarketsOpen)) {
             // Use cached data
             console.log(`Using cached data for ${ticker}`);
-            updateStockDisplay(element.id, stockDataCache[ticker].percentChange);
+            updateStockDisplay(
+                element.id,
+                stockDataCache[ticker].percentChange,
+                stockDataCache[ticker].price);
             return;
         }
         
@@ -100,16 +106,20 @@ function fetchStockData() {
             .then(data => {
                 // Extract values from our simplified API response
                 const percentChange = data.percentChange;
+                const price = data.price;
                 
                 // Cache the data with current timestamp
                 stockDataCache[ticker] = {
                     percentChange: percentChange,
-                    price: data.price,
+                    price: price,
                     timestamp: Date.now()
                 };
                 
                 // Update the stock status indicator
-                updateStockDisplay(element.id, percentChange);
+                updateStockDisplay(
+                    element.id,
+                    percentChange,
+                    price);
             })
             .catch(error => {
                 console.error(`Error fetching stock data for ${ticker}:`, error);
@@ -117,11 +127,14 @@ function fetchStockData() {
                 updateStockDisplay(element.id, null);
             });
     }); // for each ticker
-    console.log('Stock cache:', stockDataCache);
+    
+    if (settings['show-price-alt']) {
+        showChange = !showChange; // Toggle the display mode
+    }
 }
 
 // Function to update the stock display with the percentage change
-function updateStockDisplay(elementId, percentChange) {
+function updateStockDisplay(elementId, percentChange, price = null) {
     const stockStatus = document.getElementById(elementId);
     if (!stockStatus) {
         // throw an error if the element is not found
@@ -158,8 +171,12 @@ function updateStockDisplay(elementId, percentChange) {
         stockArrow.innerHTML = '—'; // Horizontal line for unchanged
     }
     
-    // Update the percentage value
-    stockValue.innerHTML = formattedChange + '%';
+    // Update the shown value
+    if (settings['show-price-alt'] && !showChange) {
+        stockValue.innerHTML = price ? `$${parseFloat(price).toFixed(2)}` : '--';
+    } else {
+        stockValue.innerHTML = formattedChange + '%';
+    }
 }
 
 // Function to update stock indicator visibility based on settings
