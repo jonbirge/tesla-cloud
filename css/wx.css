@@ -118,12 +118,21 @@ body.dark-mode {
     cursor: pointer;
 }
 
-#wx-data {
+/* #wx-data {
     max-width: 960px;
-}
+} */
 
 #minutely-precip-container {
-    max-width: 1100px;
+    width: auto;
+    display: flex;
+    justify-content: center;
+}
+
+#minutely-precip-chart {
+    /* max-width: 780px; */
+    max-height: 320px;
+    margin-left: 11pt;
+    margin-right: 11pt;
 }
 
 
@@ -224,14 +233,6 @@ body.dark-mode .forecast-day.rain img.forecast-icon {
     box-shadow: 5px 5px 15px rgba(0, 0, 0, 0.5);
 }
 
-/* Add a max-width constraint to match our 12-column layout */
-@media (min-width: 1200px) {
-    .forecast-popup {
-        max-width: 1180px; /* 1140px (12-column width) + 40px (padding) */
-        width: 1180px;
-    }
-}
-
 .forecast-popup.show {
     display: block;
 }
@@ -266,24 +267,17 @@ body.dark-mode .forecast-day.rain img.forecast-icon {
 
 .hourly-forecast {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(90px, 1fr)); /* Current setting */
-    gap: 6px; /* Reduced gap */
+    grid-template-columns: repeat(auto-fill, minmax(90px, 1fr));
+    gap: 6px;
     margin-top: 15px;
     max-width: 1140px; /* 90px × 12 + 6px × 11 gaps = 1146px, rounded down slightly */
     margin-left: auto;
     margin-right: auto;
 }
 
-/* Add a media query for larger screens to explicitly limit to 12 columns */
-@media (min-width: 1200px) {
-    .hourly-forecast {
-        grid-template-columns: repeat(12, 1fr); /* Force exactly 12 columns on wide screens */
-    }
-}
-
 .hourly-item {
     background: linear-gradient(to bottom, var(--sky-gradient-top), var(--sky-gradient-bottom));
-    padding: 6px; /* Reduced padding */
+    padding: 6px;
     border-radius: var(--button-radius);
     text-align: center;
     transition: background 0.3s ease;

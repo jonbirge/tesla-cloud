@@ -302,12 +302,13 @@ function updatePrecipitationGraph() {
                                     display: true,
                                     text: 'Minutes from now',
                                     font: {
-                                        size: 22,
+                                        size: 18,
+                                        weight: 600
                                     }
                                 },
                                 ticks: {
                                     font: {
-                                        size: 18
+                                        size: 16
                                     },
                                     callback: function (value) {
                                         return "+" + value;
@@ -319,13 +320,14 @@ function updatePrecipitationGraph() {
                                     display: true,
                                     text: 'Precipitation (mm/hr)',
                                     font: {
-                                        size: 22,
+                                        size: 18,
+                                        weight: 600
                                     }
                                 },
                                 beginAtZero: true,
                                 ticks: {
                                     font: {
-                                        size: 18
+                                        size: 16
                                     }
                                 }
                             }
@@ -365,7 +367,6 @@ function updateChartWithAnimation(chart, newLabels, newValues) {
         clearTimeout(chart.animationTimer);
     }
     
-    // const originalValues = [...chart.data.datasets[0].data];
     const valuesCount = newValues.length;
     
     // Ensure data arrays are the same length
@@ -393,8 +394,6 @@ function updateChartWithAnimation(chart, newLabels, newValues) {
             index++;
             chart.animationTimer = setTimeout(updateNextValue, 30);
         } else {
-            // Final update with nice animation
-            // chart.update();
             chart.animationTimer = null;
         }
     }
@@ -411,9 +410,6 @@ function startPrecipGraphAutoRefresh() {
     
     // Clear any existing interval first
     clearInterval(precipGraphUpdateInterval);
-    
-    // Initial update
-    // updatePrecipitationGraph();
     
     // Set up interval to update every 30 seconds
     precipGraphUpdateInterval = setInterval(() => {

@@ -196,17 +196,17 @@
                     <img class="forecast-alert hidden" src="assets/warn.svg" alt="Warning Icon">
                 </div>
             </div>
+            <!-- Minutely precipitation forecast graph elements -->
+            <h2>Precipitation Forecast</h2>
             <div id="minutely-precip-container" class="minutely-precip" style="display:none;">
-                <h2>Precipitation Forecast</h2>
                 <canvas id="minutely-precip-chart"></canvas>
             </div>
-            <!-- Add popup elements -->
+            <!-- Hourly forecast popup element -->
             <div class="forecast-popup">
-                <button id="prem-forecast-popup-close" class="forecast-popup-close" type="button">&times;</button>
                 <h2 id="popup-date"></h2>
+                <button id="prem-forecast-popup-close" class="forecast-popup-close" type="button">&times;</button>
                 <div class="hourly-forecast"></div>
             </div>
-            <!-- <hr> -->
             <h2>Current Conditions <span id="prem-station-info" class="station-name"></span></h2>
             <div class="data-info" id="prem-wx-data">
                 <div class="data-item">
