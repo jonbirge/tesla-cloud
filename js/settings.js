@@ -1,9 +1,9 @@
 // Imports
 import { updateNews, setShareButtonsVisibility, initializeNewsStorage } from './news.js';
-import { updateChartAxisColors } from './net.js';
+import { updateNetChartAxisColors } from './net.js';
 import { updatePremiumWeatherDisplay } from './wx.js';
 import { startStockUpdates, stopStockUpdates } from './stock.js';
-import { forecastDataPrem, lastLat, lastLong } from './wx.js';
+import { forecastDataPrem, lastLat, lastLong, updateRainChartAxisColors } from './wx.js';
 
 // Global variables
 let isDriving = false;          // The vehicle is not parked
@@ -256,7 +256,8 @@ function setDefaultSettings() {
 
 // Helper function to update things that depend on dark mode
 function updateDarkModeDependants() {
-    updateChartAxisColors();
+    updateNetChartAxisColors();
+    updateRainChartAxisColors();
 }
 
 // Helper function to show/hide radar display based on setting

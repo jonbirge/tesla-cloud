@@ -352,9 +352,29 @@ function updatePrecipitationGraph() {
         toggleRainIndicator(false);
         console.log('No minutely precipitation data available; continuing to monitor.');
     }
+    // Update axis colors based on theme
+    updateRainChartAxisColors();
+}
 
-    // Return true if the refresh should continue
-    return true;
+export function updateRainChartAxisColors() {
+    // Console log
+    console.log('Updating rain chart axis colors...');
+
+    // Get computed values from body element instead of document.documentElement
+    const computedStyle = getComputedStyle(document.body);
+    const axisColor = computedStyle.getPropertyValue('--button-text').trim();
+    const gridColor = computedStyle.getPropertyValue('--separator-color').trim();
+
+    // Update chart options
+    if (minutelyPrecipChart) {
+        minutelyPrecipChart.options.scales.x.ticks.color = axisColor;
+        minutelyPrecipChart.options.scales.y.ticks.color = axisColor;
+        minutelyPrecipChart.options.scales.x.grid.color = gridColor;
+        minutelyPrecipChart.options.scales.y.grid.color = gridColor;
+        minutelyPrecipChart.options.scales.y.title.color = axisColor;
+        minutelyPrecipChart.options.scales.x.title.color = axisColor;
+        minutelyPrecipChart.update();
+    }
 }
 
 // Function to update chart data with sequential animation

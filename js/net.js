@@ -206,14 +206,14 @@ function initializePingChart() {
         }
     });
 
-    updateChartAxisColors(); // Ensure initial colors are right
+    updateNetChartAxisColors(); // Ensure initial colors are right
 
     // Logging
     console.log('Ping chart initialized');
 }
 
 // Updates chart colors based on current theme settings
-export function updateChartAxisColors() {
+export function updateNetChartAxisColors() {
     // Console log
     console.log('Updating chart axis colors...');
 
@@ -370,6 +370,3 @@ window.resumePingTest = function() {
         console.log('Network ping testing resumed');
     }
 }
-
-// Initialize the firstPingDiscarded flag
-// pingTestServer.firstPingDiscarded = false;
