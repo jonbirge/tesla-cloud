@@ -126,8 +126,8 @@ body.dark-mode {
     flex: 1;
     height: 100%;
     opacity: 0.5;
-    width: calc(200% / 24); /* Twice as wide as needed for blending */
-    margin-left: calc(-100% / 24 / 2); /* Overlap by half width */
+    width: calc(400% / 24); /* Twice as wide as needed for blending */
+    margin-left: calc(-100% / 24); /* Overlap by half width */
 }
 
 .hourly-segment:first-child {
@@ -238,11 +238,14 @@ body.dark-mode .forecast-day.rain img.forecast-icon {
     font-weight: 650;
     text-transform: uppercase;
     color: var(--button-text);
+    /* Add text shadow for better contrast */
+    text-shadow: 0 0 8px rgba(255, 255, 255, 0.8), 0 0 16px rgba(255, 255, 255, 0.6);
 }
 
-/* .hourly-avail .forecast-date {
-    color: var(--tesla-blue);
-} */
+/* Dark mode text shadow for forecast date */
+body.dark-mode .forecast-date {
+    text-shadow: 0 0 8px rgba(0, 0, 0, 0.8), 0 0 16px rgba(0, 0, 0, 0.6);
+}
 
 .forecast-icon {
     width: 64px;
@@ -255,6 +258,13 @@ body.dark-mode .forecast-day.rain img.forecast-icon {
     font-weight: 750;
     margin: 8px 0;
     color: var(--button-text);
+    /* Add text shadow for better contrast */
+    text-shadow: 0 0 8px rgba(255, 255, 255, 0.8), 0 0 16px rgba(255, 255, 255, 0.6);
+}
+
+/* Dark mode text shadow for forecast temperature */
+body.dark-mode .forecast-temp {
+    text-shadow: 0 0 8px rgba(0, 0, 0, 0.8), 0 0 16px rgba(0, 0, 0, 0.6);
 }
 
 .forecast-desc {
@@ -263,6 +273,13 @@ body.dark-mode .forecast-day.rain img.forecast-icon {
     font-style: italic;
     font-weight: 600;
     color: var(--button-text);
+    /* Add text shadow for better contrast */
+    text-shadow: 0 0 8px rgba(255, 255, 255, 0.8), 0 0 16px rgba(255, 255, 255, 0.6);
+}
+
+/* Dark mode text shadow for forecast description */
+body.dark-mode .forecast-desc {
+    text-shadow: 0 0 8px rgba(0, 0, 0, 0.8), 0 0 16px rgba(0, 0, 0, 0.6);
 }
 
 .forecast-popup {
@@ -531,6 +548,24 @@ body.dark-mode .notification {
 
 .notification-message {
     font-size: 18px;
+    font-weight: 700;
+}
+
+/* Cloud icon styles for both status indicator and notification */
+.rain-status img,
+.notification-icon img {
+    filter: invert(50%) sepia(68%) saturate(3233%) hue-rotate(360deg) brightness(103%) contrast(103%);
+}
+
+body.dark-mode .rain-status img,
+body.dark-mode .notification-icon img {
+    filter: invert(74%) sepia(69%) saturate(5422%) hue-rotate(359deg) brightness(101%) contrast(107%);
+}
+
+/* Add a little spacing between the notification icon and text */
+.notification-icon {
+    margin-right: 12px;
+}
     font-weight: 700;
 }
 
