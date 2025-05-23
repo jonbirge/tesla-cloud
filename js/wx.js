@@ -22,7 +22,7 @@ let country = null;                     // Variable to store the country name
 let inCONUS = null;                     // Variable to store if the location is in the continental US (CONUS)
 
 // Export these variables for use in other modules
-export { SAT_URLS, forecastDataPrem, lastLat, lastLong, city, state };
+export { SAT_URLS, forecastDataPrem, lastLat, lastLong, city, state, currentRainAlert };
 
 // Fetches premium weather data from OpenWeather API
 export function fetchPremiumWeatherData(lat, long, silentLoad = false) {
@@ -302,12 +302,13 @@ function updatePrecipitationGraph() {
                                     display: true,
                                     text: 'Minutes from now',
                                     font: {
-                                        size: 22,
+                                        size: 18,
+                                        weight: 600
                                     }
                                 },
                                 ticks: {
                                     font: {
-                                        size: 18
+                                        size: 16
                                     },
                                     callback: function (value) {
                                         return "+" + value;
@@ -319,13 +320,14 @@ function updatePrecipitationGraph() {
                                     display: true,
                                     text: 'Precipitation (mm/hr)',
                                     font: {
-                                        size: 22,
+                                        size: 18,
+                                        weight: 600
                                     }
                                 },
                                 beginAtZero: true,
                                 ticks: {
                                     font: {
-                                        size: 18
+                                        size: 16
                                     }
                                 }
                             }
@@ -350,9 +352,29 @@ function updatePrecipitationGraph() {
         toggleRainIndicator(false);
         console.log('No minutely precipitation data available; continuing to monitor.');
     }
+    // Update axis colors based on theme
+    updateRainChartAxisColors();
+}
 
-    // Return true if the refresh should continue
-    return true;
+export function updateRainChartAxisColors() {
+    // Console log
+    console.log('Updating rain chart axis colors...');
+
+    // Get computed values from body element instead of document.documentElement
+    const computedStyle = getComputedStyle(document.body);
+    const axisColor = computedStyle.getPropertyValue('--button-text').trim();
+    const gridColor = computedStyle.getPropertyValue('--separator-color').trim();
+
+    // Update chart options
+    if (minutelyPrecipChart) {
+        minutelyPrecipChart.options.scales.x.ticks.color = axisColor;
+        minutelyPrecipChart.options.scales.y.ticks.color = axisColor;
+        minutelyPrecipChart.options.scales.x.grid.color = gridColor;
+        minutelyPrecipChart.options.scales.y.grid.color = gridColor;
+        minutelyPrecipChart.options.scales.y.title.color = axisColor;
+        minutelyPrecipChart.options.scales.x.title.color = axisColor;
+        minutelyPrecipChart.update();
+    }
 }
 
 // Function to update chart data with sequential animation
@@ -365,7 +387,6 @@ function updateChartWithAnimation(chart, newLabels, newValues) {
         clearTimeout(chart.animationTimer);
     }
     
-    // const originalValues = [...chart.data.datasets[0].data];
     const valuesCount = newValues.length;
     
     // Ensure data arrays are the same length
@@ -393,8 +414,6 @@ function updateChartWithAnimation(chart, newLabels, newValues) {
             index++;
             chart.animationTimer = setTimeout(updateNextValue, 30);
         } else {
-            // Final update with nice animation
-            // chart.update();
             chart.animationTimer = null;
         }
     }
@@ -412,9 +431,6 @@ function startPrecipGraphAutoRefresh() {
     // Clear any existing interval first
     clearInterval(precipGraphUpdateInterval);
     
-    // Initial update
-    // updatePrecipitationGraph();
-    
     // Set up interval to update every 30 seconds
     precipGraphUpdateInterval = setInterval(() => {
         // Log refresh state
@@ -423,7 +439,7 @@ function startPrecipGraphAutoRefresh() {
     }, GRAPH_DELAY*1000); // Update every n seconds
 }
 
-// Check for imminent rain (next 15 minutes) and alert user if so
+// Check for imminent rain (next 10 minutes) and alert user if so
 function checkImminentRain(minutelyData) {
     if (!minutelyData || minutelyData.length === 0) {
         toggleRainIndicator(false);
@@ -434,11 +450,11 @@ function checkImminentRain(minutelyData) {
     // Get current time
     const currentTime = new Date();
     
-    // Filter and process only the next 15 minutes of data
+    // Filter and process only the next 10 minutes of data
     const next15MinData = minutelyData.filter(minute => {
         const minuteTime = new Date(minute.dt * 1000);
         const timeDiffMinutes = (minuteTime - currentTime) / (60 * 1000);
-        return timeDiffMinutes >= 0 && timeDiffMinutes <= 15;
+        return timeDiffMinutes >= 0 && timeDiffMinutes <= 10;
     });
     
     // Determine if any precipitation is expected in the next 15 minutes
@@ -474,6 +490,7 @@ function checkImminentRain(minutelyData) {
         // Show the notification
         showNotification(message);
         // Set flag that we're under an active rain alert
+        // This flag is also used to trigger more frequent weather updates
         currentRainAlert = true;
     } else if (!hasImminentRain) {
         // Reset the alert flag when there's no longer imminent rain

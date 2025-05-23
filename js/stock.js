@@ -1,7 +1,12 @@
 // Configuration
 const STOCK_API_ENDPOINT = 'quote.php?symbol='; // Prefix for internal stock REST API
-const UPDATE_INTERVAL = 5 * 60 * 1000; // 5 minutes in milliseconds
+const UPDATE_INTERVAL = 0.2 * 60 * 1000; // minutes in milliseconds
+const CACHE_AGE_LIMIT = 1 * 60 * 1000; // minute in milliseconds
+
+// Global variables
 let stockUpdateTimer = null;
+let stockDataCache = {}; // Cache object to store stock data by ticker
+let showChange = true; // Flag to show change in stock price
 
 // Import settings to check visibility setting
 import { settings } from './settings.js';
@@ -10,20 +15,18 @@ import { settings } from './settings.js';
 export function startStockUpdates() {
     // Check if any stock indicators should be visible
     updateStockIndicatorVisibility();
-    
+
     // Check if any stock indicators are enabled
-    const anyEnabled = ['spy', 'dia', 'ief', 'btco', 'tsla'].some(ticker => 
+    const anyEnabled = ['spy', 'dia', 'ief', 'btco', 'tsla'].some(ticker =>
         settings[`show-stock-${ticker}`] !== false
     );
-    
+
     // Only fetch data if at least one indicator is enabled
     if (anyEnabled) {
-        // Fetch data immediately
-        fetchStockData();
-        
-        // Set up periodic updates
-        if (stockUpdateTimer) clearInterval(stockUpdateTimer);
-        stockUpdateTimer = setInterval(fetchStockData, UPDATE_INTERVAL);
+        if (!stockUpdateTimer) {
+            fetchStockData();
+            stockUpdateTimer = setInterval(fetchStockData, UPDATE_INTERVAL);
+        }
     } else {
         // Stop updates if no indicators are enabled
         if (stockUpdateTimer) {
@@ -45,15 +48,51 @@ export function stopStockUpdates() {
 // Function to fetch stock data for all indicators
 function fetchStockData() {
     console.log('Fetching financial data...');
+    const currentTime = Date.now();
+
+    // Flag to indicate if US markets are open
+    let usMarketsOpen;
+    // Check if US markets are open (9:30 AM to 4:00 PM ET)
+    const now = new Date();
+    const startOfDay = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 9, 30);
+    const endOfDay = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 16, 0);
+    if (now >= startOfDay && now <= endOfDay) {
+        usMarketsOpen = true;
+    } else {
+        usMarketsOpen = false;
+    }
+    console.log(`US markets open: ${usMarketsOpen}`);
     
     // Find all stock indicators
     const stockElements = document.querySelectorAll('[id^="stock-status-"]');
     
     // Process each stock element independently using promises
     stockElements.forEach(element => {
+        // Skip if the element is not visible
+        if (element.style.display === 'none') {
+            console.log(`Skipping hidden element: ${element.id}`);
+            return;
+        }
+
         // Extract ticker from the element ID and capitalize it
         // Example: 'stock-status-aapl' -> 'AAPL'
         const ticker = element.id.replace('stock-status-', '').toUpperCase();
+        
+        // Check if we have valid cached data
+        console.log('Cache age: ', (currentTime - (stockDataCache[ticker] ? stockDataCache[ticker].timestamp : 0)) / 1000, 'seconds');
+        if (stockDataCache[ticker] && 
+            (((currentTime - stockDataCache[ticker].timestamp) < CACHE_AGE_LIMIT) ||
+            !usMarketsOpen)) {
+            // Use cached data
+            console.log(`Using cached data for ${ticker}`);
+            updateStockDisplay(
+                element.id,
+                stockDataCache[ticker].percentChange,
+                stockDataCache[ticker].price);
+            return;
+        }
+        
+        // Cache miss or expired, fetch fresh data
         console.log(`Fetching data for ${ticker}`);
         
         // Create and execute fetch promise without awaiting
@@ -67,20 +106,35 @@ function fetchStockData() {
             .then(data => {
                 // Extract values from our simplified API response
                 const percentChange = data.percentChange;
+                const price = data.price;
+                
+                // Cache the data with current timestamp
+                stockDataCache[ticker] = {
+                    percentChange: percentChange,
+                    price: price,
+                    timestamp: Date.now()
+                };
                 
                 // Update the stock status indicator
-                updateStockDisplay(element.id, percentChange);
+                updateStockDisplay(
+                    element.id,
+                    percentChange,
+                    price);
             })
             .catch(error => {
                 console.error(`Error fetching stock data for ${ticker}:`, error);
                 // If there's an error, show dashes
                 updateStockDisplay(element.id, null);
             });
-    });
+    }); // for each ticker
+    
+    if (settings['show-price-alt']) {
+        showChange = !showChange; // Toggle the display mode
+    }
 }
 
 // Function to update the stock display with the percentage change
-function updateStockDisplay(elementId, percentChange) {
+function updateStockDisplay(elementId, percentChange, price = null) {
     const stockStatus = document.getElementById(elementId);
     if (!stockStatus) {
         // throw an error if the element is not found
@@ -117,8 +171,12 @@ function updateStockDisplay(elementId, percentChange) {
         stockArrow.innerHTML = '—'; // Horizontal line for unchanged
     }
     
-    // Update the percentage value
-    stockValue.innerHTML = formattedChange + '%';
+    // Update the shown value
+    if (settings['show-price-alt'] && !showChange) {
+        stockValue.innerHTML = price ? `$${parseFloat(price).toFixed(2)}` : '--';
+    } else {
+        stockValue.innerHTML = formattedChange + '%';
+    }
 }
 
 // Function to update stock indicator visibility based on settings

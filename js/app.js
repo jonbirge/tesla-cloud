@@ -1,10 +1,10 @@
 // Imports
 import { srcUpdate, testMode, updateTimeZone, GEONAMES_USERNAME } from './common.js';
 import { PositionSimulator } from './location.js';
-import { attemptLogin, leaveSettings, settings, isDriving, setDrivingState } from './settings.js';
-import { fetchPremiumWeatherData, fetchCityData, SAT_URLS, forecastDataPrem } from './wx.js';
+import { attemptLogin, leaveSettings, settings, isDriving, setDrivingState, enableLiveNewsUpdates } from './settings.js';
+import { fetchPremiumWeatherData, fetchCityData, SAT_URLS, forecastDataPrem, currentRainAlert } from './wx.js';
 import { updateNetworkInfo, updatePingChart, startPingTest } from './net.js';
-import { markAllNewsAsRead, cleanupNewsObserver, setupNewsObserver, startNewsTimeUpdates, stopNewsTimeUpdates } from './news.js';
+import { markAllNewsAsRead, cleanupNewsObserver, setupNewsObserver, startNewsTimeUpdates, stopNewsTimeUpdates, initializeNewsStorage } from './news.js';
 import { startStockUpdates, stopStockUpdates } from './stock.js';
 
 // Parameters
@@ -12,6 +12,7 @@ const DEFAULT_SECTION = 'navigation';               // Default section to show
 const LATLON_UPDATE_INTERVAL = 2;                   // seconds
 const UPDATE_DISTANCE_THRESHOLD = 2500;             // meters
 const UPDATE_TIME_THRESHOLD = 10;                   // minutes
+const UPDATE_TIME_THRESHOLD_RAIN = 2;               // minutes (when rain is predicted)
 const WX_DISTANCE_THRESHOLD = 25000;                // meters
 const WX_TIME_THRESHOLD = 60;                       // minutes
 const MAX_SPEED = 50;                               // Max speed for wind display (mph)
@@ -299,8 +300,16 @@ function shouldUpdateShortRangeData() {
     const now = Date.now();
     const timeSinceLastUpdate = (now - lastUpdate) / (1000 * 60); // Convert to minutes
     const distance = calculateDistance(lat, long, lastUpdateLat, lastUpdateLong);
-
-    return distance >= UPDATE_DISTANCE_THRESHOLD || timeSinceLastUpdate >= UPDATE_TIME_THRESHOLD;
+    
+    // Use shorter time threshold when rain is predicted in the minutely forecast
+    const timeThreshold = currentRainAlert ? UPDATE_TIME_THRESHOLD_RAIN : UPDATE_TIME_THRESHOLD;
+    
+    // Log when we're using the rain-based update interval
+    if (currentRainAlert && timeSinceLastUpdate >= timeThreshold) {
+        console.log(`Rain detected: Using shorter weather update interval (${UPDATE_TIME_THRESHOLD_RAIN} minutes)`);
+    }
+    
+    return distance >= UPDATE_DISTANCE_THRESHOLD || timeSinceLastUpdate >= timeThreshold;
 }
 
 // Function to determine if long-range data should be updated
@@ -518,13 +527,9 @@ function updateServerNote() {
             return response.text();
         })
         .then(content => {
-            // Sanitize the content to prevent XSS
-            const sanitizedContent = document.createElement('div');
-            sanitizedContent.textContent = content;
-
-            // Update the note paragraph with the sanitized content in italic
+            // Update the note paragraph with the content in italic
             const noteElement = document.getElementById('note');
-            noteElement.innerHTML = sanitizedContent.innerHTML;
+            noteElement.innerHTML = content;
 
             // Show the announcement section
             const announcementSection = document.getElementById('announcement');
@@ -532,13 +537,11 @@ function updateServerNote() {
                 announcementSection.style.display = 'block';
             }
 
-            // Add notification dot to About section if it's not the current section
-            const aboutSection = document.getElementById('about');
-            if (aboutSection && aboutSection.style.display !== 'block') {
-                const aboutButton = document.querySelector('.section-button[onclick="showSection(\'about\')"]');
-                if (aboutButton) {
-                    aboutButton.classList.add('has-notification');
-                }
+            // Add notification dot to About section button if it's not the current section
+            const aboutButton = document.getElementById('about-section');
+            if (aboutButton) {
+                aboutButton.classList.add('has-notification');
+                aboutButton.setAttribute('data-count', '1'); // Set count to 1
             }
         })
         .catch(error => {
@@ -734,16 +737,6 @@ window.showSection = function (sectionId) {
         leaveSettings();
     }
 
-    // Clean up news section when leaving it
-    if (currentSection === 'news') {
-        // Only process pending read items, don't mark everything as read
-        // This ensures unseen items remain highlighted when returning later
-        
-        // Clean up resources - this will also process pending read items
-        cleanupNewsObserver();
-        stopNewsTimeUpdates();
-    }
-
     // If switching to news section, set up observer and start time updates
     if (sectionId === 'news') {
         // Set up the observer for visible news items and start time updates
@@ -755,14 +748,14 @@ window.showSection = function (sectionId) {
 
     // If switching to about section, clear the notification dot
     if (sectionId === 'about') {
-        const aboutButton = document.querySelector('.section-button[onclick="showSection(\'about\')"]');
+        const aboutButton = document.getElementById('about-section');
         if (aboutButton) {
             aboutButton.classList.remove('has-notification');
+            aboutButton.removeAttribute('data-count'); // Remove count attribute
         }
     }
 
     // Satellite section
-    // TODO: This stuff should either be in wx.js or SAT_URLS moved here.
     if (sectionId === 'satellite') {
         // Load weather image when satellite section is shown
         const weatherImage = document.getElementById('weather-image');
@@ -869,7 +862,13 @@ document.addEventListener('DOMContentLoaded', async function () {
 
     // Attempt login from URL parameter or cookie
     await attemptLogin();
+    
+    // Initialize news storage system (create user directory if needed)
+    await initializeNewsStorage();
 
+    // Enable live news updates to allow RSS setting changes to trigger immediate updates
+    enableLiveNewsUpdates();
+    
     // Check for NOTE file and display if present
     updateServerNote();
 
@@ -879,14 +878,8 @@ document.addEventListener('DOMContentLoaded', async function () {
     // Start location services
     startGPSUpdates();
 
-    // Start news updates
-    resumeNewsUpdates();
-
     // Begin network sensing
     startPingTest();
-    
-    // Start stock market updates
-    startStockUpdates();
 
     // Get version from vers.php asyncly
     updateVersion();

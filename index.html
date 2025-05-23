@@ -8,9 +8,9 @@
     <link rel="preconnect" href="https://fonts.googleapis.com" crossorigin>
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="css/styles.css?0504">
-    <link rel="stylesheet" href="css/wx.css?0504">
-    <link rel="stylesheet" href="css/timeline.css?0504">
+    <link rel="stylesheet" href="css/styles.css?0522">
+    <link rel="stylesheet" href="css/wx.css?0522">
+    <link rel="stylesheet" href="css/timeline.css?0522">
 </head>
 
 <body>
@@ -32,7 +32,7 @@
                 <svg class="button-icon"><use href="#icon-news"></use></svg>
                 News
             </button>
-            <button id="prem-wx-section" class="section-button" onclick="showSection('prem-weather')">
+            <button id="wx-section" class="section-button" onclick="showSection('prem-weather')">
                 <svg class="button-icon"><use href="#icon-weather"></use></svg>
                 Weather
             </button>
@@ -48,7 +48,7 @@
                 <svg class="button-icon"><use href="#icon-network"></use></svg>
                 Network
             </button>
-            <button class="section-button no-driving" onclick="showSection('travel')">
+            <button class="section-button" onclick="showSection('travel')">
                 <svg class="button-icon"><use href="#icon-travel"></use></svg>
                 Travel
             </button>
@@ -64,13 +64,13 @@
                 <svg class="button-icon"><use href="#icon-toys"></use></svg>
                 Toys
             </button>
-            <button class="section-button no-driving" onclick="showSection('about')">
-                <svg class="button-icon"><use href="#icon-about"></use></svg>
-                About
-            </button>
             <button id="settings-section" class="section-button hidden" onclick="showSection('settings')">
                 <svg class="button-icon"><use href="#icon-settings"></use></svg>
                 Settings
+            </button>
+            <button id="about-section" class="section-button" onclick="showSection('about')">
+                <svg class="button-icon"><use href="#icon-about"></use></svg>
+                About
             </button>
         </div> <!-- End of section buttons -->
         <button id="login-button" class="login-button" onclick="showLoginModal()">Login</button>
@@ -196,17 +196,17 @@
                     <img class="forecast-alert hidden" src="assets/warn.svg" alt="Warning Icon">
                 </div>
             </div>
+            <!-- Minutely precipitation forecast graph elements -->
+            <h2>Precipitation Forecast</h2>
             <div id="minutely-precip-container" class="minutely-precip" style="display:none;">
-                <h2>Precipitation Forecast</h2>
                 <canvas id="minutely-precip-chart"></canvas>
             </div>
-            <!-- Add popup elements -->
+            <!-- Hourly forecast popup element -->
             <div class="forecast-popup">
-                <button id="prem-forecast-popup-close" class="forecast-popup-close" type="button">&times;</button>
                 <h2 id="popup-date"></h2>
+                <button id="prem-forecast-popup-close" class="forecast-popup-close" type="button">&times;</button>
                 <div class="hourly-forecast"></div>
             </div>
-            <!-- <hr> -->
             <h2>Current Conditions <span id="prem-station-info" class="station-name"></span></h2>
             <div class="data-info" id="prem-wx-data">
                 <div class="data-item">
@@ -257,11 +257,11 @@
         </div>
 
         <div id="landmarks" class="section">
-            <h2>Nearby Landmarks</h2>
             <div id="landmarks-loading" class="content-loading">
                 <div class="spinner"></div>
             </div>
-            <div id="landmark-items"></div>
+            <div id="landmark-items">
+            </div>
         </div>
 
         <div id="travel" class="section">
@@ -426,13 +426,12 @@
                 <li>Bookmark this page using the star in the browser menu.</li>
                 <li>Make the browser easily available by dragging it to the left-hand side of the dock at the bottom of the screen.</li>
                 <li>Settings are saved by default, but you can logout (under Settings) to disable this.</li>
-                <li>You can also create a user ID that will allow settings to be saved across multiple browsers/cars:</li>
+                <li>You can also create a user ID that will allow settings to be saved across multiple browsers:</li>
                 <ol>
                     <li>Ensure you're logged out of the default user account in Settings.</li>
                     <li>Select the 'login' button on the main page and choose an ID with 9 or more characters.</li>
                     <li>The user ID can be anything you can remember; it is encrypted before being sent to our servers.</li>
                 </ol>
-                <li>A blue dot next to a section button indicates updated information within that section.</li>
             </ul>
 
             <h2>Version</h2>
@@ -509,6 +508,13 @@
                     <label>Email</label>
                     <input type="text" placeholder="Enter e-mail address" onchange="updateSettingFrom(this)">
                 </div>
+
+                <div class="settings-toggle-item" data-setting="show-price-alt"
+                    onclick="this.querySelector('input').click()">
+                    <label>Alternate Stock Price and % Change</label>
+                    <input type="checkbox" onchange="toggleSettingFrom(this)">
+                    <span class="settings-toggle-slider"></span>
+                </div>
             
                 <div class="settings-toggle-item" data-setting="show-wind-radar"
                     onclick="this.querySelector('input').click()">
@@ -518,7 +524,7 @@
                 </div>
             </div>
 
-            <h2>Market Indicators</h2>
+            <h2>Market Indicators & Stocks</h2>
             <div class="settings-controls">
                 <div class="settings-toggle-item" data-setting="show-stock-spy"
                     onclick="this.querySelector('input').click()">
@@ -767,7 +773,7 @@
 
     <!-- Load JavaScript -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script src="js/app.js?0512" type="module"></script>
+    <script src="js/app.js?0522" type="module"></script>
 </body>
 
 </html>

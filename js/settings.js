@@ -1,22 +1,23 @@
 // Imports
-import { updateNews, setShareButtonsVisibility } from './news.js';
-import { updateChartAxisColors } from './net.js';
+import { updateNews, setShareButtonsVisibility, initializeNewsStorage } from './news.js';
+import { updateNetChartAxisColors } from './net.js';
 import { updatePremiumWeatherDisplay } from './wx.js';
 import { startStockUpdates, stopStockUpdates } from './stock.js';
-import { forecastDataPrem, lastLat, lastLong } from './wx.js';
+import { forecastDataPrem, lastLat, lastLong, updateRainChartAxisColors } from './wx.js';
 
 // Global variables
-let isDriving = false;      // The vehicle is not parked
-let isLoggedIn = false;     // User is logged in
-let currentUser = null;     // Will be NULL if not logged in OR if using auto-generated ID
-let hashedUser = null;      // The hashed version of the user ID
-let rssIsDirty = false;     // Flag to indicate if RSS settings have changed
-let rssDrop = false;        // Flag to indicate if an RSS feed has been dropped
-let unitIsDirty = false;    // Flag to indicate if unit/time settings have changed
-let settings = {};          // Initialize settings object
+let isDriving = false;          // The vehicle is not parked
+let isLoggedIn = false;         // User is logged in
+let currentUser = null;         // Will be NULL if not logged in OR if using auto-generated ID
+let hashedUser = null;          // The hashed version of the user ID
+let rssIsDirty = false;         // Flag to indicate if RSS settings have changed
+let rssDrop = false;            // Flag to indicate if an RSS feed has been dropped
+let unitIsDirty = false;        // Flag to indicate if unit/time settings have changed
+let settings = {};              // Initialize settings object
+let live_news_updates = false;  // Flag to control whether news updates should be triggered immediately
 
 // Export settings object so it's accessible to other modules
-export { settings, currentUser, isLoggedIn, hashedUser, isDriving };
+export { settings, currentUser, isLoggedIn, hashedUser, isDriving, live_news_updates };
 
 // Default settings that will be used when no user is logged in
 const defaultSettings = {
@@ -27,18 +28,20 @@ const defaultSettings = {
     "imperial-units": true,
     "map-choice": 'waze',
     "show-wind-radar": true,
+    // Stocks
+    "show-price-alt": false,
     "show-stock-indicator": true,
-    "show-stock-spy": true,     // S&P 500
-    "show-stock-dia": true,     // Dow Jones
+    "show-stock-spy": false,    // S&P 500
+    "show-stock-dia": false,    // Dow Jones
     "show-stock-iwm": false,    // Russell 2000
-    "show-stock-ief": true,     // Treasury Bonds
+    "show-stock-ief": false,    // Treasury Bonds
     "show-stock-btco": false,   // Bitcoin
     "show-stock-tsla": false,   // Tesla
     // News forwarding
     "news-forwarding": false,
     "news-forward-only": false,
     "forwarding-email": "",
-    // News source settings
+    // News sources
     "rss-wsj": true,
     "rss-nyt": true,
     "rss-wapo": true,
@@ -75,12 +78,16 @@ export function setDrivingState(state) {
 
 // Settings section is being left
 export function leaveSettings() {
+    // Handle RSS settings if any were changed but not automatically updated
     if (rssIsDirty) {
-        console.log('RSS settings are dirty, updating news feed.')
-        // If RSS is dirty, update the news feed
-        updateNews(rssDrop);
+        console.log('RSS settings are dirty, updating news feed now');
+        import('./news.js').then(newsModule => {
+            if (typeof newsModule.updateNews === 'function') {
+                newsModule.updateNews(rssDrop);
+            }
+        });
         rssIsDirty = false; // Reset the dirty flag
-        rssDrop = false; // Reset the drop flag
+        rssDrop = false;    // Reset the drop flag
     }
 
     if (unitIsDirty) {
@@ -249,7 +256,8 @@ function setDefaultSettings() {
 
 // Helper function to update things that depend on dark mode
 function updateDarkModeDependants() {
-    updateChartAxisColors();
+    updateNetChartAxisColors();
+    updateRainChartAxisColors();
 }
 
 // Helper function to show/hide radar display based on setting
@@ -450,9 +458,9 @@ async function fetchSettings() {
 
 // Update UI state based on a specific setting
 function updateSetting(key, value) {
-    // console.log(`Updating state for "${key}" to ${value}`);
-    
     const settingItems = document.querySelectorAll(`.settings-toggle-item[data-setting="${key}"]`);
+    
+    // console.log(`Updating state for "${key}" to ${value}`);
 
     // Special compatibility cases
     if (key === 'imperial-units') {
@@ -519,6 +527,22 @@ function updateSetting(key, value) {
             updateRadarVisibility();
             break;
             
+        case 'show-stock-indicator':
+            // Special handling for the master switch
+            // If it's being enabled, start updates
+            if (value) {
+                startStockUpdates();
+            } else {
+                stopStockUpdates();
+            }
+            // Update visibility state for all indicators
+            import('./stock.js').then(stockModule => {
+                if (typeof stockModule.updateStockIndicatorVisibility === 'function') {
+                    stockModule.updateStockIndicatorVisibility();
+                }
+            });
+            break;
+            
         case 'show-stock-spy':
         case 'show-stock-dia':
         case 'show-stock-ief':
@@ -551,9 +575,21 @@ function updateSetting(key, value) {
             // Handle RSS-related settings
             if (key.startsWith('rss-')) {
                 const isDrop = !value; // If unchecked, it's a drop
-                rssIsDirty = true;
-                rssDrop = rssDrop || isDrop; // Set the drop flag if this is a drop
-                // console.log(`RSS setting "${key}" changed to ${value} (dirty: ${rssIsDirty}, drop: ${rssDrop})`);
+                
+                // Only update news immediately if live_news_updates is true
+                if (live_news_updates) {
+                    console.log(`RSS setting "${key}" changed to ${value}, updating news feed immediately`);
+                    import('./news.js').then(newsModule => {
+                        if (typeof newsModule.updateNews === 'function') {
+                            newsModule.updateNews(isDrop);
+                        }
+                    });
+                } else {
+                    console.log(`RSS setting "${key}" changed to ${value}, will update later (live_news_updates is false)`);
+                    // Mark RSS as dirty so we can update after all settings are loaded
+                    rssIsDirty = true;
+                    rssDrop = rssDrop || isDrop; // If any feed was dropped, set flag
+                }
             }
             break;
     }
@@ -701,11 +737,33 @@ window.handleLogin = async function () {
         if (await validateUserId(userId)) {
             console.log('User ID validated successfully.');
             await fetchSettings();
+            
+            // Initialize news storage for the newly logged in user
+            await initializeNewsStorage();
+            
             console.log('Login successful, updating news feed...');
             updateNews(true); // Update news feed after login
         }
     } catch (error) {
         console.error('Error fetching settings: ', error);
+    }
+}
+
+// Function to enable live news updates and trigger initial update
+export function enableLiveNewsUpdates() {
+    console.log('Enabling live news updates');
+    live_news_updates = true;
+    
+    // If any RSS settings were changed during startup, update now
+    if (rssIsDirty) {
+        console.log('RSS settings were changed, triggering update now');
+        import('./news.js').then(newsModule => {
+            if (typeof newsModule.updateNews === 'function') {
+                newsModule.updateNews(rssDrop);
+            }
+        });
+        rssIsDirty = false;
+        rssDrop = false;
     }
 }
 

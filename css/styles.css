@@ -131,6 +131,7 @@ hr {
     padding: 18px;
     font-style: none;
     font-weight: 500;
+    font-style: italic;
     text-align: center;
     /* text-transform: uppercase; */
     max-width: 840px;
@@ -305,38 +306,42 @@ hr {
     background-color: var(--active-section-bg);
 }
 
+
 /* Notification dot section */
+
 .section-button.has-notification {
-  position: relative;
+    position: relative;
 }
 
 .section-button.has-notification::after {
-  content: "";
-  position: absolute;
-  top: 50%; /* Center vertically */
-  left: 5px; /* Moved further left from 10px */
-  transform: translateY(-50%); /* Perfect vertical centering */
-  width: 10px;
-  height: 10px;
-  background-color: var(--tesla-blue);
-  border-radius: 50%;
-  animation: pulse 2s 1; /* Changed from 3 pulses to 1 */
-  animation-fill-mode: forwards; /* Keep final state */
+    content: attr(data-count);      /* Use the data-count attribute for counter text */
+    position: absolute;
+    top: 50%;                       /* Center vertically */
+    right: 10px;                    /* Position to the right of text instead of left */
+    transform: translateY(-50%);    /* Perfect vertical centering */
+    min-width: 20px;                /* Minimum width for the counter */
+    height: 26px;                   /* Taller to accommodate text */
+    background-color: var(--tesla-blue);
+    border-radius: 13px;            /* Rounded pill shape */
+    display: flex;                  /* Use flex to center the counter text */
+    justify-content: center;        /* Center horizontally */
+    align-items: center;            /* Center vertically */
+    color: white;                 /* White text */
+    font-size: 12pt;                /* Small font size */
+    font-weight: 750;
+    padding: 0px 9px;
+    opacity: 1;                     /* Full opacity by default */
+    transition: opacity 0.5s ease;  /* Smooth transition for opacity */
 }
 
-@keyframes pulse {
-  0% {
-    transform: translateY(-50%) scale(0.6);
-    opacity: 0.6;
-  }
-  50% {
-    transform: translateY(-50%) scale(1.5); /* Larger pulse */
-    opacity: 1;
-  }
-  100% {
-    transform: translateY(-50%) scale(1);
-    opacity: 1;
-  }
+/* Add fade-out effect for the notification dot */
+.section-button.notification-transition {
+    position: relative;
+}
+
+.section-button.notification-transition::after {
+    opacity: 0;                    /* Fade to transparent */
+    transition: opacity 0.5s ease;  /* Smooth transition for opacity */
 }
 
 
@@ -657,18 +662,18 @@ body.dark-mode .img-white-transparent {
 
 .stat-value {
     color: var(--button-text);
-    font-size: 48pt;
-    /* font-weight: 600; */
-    display: inline;
+    font-size: 52pt;
+    font-weight: 500;
+    /* display: inline; */
     font-variant-numeric: tabular-nums;
 }
 
 .stat-unit {
     color: var(--text-color);
     font-size: 24pt;
-    /* font-weight: 650; */
+    font-weight: 600;
     font-family: sans-serif;
-    display: inline;
+    /* display: inline; */
     margin-left: 5px; /* Add some spacing between value and unit */
 }
 
@@ -755,7 +760,7 @@ body.dark-mode .img-white-transparent {
     font-size: 11.5pt;
 }
 
-.news-time, .news-date {
+.news-time {
     font-size: 12.5pt;
     margin-left: 5px;
     font-weight: 500;
@@ -779,7 +784,7 @@ body.dark-mode .img-white-transparent {
     padding-bottom: 5px;
     margin-right: 55px; /* avoid indicators */
     font-size: 16pt;
-    /* font-weight: 500; */
+    font-weight: 500;
 }
 
 .news-favicon {
@@ -860,6 +865,7 @@ body.dark-mode .share-icon img {
 
 
 /* Loading Spinner */
+
 .loading-container {
     display: flex; /* Initially visible */
     justify-content: center;
