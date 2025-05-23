@@ -97,7 +97,7 @@ body.dark-mode {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(142px, 1fr));
     gap: 15px;
-    margin: 18px 0;
+    margin: 1px 0px;
     max-width: 1100px;
 }
 
@@ -125,9 +125,7 @@ body.dark-mode {
 .hourly-segment {
     flex: 1;
     height: 100%;
-    opacity: 0.5;
-    width: calc(400% / 24); /* Twice as wide as needed for blending */
-    margin-left: calc(-100% / 24); /* Overlap by half width */
+    opacity: 0.35;
 }
 
 .hourly-segment:first-child {
