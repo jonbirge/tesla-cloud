@@ -108,6 +108,60 @@ body.dark-mode {
     position: relative;
     min-width: 120px;
     max-width: 180px;
+    overflow: hidden; /* Ensure hourly segments don't overflow */
+}
+
+.hourly-segments {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    display: flex;
+    pointer-events: none; /* Allow clicks to pass through */
+    z-index: 0; /* Behind the content */
+}
+
+.hourly-segment {
+    flex: 1;
+    height: 100%;
+    opacity: 0.5;
+    width: calc(200% / 24); /* Twice as wide as needed for blending */
+    margin-left: calc(-100% / 24 / 2); /* Overlap by half width */
+}
+
+.hourly-segment:first-child {
+    margin-left: 0; /* No overlap for first segment */
+}
+
+/* Ensure forecast content is above the hourly segments */
+.forecast-date,
+.forecast-icon,
+.forecast-temp,
+.forecast-desc,
+.forecast-alert {
+    position: relative;
+    z-index: 1;
+}
+
+.hourly-segment.clear {
+    background: linear-gradient(to bottom, var(--sky-clear-top), var(--sky-clear-bottom));
+}
+
+.hourly-segment.clouds {
+    background: linear-gradient(to bottom, var(--sky-cloudy-top), var(--sky-cloudy-bottom));
+}
+
+.hourly-segment.rain {
+    background: linear-gradient(to bottom, var(--sky-rainy-top), var(--sky-rainy-bottom));
+}
+
+.hourly-segment.storm, .hourly-segment.thunderstorm {
+    background: linear-gradient(to bottom, var(--sky-storm-top), var(--sky-storm-bottom));
+}
+
+.hourly-segment.snow {
+    background: linear-gradient(to bottom, var(--sky-snow-top), var(--sky-snow-bottom));
 }
 
 .hourly-avail {
