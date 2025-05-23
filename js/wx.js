@@ -157,6 +157,20 @@ export function updatePremiumWeatherDisplay() {
             const weatherCondition = day.weather[0].main.toLowerCase();
             dayElement.className = `forecast-day ${hourlyClass} ${weatherCondition}`;
 
+            // Clear any existing hourly segments
+            const existingSegments = dayElement.querySelector('.hourly-segments');
+            if (existingSegments) {
+                existingSegments.remove();
+            }
+
+            // Add hourly segments for the first two days
+            if (index < 2 && forecastDataPrem.hourly) {
+                const hourlySegments = createHourlySegments(day, forecastDataPrem.hourly);
+                if (hourlySegments) {
+                    dayElement.appendChild(hourlySegments);
+                }
+            }
+
             // Update date
             const dateElement = dayElement.querySelector('.forecast-date');
             if (dateElement) {
@@ -237,6 +251,56 @@ export function updatePremiumWeatherDisplay() {
 
     // Update precipitation graph with time-based x-axis
     updatePrecipitationGraph();
+}
+
+// Helper function to create hourly segments for a forecast day
+function createHourlySegments(dailyForecast, hourlyData) {
+    // Calculate start/end of the day in local time
+    const selectedDate = new Date(dailyForecast.dt * 1000);
+    const dayStart = new Date(selectedDate);
+    dayStart.setHours(0, 0, 0, 0);
+    const dayEnd = new Date(selectedDate);
+    dayEnd.setHours(23, 59, 59, 999);
+
+    // Filter hourly data for this specific day
+    const dayHourly = hourlyData.filter(h => {
+        const itemDate = new Date(h.dt * 1000);
+        return itemDate >= dayStart && itemDate <= dayEnd;
+    });
+
+    if (dayHourly.length === 0) {
+        return null; // No hourly data available for this day
+    }
+
+    // Create the hourly segments container
+    const segmentsContainer = document.createElement('div');
+    segmentsContainer.className = 'hourly-segments';
+
+    // Create 24 segments (one for each hour)
+    for (let hour = 0; hour < 24; hour++) {
+        const segment = document.createElement('div');
+        segment.className = 'hourly-segment';
+
+        // Find the hourly data for this specific hour
+        const hourData = dayHourly.find(h => {
+            const itemDate = new Date(h.dt * 1000);
+            return itemDate.getHours() === hour;
+        });
+
+        if (hourData) {
+            // Apply weather condition class based on hourly data
+            const weatherCondition = hourData.weather[0].main.toLowerCase();
+            segment.classList.add(weatherCondition);
+        } else {
+            // Fallback to daily forecast weather if no hourly data for this hour
+            const weatherCondition = dailyForecast.weather[0].main.toLowerCase();
+            segment.classList.add(weatherCondition);
+        }
+
+        segmentsContainer.appendChild(segment);
+    }
+
+    return segmentsContainer;
 }
 
 // Function to update precipitation graph with current time-based x-axis
