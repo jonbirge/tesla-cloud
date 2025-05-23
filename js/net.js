@@ -219,7 +219,7 @@ export function updateNetChartAxisColors() {
 
     // Get computed values from body element instead of document.documentElement
     const computedStyle = getComputedStyle(document.body);
-    const axisColor = computedStyle.getPropertyValue('--button-text').trim();
+    const axisColor = computedStyle.getPropertyValue('--text-color').trim();
     const gridColor = computedStyle.getPropertyValue('--separator-color').trim();
 
     // Update chart options
