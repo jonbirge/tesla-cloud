@@ -422,6 +422,59 @@ body.dark-mode .moon-phase-icon {
     background-color: #555;
 }
 
+
+/* Notification styles - with dark mode support */
+
+.notification {
+    display: flex;
+    align-items: center;
+    padding: 15px;
+    margin-bottom: 10px;
+    border-radius: 10px;
+    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.2);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    /* Light mode defaults */
+    background-color: rgba(255, 255, 255, 0.85);
+    color: #cc6600; /* Darker orange for light mode */
+}
+
+body.dark-mode .notification {
+    background-color: rgba(33, 33, 33, 0.9);
+    color: #ff7700; /* Brighter orange for dark mode */
+}
+
+.notification.show {
+    opacity: 0.95;
+}
+
+.notification.hide {
+    opacity: 0;
+}
+
+.notification-message {
+    font-size: 18px;
+    font-weight: 700;
+}
+
+/* Cloud icon styles for both status indicator and notification */
+.rain-status img,
+.notification-icon img {
+    filter: invert(50%) sepia(68%) saturate(3233%) hue-rotate(360deg) brightness(103%) contrast(103%);
+}
+
+body.dark-mode .rain-status img,
+body.dark-mode .notification-icon img {
+    filter: invert(74%) sepia(69%) saturate(5422%) hue-rotate(359deg) brightness(101%) contrast(107%);
+}
+
+/* Add a little spacing between the notification icon and text */
+.notification-icon {
+    margin-right: 12px;
+}
+
+
+
 /* Mobile Landscape Mode */
 @media only screen and (max-width: 900px) and (orientation: landscape) {
     /* Weather switch elements */
@@ -514,71 +567,4 @@ body.dark-mode .moon-phase-icon {
         width: 14px;
         height: 14px;
     }
-}
-
-/* Notification styles - with dark mode support */
-.notification {
-    display: flex;
-    align-items: center;
-    padding: 15px;
-    margin-bottom: 10px;
-    border-radius: 10px;
-    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.2);
-    opacity: 0;
-    transition: opacity 0.3s ease;
-    /* Light mode defaults */
-    background-color: rgba(255, 255, 255, 0.85);
-    color: #cc6600; /* Darker orange for light mode */
-}
-
-body.dark-mode .notification {
-    background-color: rgba(33, 33, 33, 0.9);
-    color: #ff7700; /* Brighter orange for dark mode */
-}
-
-.notification.show {
-    opacity: 0.95;
-}
-
-.notification.hide {
-    opacity: 0;
-}
-
-.notification-message {
-    font-size: 18px;
-    font-weight: 700;
-}
-
-/* Cloud icon styles for both status indicator and notification */
-.rain-status img,
-.notification-icon img {
-    filter: invert(50%) sepia(68%) saturate(3233%) hue-rotate(360deg) brightness(103%) contrast(103%);
-}
-
-body.dark-mode .rain-status img,
-body.dark-mode .notification-icon img {
-    filter: invert(74%) sepia(69%) saturate(5422%) hue-rotate(359deg) brightness(101%) contrast(107%);
-}
-
-/* Add a little spacing between the notification icon and text */
-.notification-icon {
-    margin-right: 12px;
-}
-    font-weight: 700;
-}
-
-/* Cloud icon styles for both status indicator and notification */
-.rain-status img,
-.notification-icon img {
-    filter: invert(50%) sepia(68%) saturate(3233%) hue-rotate(360deg) brightness(103%) contrast(103%);
-}
-
-body.dark-mode .rain-status img,
-body.dark-mode .notification-icon img {
-    filter: invert(74%) sepia(69%) saturate(5422%) hue-rotate(359deg) brightness(101%) contrast(107%);
-}
-
-/* Add a little spacing between the notification icon and text */
-.notification-icon {
-    margin-right: 12px;
 }

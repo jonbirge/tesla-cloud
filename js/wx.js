@@ -19,7 +19,7 @@ let currentRainAlert = false;           // Flag to track if we're currently unde
 let city = null;                        // Variable to store the city name
 let state = null;                       // Variable to store the state name
 let country = null;                     // Variable to store the country name
-let inCONUS = null;                     // Variable to store if the location is in the continental US (CONUS)
+let inCONUS = null;                     // In the continental US (CONUS)
 
 // Export these variables for use in other modules
 export { SAT_URLS, forecastDataPrem, lastLat, lastLong, city, state, currentRainAlert };
@@ -152,10 +152,9 @@ export function updatePremiumWeatherDisplay() {
             const dayElement = forecastDays[index];
             const hourlyAvail = index < 2 ? true : false;
 
-            // Update weather condition class
+            // Update weather condition class - always use clear for main background
             const hourlyClass = hourlyAvail ? 'hourly-avail' : null;
-            const weatherCondition = day.weather[0].main.toLowerCase();
-            dayElement.className = `forecast-day ${hourlyClass} ${weatherCondition}`;
+            dayElement.className = `forecast-day ${hourlyClass} clear`;
 
             // Clear any existing hourly segments
             const existingSegments = dayElement.querySelector('.hourly-segments');
@@ -288,13 +287,23 @@ function createHourlySegments(dailyForecast, hourlyData) {
         });
 
         if (hourData) {
-            // Apply weather condition class based on hourly data
+            // Apply weather condition class based on hourly data - only for non-clear conditions
             const weatherCondition = hourData.weather[0].main.toLowerCase();
-            segment.classList.add(weatherCondition);
+            if (weatherCondition !== 'clear') {
+                segment.classList.add(weatherCondition);
+            } else {
+                // For clear conditions, don't add any background - let the main clear background show through
+                segment.style.background = 'transparent';
+            }
         } else {
-            // Fallback to daily forecast weather if no hourly data for this hour
+            // Fallback to daily forecast weather if no hourly data for this hour - only for non-clear conditions
             const weatherCondition = dailyForecast.weather[0].main.toLowerCase();
-            segment.classList.add(weatherCondition);
+            if (weatherCondition !== 'clear') {
+                segment.classList.add(weatherCondition);
+            } else {
+                // For clear conditions, don't add any background - let the main clear background show through
+                segment.style.background = 'transparent';
+            }
         }
 
         segmentsContainer.appendChild(segment);
@@ -420,6 +429,7 @@ function updatePrecipitationGraph() {
     updateRainChartAxisColors();
 }
 
+// Function to update the axis colors of the rain chart
 export function updateRainChartAxisColors() {
     // Console log
     console.log('Updating rain chart axis colors...');
@@ -718,6 +728,51 @@ function getMoonPhaseName(phase) {
     }
 }
 
+// Helper: Generate test minutely precipitation data for testing
+function generateTestMinutelyData(forecastData) {
+    // Create minutely data if it doesn't exist
+    if (!forecastData.minutely || forecastData.minutely.length < 60) {
+        forecastData.minutely = [];
+        
+        // Current timestamp in seconds, minus a random offset of 0-10 minutes
+        const randomOffsetMinutes = Math.floor(Math.random() * 11); // 0-10 minutes
+        const nowSec = Math.floor(Date.now() / 1000) - (randomOffsetMinutes * 60);
+        console.log(`TEST MODE: Setting initial time to ${randomOffsetMinutes} minutes in the past`);
+        
+        // Generate 60 minutes of data
+        for (let i = 0; i < 60; i++) {
+            // First 18 data points have zero precipitation
+            const precipitation = i < 18 ? 0 : Math.random() * 5;
+            
+            forecastData.minutely.push({
+                dt: nowSec + (i * 60),
+                precipitation: precipitation
+            });
+        }
+    } else {
+        // Modify existing minutely data
+        const randomOffsetMinutes = Math.floor(Math.random() * 11); // 0-10 minutes
+        const nowSec = Math.floor(Date.now() / 1000) - (randomOffsetMinutes * 60);
+        console.log(`TEST MODE: Setting initial time to ${randomOffsetMinutes} minutes in the past`);
+        
+        forecastData.minutely.forEach((minute, index) => {
+            minute.dt = nowSec + (index * 60);
+            // First 18 data points have zero precipitation
+            minute.precipitation = index < 18 ? 0 : Math.random() * 5;
+        });
+    }
+    
+    // Make sure at least some values are non-zero to trigger display
+    // Set a few minutes after the initial 18 to have definite precipitation
+    for (let i = 25; i < 40; i++) {
+        if (i < forecastData.minutely.length) {
+            forecastData.minutely[i].precipitation = 2 + Math.random() * 3; // 2-5 mm/hr
+        }
+    }
+    
+    return forecastData;
+}
+
 // Show forecast window (used to be a graph) for a premium forecast day
 window.showPremiumPrecipGraph = function(dayIndex) {
     if (!forecastDataPrem) return;
@@ -926,51 +981,6 @@ window.showPremiumPrecipGraph = function(dayIndex) {
         hourlyContainer.innerHTML = timelineHTML;
     }
 };
-
-// Helper: Generate test minutely precipitation data for testing
-function generateTestMinutelyData(forecastData) {
-    // Create minutely data if it doesn't exist
-    if (!forecastData.minutely || forecastData.minutely.length < 60) {
-        forecastData.minutely = [];
-        
-        // Current timestamp in seconds, minus a random offset of 0-10 minutes
-        const randomOffsetMinutes = Math.floor(Math.random() * 11); // 0-10 minutes
-        const nowSec = Math.floor(Date.now() / 1000) - (randomOffsetMinutes * 60);
-        console.log(`TEST MODE: Setting initial time to ${randomOffsetMinutes} minutes in the past`);
-        
-        // Generate 60 minutes of data
-        for (let i = 0; i < 60; i++) {
-            // First 18 data points have zero precipitation
-            const precipitation = i < 18 ? 0 : Math.random() * 5;
-            
-            forecastData.minutely.push({
-                dt: nowSec + (i * 60),
-                precipitation: precipitation
-            });
-        }
-    } else {
-        // Modify existing minutely data
-        const randomOffsetMinutes = Math.floor(Math.random() * 11); // 0-10 minutes
-        const nowSec = Math.floor(Date.now() / 1000) - (randomOffsetMinutes * 60);
-        console.log(`TEST MODE: Setting initial time to ${randomOffsetMinutes} minutes in the past`);
-        
-        forecastData.minutely.forEach((minute, index) => {
-            minute.dt = nowSec + (index * 60);
-            // First 18 data points have zero precipitation
-            minute.precipitation = index < 18 ? 0 : Math.random() * 5;
-        });
-    }
-    
-    // Make sure at least some values are non-zero to trigger display
-    // Set a few minutes after the initial 18 to have definite precipitation
-    for (let i = 25; i < 40; i++) {
-        if (i < forecastData.minutely.length) {
-            forecastData.minutely[i].precipitation = 2 + Math.random() * 3; // 2-5 mm/hr
-        }
-    }
-    
-    return forecastData;
-}
 
 // Close forecast window
 window.closePremiumPrecipPopup = function() {
