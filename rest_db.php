@@ -2,6 +2,16 @@
 
 require_once 'dotenv.php';
 
+// Configuration
+define('LOG_FILE_PATH', '/tmp/rest_db_php.log');
+
+// Helper function to log messages
+function logMessage($message) {
+    $timestamp = date('Y-m-d H:i:s');
+    $logEntry = "[$timestamp] $message" . PHP_EOL;
+    file_put_contents(LOG_FILE_PATH, $logEntry, FILE_APPEND);
+}
+
 // Helper function to send JSON responses
 function sendJsonResponse($data, $statusCode = 200) {
     http_response_code($statusCode);
@@ -160,7 +170,8 @@ if ($method === 'POST') {
                 header('Content-Type: application/json');
                 http_response_code(201);
                 echo json_encode(['status' => 'success', 'message' => "Directory created at $dbPath"]);
-                
+                // Log the successful creation
+                logMessage("Directory created successfully at $dbPath");
             } catch (PDOException $e) {
                 $pdo->rollBack();
                 http_response_code(500);
@@ -273,6 +284,8 @@ if ($method === 'POST') {
         header('Content-Type: application/json');
         http_response_code(201);
         echo json_encode(['status' => 'success', 'message' => "Value stored at $path"]);
+        // Log the successful storage
+        logMessage("Value stored successfully at $path");
     } catch (PDOException $e) {
         http_response_code(500);
         echo json_encode(['error' => 'Failed to store value: ' . $e->getMessage()]);
@@ -336,9 +349,13 @@ if ($method === 'POST') {
             if ($currentTime > $expirationTime) {
                 // Item is expired
                 $expiredKeys[] = $item['key'];
+                logMessage("Key expired and marked for deletion: {$item['key']} (created: {$item['created_at']}, lifetime: {$item['life_time']} days)");
             } else {
                 // Item is still valid
                 $validResults[] = $item;
+                // Write the age (in days) to the log
+                $ageDays = ($currentTime - $createdTime) / (24 * 60 * 60);
+                logMessage("Key valid: {$item['key']} (age: " . round($ageDays, 2) . " days, lifetime: {$item['life_time']} days)");
             }
         }
         
@@ -348,9 +365,12 @@ if ($method === 'POST') {
                 $placeholders = implode(',', array_fill(0, count($expiredKeys), '?'));
                 $deleteStmt = $pdo->prepare("DELETE FROM key_value WHERE `key` IN ($placeholders)");
                 $deleteStmt->execute($expiredKeys);
+                logMessage("Successfully deleted " . count($expiredKeys) . " expired keys: " . implode(', ', $expiredKeys));
             } catch (PDOException $e) {
                 // Log error but continue with response
-                error_log("Failed to delete expired keys: " . $e->getMessage());
+                $errorMsg = "Failed to delete expired keys: " . $e->getMessage();
+                error_log($errorMsg);
+                logMessage("ERROR: $errorMsg");
             }
         }
         
