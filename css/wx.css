@@ -120,12 +120,11 @@ body.dark-mode {
 
 #minutely-precip-container {
     max-width: 1100px;
-    display: flex;
-    justify-content: center;
 }
 
 #minutely-precip-chart {
-    /* max-width: 780px; */
+    display: flex;
+    justify-content: center;
     max-height: 320px;
     margin-left: 11pt;
     margin-right: 11pt;
