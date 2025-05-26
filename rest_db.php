@@ -63,7 +63,7 @@ try {
         $pdo->exec("CREATE TABLE key_value (
             `key` VARCHAR(255) NOT NULL PRIMARY KEY,
             `value` TEXT NULL,
-            'expire_at' TIMESTAMP NULL,
+            `life_time` FLOAT DEFAULT 2,
             `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
             `updated_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
         )");
@@ -281,8 +281,7 @@ if ($method === 'POST') {
 } elseif ($method === 'GET') {
     $path = ltrim($uri, '/');
 
-    if (substr($uri, -1) === '/' || $uri === '/') {
-        // GET /dir/ - list all keys under this directory
+    if (substr($uri, -1) === '/' || $uri === '/') { // GET /dir/ - list all keys under this directory
         // Special handling for root directory
         $prefix = rtrim($path, '/');
         
@@ -310,22 +309,54 @@ if ($method === 'POST') {
             }
         }
         
-        // Get all keys under this prefix - special case for root
+        // Get all keys under this prefix with special case for root
         if (empty($prefix)) {
             // For root listing, get ALL entries in the database
-            $stmt = $pdo->prepare("SELECT `key`, `value` FROM key_value");
+            $stmt = $pdo->prepare("SELECT `key`, `value`, `life_time`, `created_at` FROM key_value");
             $stmt->execute();
         } else {
             // For non-root directories, use the standard prefix search
-            $stmt = $pdo->prepare("SELECT `key`, `value` FROM key_value WHERE `key` LIKE ? OR `key` = ?");
+            $stmt = $pdo->prepare("SELECT `key`, `value`, `life_time`, `created_at` FROM key_value WHERE `key` LIKE ? OR `key` = ?");
             $stmt->execute([$prefix . '/%', $prefix]);
         }
         
         $results = $stmt->fetchAll(PDO::FETCH_ASSOC);
         
+        // Check for expired items and delete them
+        $expiredKeys = [];
+        $validResults = [];
+        $currentTime = time();
+        
+        foreach ($results as $item) {
+            // Calculate expiration time
+            $createdTime = strtotime($item['created_at']);
+            $lifetimeSeconds = $item['life_time'] * 24 * 60 * 60; // Convert days to seconds
+            $expirationTime = $createdTime + $lifetimeSeconds;
+            
+            if ($currentTime > $expirationTime) {
+                // Item is expired
+                $expiredKeys[] = $item['key'];
+            } else {
+                // Item is still valid
+                $validResults[] = $item;
+            }
+        }
+        
+        // Delete expired keys from database
+        if (!empty($expiredKeys)) {
+            try {
+                $placeholders = implode(',', array_fill(0, count($expiredKeys), '?'));
+                $deleteStmt = $pdo->prepare("DELETE FROM key_value WHERE `key` IN ($placeholders)");
+                $deleteStmt->execute($expiredKeys);
+            } catch (PDOException $e) {
+                // Log error but continue with response
+                error_log("Failed to delete expired keys: " . $e->getMessage());
+            }
+        }
+        
         // Transform results into a more useful structure with directory information
         $transformed = [];
-        foreach ($results as $item) {
+        foreach ($validResults as $item) {
             $isDir = $item['value'] === null;
             
             $transformed[] = [
@@ -335,14 +366,13 @@ if ($method === 'POST') {
             ];
         }
 
-        if (count($results) > 0 || empty($prefix)) {
+        if (count($validResults) > 0 || empty($prefix)) {
             // Always return success for root directory, even if empty
             sendJsonResponse($transformed);
         } else {
             sendJsonResponse(['error' => "No keys found under $prefix/"], 404);
         }
-    } else {
-        // GET /dir/key - get a specific key
+    } else { // GET /dir/key - get a specific key
         $stmt = $pdo->prepare("SELECT `value` FROM key_value WHERE `key` = ?");
         $stmt->execute([$path]);
         $result = $stmt->fetch(PDO::FETCH_ASSOC);
@@ -358,7 +388,7 @@ if ($method === 'POST') {
         } else {
             sendJsonResponse(['error' => "Key not found: $path"], 404);
         }
-    }
+    } // GET specific key
 
 } elseif ($method === 'DELETE') {
     $path = ltrim($uri, '/');

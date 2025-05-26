@@ -245,70 +245,6 @@ async function getSeenNewsIds() {
     }
 }
 
-// Clean up old seen news IDs
-async function cleanupOldSeenIds() {
-    // If not logged in, nothing to clean up
-    if (!isLoggedIn || !hashedUser) {
-        return;
-    }
-    
-    try {
-        console.log(`Starting cleanup of old seen news IDs (older than ${MAX_AGE_DAYS} days)...`);
-        
-        // Get all seen news IDs
-        const seenIds = await getSeenNewsIds();
-        const now = Date.now();
-
-        // Go through each ID and print the ID and timestamp to the console for debugging
-        for (const [id, timestamp] of Object.entries(seenIds)) {
-            const ageInDays = (now - timestamp) / (1000 * 60 * 60 * 24);
-            if (ageInDays > MAX_AGE_DAYS) {
-                console.log(`Age of ID ${id}: ${ageInDays.toFixed(2)} days`);
-                await deleteSeenNewsId(id);  // avoid sending too many requests at once
-            }
-        }
-        
-        // Log the number of items before cleanup
-        const totalItems = Object.keys(seenIds).length;
-        console.log(`Found ${totalItems} stored article IDs before cleanup`);
-    }
-    catch (error) {
-        console.error('Error during cleanup of seen news IDs:', error);
-        return;
-    }
-}
-
-// Delete given news ID from ${RESTDB_URL}
-async function deleteSeenNewsId(id) {
-    // If not logged in, don't persist
-    if (!isLoggedIn || !hashedUser) {
-        return;
-    }
-    
-    try {        
-        // Delete the news ID
-        const response = await fetch(`${RESTDB_URL}/${hashedUser}/${id}`, {
-            method: 'DELETE'
-        });
-        
-        if (!response.ok) {
-            console.error(`Failed to delete news item ${id}:`, response.status);
-            return false;
-        }
-        
-        // Remove from cache if it exists
-        if (cachedSeenNewsIds && id in cachedSeenNewsIds) {
-            delete cachedSeenNewsIds[id];
-        }
-        
-        console.log(`Deleted news item ${id} successfully`);
-        return true;
-    } catch (error) {
-        console.error(`Error deleting news item ${id}:`, error);
-        return false;
-    }
-}
-
 // Mark a news item as seen
 async function markNewsSeen(id) {
     // If not logged in, don't persist
@@ -351,19 +287,6 @@ export async function updateNews(clear = false) {
     }
 
     try {
-        // Run loading/cleanup of server-stored articles once per app session
-        if (isLoggedIn && hashedUser) {
-            // Only run cleanup occasionally to reduce API load
-            const now = Date.now();
-            const lastCleanup = sessionStorage.getItem('lastNewsCleanup') || 0;
-            
-            if (now - lastCleanup > (CLEANUP_INTERVAL * 1000 * 60)) { // Run cleanup once per hour at most
-                console.log('Running cleanup of old seen news IDs...');
-                await cleanupOldSeenIds();
-                sessionStorage.setItem('lastNewsCleanup', now.toString());
-            }
-        }
-
         // Collect included RSS feeds from user settings
         const includedFeeds = [];
         if (settings) {
