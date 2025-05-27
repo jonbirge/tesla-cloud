@@ -45,9 +45,6 @@ export async function initializeNewsStorage() {
                 const seenIds = await getSeenNewsIds();
                 const count = Object.keys(seenIds).length;
                 console.log(`Successfully accessed news storage with ${count} existing entries`);
-                
-                // Clean up old entries during initialization
-                await cleanupOldSeenIds();
                 return true;
             } catch (error) {
                 console.error('Error during news storage verification:', error);
