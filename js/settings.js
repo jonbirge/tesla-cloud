@@ -27,7 +27,7 @@ const defaultSettings = {
     "24-hour-time": false,
     "imperial-units": true,
     "map-choice": 'waze',
-    "show-wind-radar": true,
+    "show-wind-radar": false,
     // Stocks
     "show-price-alt": false,
     "show-stock-indicator": true,
@@ -44,13 +44,13 @@ const defaultSettings = {
     // News sources
     "rss-wsj": true,
     "rss-nyt": true,
-    "rss-wapo": true,
+    "rss-wapo": false,
     "rss-latimes": false,
     "rss-bos": false,
     "rss-den": false,
     "rss-chi": false,
     "rss-bloomberg": false,
-    "rss-ap": true,
+    "rss-ap": false,
     "rss-bbc": false,
     "rss-economist": false,
     "rss-lemonde": false,
@@ -59,10 +59,10 @@ const defaultSettings = {
     "rss-teslarati": true,
     "rss-insideevs": true,
     "rss-thedrive": false,
-    "rss-techcrunch": true,
+    "rss-techcrunch": false,
     "rss-caranddriver": true,
     "rss-theverge": false,
-    "rss-arstechnica": true,
+    "rss-arstechnica": false,
     "rss-engadget": true,
     "rss-gizmodo": false,
     "rss-wired": false,
@@ -168,6 +168,7 @@ export async function attemptLogin() {
                 for (const [key, value] of Object.entries(settings)) {
                     await saveSetting(key, value);
                 }
+                await fetchSettings(); // Fetch settings for the new user
             }
         }
     }
@@ -249,9 +250,9 @@ function turnOffDarkMode() {
 // Initialize settings with defaults
 function setDefaultSettings() {
     settings = { ...defaultSettings };
-    initializeSettings();
+    // initializeSettings();
     updateRadarVisibility();
-    console.log('Settings initialized: ', settings);
+    console.log('Settings initialized to defaults');
 }
 
 // Helper function to update things that depend on dark mode
