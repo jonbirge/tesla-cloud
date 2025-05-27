@@ -857,7 +857,7 @@ document.addEventListener('visibilitychange', () => {
 
 // Event listeners and initialization after DOM content is loaded
 document.addEventListener('DOMContentLoaded', async function () {
-    // Log
+    // Log that the DOM is fully loaded
     console.log('DOM fully loaded and parsed...');
 
     // Attempt login from URL parameter or cookie

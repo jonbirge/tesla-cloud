@@ -185,7 +185,7 @@ async function ensureUserDirectoryExists(retryCount = 2) {
 // Get seen news IDs from rest_db.php
 async function getSeenNewsIds() {
     // If not logged in, return empty object
-    if (!isLoggedIn || !hashedUser) {
+    if (!isLoggedIn || !hashedUser || !directoryInitialized) {
         console.log('User not logged in, returning empty seen news IDs');
         return {};
     }
@@ -245,7 +245,7 @@ async function getSeenNewsIds() {
 // Mark a news item as seen
 async function markNewsSeen(id) {
     // If not logged in, don't persist
-    if (!isLoggedIn || !hashedUser) {
+    if (!isLoggedIn || !hashedUser || !directoryInitialized) {
         return;
     }
 
