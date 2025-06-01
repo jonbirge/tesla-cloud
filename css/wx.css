@@ -125,7 +125,7 @@ body.dark-mode {
 .hourly-segment {
     flex: 1;
     height: 100%;
-    opacity: 0.35;
+    opacity: 0.75;
 }
 
 .hourly-segment:first-child {
@@ -291,7 +291,8 @@ body.dark-mode .forecast-desc {
     padding: 20px;
     z-index: 1000;
     max-width: 90%;
-    width: 90%; /* Increased width to fit more items */
+    width: 90%;
+    max-width: 1200px;
     max-height: 80vh;
     overflow-y: auto;
     box-shadow: 5px 5px 15px rgba(0, 0, 0, 0.5);
