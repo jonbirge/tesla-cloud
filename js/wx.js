@@ -152,9 +152,11 @@ export function updatePremiumWeatherDisplay() {
             const dayElement = forecastDays[index];
             const hourlyAvail = index < 2 ? true : false;
 
-            // Update weather condition class - always use clear for main background
-            const hourlyClass = hourlyAvail ? 'hourly-avail' : null;
-            dayElement.className = `forecast-day ${hourlyClass} clear`;
+            // Update weather condition class
+            // Only use clear for the first two days, use actual weather for last three days
+            const weatherClass = index < 2 ? 'clear' : day.weather[0].main.toLowerCase();
+            const hourlyClass = hourlyAvail ? 'hourly-avail' : '';
+            dayElement.className = `forecast-day ${hourlyClass} ${weatherClass}`;
 
             // Clear any existing hourly segments
             const existingSegments = dayElement.querySelector('.hourly-segments');
@@ -260,7 +262,10 @@ function createHourlySegments(dailyForecast, hourlyData) {
     dayStart.setHours(0, 0, 0, 0);
     const dayEnd = new Date(selectedDate);
     dayEnd.setHours(23, 59, 59, 999);
-
+    
+    const now = new Date();
+    const isToday = now.toDateString() === selectedDate.toDateString();
+    
     // Filter hourly data for this specific day
     const dayHourly = hourlyData.filter(h => {
         const itemDate = new Date(h.dt * 1000);
@@ -274,12 +279,17 @@ function createHourlySegments(dailyForecast, hourlyData) {
     // Create the hourly segments container
     const segmentsContainer = document.createElement('div');
     segmentsContainer.className = 'hourly-segments';
-
-    // Create 24 segments (one for each hour)
-    for (let hour = 0; hour < 24; hour++) {
+    
+    // Get starting hour - if today, start from current hour, otherwise start from 0
+    const startHour = isToday ? now.getHours() : 0;
+    const hoursToShow = 24 - startHour;
+    
+    // Create segments only for remaining hours (or all hours for future days)
+    for (let h = 0; h < hoursToShow; h++) {
+        const hour = startHour + h;
         const segment = document.createElement('div');
         segment.className = 'hourly-segment';
-
+        
         // Find the hourly data for this specific hour
         const hourData = dayHourly.find(h => {
             const itemDate = new Date(h.dt * 1000);
