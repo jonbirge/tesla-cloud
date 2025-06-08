@@ -586,27 +586,17 @@ function checkImminentRain(minutelyData) {
 
 // Toggle the rain indicator
 function toggleRainIndicator(show) {
-    // Get or create the rain indicator element
-    let rainIndicator = document.getElementById('rain-indicator');
+    // Get the rain indicator element
+    const rainIndicator = document.getElementById('rain-indicator');
     
-    if (!rainIndicator && show) {
-        // Create the rain indicator if it doesn't exist
-        rainIndicator = document.createElement('div');
-        rainIndicator.id = 'rain-indicator';
-        rainIndicator.className = 'status-indicator rain-status';
-        rainIndicator.title = 'Rain expected within 15 minutes';
-        
-        // Add img element for cloud icon using the external SVG file
-        rainIndicator.innerHTML = `<img src="assets/cloud.svg" alt="Rain Alert" width="24" height="24">`;
-        
-        // Insert at the beginning of the control container and center it horizontally
-        const controlContainer = document.querySelector('.control-container');
-        if (controlContainer) {
-            controlContainer.insertBefore(rainIndicator, controlContainer.firstChild);
+    if (rainIndicator) {
+        if (show) {
+            // Show the rain indicator by removing the hidden class
+            rainIndicator.classList.remove('hidden');
+        } else {
+            // Hide the rain indicator by adding the hidden class
+            rainIndicator.classList.add('hidden');
         }
-    } else if (rainIndicator && !show) {
-        // Remove the indicator if it exists and should not be shown
-        rainIndicator.remove();
     }
 }
 
