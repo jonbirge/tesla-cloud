@@ -549,7 +549,22 @@ function checkImminentRain(minutelyData) {
     );
 
     // Toggle the rain indicator based on our findings
-    toggleRainIndicator(hasImminentRain);
+    if (hasImminentRain) {
+        // Calculate when rain will start (first minute above threshold)
+        const rainStartIndex = next15MinData.findIndex(minute => 
+            (minute.precipitation || 0) > precipThreshold
+        );
+        
+        let minutesUntilRain = 0;
+        if (rainStartIndex > 0) {
+            const minuteTime = new Date(next15MinData[rainStartIndex].dt * 1000);
+            minutesUntilRain = Math.round((minuteTime - currentTime) / (60 * 1000));
+        }
+        
+        toggleRainIndicator(true, minutesUntilRain);
+    } else {
+        toggleRainIndicator(false);
+    }
     
     // If rain is imminent and we don't have an active alert already, show a notification
     if (hasImminentRain && !currentRainAlert) {
@@ -585,17 +600,32 @@ function checkImminentRain(minutelyData) {
 }
 
 // Toggle the rain indicator
-function toggleRainIndicator(show) {
+function toggleRainIndicator(show, minutesUntilRain = 0) {
     // Get the rain indicator element
     const rainIndicator = document.getElementById('rain-indicator');
+    const rainTimingText = document.getElementById('rain-timing-text');
     
     if (rainIndicator) {
         if (show) {
             // Show the rain indicator by removing the hidden class
             rainIndicator.classList.remove('hidden');
+            
+            // Update the timing text
+            if (rainTimingText) {
+                if (minutesUntilRain === 0) {
+                    rainTimingText.textContent = 'Now';
+                } else {
+                    rainTimingText.textContent = `${minutesUntilRain} min`;
+                }
+            }
         } else {
             // Hide the rain indicator by adding the hidden class
             rainIndicator.classList.add('hidden');
+            
+            // Clear the timing text
+            if (rainTimingText) {
+                rainTimingText.textContent = '';
+            }
         }
     }
 }
