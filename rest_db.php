@@ -197,8 +197,9 @@ if ($method === 'POST') {
     $path = ltrim($uri, '/');
     $json = file_get_contents('php://input');
     
-    // Validate JSON input
-    if (!json_decode($json)) {
+    // Validate JSON input without altering payload
+    json_decode($json);
+    if (json_last_error() !== JSON_ERROR_NONE) {
         http_response_code(400);
         echo json_encode(['error' => 'Invalid JSON input']);
         exit;
