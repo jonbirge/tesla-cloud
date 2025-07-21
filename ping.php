@@ -67,6 +67,7 @@ if ($dbHost && $dbName && $dbUser) {
                 longitude DOUBLE NULL,
                 altitude DOUBLE NULL,
                 ip_address VARCHAR(45) NULL,
+                ping_time DOUBLE NULL,
                 timestamp DATETIME DEFAULT CURRENT_TIMESTAMP
             )";
             $dbConnection->exec($sql);
