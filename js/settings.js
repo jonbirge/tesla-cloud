@@ -28,6 +28,7 @@ const defaultSettings = {
     "imperial-units": true,
     "map-choice": 'waze',
     "show-wind-radar": false,
+    "show-hourly-stripes": true,
     // Stocks
     "show-price-alt": false,
     "show-stock-indicator": true,
@@ -526,6 +527,10 @@ function updateSetting(key, value) {
             
         case 'show-wind-radar':
             updateRadarVisibility();
+            break;
+
+        case 'show-hourly-stripes':
+            updatePremiumWeatherDisplay();
             break;
             
         case 'show-stock-indicator':
