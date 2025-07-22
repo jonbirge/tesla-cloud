@@ -532,7 +532,6 @@ function updateSetting(key, value) {
         case 'show-hourly-stripes':
             updatePremiumWeatherDisplay();
             break;
-            
         case 'show-stock-indicator':
             // Special handling for the master switch
             // If it's being enabled, start updates
