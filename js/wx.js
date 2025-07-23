@@ -3,6 +3,7 @@ import { formatTime, highlightUpdate, testMode, showSpinner, hideSpinner, showNo
 import { autoDarkMode, settings } from './settings.js';
 
 // Parameters
+const HOURLY_FORECAST_DAYS = 2;
 const SAT_URLS = {
     latest: 'https://cdn.star.nesdis.noaa.gov/GOES19/ABI/CONUS/GEOCOLOR/1250x750.jpg',
     loop: 'https://cdn.star.nesdis.noaa.gov/GOES16/GLM/CONUS/EXTENT3/GOES16-CONUS-EXTENT3-625x375.gif',
