@@ -165,7 +165,7 @@ export function updatePremiumWeatherDisplay() {
             }
 
             // Add hourly segments for the first two days if enabled
-            if (settings["show-hourly-stripes"] !== false && index < 2 && forecastDataPrem.hourly) {
+            if (settings["show-hourly-stripes"] !== false && index < HOURLY_FORECAST_DAYS && forecastDataPrem.hourly) {
                 const hourlySegments = createHourlySegments(day, forecastDataPrem.hourly);
                 if (hourlySegments) {
                     dayElement.appendChild(hourlySegments);
