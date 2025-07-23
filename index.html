@@ -150,7 +150,6 @@
                 <div class="spinner"></div>
             </div>
             <div id="newsHeadlines" class="news-headlines">
-                <p><em>Headlines...</em></p>
             </div>
         </div>
 
@@ -523,6 +522,13 @@
                     <input type="checkbox" onchange="toggleSettingFrom(this)" checked><span
                         class="settings-toggle-slider"></span>
                 </div>
+
+                <div class="settings-toggle-item" data-setting="show-hourly-stripes"
+                    onclick="this.querySelector('input').click()">
+                    <label>Hourly Forecast Stripes</label>
+                    <input type="checkbox" onchange="toggleSettingFrom(this)" checked><span
+                        class="settings-toggle-slider"></span>
+                </div>
             </div>
 
             <h2>Market Indicators & Stocks</h2>
@@ -721,7 +727,11 @@
 
     <!-- Indicators and dark mode toggle -->
     <div class="control-container">
-        <!-- Rain indicator will be inserted here dynamically when needed -->
+        <!-- Rain indicator - hidden by default -->
+        <div id="rain-indicator" class="status-indicator rain-status hidden" title="Rain expected within 15 minutes">
+            <img src="assets/cloud.svg" alt="Rain Alert" width="24" height="24">
+            <span id="rain-timing-text"></span>
+        </div>
         <div id="gps-status" class="status-indicator gps-status unavailable" title="GPS Status">
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24">
                 <!-- Outer circle -->
@@ -730,26 +740,27 @@
                 <circle cx="12" cy="12" r="3" fill="currentColor"/>
             </svg>
         </div>
-        <div id="stock-status-spy" class="status-indicator stock-status neutral">
-            S&P<span id="stock-arrow"></span><span id="stock-value">--%</span>
+        <div id="stock-status-spy" class="status-indicator stock-status neutral hidden">
+            S&P<span id="stock-arrow"></span><span id="stock-value">--</span>
         </div>
-        <div id="stock-status-dia" class="status-indicator stock-status neutral">
-            DOW<span id="stock-arrow"></span><span id="stock-value">--%</span>
+        <div id="stock-status-dia" class="status-indicator stock-status neutral hidden">
+            DOW<span id="stock-arrow"></span><span id="stock-value">--</span>
         </div>
-        <div id="stock-status-iwm" class="status-indicator stock-status neutral">
-            RUT<span id="stock-arrow"></span><span id="stock-value">--%</span>
+        <div id="stock-status-iwm" class="status-indicator stock-status neutral hidden">
+            RUT<span id="stock-arrow"></span><span id="stock-value">--</span>
         </div>
         <div id="stock-status-ief" class="status-indicator stock-status neutral">
-            10Y<span id="stock-arrow"></span><span id="stock-value">--%</span>
+            10Y<span id="stock-arrow"></span><span id="stock-value">--</span>
         </div>
         <div id="stock-status-btco" class="status-indicator stock-status neutral">
-            BITC<span id="stock-arrow"></span><span id="stock-value">--%</span>
+            BITC<span id="stock-arrow"></span><span id="stock-value">--</span>
         </div>
         <div id="stock-status-tsla" class="status-indicator stock-status neutral">
-            TSLA<span id="stock-arrow"></span><span id="stock-value">--%</span>
+            TSLA<span id="stock-arrow"></span><span id="stock-value">--</span>
         </div>
         <div id="network-status" class="status-indicator network-status unavailable" title="Network Status">
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 28 24" width="28" height="24">
+            <img src="assets/network.svg" class="network-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 28 24" width="28px" height="24px">
                 <!-- Bar 1 (smallest) -->
                 <rect class="network-bar bar-1" x="2" y="13" width="4" height="6"/>
                 <!-- Bar 2 -->

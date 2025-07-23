@@ -4,7 +4,7 @@ import { PositionSimulator } from './location.js';
 import { attemptLogin, leaveSettings, settings, isDriving, setDrivingState, enableLiveNewsUpdates } from './settings.js';
 import { fetchPremiumWeatherData, fetchCityData, SAT_URLS, forecastDataPrem, currentRainAlert } from './wx.js';
 import { updateNetworkInfo, updatePingChart, startPingTest } from './net.js';
-import { markAllNewsAsRead, cleanupNewsObserver, setupNewsObserver, startNewsTimeUpdates, stopNewsTimeUpdates, initializeNewsStorage } from './news.js';
+import { setupNewsObserver, startNewsTimeUpdates, initializeNewsStorage } from './news.js';
 import { startStockUpdates, stopStockUpdates } from './stock.js';
 
 // Parameters
@@ -12,7 +12,7 @@ const DEFAULT_SECTION = 'navigation';               // Default section to show
 const LATLON_UPDATE_INTERVAL = 2;                   // seconds
 const UPDATE_DISTANCE_THRESHOLD = 2500;             // meters
 const UPDATE_TIME_THRESHOLD = 10;                   // minutes
-const UPDATE_TIME_THRESHOLD_RAIN = 2;               // minutes (when rain is predicted)
+const UPDATE_TIME_THRESHOLD_RAIN = 1;               // minutes (when rain is predicted)
 const WX_DISTANCE_THRESHOLD = 25000;                // meters
 const WX_TIME_THRESHOLD = 60;                       // minutes
 const MAX_SPEED = 50;                               // Max speed for wind display (mph)
@@ -182,7 +182,7 @@ function updateWindage(vehicleSpeed, vehicleHeading, windSpeed, windDirection) {
 
     // Helper function to draw arrow
     function drawArrow(fromX, fromY, toX, toY, color, headLength = 9) {
-        const angle = Math.atan2(toY - fromY, toX - fromY);
+        const angle = Math.atan2(toY - fromY, toX - fromX);
         const headAngle = Math.PI / 6; // 30 degrees
 
         radarContext.beginPath();
@@ -857,7 +857,7 @@ document.addEventListener('visibilitychange', () => {
 
 // Event listeners and initialization after DOM content is loaded
 document.addEventListener('DOMContentLoaded', async function () {
-    // Log
+    // Log that the DOM is fully loaded
     console.log('DOM fully loaded and parsed...');
 
     // Attempt login from URL parameter or cookie

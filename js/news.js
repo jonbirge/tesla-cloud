@@ -185,7 +185,7 @@ async function ensureUserDirectoryExists(retryCount = 2) {
 // Get seen news IDs from rest_db.php
 async function getSeenNewsIds() {
     // If not logged in, return empty object
-    if (!isLoggedIn || !hashedUser) {
+    if (!isLoggedIn || !hashedUser || !directoryInitialized) {
         console.log('User not logged in, returning empty seen news IDs');
         return {};
     }
@@ -245,7 +245,7 @@ async function getSeenNewsIds() {
 // Mark a news item as seen
 async function markNewsSeen(id) {
     // If not logged in, don't persist
-    if (!isLoggedIn || !hashedUser) {
+    if (!isLoggedIn || !hashedUser || !directoryInitialized) {
         return;
     }
 
@@ -597,7 +597,7 @@ function generateHTMLforItem(item)
                 <span class="${timeClass}" data-timestamp="${item.date}">${generateTimeAgoText(item.date)}</span>
             </div>
             <div class="news-title">${item.title}</div>
-            <button class="share-icon" onclick="shareNews('${item.title}','${item.link}','${item.source}'); event.stopPropagation();">
+            <button class="share-icon" onclick="shareNews('${item.title}','${item.link}','${item.source}','${item.id}'); event.stopPropagation();">
                 <img src="assets/share.svg">
             </button>
         </div>`;
@@ -848,8 +848,36 @@ window.clickNews = async function (title, link, source, id) {
 }
 
 // User clicks on the share button
-window.shareNews = async function (title, link, source) {
+window.shareNews = async function (title, link, source, id) {
     console.log('Sharing news item:', title, link);
+
+    // Mark the news item as read when shared
+    if (id) {
+        // Remove from pending items if it was there
+        pendingReadItems.delete(id);
+        
+        // Mark as read in ${RESTDB_URL}
+        await markNewsSeen(id);
+        
+        // Update the UI - add transition and remove "new" styling
+        const element = document.querySelector(`.news-item[data-id="${id}"]`);
+        if (element) {
+            const timeElement = element.querySelector('.news-time');
+            if (timeElement && timeElement.classList.contains('news-new-time')) {
+                // Add transition class first
+                timeElement.classList.add('news-seen-transition');
+                
+                // After transition completes, remove the new-time class
+                setTimeout(() => {
+                    timeElement.classList.remove('news-new-time');
+                    timeElement.classList.remove('news-seen-transition');
+                    
+                    // Update notification dot after marking item as read
+                    updateNewsNotificationDot();
+                }, 1500); // Match this to the CSS transition time
+            }
+        }
+    }
 
     // E-mail address to share with
     if (settings["forwarding-email"] === '') {

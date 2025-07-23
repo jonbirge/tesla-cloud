@@ -97,7 +97,7 @@ body.dark-mode {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(142px, 1fr));
     gap: 15px;
-    margin: 18px 0;
+    margin: 1px 0px;
     max-width: 1100px;
 }
 
@@ -108,6 +108,58 @@ body.dark-mode {
     position: relative;
     min-width: 120px;
     max-width: 180px;
+    overflow: hidden; /* Ensure hourly segments don't overflow */
+}
+
+.hourly-segments {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    display: flex;
+    pointer-events: none; /* Allow clicks to pass through */
+    z-index: 0; /* Behind the content */
+}
+
+.hourly-segment {
+    flex: 1;
+    height: 100%;
+    opacity: 0.75;
+}
+
+.hourly-segment:first-child {
+    margin-left: 0; /* No overlap for first segment */
+}
+
+/* Ensure forecast content is above the hourly segments */
+.forecast-date,
+.forecast-icon,
+.forecast-temp,
+.forecast-desc,
+.forecast-alert {
+    position: relative;
+    z-index: 1;
+}
+
+.hourly-segment.clear {
+    background: linear-gradient(to bottom, var(--sky-clear-top), var(--sky-clear-bottom));
+}
+
+.hourly-segment.clouds {
+    background: linear-gradient(to bottom, var(--sky-cloudy-top), var(--sky-cloudy-bottom));
+}
+
+.hourly-segment.rain {
+    background: linear-gradient(to bottom, var(--sky-rainy-top), var(--sky-rainy-bottom));
+}
+
+.hourly-segment.storm, .hourly-segment.thunderstorm {
+    background: linear-gradient(to bottom, var(--sky-storm-top), var(--sky-storm-bottom));
+}
+
+.hourly-segment.snow {
+    background: linear-gradient(to bottom, var(--sky-snow-top), var(--sky-snow-bottom));
 }
 
 .hourly-avail {
@@ -184,11 +236,14 @@ body.dark-mode .forecast-day.rain img.forecast-icon {
     font-weight: 650;
     text-transform: uppercase;
     color: var(--button-text);
+    /* Add text shadow for better contrast */
+    text-shadow: 0 0 8px rgba(255, 255, 255, 0.8), 0 0 16px rgba(255, 255, 255, 0.6);
 }
 
-/* .hourly-avail .forecast-date {
-    color: var(--tesla-blue);
-} */
+/* Dark mode text shadow for forecast date */
+body.dark-mode .forecast-date {
+    text-shadow: 0 0 8px rgba(0, 0, 0, 0.8), 0 0 16px rgba(0, 0, 0, 0.6);
+}
 
 .forecast-icon {
     width: 64px;
@@ -201,6 +256,13 @@ body.dark-mode .forecast-day.rain img.forecast-icon {
     font-weight: 750;
     margin: 8px 0;
     color: var(--button-text);
+    /* Add text shadow for better contrast */
+    text-shadow: 0 0 8px rgba(255, 255, 255, 0.8), 0 0 16px rgba(255, 255, 255, 0.6);
+}
+
+/* Dark mode text shadow for forecast temperature */
+body.dark-mode .forecast-temp {
+    text-shadow: 0 0 8px rgba(0, 0, 0, 0.8), 0 0 16px rgba(0, 0, 0, 0.6);
 }
 
 .forecast-desc {
@@ -209,6 +271,13 @@ body.dark-mode .forecast-day.rain img.forecast-icon {
     font-style: italic;
     font-weight: 600;
     color: var(--button-text);
+    /* Add text shadow for better contrast */
+    text-shadow: 0 0 8px rgba(255, 255, 255, 0.8), 0 0 16px rgba(255, 255, 255, 0.6);
+}
+
+/* Dark mode text shadow for forecast description */
+body.dark-mode .forecast-desc {
+    text-shadow: 0 0 8px rgba(0, 0, 0, 0.8), 0 0 16px rgba(0, 0, 0, 0.6);
 }
 
 .forecast-popup {
@@ -222,7 +291,8 @@ body.dark-mode .forecast-day.rain img.forecast-icon {
     padding: 20px;
     z-index: 1000;
     max-width: 90%;
-    width: 90%; /* Increased width to fit more items */
+    width: 90%;
+    max-width: 1200px;
     max-height: 80vh;
     overflow-y: auto;
     box-shadow: 5px 5px 15px rgba(0, 0, 0, 0.5);
@@ -353,6 +423,59 @@ body.dark-mode .moon-phase-icon {
     background-color: #555;
 }
 
+
+/* Notification styles - with dark mode support */
+
+.notification {
+    display: flex;
+    align-items: center;
+    padding: 15px;
+    margin-bottom: 10px;
+    border-radius: 10px;
+    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.2);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    /* Light mode defaults */
+    background-color: rgba(255, 255, 255, 0.85);
+    color: #cc6600; /* Darker orange for light mode */
+}
+
+body.dark-mode .notification {
+    background-color: rgba(33, 33, 33, 0.9);
+    color: #ff7700; /* Brighter orange for dark mode */
+}
+
+.notification.show {
+    opacity: 0.95;
+}
+
+.notification.hide {
+    opacity: 0;
+}
+
+.notification-message {
+    font-size: 18px;
+    font-weight: 700;
+}
+
+/* Cloud icon styles for both status indicator and notification */
+.rain-status img,
+.notification-icon img {
+    filter: invert(50%) sepia(68%) saturate(3233%) hue-rotate(360deg) brightness(103%) contrast(103%);
+}
+
+body.dark-mode .rain-status img,
+body.dark-mode .notification-icon img {
+    filter: invert(74%) sepia(69%) saturate(5422%) hue-rotate(359deg) brightness(101%) contrast(107%);
+}
+
+/* Add a little spacing between the notification icon and text */
+.notification-icon {
+    margin-right: 12px;
+}
+
+
+
 /* Mobile Landscape Mode */
 @media only screen and (max-width: 900px) and (orientation: landscape) {
     /* Weather switch elements */
@@ -445,53 +568,4 @@ body.dark-mode .moon-phase-icon {
         width: 14px;
         height: 14px;
     }
-}
-
-/* Notification styles - with dark mode support */
-.notification {
-    display: flex;
-    align-items: center;
-    padding: 15px;
-    margin-bottom: 10px;
-    border-radius: 10px;
-    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.2);
-    opacity: 0;
-    transition: opacity 0.3s ease;
-    /* Light mode defaults */
-    background-color: rgba(255, 255, 255, 0.85);
-    color: #cc6600; /* Darker orange for light mode */
-}
-
-body.dark-mode .notification {
-    background-color: rgba(33, 33, 33, 0.9);
-    color: #ff7700; /* Brighter orange for dark mode */
-}
-
-.notification.show {
-    opacity: 0.95;
-}
-
-.notification.hide {
-    opacity: 0;
-}
-
-.notification-message {
-    font-size: 18px;
-    font-weight: 700;
-}
-
-/* Cloud icon styles for both status indicator and notification */
-.rain-status img,
-.notification-icon img {
-    filter: invert(50%) sepia(68%) saturate(3233%) hue-rotate(360deg) brightness(103%) contrast(103%);
-}
-
-body.dark-mode .rain-status img,
-body.dark-mode .notification-icon img {
-    filter: invert(74%) sepia(69%) saturate(5422%) hue-rotate(359deg) brightness(101%) contrast(107%);
-}
-
-/* Add a little spacing between the notification icon and text */
-.notification-icon {
-    margin-right: 12px;
 }

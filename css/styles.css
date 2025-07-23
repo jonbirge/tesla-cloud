@@ -442,7 +442,7 @@ body.dark-mode .img-white-transparent {
 }
 
 .status-indicator {
-    width: 24px;
+    /* width: 24px; */
     height: 24px;
     margin-right: 11px;
     margin-left: 11px;
@@ -455,25 +455,15 @@ body.dark-mode .img-white-transparent {
 
 /* Network Status Indicator */
 
-.network-status {
-    color: var(--status-unavailable);
+.network-icon {
+    height: 16px;
+    filter: invert(0%);
+    transition: filter 0.3s ease;
 }
 
-.network-status.unavailable {
-    color: var(--status-unavailable);
-}
-
-.network-status.poor {
-    color: var(--status-poor);
-}
-
-.network-status.good {
-    color: var(--status-good);
-}
-
-.network-status svg {
-    width: 24px;
-    height: 24px;
+/* Dark mode: white icon */
+body.dark-mode .network-icon {
+    filter: invert(70%);
 }
 
 .network-status .network-bar {
@@ -546,6 +536,17 @@ body.dark-mode .img-white-transparent {
 .rain-status {
     color: var(--weather-warning-color); /* Changed to orange weather warning color */
     animation: pulse-rain 2s infinite;
+    display: flex;
+    align-items: center;
+    gap: 3px;
+    /* margin-right: 21px; */
+}
+
+.rain-status #rain-timing-text {
+    color: var(--weather-warning-color);
+    font-size: 9pt;
+    font-weight: 700;
+    white-space: nowrap;
 }
 
 @keyframes pulse-rain {
@@ -565,7 +566,7 @@ body.dark-mode .img-white-transparent {
 
 .stock-status {
     width: auto;
-    font-size: 12pt;
+    font-size: 11pt;
     font-weight: 600;
     transition: color 0.3s ease;
     font-variant-numeric: tabular-nums;
@@ -783,7 +784,7 @@ body.dark-mode .img-white-transparent {
     margin-top: 0px;
     padding-bottom: 5px;
     margin-right: 55px; /* avoid indicators */
-    font-size: 16pt;
+    font-size: 17pt;
     font-weight: 500;
 }
 
