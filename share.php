@@ -16,7 +16,7 @@ $dotenv = new DotEnv();
 $_ENV = $dotenv->getAll();
 
 // Check if API key is set
-if (!isset($_ENV['SENDGRID_KEY'])) {
+if (!isset($_ENV['BREVO_KEY'])) {
     http_response_code(500);
     echo json_encode(['error' => 'API key not found in .env file']);
     exit;
@@ -42,18 +42,23 @@ $to = $input['to'];
 $subject = $input['subject'] ?? 'Article forwarded from teslas.cloud';
 $htmlContent = $input['html'];
 
-$email = new \SendGrid\Mail\Mail(); 
-$email->setFrom("feedback@teslas.cloud", "teslas.cloud");
-$email->setSubject($subject);
-$email->addTo($to);
-$email->addContent("text/plain", strip_tags($htmlContent));
-$email->addContent("text/html", $htmlContent);
-$sendgrid = new \SendGrid($_ENV['SENDGRID_KEY']);
+$config = Brevo\Client\Configuration::getDefaultConfiguration()
+    ->setApiKey('api-key', $_ENV['BREVO_KEY']);
+$apiInstance = new Brevo\Client\Api\TransactionalEmailsApi(
+    new GuzzleHttp\Client(),
+    $config
+);
+
+$sendSmtpEmail = new Brevo\Client\Model\SendSmtpEmail();
+$sendSmtpEmail->setSender(['email' => 'feedback@teslas.cloud', 'name' => 'teslas.cloud']);
+$sendSmtpEmail->setTo([['email' => $to]]);
+$sendSmtpEmail->setSubject($subject);
+$sendSmtpEmail->setHtmlContent($htmlContent);
+$sendSmtpEmail->setTextContent(strip_tags($htmlContent));
+
 try {
-    $response = $sendgrid->send($email);
-    print $response->statusCode() . "\n";
-    print_r($response->headers());
-    print $response->body() . "\n";
+    $result = $apiInstance->sendTransacEmail($sendSmtpEmail);
+    print_r($result);
 } catch (Exception $e) {
-    echo 'Caught exception: '. $e->getMessage() ."\n";
+    echo 'Caught exception: ' . $e->getMessage() . "\n";
 }
