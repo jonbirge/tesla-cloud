@@ -318,11 +318,10 @@ if ($method === 'POST') {
             }
         }
         
-        // Get all keys under this prefix with special case for root
+        // Get all keys under this prefix - no longer allow root listing
         if (empty($prefix)) {
-            // For root listing, get ALL entries in the database
-            $stmt = $pdo->prepare("SELECT `key`, `value`, `life_time`, `created_at` FROM key_value");
-            $stmt->execute();
+            // Return 404 for root directory access - don't dump entire database
+            sendJsonResponse(['error' => 'Root directory access not allowed'], 404);
         } else {
             // For non-root directories, use the standard prefix search
             $stmt = $pdo->prepare("SELECT `key`, `value`, `life_time`, `created_at` FROM key_value WHERE `key` LIKE ? OR `key` = ?");
@@ -377,8 +376,7 @@ if ($method === 'POST') {
             ];
         }
 
-        if (count($validResults) > 0 || empty($prefix)) {
-            // Always return success for root directory, even if empty
+        if (count($validResults) > 0) {
             sendJsonResponse($transformed);
         } else {
             sendJsonResponse(['error' => "No keys found under $prefix/"], 404);
