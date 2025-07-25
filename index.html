@@ -21,7 +21,7 @@
     <div class="frame-container">
 
     <!-- Section menu -->
-    <div class="left-frame">
+    <div id="leftFrame" class="left-frame">
         <div class="section-buttons">
             <h1>teslas.cloud</h1>
             <button class="section-button" onclick="showSection('navigation')">
@@ -489,25 +489,6 @@
                             onclick="toggleOptionSetting(this)">ABRP</button>
                     </div>
                 </div>
-                
-                <div class="settings-toggle-item" data-setting="news-forwarding"
-                    onclick="this.querySelector('input').click()">
-                    <label>Enable News Forwarding</label>
-                    <input type="checkbox" onchange="toggleSettingFrom(this)"><span
-                        class="settings-toggle-slider"></span>
-                </div>
-                
-                <div class="settings-toggle-item" data-setting="news-forward-only"
-                    onclick="this.querySelector('input').click()">
-                    <label>Always Forward News When Driving</label>
-                    <input type="checkbox" onchange="toggleSettingFrom(this)">
-                    <span class="settings-toggle-slider"></span>
-                </div>
-                
-                <div class="settings-toggle-item settings-text-item" data-setting="forwarding-email">
-                    <label>Email</label>
-                    <input type="text" placeholder="Enter e-mail address" onchange="updateSettingFrom(this)">
-                </div>
 
                 <div class="settings-toggle-item" data-setting="show-price-alt"
                     onclick="this.querySelector('input').click()">
@@ -531,48 +512,25 @@
                 </div>
             </div>
 
-            <h2>Market Indicators & Stocks</h2>
+            <h2>News Forwarding</h2>
             <div class="settings-controls">
-                <div class="settings-toggle-item" data-setting="show-stock-spy"
+                <div class="settings-toggle-item" data-setting="news-forwarding"
                     onclick="this.querySelector('input').click()">
-                    <label>S&P 500 Index</label>
-                    <input type="checkbox" onchange="toggleSettingFrom(this)" checked><span
-                        class="settings-toggle-slider"></span>
-                </div>
-                
-                <div class="settings-toggle-item" data-setting="show-stock-dia"
-                    onclick="this.querySelector('input').click()">
-                    <label>Dow Jones Industrials</label>
-                    <input type="checkbox" onchange="toggleSettingFrom(this)" checked><span
-                        class="settings-toggle-slider"></span>
-                </div>
-
-                <div class="settings-toggle-item" data-setting="show-stock-iwm"
-                    onclick="this.querySelector('input').click()">
-                    <label>Russell 2000</label>
-                    <input type="checkbox" onchange="toggleSettingFrom(this)" checked><span
-                        class="settings-toggle-slider"></span>
-                </div>
-                
-                <div class="settings-toggle-item" data-setting="show-stock-ief"
-                    onclick="this.querySelector('input').click()">
-                    <label>10-Year Treasury</label>
-                    <input type="checkbox" onchange="toggleSettingFrom(this)" checked><span
-                        class="settings-toggle-slider"></span>
-                </div>
-                
-                <div class="settings-toggle-item" data-setting="show-stock-btco"
-                    onclick="this.querySelector('input').click()">
-                    <label>BITC</label>
+                    <label>Enable News Forwarding</label>
                     <input type="checkbox" onchange="toggleSettingFrom(this)"><span
                         class="settings-toggle-slider"></span>
                 </div>
-                
-                <div class="settings-toggle-item" data-setting="show-stock-tsla"
+            
+                <div class="settings-toggle-item" data-setting="news-forward-only"
                     onclick="this.querySelector('input').click()">
-                    <label>TSLA</label>
-                    <input type="checkbox" onchange="toggleSettingFrom(this)"><span
-                        class="settings-toggle-slider"></span>
+                    <label>Always Forward News When Driving</label>
+                    <input type="checkbox" onchange="toggleSettingFrom(this)">
+                    <span class="settings-toggle-slider"></span>
+                </div>
+            
+                <div class="settings-toggle-item settings-text-item" data-setting="forwarding-email">
+                    <label>Email</label>
+                    <input type="text" placeholder="Enter e-mail address" onchange="updateSettingFrom(this)">
                 </div>
             </div>
             
@@ -691,6 +649,51 @@
 
                 <div class="settings-toggle-item news-toggle-item" data-setting="rss-insideevs" onclick="this.querySelector('input').click()">
                     <label>InsideEVs</label><input type="checkbox" onchange="toggleSettingFrom(this)" checked><span class="settings-toggle-slider"></span>
+                </div>
+            </div>
+
+            <h2>Market Indicators & Stocks</h2>
+            <div class="settings-controls">
+                <div class="settings-toggle-item" data-setting="show-stock-spy"
+                    onclick="this.querySelector('input').click()">
+                    <label>S&P 500 Index</label>
+                    <input type="checkbox" onchange="toggleSettingFrom(this)" checked><span
+                        class="settings-toggle-slider"></span>
+                </div>
+                
+                <div class="settings-toggle-item" data-setting="show-stock-dia"
+                    onclick="this.querySelector('input').click()">
+                    <label>Dow Jones Industrials</label>
+                    <input type="checkbox" onchange="toggleSettingFrom(this)" checked><span
+                        class="settings-toggle-slider"></span>
+                </div>
+
+                <div class="settings-toggle-item" data-setting="show-stock-iwm"
+                    onclick="this.querySelector('input').click()">
+                    <label>Russell 2000</label>
+                    <input type="checkbox" onchange="toggleSettingFrom(this)" checked><span
+                        class="settings-toggle-slider"></span>
+                </div>
+                
+                <div class="settings-toggle-item" data-setting="show-stock-ief"
+                    onclick="this.querySelector('input').click()">
+                    <label>10-Year Treasury</label>
+                    <input type="checkbox" onchange="toggleSettingFrom(this)" checked><span
+                        class="settings-toggle-slider"></span>
+                </div>
+                
+                <div class="settings-toggle-item" data-setting="show-stock-btco"
+                    onclick="this.querySelector('input').click()">
+                    <label>BITC</label>
+                    <input type="checkbox" onchange="toggleSettingFrom(this)"><span
+                        class="settings-toggle-slider"></span>
+                </div>
+                
+                <div class="settings-toggle-item" data-setting="show-stock-tsla"
+                    onclick="this.querySelector('input').click()">
+                    <label>TSLA</label>
+                    <input type="checkbox" onchange="toggleSettingFrom(this)"><span
+                        class="settings-toggle-slider"></span>
                 </div>
             </div>
             
