@@ -96,7 +96,6 @@ try {
             PRIMARY KEY (user_id)
         )";
         $dbConnection->exec($sql);
-        logMessage("Created user_ids table");
     }
     
     // Check if login_hist table exists, create it if not
@@ -109,7 +108,6 @@ try {
             ip_address VARCHAR(45) NOT NULL
         )";
         $dbConnection->exec($sql);
-        logMessage("Created login_hist table");
     }
 } catch (PDOException $e) {
     $errorMessage = "Database connection failed: " . $e->getMessage();
@@ -158,24 +156,20 @@ switch ($method) {
         
         // Check if user settings already exist
         if ($userId && userSettingsExist($userId)) {
-            logMessage("POST: User settings already exist for $userId", "WARNING");
             http_response_code(409); // Conflict
             exit;
         }
         
         // Generate userId if none is provided
         if (!$userId) {
-            logMessage("POST: Creating new user with random ID", "INFO");
             $userId = bin2hex(string: random_bytes(length: 4)); // Generate a random user ID
             $automated = true;
         } else {
             $automated = false;
         }
-        logMessage("POST: Creating user settings for $userId...", "INFO");
 
         if (initializeUserIdEntry(userId: $userId, auto_created: $automated)) {
             saveUserSettings(userId: $userId, settings: $defaultSettings); // Default settings
-            logMessage("POST: User settings created successfully for $userId", "INFO");
             http_response_code(201); // Created
             echo json_encode([
                 'success' => true, 
@@ -199,7 +193,6 @@ switch ($method) {
         }
         
         if (!userSettingsExist($userId)) {
-            logMessage("HEAD: User settings not found for $userId", "WARNING");
             http_response_code(404);
             exit;
         }
@@ -225,7 +218,6 @@ switch ($method) {
 
         // Check if the user settings exist
         if (!userSettingsExist($userId)) {
-            logMessage("GET: User settings not found for $userId", "WARNING");
             http_response_code(404);
             exit;
         }
@@ -244,7 +236,6 @@ switch ($method) {
                 if (!empty($settingsWithPrefix)) {
                     echo json_encode($settingsWithPrefix);
                 } else {
-                    logMessage("GET: No settings found with key or prefix '$key' for user $userId", "WARNING");
                     http_response_code(404);
                 }
             }
@@ -336,7 +327,6 @@ switch ($method) {
 // Helper function to initialize or update a user entry in the user_ids table
 function initializeUserIdEntry($userId, $auto_created = false): bool {
     global $dbConnection;
-    logMessage("Initializing/updating user_ids entry for user $userId");
     
     try {
 
@@ -355,7 +345,6 @@ function initializeUserIdEntry($userId, $auto_created = false): bool {
                 WHERE user_id = ?
             ");
             $updateStmt->execute([$currentTime, getClientIP(), $userId]);
-            logMessage("Updated login statistics for user $userId");
         } else {
             // Create new user entry with initial values
             $auto_created_bit = $auto_created ? 1 : 0;
@@ -364,13 +353,11 @@ function initializeUserIdEntry($userId, $auto_created = false): bool {
                 VALUES (?, ?, ?, ?, 0, ?)
             ");
             $insertStmt->execute([$userId, $currentTime, $currentTime, getClientIP(), $auto_created_bit]);
-            logMessage("Added user $userId to user_ids table with initial login at $currentTime");
         }
         
         return true;
 
     } catch (PDOException $e) {
-        logMessage("Failed to initialize user_ids entry: " . $e->getMessage(), "WARNING");
         // Non-fatal error
         return false;
     }
@@ -379,7 +366,6 @@ function initializeUserIdEntry($userId, $auto_created = false): bool {
 // Helper function to update a single setting
 function updateSingleSetting($userId, $key, $value) {
     global $dbConnection;
-    logMessage("Updating single setting for user $userId, key: $key");
     
     try {
         $jsonValue = json_encode($value);
@@ -391,17 +377,14 @@ function updateSingleSetting($userId, $key, $value) {
         
         if ($exists) {
             // Update existing key
-            logMessage("Key $key exists, updating it");
             $updateStmt = $dbConnection->prepare("UPDATE user_settings SET setting_value = ? WHERE user_id = ? AND setting_key = ?");
             $updateStmt->execute([$jsonValue, $userId, $key]);
         } else {
             // Insert new key
-            logMessage("Key $key does not exist, inserting it");
             $insertStmt = $dbConnection->prepare("INSERT INTO user_settings (user_id, setting_key, setting_value) VALUES (?, ?, ?)");
             $insertStmt->execute([$userId, $key, $jsonValue]);
         }
         
-        logMessage("Successfully saved setting $key for user $userId");
         return true;
     } catch (PDOException $e) {
         $errorMsg = "Database error updating setting: " . $e->getMessage();
@@ -413,7 +396,6 @@ function updateSingleSetting($userId, $key, $value) {
 // Helper function to get a single setting value
 function getSingleSetting($userId, $key) {
     global $dbConnection;
-    logMessage("Getting single setting for user $userId, key: $key");
     
     try {
         // Get the specific key value
@@ -423,10 +405,8 @@ function getSingleSetting($userId, $key) {
         if ($stmt->rowCount() > 0) {
             $row = $stmt->fetch();
             $value = json_decode($row['setting_value'], true);
-            logMessage("Found setting $key for user $userId");
             return $value !== null ? $value : $row['setting_value'];
         } else {
-            logMessage("Setting $key not found for user $userId", "WARNING");
             return null;
         }
     } catch (PDOException $e) {
@@ -439,7 +419,6 @@ function getSingleSetting($userId, $key) {
 // Helper function to get settings with a prefix
 function getSettingsWithPrefix($userId, $keyPrefix) {
     global $dbConnection;
-    logMessage("Getting settings with prefix '$keyPrefix' for user $userId");
     
     try {
         $stmt = $dbConnection->prepare("SELECT setting_key, setting_value FROM user_settings WHERE user_id = ? AND setting_key LIKE ?");
@@ -451,7 +430,6 @@ function getSettingsWithPrefix($userId, $keyPrefix) {
             $settings[$row['setting_key']] = $value !== null ? $value : $row['setting_value'];
         }
         
-        logMessage("Found " . count($settings) . " setting(s) with prefix '$keyPrefix' for user $userId");
         return $settings;
     } catch (PDOException $e) {
         $errorMsg = "Database error getting settings with prefix: " . $e->getMessage();
@@ -463,7 +441,6 @@ function getSettingsWithPrefix($userId, $keyPrefix) {
 // Helper function to validate user ID
 function validateUserId($userId) {
     $isValid = (strlen($userId) >= 8) && preg_match('/^[a-zA-Z0-9_-]+$/', $userId);
-    logMessage("Validating user ID: $userId - " . ($isValid ? "Valid" : "Invalid"));
     return $isValid;
 }
 
@@ -472,11 +449,9 @@ function userSettingsExist($userId) {
     global $dbConnection;
     
     try {
-        logMessage("Checking if user $userId exists in database");
         $stmt = $dbConnection->prepare("SELECT 1 FROM user_settings WHERE user_id = ? LIMIT 1");
         $stmt->execute([$userId]);
         $exists = $stmt->rowCount() > 0;
-        logMessage("Database check result: " . ($exists ? "User exists" : "User does not exist"));
         return $exists;
     } catch (PDOException $e) {
         $errorMsg = "Database error checking if user settings exist: " . $e->getMessage();
@@ -488,28 +463,23 @@ function userSettingsExist($userId) {
 // Helper function to load user settings
 function loadUserSettings($userId) {
     global $dbConnection, $defaultSettings;
-    logMessage("Loading settings for user $userId");
     
     try {
-        logMessage("Loading settings from database for $userId");
         $settings = [];
         $stmt = $dbConnection->prepare("SELECT setting_key, setting_value FROM user_settings WHERE user_id = ?");
         $stmt->execute([$userId]);
         $rowCount = $stmt->rowCount();
-        logMessage("Found $rowCount setting(s) in database for user $userId");
         
         if ($rowCount > 0) {
             while ($row = $stmt->fetch()) {
                 // Parse stored JSON value or use as is if parsing fails
                 $value = json_decode($row['setting_value'], true);
                 $settings[$row['setting_key']] = ($value !== null) ? $value : $row['setting_value'];
-                logMessage("Loaded setting {$row['setting_key']} from database with value type: " . gettype($value));
             }
             return $settings;
         }
         
         // If no settings in DB but this was called, create default settings
-        logMessage("No settings found in database, saving defaults", "WARNING");
         saveUserSettings($userId, $defaultSettings);
         return $defaultSettings;
     } catch (PDOException $e) {
@@ -522,17 +492,14 @@ function loadUserSettings($userId) {
 // Helper function to save user settings
 function saveUserSettings($userId, $settings) {
     global $dbConnection;
-    logMessage("Saving settings for user $userId - " . count($settings) . " setting(s)");
     
     try {
-        logMessage("Saving settings to database");
         $dbConnection->beginTransaction();
         
         // Delete existing settings for this user
         $deleteStmt = $dbConnection->prepare("DELETE FROM user_settings WHERE user_id = ?");
         $deleteStmt->execute([$userId]);
         $deletedCount = $deleteStmt->rowCount();
-        logMessage("Deleted $deletedCount existing setting(s) for user $userId");
         
         // Insert new settings
         $insertStmt = $dbConnection->prepare("INSERT INTO user_settings (user_id, setting_key, setting_value) VALUES (?, ?, ?)");
@@ -542,11 +509,9 @@ function saveUserSettings($userId, $settings) {
             $jsonValue = json_encode($value);
             $insertStmt->execute([$userId, $key, $jsonValue]);
             $insertCount++;
-            logMessage("Inserted setting: $key with value type: " . gettype($value));
         }
         
         $dbConnection->commit();
-        logMessage("Database transaction committed successfully - inserted $insertCount setting(s)");
         return true;
     } catch (PDOException $e) {
         $dbConnection->rollBack();
@@ -559,12 +524,10 @@ function saveUserSettings($userId, $settings) {
 // Helper function to record login attempts
 function recordLogin($userId) {
     global $dbConnection;
-    logMessage("Recording login for user $userId");
     
     try {
         $stmt = $dbConnection->prepare("INSERT INTO login_hist (user_id, login_time, ip_address) VALUES (?, ?, ?)");
         $stmt->execute([$userId, date('Y-m-d H:i:s'), getClientIP()]);
-        logMessage("Recorded login for user $userId");
     } catch (PDOException $e) {
         logMessage("Failed to record login for user $userId: " . $e->getMessage(), "WARNING");
         // Non-fatal error
