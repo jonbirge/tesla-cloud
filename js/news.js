@@ -3,11 +3,45 @@ import { settings, isDriving, hashedUser, isLoggedIn } from './settings.js';
 import { showSpinner, hideSpinner, showNotification } from './common.js';
 
 // Constants
-const BASE_URL = 'news.php?n=256';
+// Deprecated: server-side news aggregator
+const BASE_URL = 'news.php?n=256'; // no longer used
 const RESTDB_URL = 'rest_db.php';
 const NEWS_REFRESH_INTERVAL = 2.5;  // minutes
 const CLEANUP_INTERVAL = 120;       // minutes
 const MAX_AGE_DAYS = 2;             // Maximum age in days for seen news IDs
+const MAX_SINGLE_SOURCE = 32;       // limit stories per feed
+const MAX_STORIES = 256;            // maximum total stories to keep
+
+// Map of RSS feeds and cache duration (minutes)
+const RSS_FEEDS = {
+    'wsj': { url: 'https://feeds.content.dowjones.io/public/rss/RSSWorldNews', cache: 5 },
+    'nyt': { url: 'https://rss.nytimes.com/services/xml/rss/nyt/HomePage.xml', cache: 5 },
+    'wapo': { url: 'https://www.washingtonpost.com/arcio/rss/category/politics/', cache: 15 },
+    'latimes': { url: 'https://www.latimes.com/rss2.0.xml', cache: 15 },
+    'bos': { url: 'https://www.boston.com/tag/local-news/feed', cache: 15 },
+    'den': { url: 'https://www.denverpost.com/feed/', cache: 15 },
+    'chi': { url: 'https://www.chicagotribune.com/news/feed/', cache: 15 },
+    'bbc': { url: 'http://feeds.bbci.co.uk/news/world/rss.xml', cache: 15 },
+    'lemonde': { url: 'https://www.lemonde.fr/rss/une.xml', cache: 60 },
+    'bloomberg': { url: 'https://feeds.bloomberg.com/news.rss', cache: 15 },
+    'economist': { url: 'https://www.economist.com/latest/rss.xml', cache: 60 },
+    'cnn': { url: 'https://openrss.org/www.cnn.com', cache: 15, icon: 'https://www.cnn.com/' },
+    'ap': { url: 'https://news.google.com/rss/search?q=when:24h+allinurl:apnews.com&hl=en-US&gl=US&ceid=US:en', cache: 30, icon: 'https://apnews.com/' },
+    'notateslaapp': { url: 'https://www.notateslaapp.com/rss', cache: 30 },
+    'teslarati': { url: 'https://www.teslarati.com/feed/', cache: 30 },
+    'insideevs': { url: 'https://insideevs.com/rss/articles/all/', cache: 30 },
+    'thedrive': { url: 'https://www.thedrive.com/feed', cache: 30 },
+    'caranddriver': { url: 'https://www.caranddriver.com/rss/all.xml/', cache: 30 },
+    'techcrunch': { url: 'https://techcrunch.com/feed/', cache: 30 },
+    'arstechnica': { url: 'https://feeds.arstechnica.com/arstechnica/index', cache: 30 },
+    'engadget': { url: 'https://www.engadget.com/rss.xml', cache: 30 },
+    'gizmodo': { url: 'https://gizmodo.com/rss', cache: 30 },
+    'theverge': { url: 'https://www.theverge.com/rss/index.xml', cache: 30 },
+    'wired': { url: 'https://www.wired.com/feed/rss', cache: 30 },
+    'spacenews': { url: 'https://spacenews.com/feed/', cache: 30 },
+    'defensenews': { url: 'https://www.defensenews.com/arc/outboundfeeds/rss/?outputType=xml', cache: 30 },
+    'aviationweek': { url: 'https://aviationweek.com/awn/rss-feed-by-content-source', cache: 30 }
+};
 
 // Variables
 let newsUpdateInterval = null;
@@ -274,6 +308,107 @@ async function markNewsSeen(id) {
     }
 }
 
+// ================= RSS Fetching Utilities =================
+
+// Parse RSS or Atom XML text and return array of items
+function parseRSS(xmlText, source) {
+    const feed = RSS_FEEDS[source];
+    const parser = new DOMParser();
+    const doc = parser.parseFromString(xmlText, 'text/xml');
+
+    let elements = Array.from(doc.querySelectorAll('item'));
+    if (elements.length === 0) {
+        elements = Array.from(doc.querySelectorAll('entry'));
+    }
+
+    const items = [];
+    for (const el of elements) {
+        if (items.length >= MAX_SINGLE_SOURCE) break;
+
+        const titleEl = el.querySelector('title');
+        const linkEl = el.querySelector('link');
+        const pubEl = el.querySelector('pubDate') || el.querySelector('published') ||
+                      el.querySelector('updated') || el.querySelector('dc\:date');
+
+        const title = titleEl ? titleEl.textContent.trim() : 'No Title';
+        let link = '';
+        if (linkEl) {
+            link = linkEl.getAttribute('href') || linkEl.textContent.trim();
+        }
+
+        let timestamp = Date.now();
+        if (pubEl && pubEl.textContent) {
+            const t = Date.parse(pubEl.textContent);
+            if (!isNaN(t)) {
+                timestamp = t;
+            }
+        }
+
+        const item = {
+            title,
+            link,
+            date: Math.floor(timestamp / 1000),
+            source
+        };
+        if (feed && feed.icon) item.icon = feed.icon;
+        items.push(item);
+    }
+    return items;
+}
+
+// Fetch a single feed with caching in localStorage
+async function fetchFeedWithCache(source) {
+    const feed = RSS_FEEDS[source];
+    if (!feed) return [];
+
+    const cacheKey = `rss_cache_${source}`;
+    const tsKey = `rss_cache_ts_${source}`;
+    const now = Date.now();
+    const cacheDuration = feed.cache * 60 * 1000;
+
+    let cachedItems = null;
+    const cachedData = localStorage.getItem(cacheKey);
+    const cachedTs = parseInt(localStorage.getItem(tsKey) || '0', 10);
+    if (cachedData && (now - cachedTs) < cacheDuration) {
+        try { cachedItems = JSON.parse(cachedData); } catch(e) { cachedItems = null; }
+    }
+
+    if (cachedItems) {
+        return cachedItems;
+    }
+
+    try {
+        const resp = await fetch(feed.url);
+        const text = await resp.text();
+        const items = parseRSS(text, source);
+        localStorage.setItem(cacheKey, JSON.stringify(items));
+        localStorage.setItem(tsKey, `${now}`);
+        return items;
+    } catch(err) {
+        console.error(`Failed to fetch ${source}:`, err);
+        if (cachedData) {
+            try { return JSON.parse(cachedData); } catch(e) { }
+        }
+        return [];
+    }
+}
+
+// Load all requested feeds and merge items
+async function loadFeeds(feedList) {
+    const items = [];
+    for (const src of feedList) {
+        const feedItems = await fetchFeedWithCache(src);
+        items.push(...feedItems);
+    }
+    return items;
+}
+
+function filterByAge(items) {
+    const maxAgeSec = MAX_AGE_DAYS * 86400;
+    const now = Date.now() / 1000;
+    return items.filter(item => (now - item.date) <= maxAgeSec);
+}
+
 // Updates the news headlines, optionally clearing existing ones
 export async function updateNews(clear = false) {
     if (updatingNews) {
@@ -324,15 +459,14 @@ export async function updateNews(clear = false) {
         // Copy displayedItems to oldDisplayedItems
         let oldDisplayedItems = [...displayedItems];
 
-        // Send the request with included feeds in the body
-        const response = await fetch(BASE_URL, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({ includedFeeds })
-        });
-        let loadedItems = await response.json();
+        // Determine which feeds to load
+        const requestedFeeds = includedFeeds.length > 0 ? includedFeeds : Object.keys(RSS_FEEDS);
+
+        // Fetch items directly from RSS sources
+        let loadedItems = await loadFeeds(requestedFeeds);
+        loadedItems = filterByAge(loadedItems);
+        // Limit to max stories
+        loadedItems = loadedItems.slice(0, MAX_STORIES);
         console.log('...Done! Count: ', loadedItems.length);
         
         // Hide the spinner when data arrives
