@@ -135,17 +135,21 @@ foreach ($requestedFeeds as $source) {
     }
 
     if (!$useCache) {
-        // Fetch and cache
+        // Fetch and cache with timing
+        $startTime = microtime(true);
         $xml = $useSerialFetch ? fetchRSS($feedData['url']) : fetchRSS($feedData['url']); // Only one at a time now
+        $endTime = microtime(true);
+        $downloadTime = round(($endTime - $startTime) * 1000, 2); // Convert to milliseconds
+        
         if ($xml !== false) {
             $items = parseRSS($xml, $source);
             file_put_contents($cacheFile, json_encode($items));
             $feedTimestamps[$source] = $currentTime;
             $updatedTimestamps = true;
             $allItems = array_merge($allItems, $items);
-            logMessage("Fetched {$source} from internet and updated cache.");
+            logMessage("Fetched {$source} from internet in {$downloadTime}ms and updated cache.");
         } else {
-            logMessage("Failed to fetch {$source} from internet.");
+            logMessage("Failed to fetch {$source} from internet after {$downloadTime}ms.");
         }
     }
 }
@@ -180,6 +184,7 @@ echo json_encode($outputItems);
 // ***** Utility functions *****
 
 function fetchRSS($url) {
+    $startTime = microtime(true);
     $ch = curl_init();
     curl_setopt($ch, CURLOPT_URL, $url);
     curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
@@ -187,9 +192,11 @@ function fetchRSS($url) {
     curl_setopt($ch, CURLOPT_USERAGENT, 'Mozilla/5.0 (compatible; RSS Reader/1.0)');
     curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
     $response = curl_exec($ch);
+    $endTime = microtime(true);
+    $curlTime = round(($endTime - $startTime) * 1000, 2); // Convert to milliseconds
     
     if (curl_errno($ch)) {
-        error_log("RSS Feed Error: " . curl_error($ch) . " - URL: " . $url);
+        error_log("RSS Feed Error after {$curlTime}ms: " . curl_error($ch) . " - URL: " . $url);
         curl_close($ch);
         return false;
     }
