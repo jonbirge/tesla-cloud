@@ -44,11 +44,12 @@ $feeds = [
     'den' => ['url' => 'https://www.denverpost.com/feed/', 'cache' => 15],
     'chi' => ['url' => 'https://www.chicagotribune.com/news/feed/', 'cache' => 15],
     'bbc' => ['url' => 'http://feeds.bbci.co.uk/news/world/rss.xml', 'cache' => 15],
-    'lemonde' => ['url' => 'https://www.lemonde.fr/rss/une.xml', 'cache' => 60],
+    'lemonde' => ['url' => 'https://www.lemonde.fr/rss/une.xml', 'cache' => 30],
     'bloomberg' => ['url' => 'https://feeds.bloomberg.com/news.rss', 'cache' => 15],
     'economist' => ['url' => 'https://www.economist.com/latest/rss.xml', 'cache' => 60],
+    //'newyorker' => ['url' => 'https://www.newyorker.com/feed/news', 'cache' => 30],
     'cnn' => ['url' => 'https://openrss.org/www.cnn.com', 'cache' => 15, 'icon' => 'https://www.cnn.com/'],
-    'ap' => ['url' => 'https://news.google.com/rss/search?q=when:24h+allinurl:apnews.com&hl=en-US&gl=US&ceid=US:en', 'cache' => 30, 'icon' => 'https://apnews.com/'],
+    'ap' => ['url' => 'https://news.google.com/rss/search?q=when:24h+allinurl:apnews.com&hl=en-US&gl=US&ceid=US:en', 'cache' => 15, 'icon' => 'https://apnews.com/'],
     'notateslaapp' => ['url' => 'https://www.notateslaapp.com/rss', 'cache' => 30],
     'teslarati' => ['url' => 'https://www.teslarati.com/feed/', 'cache' => 30],
     'insideevs' => ['url' => 'https://insideevs.com/rss/articles/all/', 'cache' => 30],
@@ -149,7 +150,8 @@ foreach ($requestedFeeds as $source) {
             $allItems = array_merge($allItems, $items);
             logMessage("Fetched {$source} from internet in {$downloadTime}ms and updated cache.");
         } else {
-            logMessage("Failed to fetch {$source} from internet after {$downloadTime}ms.");
+            logMessage("Failed to fetch {$source} from internet after {$downloadTime}ms - treating as empty feed.");
+            // Don't update cache or timestamp when fetch fails due to timeout - leave existing cache intact
         }
     }
 }
@@ -188,7 +190,7 @@ function fetchRSS($url) {
     $ch = curl_init();
     curl_setopt($ch, CURLOPT_URL, $url);
     curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-    curl_setopt($ch, CURLOPT_TIMEOUT, 10);
+    curl_setopt($ch, CURLOPT_TIMEOUT, 1.5); // Changed from 10 to 1.5 seconds
     curl_setopt($ch, CURLOPT_USERAGENT, 'Mozilla/5.0 (compatible; RSS Reader/1.0)');
     curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
     $response = curl_exec($ch);

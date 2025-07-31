@@ -2,7 +2,7 @@
 import { settings, isDriving, hashedUser, isLoggedIn } from './settings.js';
 
 // Constants
-const BASE_URL = 'news.php?n=256';
+const BASE_URL = 'news.php?n=512';
 const RESTDB_URL = 'rest_db.php';
 const NEWS_REFRESH_INTERVAL = 2.5;  // minutes
 
