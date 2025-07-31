@@ -814,7 +814,7 @@ window.showPremiumPrecipGraph = function(dayIndex) {
     if (!daily[dayIndex]) return;
 
     // Show only the premium popup
-    const premPopup = document.querySelector('#prem-weather .forecast-popup');
+    const premPopup = document.querySelector('#weather .forecast-popup');
     if (premPopup) {
         premPopup.classList.add('show');
     }
@@ -1015,7 +1015,7 @@ window.showPremiumPrecipGraph = function(dayIndex) {
 
 // Close forecast window
 window.closePremiumPrecipPopup = function() {
-    const premPopup = document.querySelector('#prem-weather .forecast-popup');
+    const premPopup = document.querySelector('#weather .forecast-popup');
     if (premPopup) premPopup.classList.remove('show');
 }
 
