@@ -173,9 +173,9 @@ hr {
 
 /* Scroll indicators that fade content at top/bottom when more content is available */
 .scroll-indicator {
-    position: fixed; /* Fixed position so they don't move when scrolling */
-    left: 300px; /* Match the width of the left frame */
-    right: 10px;
+    position: sticky; /* Stick to the edges of the scroll container */
+    left: 0;
+    right: 0;
     height: 64px; /* Increased height for better visibility */
     pointer-events: none; /* Let mouse events pass through */
     opacity: 0; /* Start hidden */
@@ -185,12 +185,12 @@ hr {
 
 .top-fade {
     top: 0;
-    background: linear-gradient(to bottom, var(--bg-color), transparent);
+    background: linear-gradient(to bottom, var(--bg-color) 10%, transparent);
 }
 
 .bottom-fade {
     bottom: 0;
-    background: linear-gradient(to top, var(--bg-color), transparent);
+    background: linear-gradient(to top, var(--bg-color) 10%, transparent);
 }
 
 .section {
@@ -1268,12 +1268,8 @@ body.dark-mode .option-button:hover:not(.active) {
     .left-frame {
         width: 100%;
         height: auto;
-        max-height: 90px;
         padding: 5px;
-        overflow-y: hidden;
-        overflow-x: auto;
-        -webkit-overflow-scrolling: touch;
-        scrollbar-width: none; /* Hide scrollbar for Firefox */
+        overflow: visible;
     }
     
     .left-frame::-webkit-scrollbar {
@@ -1283,10 +1279,10 @@ body.dark-mode .option-button:hover:not(.active) {
     /* Convert section buttons to horizontal layout */
     .section-buttons {
         flex-direction: row;
-        min-width: min-content;
-        width: auto;
-        /* height: 80px; */
-        overflow-x: auto;
+        flex-wrap: wrap;
+        justify-content: center;
+        width: 100%;
+        gap: 3px 6px;
     }
     
     .section-buttons h1 {
@@ -1309,8 +1305,9 @@ body.dark-mode .option-button:hover:not(.active) {
     
     /* Right frame takes remaining space */
     .right-frame {
-        height: calc(100vh - 90px);
+        height: auto;
         padding: 10px 15px;
+        flex-grow: 1;
     }
     
     /* Dashboard adjustments */
