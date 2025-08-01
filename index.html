@@ -262,7 +262,7 @@
         </div>
 
         <div id="travel" class="section">
-            <h2>Links</h2>
+            <h2>Mapping Tools</h2>
             <ul class="button-list">
                 <li><a href="https://teslawaze.azurewebsites.net"><img src="https://www.waze.com/favicon.ico" loading="lazy">TeslaWaze</a></li>
                 <li><a href="https://abetterrouteplanner.com"><img src="https://abetterrouteplanner.com/favicon.ico" loading="lazy">ABRP</a></li>
@@ -270,7 +270,9 @@
                 <li><a href="https://maps.google.com"><img src="https://www.google.com/images/branding/product/ico/maps15_bnuw3a_32dp.ico" loading="lazy">Google Maps</a></li>
                 <li><a href="https://earth.google.com"><img src="https://www.gstatic.com/earth/00-favicon.ico" loading="lazy">Google Earth</a></li>
                 <li><a href="https://vfrmap.com"><img src="https://nasstatus.faa.gov/favicon-32x32.png" loading="lazy">Aviation Maps</a></li>
-                <li><a href="https://www.waze.com"><img src="https://www.waze.com/favicon.ico" loading="lazy">Waze</a></li>
+            </ul>
+            <h2>Destination Information</h2>
+            <ul class="button-list">
                 <li><a href="https://www.plugshare.com"><img src="https://www.plugshare.com/favicon.ico" loading="lazy">PlugShare</a></li>
                 <li><a href="https://www.yelp.com" data-frame><img src="https://www.yelp.com/favicon.ico" loading="lazy">Yelp</a></li>
                 <li><a href="https://www.tripadvisor.com" data-frame><img src="https://www.tripadvisor.com/favicon.ico" loading="lazy">TripAdvisor</a></li>
@@ -288,12 +290,12 @@
         <div id="reference" class="section">
             <h2>AI Agents</h2>
             <ul class="button-list">
-                <li><a href="https://chat.openai.com/chat"><img src="https://www.google.com/s2/favicons?domain=chat.openai.com&sz=64" loading="lazy">ChatGPT</a></li>
+                <li><a href="https://chat.openai.com/chat"><img src="https://www.google.com/s2/favicons?domain=chat.openai.com&sz=64" loading="lazy">OpenAI ChatGPT</a></li>
                 <li><a href="https://gemini.google.com/app"><img src="https://www.google.com/s2/favicons?domain=gemini.google.com&sz=64" loading="lazy">Google Gemini</a></li>
                 <li><a href="https://www.perplexity.ai/"><img src="https://www.google.com/s2/favicons?domain=perplexity.ai&sz=64" loading="lazy">Perplexity AI</a></li>
                 <li><a href="https://copilot.microsoft.com/"><img src="https://www.google.com/s2/favicons?domain=copilot.microsoft.com&sz=64" loading="lazy">Microsoft Copilot</a></li>
                 <li><a href="https://claude.ai/chat"><img src="https://www.google.com/s2/favicons?domain=claude.ai&sz=64" loading="lazy">Anthropic Claude</a></li>
-                <li><a href="https://poe.com/"><img src="https://www.google.com/s2/favicons?domain=poe.com&sz=64" loading="lazy">Poe (Multi-AI)</a></li>
+                <li><a href="https://grok.com"><img src="https://www.google.com/s2/favicons?domain=grok.com&sz=64" loading="lazy">xAI Grok</a>
             </ul>
             <h2>Learning Tools</h2>
             <ul class="button-list">
@@ -552,47 +554,39 @@
                 <div class="settings-toggle-item news-toggle-item" data-setting="rss-wsj" onclick="this.querySelector('input').click()">
                     <label>Wall Street Journal</label><input type="checkbox" onchange="toggleSettingFrom(this)"><span class="settings-toggle-slider"></span>
                 </div>
-
                 <div class="settings-toggle-item news-toggle-item" data-setting="rss-nyt" onclick="this.querySelector('input').click()">
                     <label>New York Times</label><input type="checkbox" onchange="toggleSettingFrom(this)" checked><span class="settings-toggle-slider"></span>
                 </div>
-
                 <div class="settings-toggle-item news-toggle-item" data-setting="rss-wapo" onclick="this.querySelector('input').click()">
                     <label>Washington Post</label><input type="checkbox" onchange="toggleSettingFrom(this)" checked><span class="settings-toggle-slider"></span>
                 </div>
-
                 <div class="settings-toggle-item news-toggle-item" data-setting="rss-latimes" onclick="this.querySelector('input').click()">
                     <label>Los Angeles Times</label><input type="checkbox" onchange="toggleSettingFrom(this)" checked><span class="settings-toggle-slider"></span>
                 </div>
-
                 <div class="settings-toggle-item news-toggle-item" data-setting="rss-bos" onclick="this.querySelector('input').click()">
                     <label>Boston Globe</label><input type="checkbox" onchange="toggleSettingFrom(this)" checked><span class="settings-toggle-slider"></span>
                 </div>
-                
                 <div class="settings-toggle-item news-toggle-item" data-setting="rss-chi" onclick="this.querySelector('input').click()">
                     <label>Chicago Tribune</label><input type="checkbox" onchange="toggleSettingFrom(this)"><span class="settings-toggle-slider"></span>
                 </div>
-
                 <div class="settings-toggle-item news-toggle-item" data-setting="rss-den" onclick="this.querySelector('input').click()">
                     <label>Denver Post</label><input type="checkbox" onchange="toggleSettingFrom(this)" checked><span class="settings-toggle-slider"></span>
                 </div>
-                
                 <div class="settings-toggle-item news-toggle-item" data-setting="rss-bbc" onclick="this.querySelector('input').click()">
                     <label>BBC</label><input type="checkbox" onchange="toggleSettingFrom(this)" checked><span class="settings-toggle-slider"></span>
                 </div>
-
                 <div class="settings-toggle-item news-toggle-item" data-setting="rss-economist" onclick="this.querySelector('input').click()">
                     <label>The Economist</label><input type="checkbox" onchange="toggleSettingFrom(this)" checked><span class="settings-toggle-slider"></span>
                 </div>
-                
                 <div class="settings-toggle-item news-toggle-item" data-setting="rss-lemonde" onclick="this.querySelector('input').click()">
                     <label>Le Monde</label><input type="checkbox" onchange="toggleSettingFrom(this)" checked><span class="settings-toggle-slider"></span>
                 </div>
-
-                <div class="settings-toggle-item news-toggle-item" data-setting="rss-cnn" onclick="this.querySelector('input').click()">
+                <!-- <div class="settings-toggle-item news-toggle-item" data-setting="rss-cnn" onclick="this.querySelector('input').click()">
                     <label>CNN</label><input type="checkbox" onchange="toggleSettingFrom(this)" checked><span class="settings-toggle-slider"></span>
+                </div> -->
+                <div class="settings-toggle-item news-toggle-item" data-setting="rss-newyorker" onclick="this.querySelector('input').click()">
+                    <label>New Yorker</label><input type="checkbox" onchange="toggleSettingFrom(this)" checked><span class="settings-toggle-slider"></span>
                 </div>
-
                 <div class="settings-toggle-item news-toggle-item" data-setting="rss-ap" onclick="this.querySelector('input').click()">
                     <label>AP News</label><input type="checkbox" onchange="toggleSettingFrom(this)" checked><span class="settings-toggle-slider"></span>
                 </div>
@@ -603,47 +597,36 @@
                 <div class="settings-toggle-item news-toggle-item" data-setting="rss-bloomberg" onclick="this.querySelector('input').click()">
                     <label>Bloomberg</label><input type="checkbox" onchange="toggleSettingFrom(this)" checked><span class="settings-toggle-slider"></span>
                 </div>
-
                 <div class="settings-toggle-item news-toggle-item" data-setting="rss-thedrive" onclick="this.querySelector('input').click()">
                     <label>The Drive</label><input type="checkbox" onchange="toggleSettingFrom(this)" checked><span class="settings-toggle-slider"></span>
                 </div>
-
                 <div class="settings-toggle-item news-toggle-item" data-setting="rss-techcrunch" onclick="this.querySelector('input').click()">
                     <label>TechCrunch</label><input type="checkbox" onchange="toggleSettingFrom(this)" checked><span class="settings-toggle-slider"></span>
                 </div>
-
                 <div class="settings-toggle-item news-toggle-item" data-setting="rss-caranddriver" onclick="this.querySelector('input').click()">
                     <label>Car & Driver</label><input type="checkbox" onchange="toggleSettingFrom(this)"><span class="settings-toggle-slider"></span>
                 </div>
-
                 <div class="settings-toggle-item news-toggle-item" data-setting="rss-theverge" onclick="this.querySelector('input').click()">
                     <label>The Verge</label><input type="checkbox" onchange="toggleSettingFrom(this)" checked><span class="settings-toggle-slider"></span>
                 </div>
-
                 <div class="settings-toggle-item news-toggle-item" data-setting="rss-arstechnica" onclick="this.querySelector('input').click()">
                     <label>Ars Technica</label><input type="checkbox" onchange="toggleSettingFrom(this)"><span class="settings-toggle-slider"></span>
                 </div>
-
                 <div class="settings-toggle-item news-toggle-item" data-setting="rss-engadget" onclick="this.querySelector('input').click()">
                     <label>Engadget</label><input type="checkbox" onchange="toggleSettingFrom(this)"><span class="settings-toggle-slider"></span>
                 </div>
-
                 <div class="settings-toggle-item news-toggle-item" data-setting="rss-gizmodo" onclick="this.querySelector('input').click()">
                     <label>Gizmodo</label><input type="checkbox" onchange="toggleSettingFrom(this)"><span class="settings-toggle-slider"></span>
                 </div>
-
                 <div class="settings-toggle-item news-toggle-item" data-setting="rss-wired" onclick="this.querySelector('input').click()">
                     <label>WIRED</label><input type="checkbox" onchange="toggleSettingFrom(this)"><span class="settings-toggle-slider"></span>
                 </div>
-
                 <div class="settings-toggle-item news-toggle-item" data-setting="rss-aviationweek" onclick="this.querySelector('input').click()">
                     <label>Aviation Week</label><input type="checkbox" onchange="toggleSettingFrom(this)" checked><span class="settings-toggle-slider"></span>
                 </div>
-
                 <div class="settings-toggle-item news-toggle-item" data-setting="rss-spacenews" onclick="this.querySelector('input').click()">
                     <label>SpaceNews</label><input type="checkbox" onchange="toggleSettingFrom(this)"><span class="settings-toggle-slider"></span>
                 </div>
-
                 <div class="settings-toggle-item news-toggle-item" data-setting="rss-defensenews" onclick="this.querySelector('input').click()">
                     <label>DefenseNews</label><input type="checkbox" onchange="toggleSettingFrom(this)"><span class="settings-toggle-slider"></span>
                 </div>
@@ -654,11 +637,9 @@
                 <div class="settings-toggle-item news-toggle-item" data-setting="rss-notateslaapp" onclick="this.querySelector('input').click()">
                     <label>Not A Tesla App</label><input type="checkbox" onchange="toggleSettingFrom(this)" checked><span class="settings-toggle-slider"></span>
                 </div>
-
                 <div class="settings-toggle-item news-toggle-item" data-setting="rss-teslarati" onclick="this.querySelector('input').click()">
                     <label>Teslarati</label><input type="checkbox" onchange="toggleSettingFrom(this)" checked><span class="settings-toggle-slider"></span>
                 </div>
-
                 <div class="settings-toggle-item news-toggle-item" data-setting="rss-insideevs" onclick="this.querySelector('input').click()">
                     <label>InsideEVs</label><input type="checkbox" onchange="toggleSettingFrom(this)" checked><span class="settings-toggle-slider"></span>
                 </div>

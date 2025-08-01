@@ -1,13 +1,10 @@
 // Imports
 import { settings, isDriving, hashedUser, isLoggedIn } from './settings.js';
-import { showSpinner, hideSpinner, showNotification } from './common.js';
 
 // Constants
-const BASE_URL = 'news.php?n=256';
+const BASE_URL = 'news.php?n=512';
 const RESTDB_URL = 'rest_db.php';
 const NEWS_REFRESH_INTERVAL = 2.5;  // minutes
-const CLEANUP_INTERVAL = 120;       // minutes
-const MAX_AGE_DAYS = 2;             // Maximum age in days for seen news IDs
 
 // Variables
 let newsUpdateInterval = null;
@@ -261,7 +258,7 @@ async function markNewsSeen(id) {
         });
 
         if (response.ok) {
-            console.log(`Successfully marked article ${id} as seen.`);
+            // console.log(`Successfully marked article ${id} as seen.`);
             // Update the cache
             if (cachedSeenNewsIds !== null) {
                 cachedSeenNewsIds[id] = timestamp;
@@ -315,23 +312,29 @@ export async function updateNews(clear = false) {
         }
         
         console.log('Fetching news headlines...');
-        // if (includedFeeds.length > 0) {
-        //     console.log('Including RSS feeds:', includedFeeds);
-        // } else {
-        //     console.log('No RSS feeds selected, showing all available feeds');
-        // }
         
         // Copy displayedItems to oldDisplayedItems
         let oldDisplayedItems = [...displayedItems];
 
-        // Send the request with included feeds in the body
+        // Create AbortController for timeout handling
+        const abortController = new AbortController();
+        const timeoutId = setTimeout(() => {
+            abortController.abort();
+        }, 2000); // 2 second timeout
+
+        // Send the request with included feeds in the body and timeout
         const response = await fetch(BASE_URL, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
             },
-            body: JSON.stringify({ includedFeeds })
+            body: JSON.stringify({ includedFeeds }),
+            signal: abortController.signal
         });
+
+        // Clear the timeout since request completed
+        clearTimeout(timeoutId);
+
         let loadedItems = await response.json();
         console.log('...Done! Count: ', loadedItems.length);
         
@@ -404,11 +407,14 @@ export async function updateNews(clear = false) {
             // Update the visibility of share buttons
             setShareButtonsVisibility();
         } else {
-            newsContainer.innerHTML = '<p><em>No headlines available</em></p>';
+            newsContainer.innerHTML = '<p><em>No unread headlines available</em></p>';
         }
     } catch (error) {
-        console.error('Error fetching news:', error);
-        console.log('Error fetching news:', error);
+        if (error.name === 'AbortError') {
+            console.error('News fetch timed out after 2 seconds');
+        } else {
+            console.error('Error fetching news:', error);
+        }
         
         // Make sure to hide the spinner even in case of an error
         document.getElementById('news-loading').style.display = 'none';
@@ -579,11 +585,11 @@ function generateHTMLforItem(item)
     let faviconUrl = '';
     if (item.icon && typeof item.icon === 'string' && item.icon.trim() !== '') {
         // Use the domain from the icon key
-        faviconUrl = `https://www.google.com/s2/favicons?domain=${item.icon}&sz=32`;
+        faviconUrl = `https://www.google.com/s2/favicons?domain=${item.icon}&sz=48`;
     } else {
         try {
             const url = new URL(item.link);
-            faviconUrl = `https://www.google.com/s2/favicons?domain=${url.hostname}&sz=32`;
+            faviconUrl = `https://www.google.com/s2/favicons?domain=${url.hostname}&sz=48`;
         } catch (e) {
             console.error('Error parsing URL for favicon:', e);
         }
@@ -628,14 +634,14 @@ export function setupNewsObserver() {
                 if (timeElement.classList.contains('news-new-time')) {
                     // Add to pending set (don't mark as read yet)
                     pendingReadItems.add(id);
-                    //console.log(`News item now visible, added to pending: ${id} (Total pending: ${pendingReadItems.size})`);
+                    // console.log(`News item now visible, added to pending: ${id} (Total pending: ${pendingReadItems.size})`);
                 }
             } 
             // Item is no longer visible
             else {
                 // If it was in our pending set, now mark it as read
                 if (pendingReadItems.has(id) && timeElement.classList.contains('news-new-time')) {
-                    console.log(`News item scrolled out of view, marking as read: ${id}`);
+                    // console.log(`News item scrolled out of view, marking as read: ${id}`);
                     // Mark as seen in ${RESTDB_URL}
                     markNewsSeen(id).then(() => {
                         // Remove from pending set
@@ -788,7 +794,7 @@ export function updateNewsNotificationDot() {
             newsButton.classList.add('has-notification');
             // Set the data-count attribute for CSS to use as content
             newsButton.setAttribute('data-count', unreadCount);
-            console.log(`News notification counter updated (${unreadCount} unread items)`);
+            // console.log(`News notification counter updated (${unreadCount} unread items)`);
         }, 50);
     } else {
         if (newsButton.classList.contains('has-notification')) {
@@ -949,26 +955,26 @@ window.resumeNewsUpdates = function () {
 }
 
 // Debug function to check ${RESTDB_URL} news data
-window.checkSeenNewsStorage = async function() {
-    const seenIds = await getSeenNewsIds();
-    const count = Object.keys(seenIds).length;
+// window.checkSeenNewsStorage = async function() {
+//     const seenIds = await getSeenNewsIds();
+//     const count = Object.keys(seenIds).length;
     
-    let oldestTimestamp = Date.now();
-    if (Object.keys(seenIds).length > 0) {
-        oldestTimestamp = Math.min(...Object.values(seenIds));
-    }
-    const oldestDate = new Date(oldestTimestamp);
+//     let oldestTimestamp = Date.now();
+//     if (Object.keys(seenIds).length > 0) {
+//         oldestTimestamp = Math.min(...Object.values(seenIds));
+//     }
+//     const oldestDate = new Date(oldestTimestamp);
     
-    console.log(`Seen news items in restdb: ${count}`);
-    console.log(`Oldest item from: ${oldestDate.toLocaleString()}`);
-    console.log('Sample items:', Object.keys(seenIds).slice(0, 5));
+//     console.log(`Seen news items in restdb: ${count}`);
+//     console.log(`Oldest item from: ${oldestDate.toLocaleString()}`);
+//     console.log('Sample items:', Object.keys(seenIds).slice(0, 5));
     
-    return {
-        count,
-        oldest: oldestDate,
-        sample: Object.keys(seenIds).slice(0, 5)
-    };
-}
+//     return {
+//         count,
+//         oldest: oldestDate,
+//         sample: Object.keys(seenIds).slice(0, 5)
+//     };
+// }
 
 // Clear all seen news data from ${RESTDB_URL}
 window.clearSeenNewsStorage = async function() {
@@ -1003,8 +1009,8 @@ window.clearSeenNewsStorage = async function() {
 }
 
 // Debug function to check pending items
-window.checkPendingNewsItems = function() {
-    console.log(`Currently pending read items: ${pendingReadItems.size}`);
-    console.log('Pending IDs:', Array.from(pendingReadItems));
-    return Array.from(pendingReadItems);
-}
+// window.checkPendingNewsItems = function() {
+//     console.log(`Currently pending read items: ${pendingReadItems.size}`);
+//     console.log('Pending IDs:', Array.from(pendingReadItems));
+//     return Array.from(pendingReadItems);
+// }
