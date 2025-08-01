@@ -316,14 +316,25 @@ export async function updateNews(clear = false) {
         // Copy displayedItems to oldDisplayedItems
         let oldDisplayedItems = [...displayedItems];
 
-        // Send the request with included feeds in the body
+        // Create AbortController for timeout handling
+        const abortController = new AbortController();
+        const timeoutId = setTimeout(() => {
+            abortController.abort();
+        }, 2000); // 2 second timeout
+
+        // Send the request with included feeds in the body and timeout
         const response = await fetch(BASE_URL, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
             },
-            body: JSON.stringify({ includedFeeds })
+            body: JSON.stringify({ includedFeeds }),
+            signal: abortController.signal
         });
+
+        // Clear the timeout since request completed
+        clearTimeout(timeoutId);
+
         let loadedItems = await response.json();
         console.log('...Done! Count: ', loadedItems.length);
         
@@ -399,7 +410,11 @@ export async function updateNews(clear = false) {
             newsContainer.innerHTML = '<p><em>No unread headlines available</em></p>';
         }
     } catch (error) {
-        console.error('Error fetching news:', error);
+        if (error.name === 'AbortError') {
+            console.error('News fetch timed out after 2 seconds');
+        } else {
+            console.error('Error fetching news:', error);
+        }
         
         // Make sure to hide the spinner even in case of an error
         document.getElementById('news-loading').style.display = 'none';
