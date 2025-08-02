@@ -1262,16 +1262,19 @@ body.dark-mode .option-button:hover:not(.active) {
     /* Layout adjustment */
     .frame-container {
         flex-direction: column;
+        position: static; /* allow page scrolling */
+        height: auto;
+        overflow: visible;
     }
     
     /* Convert left menu to horizontal top menu */
     .left-frame {
         width: 100%;
         height: auto;
-        max-height: 90px;
+        max-height: none; /* allow multiple rows */
         padding: 5px;
         overflow-y: hidden;
-        overflow-x: auto;
+        overflow-x: visible;
         -webkit-overflow-scrolling: touch;
         scrollbar-width: none; /* Hide scrollbar for Firefox */
     }
@@ -1283,10 +1286,10 @@ body.dark-mode .option-button:hover:not(.active) {
     /* Convert section buttons to horizontal layout */
     .section-buttons {
         flex-direction: row;
+        flex-wrap: wrap; /* show all buttons */
         min-width: min-content;
-        width: auto;
-        /* height: 80px; */
-        overflow-x: auto;
+        width: 100%;
+        overflow-x: visible;
     }
     
     .section-buttons h1 {
@@ -1306,10 +1309,16 @@ body.dark-mode .option-button:hover:not(.active) {
         height: 16px;
         margin-right: 8px;
     }
+
+    /* Scroll indicators span full width on mobile */
+    .scroll-indicator {
+        left: 0;
+        right: 0;
+    }
     
     /* Right frame takes remaining space */
     .right-frame {
-        height: calc(100vh - 90px);
+        height: calc(100vh - 120px); /* account for two rows of buttons */
         padding: 10px 15px;
     }
     

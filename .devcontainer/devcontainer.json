@@ -1,0 +1,10 @@
+{
+    "name": "tesla-cloud",
+    "image": "mcr.microsoft.com/devcontainers/php:8.2",
+    "features": {
+        "ghcr.io/devcontainers/features/node:1": {},
+        "ghcr.io/devcontainers/features/git-lfs:1": {}
+    },
+    "forwardPorts": [80],
+    "postCreateCommand": "composer install"
+}
