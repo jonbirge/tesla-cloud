@@ -1262,16 +1262,19 @@ body.dark-mode .option-button:hover:not(.active) {
     /* Layout adjustment */
     .frame-container {
         flex-direction: column;
+        height: auto;
+        position: relative;
+        overflow-y: auto;
     }
     
     /* Convert left menu to horizontal top menu */
     .left-frame {
         width: 100%;
         height: auto;
-        max-height: 90px;
+        max-height: none;
         padding: 5px;
         overflow-y: hidden;
-        overflow-x: auto;
+        overflow-x: visible;
         -webkit-overflow-scrolling: touch;
         scrollbar-width: none; /* Hide scrollbar for Firefox */
     }
@@ -1286,7 +1289,9 @@ body.dark-mode .option-button:hover:not(.active) {
         min-width: min-content;
         width: auto;
         /* height: 80px; */
-        overflow-x: auto;
+        overflow-x: visible;
+        flex-wrap: wrap;
+        justify-content: center;
     }
     
     .section-buttons h1 {
@@ -1309,7 +1314,8 @@ body.dark-mode .option-button:hover:not(.active) {
     
     /* Right frame takes remaining space */
     .right-frame {
-        height: calc(100vh - 90px);
+        min-height: calc(100vh - 90px);
+        height: auto;
         padding: 10px 15px;
     }
     
@@ -1456,5 +1462,11 @@ body.dark-mode .option-button:hover:not(.active) {
         margin-top: 10px;
         padding: 10px 15px;
         font-size: 14pt;
+    }
+
+    /* Adjust scroll indicator width for mobile */
+    .scroll-indicator {
+        left: 0;
+        right: 0;
     }
 }

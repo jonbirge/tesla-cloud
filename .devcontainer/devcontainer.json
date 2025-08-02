@@ -1,0 +1,10 @@
+{
+    "name": "tesla-cloud",
+    "image": "mcr.microsoft.com/devcontainers/php:0-8.2",
+    "features": {
+        "ghcr.io/devcontainers/features/node:1": {
+            "version": "lts"
+        }
+    },
+    "forwardPorts": [80]
+}
