@@ -1262,16 +1262,24 @@ body.dark-mode .option-button:hover:not(.active) {
     /* Layout adjustment */
     .frame-container {
         flex-direction: column;
+        position: static;
+        height: auto;
+        overflow: visible;
+    }
+
+    /* Adjust scroll indicator placement */
+    .scroll-indicator {
+        left: 0;
+        right: 0;
     }
     
     /* Convert left menu to horizontal top menu */
     .left-frame {
         width: 100%;
         height: auto;
-        max-height: 90px;
+        max-height: none;
         padding: 5px;
-        overflow-y: hidden;
-        overflow-x: auto;
+        overflow: visible;
         -webkit-overflow-scrolling: touch;
         scrollbar-width: none; /* Hide scrollbar for Firefox */
     }
@@ -1283,10 +1291,10 @@ body.dark-mode .option-button:hover:not(.active) {
     /* Convert section buttons to horizontal layout */
     .section-buttons {
         flex-direction: row;
-        min-width: min-content;
-        width: auto;
-        /* height: 80px; */
-        overflow-x: auto;
+        flex-wrap: wrap;
+        width: 100%;
+        gap: 4px;
+        overflow: visible;
     }
     
     .section-buttons h1 {
@@ -1309,8 +1317,9 @@ body.dark-mode .option-button:hover:not(.active) {
     
     /* Right frame takes remaining space */
     .right-frame {
-        height: calc(100vh - 90px);
+        height: auto;
         padding: 10px 15px;
+        overflow: visible;
     }
     
     /* Dashboard adjustments */
