@@ -1,0 +1,12 @@
+{
+    "name": "tesla-cloud Dev Container",
+    "image": "mcr.microsoft.com/devcontainers/base:ubuntu",
+    "features": {
+        "ghcr.io/devcontainers/features/php:1": {
+            "version": "8.2"
+        },
+        "ghcr.io/devcontainers/features/node:1": {
+            "version": "18"
+        }
+    }
+}
