@@ -1,0 +1,8 @@
+{
+    "name": "tesla-cloud",
+    "image": "mcr.microsoft.com/devcontainers/php:0-8.2",
+    "features": {
+        "ghcr.io/devcontainers/features/github-cli:1": {}
+    },
+    "postCreateCommand": "composer install || true"
+}
