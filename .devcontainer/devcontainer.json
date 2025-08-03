@@ -5,5 +5,11 @@
         "ghcr.io/devcontainers/features/php:1": {
             "version": "8.2"
         }
+    },
+    "forwardPorts": [8000],
+    "portsAttributes": {
+        "8000": {
+            "label": "Web Server"
+        }
     }
 }

@@ -311,25 +311,26 @@ hr {
 
 .section-button.has-notification {
     position: relative;
+    padding-right: 45px;            /* Reserve space so badge doesn't cover text */
 }
 
 .section-button.has-notification::after {
     content: attr(data-count);      /* Use the data-count attribute for counter text */
     position: absolute;
     top: 50%;                       /* Center vertically */
-    right: 10px;                    /* Position to the right of text instead of left */
+    right: 12px;                    /* Position to the right of text instead of left */
     transform: translateY(-50%);    /* Perfect vertical centering */
-    min-width: 20px;                /* Minimum width for the counter */
-    height: 26px;                   /* Taller to accommodate text */
+    min-width: 18px;                /* Minimum width for the counter */
+    height: 18px;                   /* Match font size for a compact badge */
     background-color: var(--tesla-blue);
-    border-radius: 13px;            /* Rounded pill shape */
+    border-radius: 9px;             /* Rounded pill shape */
     display: flex;                  /* Use flex to center the counter text */
     justify-content: center;        /* Center horizontally */
     align-items: center;            /* Center vertically */
-    color: white;                 /* White text */
-    font-size: 12pt;                /* Small font size */
+    color: white;                   /* White text */
+    font-size: 10px;                /* Smaller font size */
     font-weight: 750;
-    padding: 0px 9px;
+    padding: 0 6px;                 /* Adjust horizontal padding */
     opacity: 1;                     /* Full opacity by default */
     transition: opacity 0.5s ease;  /* Smooth transition for opacity */
 }
@@ -1311,20 +1312,20 @@ body.dark-mode .option-button:hover:not(.active) {
 
     /* Reserve space for mobile notification badge */
     #news-section {
-        padding-right: 22px;
+        padding-right: 26px;
     }
 
     .section-button.has-notification {
-        padding-right: 22px;
+        padding-right: 26px;
     }
 
     .section-button.has-notification::after {
         right: 6px;
-        min-width: 12px;
-        height: 18px;
-        border-radius: 9px;
-        font-size: 8pt;
-        padding: 0 5px;
+        min-width: 16px;
+        height: 16px;
+        border-radius: 8px;
+        font-size: 7pt;
+        padding: 0 4px;
     }
 
     .button-icon {
