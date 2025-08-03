@@ -307,10 +307,15 @@ hr {
 }
 
 
+#news-section {
+    padding-right: 50px;
+}
+
 /* Notification dot section */
 
 .section-button.has-notification {
     position: relative;
+    padding-right: 50px;
 }
 
 .section-button.has-notification::after {
@@ -320,16 +325,16 @@ hr {
     right: 10px;                    /* Position to the right of text instead of left */
     transform: translateY(-50%);    /* Perfect vertical centering */
     min-width: 20px;                /* Minimum width for the counter */
-    height: 26px;                   /* Taller to accommodate text */
+    height: 20px;                   /* Smaller badge height */
     background-color: var(--tesla-blue);
-    border-radius: 13px;            /* Rounded pill shape */
+    border-radius: 10px;            /* Rounded pill shape */
     display: flex;                  /* Use flex to center the counter text */
     justify-content: center;        /* Center horizontally */
     align-items: center;            /* Center vertically */
     color: white;                 /* White text */
-    font-size: 12pt;                /* Small font size */
+    font-size: 10pt;                /* Small font size */
     font-weight: 750;
-    padding: 0px 9px;
+    padding: 0px 6px;
     opacity: 1;                     /* Full opacity by default */
     transition: opacity 0.5s ease;  /* Smooth transition for opacity */
 }
