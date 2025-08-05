@@ -294,7 +294,6 @@ hr {
     height: 24px;
     margin-right: 14px;
     stroke: currentColor;
-    /* flex-shrink: 0; */
 }
 
 .section-button.active {
@@ -374,11 +373,9 @@ hr {
     transition: background-color 0.3s;
     width: auto;
     font-weight: 600;
-    /* height: 40px; */
     align-items: center;
     justify-content: center;
     gap: 11px;
-    /* text-align: center; */
 }
 
 .button-list a img {
@@ -442,7 +439,6 @@ body.dark-mode .img-white-transparent {
 }
 
 .status-indicator {
-    /* width: 24px; */
     height: 24px;
     margin-right: 11px;
     margin-left: 11px;
@@ -1281,7 +1277,7 @@ body.dark-mode .option-button:hover:not(.active) {
         padding: 5px;
         overflow: visible;
         -webkit-overflow-scrolling: touch;
-        scrollbar-width: none; /* Hide scrollbar for Firefox */
+        scrollbar-width: none;
     }
     
     .left-frame::-webkit-scrollbar {
@@ -1486,5 +1482,18 @@ body.dark-mode .option-button:hover:not(.active) {
         margin-top: 10px;
         padding: 10px 15px;
         font-size: 14pt;
+    }
+
+    .share-icon {
+        right: 10px;
+    }
+
+    .share-icon img {
+        width: 100%;
+        height: auto;
+        min-width: 0;
+        min-height: 0;
+        max-width: 32px;
+        max-height: 32px;
     }
 }
