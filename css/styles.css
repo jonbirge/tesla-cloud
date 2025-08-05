@@ -1304,18 +1304,12 @@ body.dark-mode .option-button:hover:not(.active) {
     .section-button {
         font-size: 14pt;
         padding: 0px 9px;
-        /* margin: 0 3px; */
         white-space: nowrap;
         height: 40px;
     }
 
-    /* Reserve space for mobile notification badge */
-    #news-section {
-        padding-right: 22px;
-    }
-
     .section-button.has-notification {
-        padding-right: 22px;
+        padding-right: 42px !important; /* Ensure padding is applied when has-notification is present */
     }
 
     .section-button.has-notification::after {
