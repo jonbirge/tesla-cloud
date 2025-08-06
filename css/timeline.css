@@ -45,7 +45,8 @@
     background: linear-gradient(to bottom, var(--sky-rainy-top), var(--sky-rainy-bottom));
 }
 
-.timeline-hour.storm, .timeline-hour.thunderstorm {
+.timeline-hour.storm, 
+.timeline-hour.thunderstorm {
     background: linear-gradient(to bottom, var(--sky-storm-top), var(--sky-storm-bottom));
 }
 
@@ -76,7 +77,7 @@
     box-shadow: 0 0 5px rgba(0, 0, 0, 0.2);
     z-index: 10;
     transform: translate(-50%, -50%);
-    top: 40px; /* Exact center of the 80px height timeline */
+    top: 40px;
 }
 
 .weather-change-icon img {
@@ -102,13 +103,13 @@
     transform: translateX(-50%);
     color: var(--text-color);
     bottom: 10px;
-    font-size: 14pt; /* Bumped up font size for temperature labels */
+    font-size: 14pt;
 }
 
 /* Hour labels */
 .hour-labels {
     position: absolute;
-    bottom: 5px; /* Move up even closer to the temperature labels */
+    bottom: 5px;
     left: 0;
     width: 100%;
     pointer-events: none;
@@ -120,21 +121,18 @@
     text-align: center;
     transform: translateX(-50%);
     color: var(--text-color);
-    font-size: 13pt; /* Bumped up font size for time labels */
+    font-size: 13pt;
 }
 
 /* Weather legend */
 .weather-legend {
     display: flex;
-    /* flex-wrap: wrap; */
     justify-content: center;
     gap: 10px;
-    /* margin-top: 15px; */
 }
 
 .legend-item {
     display: flex;
-    /* align-items: center; */
     margin: 0 10px;
     font-size: 14pt;
     font-weight: 500;
@@ -159,7 +157,8 @@
     background: linear-gradient(to bottom, var(--sky-rainy-top), var(--sky-rainy-bottom));
 }
 
-.legend-item.storm .legend-color, .legend-item.thunderstorm .legend-color {
+.legend-item.storm .legend-color, 
+.legend-item.thunderstorm .legend-color {
     background: linear-gradient(to bottom, var(--sky-storm-top), var(--sky-storm-bottom));
 }
 
@@ -178,16 +177,17 @@
         height: 60px;
     }
     
+    .weather-change-icon {
+        top: 30px;
+    }
+    
     .weather-change-icon img {
         width: 24px;
         height: 24px;
     }
     
-    .temperature-indicators {
-        top: 65px;
-    }
-    
-    .temp-indicator, .hour-label {
+    .temp-indicator, 
+    .hour-label {
         font-size: 10pt;
     }
     

@@ -14,20 +14,19 @@
     --button-radius: 13px;
     --weather-switch-slider: #ffffff;
     --weather-warning-color: #ff7700;
-    --status-poor: #E65100;    /* Yellow for poor connection */
-    --status-good: #0fa215;    /* Green for good connection */
-    --status-unavailable: #888888;  /* Gray for unavailable/bad connection */
-    --status-rain: #00a1ff;    /* Blue for rain indicator */
+    --status-poor: #E65100;
+    --status-good: #0fa215;
+    --status-unavailable: #888888;
+    --status-rain: #00a1ff;
     --heading-font-size: 17pt;
     --heading-font-weight: 500;
-    --stock-up: #0fa215;       /* Green for positive market change */
-    --stock-down: #dc3545;     /* Red for negative market change */
-    --stock-neutral: #888888;  /* Gray for unchanged market */
+    --stock-up: #0fa215;
+    --stock-down: #dc3545;
+    --stock-neutral: #888888;
 }
 
 body.dark-mode {
     --bg-color: #1d1d1d;
-    --text-color: #777777;
     --disabled-text-color: #444444;
     --active-section-bg: #333333;
     --separator-color: #444444;
@@ -37,18 +36,16 @@ body.dark-mode {
     --info-bg: #302f39;
     --weather-switch-slider: #222222;
     --weather-warning-color: #ff9900;
-    --status-poor: #ffcd27;    /* Yellow for poor connection */
-    --status-good: #5eff19;    /* Green for good connection */
-    --status-unavailable: #888888;  /* Gray for unavailable/bad connection */
-    --status-rain: #4fb8ff;    /* Blue for rain indicator */
-    --stock-up: #3ad45b;       /* Brighter green for dark mode */
-    --stock-down: #ff4d5e;     /* Brighter red for dark mode */
-    --stock-neutral: #888888;  /* Same gray for unchanged market */
+    --status-poor: #ffcd27;
+    --status-good: #5eff19;
+    --status-unavailable: #888888;
+    --status-rain: #4fb8ff;
+    --stock-up: #3ad45b;
+    --stock-down: #ff4d5e;
+    --stock-neutral: #888888;
 }
 
-
 /* Basic HTML Elements */
-
 * {
     font-family: "Inter";
     font-optical-sizing: auto;
@@ -61,7 +58,6 @@ body {
     font-size: 16pt;
     padding: 0;
     text-align: left;
-    /* font-weight: 400; */
 }
 
 a {
@@ -73,17 +69,14 @@ a {
 h1 {
     color: var(--button-text);
     font-size: 19pt;
-    margin-bottom: 15px;
-    text-align: left;
-    margin-top: 0px;
+    margin: 0 0 15px 0;
     font-weight: 250;
 }
 
 h2 {
     color: var(--button-text);
     font-size: var(--heading-font-size);
-    margin-bottom: 9px;
-    margin-top: 28px;
+    margin: 28px 0 9px 0;
     font-weight: var(--heading-font-weight);
 }
 
@@ -91,36 +84,30 @@ h3 {
     color: var(--button-text);
     font-size: calc(var(--heading-font-size) - 1pt);
     font-weight: calc(var(--heading-font-weight) - 100);
-    margin-bottom: 7px;
-    margin-top: 16px;
+    margin: 16px 0 7px 0;
 }
 
 p {
-    margin-top: 12px;
-    margin-bottom: 12px;
+    margin: 12px 0;
     text-align: justify;
     max-width: 980px;
 }
 
 ul {
     padding-left: 25px;
-    margin-top: 0px;
-    margin-bottom: 0px;
+    margin: 0;
     text-align: justify;
     max-width: 940px;
 }
 
 li {
     margin: 11px 0;
-    padding-left: 0px;
-    margin-left: 0px;
 }
 
 hr {
     border: 0;
     border-top: 1px solid var(--separator-color);
-    margin-top: 28px;
-    margin-bottom: 28px;
+    margin: 28px 0;
 }
 
 /* About */
@@ -129,18 +116,13 @@ hr {
     color: var(--button-text);
     border-radius: var(--button-radius);
     padding: 18px;
-    font-style: none;
     font-weight: 500;
     font-style: italic;
     text-align: center;
-    /* text-transform: uppercase; */
     max-width: 840px;
-    place-self: left;
 }
 
-
 /* Layout */
-
 .frame-container {
     display: flex;
     height: 100vh;
@@ -148,7 +130,7 @@ hr {
     position: absolute;
     top: 0;
     left: 0;
-    overflow: hidden; /* Prevent scrolling on the frame-container */
+    overflow: hidden;
 }
 
 .left-frame {
@@ -156,31 +138,31 @@ hr {
     flex-shrink: 0;
     overflow-y: auto;
     padding: 10px 10px 5px 15px;
-    box-sizing: border-box; /* Include padding in height calculations */
+    box-sizing: border-box;
     scrollbar-gutter: stable;
     scrollbar-width: thin;
 }
 
 .right-frame {
     flex-grow: 1;
-    height: 100%; /* Ensure it spans the full height of the container */
-    overflow-y: auto; /* Enable scrolling for the right frame */
+    height: 100%;
+    overflow-y: auto;
     padding: 20px 45px 20px 15px;
-    box-sizing: border-box; /* Include padding in the height calculation */
-    scrollbar-width: thin; /* Use a thin scrollbar */
-    position: relative; /* Add positioning context for the absolute positioned external-site */
+    box-sizing: border-box;
+    scrollbar-width: thin;
+    position: relative;
 }
 
-/* Scroll indicators that fade content at top/bottom when more content is available */
+/* Scroll indicators */
 .scroll-indicator {
-    position: fixed; /* Fixed position so they don't move when scrolling */
-    left: 300px; /* Match the width of the left frame */
+    position: fixed;
+    left: 300px;
     right: 10px;
-    height: 64px; /* Increased height for better visibility */
-    pointer-events: none; /* Let mouse events pass through */
-    opacity: 0; /* Start hidden */
+    height: 64px;
+    pointer-events: none;
+    opacity: 0;
     transition: opacity 0.3s ease;
-    z-index: 100; /* Ensure it's above most content */
+    z-index: 100;
 }
 
 .top-fade {
@@ -203,64 +185,52 @@ hr {
 
 /* External site container */
 #external-site {
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  width: 100%;
-  height: 100%;
-  display: none;
-  overflow: hidden;
-  padding: 0;
-  margin: 0;
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    display: none;
+    overflow: hidden;
+    padding: 0;
+    margin: 0;
 }
 
 #external-site iframe {
-  width: 100%;
-  height: 100%;
-  border: none;
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  padding: 0;
-  margin: 0;
+    width: 100%;
+    height: 100%;
+    border: none;
+    position: absolute;
+    top: 0;
+    left: 0;
+    padding: 0;
+    margin: 0;
 }
 
-
 /* Navigation */
-
 .section-buttons {
     position: relative;
     display: flex;
     flex-direction: column;
-    /* margin: 0; */
-    /* padding: 0; */
-    width: auto;
-    max-height: 100%; /* Ensure it doesn't exceed the container height */
-    box-sizing: border-box; /* Include padding in height calculations */
+    max-height: 100%;
+    box-sizing: border-box;
 }
 
 .section-button {
     color: var(--text-color);
     border-radius: var(--button-radius);
     font-weight: 600;
-    /* letter-spacing: 0.025em; */
     background-color: var(--bg-color);
     font-size: 19pt;
     padding: 16px 20px;
     border: none;
     cursor: pointer;
-    /* text-align: left; */
     margin-bottom: 3px;
     display: flex;
     align-items: center;
     transition: background-color 0.3s, color 0.3s;
 }
 
-/* Section button that also has disabled class */
 .section-button.disabled {
     color: var(--disabled-text-color) !important;
     cursor: not-allowed;
@@ -281,7 +251,6 @@ hr {
     cursor: pointer;
     text-align: center;
     margin-top: 15px;
-    width: auto;
     transition: background-color 0.3s;
 }
 
@@ -296,56 +265,43 @@ hr {
     stroke: currentColor;
 }
 
-.section-button.active {
+.section-button.active,
+.section-button:hover {
     background-color: var(--active-section-bg);
     color: var(--button-text);
 }
 
-.section-button:hover {
-    background-color: var(--active-section-bg);
-}
-
-
-/* Notification dot section */
-
+/* Notification dot */
 .section-button.has-notification {
     position: relative;
 }
 
 .section-button.has-notification::after {
-    content: attr(data-count);      /* Use the data-count attribute for counter text */
+    content: attr(data-count);
     position: absolute;
-    top: 50%;                       /* Center vertically */
-    right: 10px;                    /* Position to the right of text instead of left */
-    transform: translateY(-50%);    /* Perfect vertical centering */
-    min-width: 20px;                /* Minimum width for the counter */
-    height: 26px;                   /* Taller to accommodate text */
+    top: 50%;
+    right: 10px;
+    transform: translateY(-50%);
+    min-width: 20px;
+    height: 26px;
     background-color: var(--tesla-blue);
-    border-radius: 13px;            /* Rounded pill shape */
-    display: flex;                  /* Use flex to center the counter text */
-    justify-content: center;        /* Center horizontally */
-    align-items: center;            /* Center vertically */
-    color: white;                 /* White text */
-    font-size: 12pt;                /* Small font size */
+    border-radius: 13px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    color: white;
+    font-size: 12pt;
     font-weight: 750;
-    padding: 0px 9px;
-    opacity: 1;                     /* Full opacity by default */
-    transition: opacity 0.5s ease;  /* Smooth transition for opacity */
-}
-
-/* Add fade-out effect for the notification dot */
-.section-button.notification-transition {
-    position: relative;
+    padding: 0 9px;
+    opacity: 1;
+    transition: opacity 0.5s ease;
 }
 
 .section-button.notification-transition::after {
-    opacity: 0;                    /* Fade to transparent */
-    transition: opacity 0.5s ease;  /* Smooth transition for opacity */
+    opacity: 0;
 }
 
-
 /* Link Button Lists */
-
 .button-list {
     list-style: none;
     padding: 0;
@@ -354,7 +310,7 @@ hr {
     grid-template-columns: repeat(auto-fill, 280px);
     gap: 15px;
     justify-content: start;
-    max-width: calc(280px * 5 + 16px * 4); /* Limit to 5 columns */
+    max-width: calc(280px * 5 + 16px * 4);
 }
 
 .button-list li {
@@ -366,12 +322,7 @@ hr {
     background-color: var(--button-bg);
     border-radius: var(--button-radius);
     display: flex;
-    padding-top: 23px;
-    padding-bottom: 23px;
-    padding-left: 5px;
-    padding-right: 5px;
-    transition: background-color 0.3s;
-    width: auto;
+    padding: 23px 5px;
     font-weight: 600;
     align-items: center;
     justify-content: center;
@@ -384,44 +335,34 @@ hr {
     border-radius: 7px;
 }
 
-
 /* Enhanced Image Visibility Classes */
-
 .img-adaptive,
 .img-adaptive-light-invert,
 .img-adaptive-dark-invert {
-    /* Base styling shared by all image adaptive classes */
     filter: grayscale(100%) contrast(1.5);
     transition: filter 0.3s;
 }
 
-/* Invert colors only in light mode */
 body:not(.dark-mode) .img-adaptive,
 body:not(.dark-mode) .img-adaptive-light-invert {
     filter: invert(100%);
 }
 
-/* Invert colors only in dark mode */
 body.dark-mode .img-adaptive-dark-invert {
     filter: invert(100%);
 }
 
-/* Make white areas in images transparent */
 .img-white-transparent {
-    /* Remove the inverting filters */
-    mix-blend-mode: multiply; /* Keep this to make white transparent */
+    mix-blend-mode: multiply;
     transition: filter 0.3s;
 }
 
-/* Add specific dark mode handling */
 body.dark-mode .img-white-transparent {
-    mix-blend-mode: screen; /* In dark mode, use screen blend mode to make white transparent */
-    filter: invert(100%) brightness(125%); /* Invert colors and slightly increase brightness for better visibility */
+    mix-blend-mode: screen;
+    filter: invert(100%) brightness(125%);
 }
 
-
 /* Indicator container */
-
 .control-container {
     position: fixed;
     top: -3px;
@@ -448,9 +389,7 @@ body.dark-mode .img-white-transparent {
     transition: color 0.3s ease;
 }
 
-
 /* Network Status Indicator */
-
 .network-icon {
     height: 16px;
     filter: invert(0%);
@@ -507,35 +446,30 @@ body.dark-mode .network-icon {
     fill: var(--status-good);
 }
 
-
 /* GPS Status Indicator */
-
 .gps-status.unavailable {
-    color: var(--status-unavailable); /* Using the shared variable */
+    color: var(--status-unavailable);
 }
 
 .gps-status.poor {
-    color: var(--status-poor); /* Using the shared variable */
+    color: var(--status-poor);
 }
 
 .gps-status.good {
-    color: var(--status-good); /* Using the shared variable */
+    color: var(--status-good);
 }
 
 .gps-status {
     color: var(--status-unavailable);
 }
 
-
 /* Rain Status Indicator */
-
 .rain-status {
-    color: var(--weather-warning-color); /* Changed to orange weather warning color */
+    color: var(--weather-warning-color);
     animation: pulse-rain 2s infinite;
     display: flex;
     align-items: center;
     gap: 3px;
-    /* margin-right: 21px; */
 }
 
 .rain-status #rain-timing-text {
@@ -557,9 +491,7 @@ body.dark-mode .network-icon {
     }
 }
 
-
 /* Stock Status Indicator */
-
 .stock-status {
     width: auto;
     font-size: 11pt;
@@ -580,13 +512,10 @@ body.dark-mode .network-icon {
     color: var(--stock-neutral);
 }
 
-
 /* Data Display */
-
 .data-info, .data-info-column {
     row-gap: 18px;
-    /* max-width: 1080px; */
-    width: auto; /* Ensure it spans full width */
+    width: auto;
 }
 
 .data-info {
@@ -602,8 +531,8 @@ body.dark-mode .network-icon {
 }
 
 .data-info-column .data-item {
-    margin-right: 0; /* Ensure no extra margin */
-    width: auto; /* Ensure items span full width */
+    margin-right: 0;
+    width: auto;
 }
 
 .data-item {
@@ -626,9 +555,7 @@ body.dark-mode .network-icon {
     margin-bottom: 4px;
 }
 
-
 /* Stats  */
-
 .nav-container {
     display: flex;
     gap: 50px;
@@ -649,19 +576,18 @@ body.dark-mode .network-icon {
     flex-direction: column;
     align-items: left;
     min-width: 200px;
-    height: 125px; /* fixed height added */
+    height: 125px;
 }
 
 .value-container {
     display: flex;
-    align-items: center; /* Vertically align items in container */
+    align-items: center;
 }
 
 .stat-value {
     color: var(--button-text);
     font-size: 52pt;
     font-weight: 500;
-    /* display: inline; */
     font-variant-numeric: tabular-nums;
 }
 
@@ -670,8 +596,7 @@ body.dark-mode .network-icon {
     font-size: 24pt;
     font-weight: 600;
     font-family: sans-serif;
-    /* display: inline; */
-    margin-left: 5px; /* Add some spacing between value and unit */
+    margin-left: 5px;
 }
 
 .stat-label {
@@ -679,16 +604,14 @@ body.dark-mode .network-icon {
     font-size: 13pt;
     font-weight: 500;
     margin-top: 0px;
-    display: block; /* Ensure it's on its own line */
-    clear: both; /* Clear the float to ensure it appears below */
+    display: block;
+    clear: both;
 }
 
-
 /* Dashboard Display */
-
 .radar-container {
     position: relative;
-    padding-top: 30px; /* Added padding to push radar down */
+    padding-top: 30px;
     margin-right: 30px;
 }
 
@@ -709,14 +632,12 @@ body.dark-mode .network-icon {
     background-color: rgba(255, 255, 255, 0.1);
 }
 
-
 /* Waze frame */
-
 .teslawaze-container {
     height: calc(100vh - 370px);
     min-height: 280px;
-    margin-bottom: 0; /* Ensure no bottom margin */
-    position: relative; /* Add positioning context */
+    margin-bottom: 0;
+    position: relative;
 }
 
 #teslawaze {
@@ -726,9 +647,7 @@ body.dark-mode .network-icon {
     border: none;
 }
 
-
 /* News Elements */
-
 .news-headlines {
     margin: 24px 0;
 }
@@ -740,11 +659,11 @@ body.dark-mode .network-icon {
     padding: 9px 9px 9px 61px;
     max-width: 1200px;
     cursor: pointer;
-    position: relative;  /* Added for absolute positioning of the favicon */
+    position: relative;
 }
 
 .news-item:hover {
-    background-color: var(--button-bg); /* Keep the hover color consistent */
+    background-color: var(--button-bg);
 }
 
 .news-item:last-child {
@@ -779,19 +698,19 @@ body.dark-mode .network-icon {
     color: var(--button-text);
     margin-top: 0px;
     padding-bottom: 5px;
-    margin-right: 55px; /* avoid indicators */
+    margin-right: 55px;
     font-size: 17pt;
     font-weight: 500;
 }
 
 .news-favicon {
-    position: absolute;             /* Position absolutely within the news-item */
-    left: 15px;                     /* Position on the left side with some padding */
-    top: 50%;                       /* Center vertically */
-    transform: translateY(-50%);    /* Perfect vertical centering */
-    width: 32px;                    /* Slightly increased width */
-    height: 32px;                   /* Slightly increased height */
-    border-radius: 4px;             /* Optional: adds a slight rounding to the icons */
+    position: absolute;
+    left: 15px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 32px;
+    height: 32px;
+    border-radius: 4px;
     opacity: 0.8;
 }
 
@@ -809,16 +728,14 @@ body.dark-mode .share-icon img {
     filter: brightness(0) invert(0.8) grayscale(1);
 }
 
-
 /* Notification System */
-
 #notification-container {
     position: fixed;
     top: 20px;
-    left: 50%; /* Center horizontally */
-    transform: translateX(-50%); /* Offset by half width for true centering */
+    left: 50%;
+    transform: translateX(-50%);
     z-index: 9999;
-    max-width: 80%; /* Allow more width */
+    max-width: 80%;
     min-width: 200px;
 }
 
@@ -833,9 +750,9 @@ body.dark-mode .share-icon img {
     opacity: 0;
     transform: translateY(-20px);
     transition: opacity 0.3s, transform 0.3s;
-    white-space: nowrap; /* Keep on one line */
-    width: auto; /* Size to content */
-    display: inline-flex; /* Only take needed width */
+    white-space: nowrap;
+    width: auto;
+    display: inline-flex;
 }
 
 .notification.show {
@@ -850,21 +767,19 @@ body.dark-mode .share-icon img {
 
 .notification-icon {
     margin-right: 12px;
-    color: var(--weather-warning-color); /* Match the orange warning color */
+    color: var(--weather-warning-color);
 }
 
 .notification-message {
     font-size: 14pt;
     font-weight: 500;
-    color: #ff9500; /* Bright orange color for text */
-    white-space: nowrap; /* Ensure text stays on one line */
+    color: #ff9500;
+    white-space: nowrap;
 }
 
-
 /* Loading Spinner */
-
 .loading-container {
-    display: flex; /* Initially visible */
+    display: flex;
     justify-content: center;
     align-items: center;
     height: 200px;
@@ -898,9 +813,7 @@ body.dark-mode .spinner {
     margin: 20px 0;
 }
 
-
 /* Login Styles */
-
 .login-button {
     color: var(--button-text);
     background-color: var(--button-bg);
@@ -920,9 +833,7 @@ body.dark-mode .spinner {
     background-color: var(--active-section-bg);
 }
 
-
 /* Modal Login Dialog */
-
 .modal {
     display: none;
     position: fixed;
@@ -1006,14 +917,12 @@ body.dark-mode .spinner {
     min-height: 20px;
 }
 
-
 /* Settings Section Styles */
-
 .settings-controls {
     margin-top: -9px;
     display: grid;
     grid-template-columns: repeat(auto-fill, 470px);
-    gap: 0px 11px; /* row gap, column gap */
+    gap: 0px 11px;
 }
 
 .settings-toggle-item {
@@ -1033,12 +942,12 @@ body.dark-mode .spinner {
 }
 
 .settings-toggle-item label {
-    flex-grow: 1; /* Make label take up all available space */
+    flex-grow: 1;
     cursor: inherit;
 }
 
 .settings-toggle-item input {
-    opacity: 0; /* Hide the checkbox */
+    opacity: 0;
     width: 0;
     height: 0;
     position: absolute;
@@ -1049,7 +958,7 @@ body.dark-mode .spinner {
     display: inline-block;
     width: 60px;
     height: 32px;
-    flex-shrink: 0; /* Prevent slider from shrinking */
+    flex-shrink: 0;
 }
 
 .settings-toggle-slider {
@@ -1096,11 +1005,9 @@ input:checked + .settings-toggle-slider:before {
     transform: translateX(26px);
 }
 
-
 /* Settings Text Item */
-
 .settings-text-item {
-    cursor: initial; /* Prevent cursor change on text input */
+    cursor: initial;
 }
 
 .settings-text-item input[type="text"] {
@@ -1129,11 +1036,11 @@ body.dark-mode .settings-text-item input[type="text"]:disabled {
 
 #in-map-toggle {
     position: absolute;
-    margin: 0px;
+    margin: 0;
     padding: 7px;
     z-index: 10;
     background-color: transparent;
-    opacity: 80%;
+    opacity: 0.8;
 }
 
 #in-map-toggle .option-switch {
@@ -1144,30 +1051,10 @@ body.dark-mode .settings-text-item input[type="text"]:disabled {
     font-size: 12pt;
     font-weight: 700;
 }
-
-#in-map-toggle {
-    position: absolute;
-    margin: 0px;
-    padding: 7px;
-    z-index: 10;
-    background-color: transparent;
-    opacity: 80%;
-}
-
-#in-map-toggle .option-switch {
-    background-color: var(--button-bg);
-}
-
-#in-map-toggle .option-button {
-    font-size: 12pt;
-    font-weight: 700;
-}
-
 
 /* Option Switch (Two-option selector) */
-
 .option-switch-container {
-    padding-right: 15px; /* Ensure there's adequate right padding */
+    padding-right: 15px;
     padding-top: 11px;
     padding-bottom: 11px;
     cursor: initial;
@@ -1205,9 +1092,7 @@ body.dark-mode .option-button:hover:not(.active) {
     background-color: rgba(255, 255, 255, 0.1);
 }
 
-
 /* News Source Grid */
-
 .news-source-grid {
     grid-template-columns: repeat(auto-fill, 310px);
     gap: 0px 10px;
@@ -1216,14 +1101,9 @@ body.dark-mode .option-button:hover:not(.active) {
 
 .news-toggle-item {
     padding: 9px 15px;
-    margin-bottom: 0px;
     margin-top: 7px;
-    max-width: none;
-    width: auto;
     border-radius: 9px;
-}
-
-.news-toggle-item {
+    width: auto;
     font-size: 15pt;
 }
 
@@ -1231,7 +1111,6 @@ body.dark-mode .option-button:hover:not(.active) {
 #satellite {
     padding-top: 30px;
 }
-
 
 /* Mobile Landscape Mode */
 @media only screen and (max-width: 900px) {
@@ -1281,7 +1160,7 @@ body.dark-mode .option-button:hover:not(.active) {
     }
     
     .left-frame::-webkit-scrollbar {
-        display: none; /* Hide scrollbar for Chrome/Safari */
+        display: none;
     }
     
     /* Convert section buttons to horizontal layout */
@@ -1294,7 +1173,7 @@ body.dark-mode .option-button:hover:not(.active) {
     }
     
     .section-buttons h1 {
-        display: none; /* Hide title to save space */
+        display: none;
     }
     
     .section-button {
@@ -1305,7 +1184,7 @@ body.dark-mode .option-button:hover:not(.active) {
     }
 
     .section-button.has-notification {
-        padding-right: 42px !important; /* Ensure padding is applied when has-notification is present */
+        padding-right: 42px !important;
     }
 
     .section-button.has-notification::after {
