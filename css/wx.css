@@ -24,9 +24,7 @@ body.dark-mode {
     --sky-snow-bottom: #706e6b;
 }
 
-
 /* Sat Weather Switch Elements */
-
 .weather-switch-container {
     display: flex;
     justify-content: flex-start;
@@ -90,14 +88,12 @@ body.dark-mode {
     opacity: 1;
 }
 
-
 /* Weather Forecast */
-
 .forecast-container {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(142px, 1fr));
     gap: 15px;
-    margin: 1px 0px;
+    margin: 1px 0;
     max-width: 1100px;
 }
 
@@ -108,7 +104,7 @@ body.dark-mode {
     position: relative;
     min-width: 120px;
     max-width: 180px;
-    overflow: hidden; /* Ensure hourly segments don't overflow */
+    overflow: hidden;
 }
 
 .hourly-segments {
@@ -118,8 +114,8 @@ body.dark-mode {
     right: 0;
     bottom: 0;
     display: flex;
-    pointer-events: none; /* Allow clicks to pass through */
-    z-index: 0; /* Behind the content */
+    pointer-events: none;
+    z-index: 0;
 }
 
 .hourly-segment {
@@ -129,7 +125,7 @@ body.dark-mode {
 }
 
 .hourly-segment:first-child {
-    margin-left: 0; /* No overlap for first segment */
+    margin-left: 0;
 }
 
 /* Ensure forecast content is above the hourly segments */
@@ -142,31 +138,41 @@ body.dark-mode {
     z-index: 1;
 }
 
+/* Weather condition gradients - shared by all forecast elements */
+.forecast-day.clear,
+.hourly-item.clear,
 .hourly-segment.clear {
     background: linear-gradient(to bottom, var(--sky-clear-top), var(--sky-clear-bottom));
 }
 
+.forecast-day.clouds,
+.hourly-item.clouds,
 .hourly-segment.clouds {
     background: linear-gradient(to bottom, var(--sky-cloudy-top), var(--sky-cloudy-bottom));
 }
 
+.forecast-day.rain,
+.hourly-item.rain,
 .hourly-segment.rain {
     background: linear-gradient(to bottom, var(--sky-rainy-top), var(--sky-rainy-bottom));
 }
 
-.hourly-segment.storm, .hourly-segment.thunderstorm {
+.forecast-day.storm,
+.forecast-day.thunderstorm,
+.hourly-item.storm,
+.hourly-item.thunderstorm,
+.hourly-segment.storm,
+.hourly-segment.thunderstorm {
     background: linear-gradient(to bottom, var(--sky-storm-top), var(--sky-storm-bottom));
 }
 
+.forecast-day.snow,
+.hourly-item.snow,
 .hourly-segment.snow {
     background: linear-gradient(to bottom, var(--sky-snow-top), var(--sky-snow-bottom));
 }
 
 .hourly-avail {
-    /* box-shadow: 5px 5px 9px 0px rgba(0, 0, 0, 0.5); */
-    /* border-color: var(--tesla-blue); */
-    /* border-width: 2pt; */
-    /* border-style: solid; */
     cursor: pointer;
 }
 
@@ -178,48 +184,14 @@ body.dark-mode {
     display: flex;
     justify-content: center;
     max-height: 320px;
-    margin-left: 11pt;
-    margin-right: 11pt;
+    margin: 0 11pt;
 }
 
-
-/* Weather condition-specific gradients */
-
-.forecast-day.clear {
-    background: linear-gradient(to bottom, var(--sky-clear-top), var(--sky-clear-bottom));
-}
-
-.forecast-day.clouds {
-    background: linear-gradient(to bottom, var(--sky-cloudy-top), var(--sky-cloudy-bottom));
-}
-
-.forecast-day.rain {
-    background: linear-gradient(to bottom, var(--sky-rainy-top), var(--sky-rainy-bottom));
-}
-
-.forecast-day.storm, .forecast-day.thunderstorm {
-    background: linear-gradient(to bottom, var(--sky-storm-top), var(--sky-storm-bottom));
-}
-
-.forecast-day.snow {
-    background: linear-gradient(to bottom, var(--sky-snow-top), var(--sky-snow-bottom));
-}
-
-/* Invert snow icon in dark mode */
-body.dark-mode .forecast-day.snow img.forecast-icon {
-    filter: invert(1);
-}
-
-/* Invert clear icon in dark mode and make it grayscale */
-body.dark-mode .forecast-day.clear img.forecast-icon {
-    filter: invert(1);
-    filter: grayscale(1);
-}
-
-/* Invert rain icon in dark mode and make it grayscale */
+/* Icon filters for dark mode */
+body.dark-mode .forecast-day.snow img.forecast-icon,
+body.dark-mode .forecast-day.clear img.forecast-icon,
 body.dark-mode .forecast-day.rain img.forecast-icon {
-    filter: invert(1);
-    filter: grayscale(1);
+    filter: invert(1) grayscale(1);
 }
 
 .forecast-alert {
@@ -229,18 +201,14 @@ body.dark-mode .forecast-day.rain img.forecast-icon {
 }
 
 .forecast-date {
-    font-size: 13pt;
-    font-weight: 600;
-    margin-bottom: 8px;
     font-size: 12pt;
     font-weight: 650;
+    margin-bottom: 8px;
     text-transform: uppercase;
     color: var(--button-text);
-    /* Add text shadow for better contrast */
     text-shadow: 0 0 8px rgba(255, 255, 255, 0.8), 0 0 16px rgba(255, 255, 255, 0.6);
 }
 
-/* Dark mode text shadow for forecast date */
 body.dark-mode .forecast-date {
     text-shadow: 0 0 8px rgba(0, 0, 0, 0.8), 0 0 16px rgba(0, 0, 0, 0.6);
 }
@@ -256,11 +224,9 @@ body.dark-mode .forecast-date {
     font-weight: 750;
     margin: 8px 0;
     color: var(--button-text);
-    /* Add text shadow for better contrast */
     text-shadow: 0 0 8px rgba(255, 255, 255, 0.8), 0 0 16px rgba(255, 255, 255, 0.6);
 }
 
-/* Dark mode text shadow for forecast temperature */
 body.dark-mode .forecast-temp {
     text-shadow: 0 0 8px rgba(0, 0, 0, 0.8), 0 0 16px rgba(0, 0, 0, 0.6);
 }
@@ -271,11 +237,9 @@ body.dark-mode .forecast-temp {
     font-style: italic;
     font-weight: 600;
     color: var(--button-text);
-    /* Add text shadow for better contrast */
     text-shadow: 0 0 8px rgba(255, 255, 255, 0.8), 0 0 16px rgba(255, 255, 255, 0.6);
 }
 
-/* Dark mode text shadow for forecast description */
 body.dark-mode .forecast-desc {
     text-shadow: 0 0 8px rgba(0, 0, 0, 0.8), 0 0 16px rgba(0, 0, 0, 0.6);
 }
@@ -306,7 +270,7 @@ body.dark-mode .forecast-desc {
     position: absolute;
     right: 10px;
     top: 10px;
-    background: rgb(205 205 205 / 50%);
+    background: rgba(205, 205, 205, 0.5);
     border: none;
     width: 30px;
     height: 30px;
@@ -318,9 +282,7 @@ body.dark-mode .forecast-desc {
     font-size: 24px;
     font-weight: 600;
     line-height: 1;
-    /* font-family: monospace; */
-    padding-bottom: 4px;
-    padding-left: 7px;
+    padding: 0 0 4px 7px;
     color: var(--button-text);
     transition: all 0.2s ease;
 }
@@ -335,67 +297,45 @@ body.dark-mode .forecast-desc {
     grid-template-columns: repeat(auto-fill, minmax(90px, 1fr));
     gap: 6px;
     margin-top: 15px;
-    max-width: 1140px; /* 90px × 12 + 6px × 11 gaps = 1146px, rounded down slightly */
+    max-width: 1140px;
     margin-left: auto;
     margin-right: auto;
 }
 
 .hourly-item {
-    background: linear-gradient(to bottom, var(--sky-gradient-top), var(--sky-gradient-bottom));
     padding: 6px;
     border-radius: var(--button-radius);
     text-align: center;
     transition: background 0.3s ease;
 }
 
-/* Weather condition-specific gradients for hourly items */
-.hourly-item.clear {
-    background: linear-gradient(to bottom, var(--sky-clear-top), var(--sky-clear-bottom));
-}
-
-.hourly-item.clouds {
-    background: linear-gradient(to bottom, var(--sky-cloudy-top), var(--sky-cloudy-bottom));
-}
-
-.hourly-item.rain {
-    background: linear-gradient(to bottom, var(--sky-rainy-top), var(--sky-rainy-bottom));
-}
-
-.hourly-item.storm, .hourly-item.thunderstorm {
-    background: linear-gradient(to bottom, var(--sky-storm-top), var(--sky-storm-bottom));
-}
-
-.hourly-item.snow {
-    background: linear-gradient(to bottom, var(--sky-snow-top), var(--sky-snow-bottom));
-}
-
 .hourly-time {
     font-weight: 500;
-    font-size: 11pt; /* Reduced font size */
+    font-size: 11pt;
     color: var(--button-text);
-    margin-bottom: 2px; /* Reduced margin */
+    margin-bottom: 2px;
 }
 
 .hourly-icon {
-    width: 32px; /* Smaller icon */
-    height: 32px; /* Smaller icon */
+    width: 32px;
+    height: 32px;
 }
 
 .hourly-temp {
     color: var(--button-text);
-    font-size: 11pt; /* Reduced font size */
+    font-size: 11pt;
     font-weight: 750;
-    margin: 2px 0; /* Reduced margin */
+    margin: 2px 0;
 }
 
 .hourly-desc {
     color: var(--button-text);
-    font-size: 10pt; /* Reduced font size */
+    font-size: 10pt;
     font-style: italic;
     font-weight: 600;
-    white-space: nowrap; /* Prevent text wrapping */
-    overflow: hidden; /* Hide text that doesn't fit */
-    text-overflow: ellipsis; /* Add ellipsis for overflow text */
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 .station-name {
@@ -418,14 +358,11 @@ body.dark-mode .forecast-desc {
     overflow: hidden;
 }
 
-/* Dark mode styles for moon icon */
 body.dark-mode .moon-phase-icon {
     background-color: #555;
 }
 
-
-/* Notification styles - with dark mode support */
-
+/* Notification styles */
 .notification {
     display: flex;
     align-items: center;
@@ -435,14 +372,13 @@ body.dark-mode .moon-phase-icon {
     box-shadow: 0 3px 10px rgba(0, 0, 0, 0.2);
     opacity: 0;
     transition: opacity 0.3s ease;
-    /* Light mode defaults */
     background-color: rgba(255, 255, 255, 0.85);
-    color: #cc6600; /* Darker orange for light mode */
+    color: #cc6600;
 }
 
 body.dark-mode .notification {
     background-color: rgba(33, 33, 33, 0.9);
-    color: #ff7700; /* Brighter orange for dark mode */
+    color: #ff7700;
 }
 
 .notification.show {
@@ -458,7 +394,7 @@ body.dark-mode .notification {
     font-weight: 700;
 }
 
-/* Cloud icon styles for both status indicator and notification */
+/* Cloud icon styles */
 .rain-status img,
 .notification-icon img {
     filter: invert(50%) sepia(68%) saturate(3233%) hue-rotate(360deg) brightness(103%) contrast(103%);
@@ -469,16 +405,12 @@ body.dark-mode .notification-icon img {
     filter: invert(74%) sepia(69%) saturate(5422%) hue-rotate(359deg) brightness(101%) contrast(107%);
 }
 
-/* Add a little spacing between the notification icon and text */
 .notification-icon {
     margin-right: 12px;
 }
 
-
-
 /* Mobile Landscape Mode */
 @media only screen and (max-width: 900px) and (orientation: landscape) {
-    /* Weather switch elements */
     .weather-switch-container {
         margin: 10px 0;
     }
@@ -492,12 +424,10 @@ body.dark-mode .notification-icon img {
         font-size: 14pt;
     }
     
-    /* Weather images */
     .weather-image {
         max-width: 95%;
     }
     
-    /* Forecast container */
     .forecast-container {
         gap: 10px;
         margin: 12px 0;
@@ -530,14 +460,13 @@ body.dark-mode .notification-icon img {
         font-size: 12pt;
     }
     
-    /* Forecast popup */
     .forecast-popup {
         width: 90%;
         max-height: 70vh;
     }
     
     .hourly-forecast {
-        grid-template-columns: repeat(auto-fill, minmax(70px, 1fr)); /* Even smaller for landscape */
+        grid-template-columns: repeat(auto-fill, minmax(70px, 1fr));
         gap: 5px;
     }
     
@@ -563,7 +492,6 @@ body.dark-mode .notification-icon img {
         font-size: 9pt;
     }
     
-    /* Moon phase icon */
     .moon-phase-icon {
         width: 14px;
         height: 14px;

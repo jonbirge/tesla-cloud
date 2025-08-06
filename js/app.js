@@ -18,10 +18,12 @@ const WX_TIME_THRESHOLD = 60;                       // minutes
 const MAX_SPEED = 50;                               // Max speed for wind display (mph)
 const MIN_GPS_UPDATE_INTERVAL = 1000;               // ms - minimum time between updates
 const WIKI_TYPES = ['event','airport','landmark'];  // Types of Wikipedia data to fetch
+const ENABLE_SPEED_DISABLE = false;                 // Set to false to disable speed-based section disabling
+const SPEED_DISABLE_THRESHOLD = 1.5;                // Speed in mph above which disabling occurs
 
 // Module variables
-let currentSection = null;          // Track the current section
-let lastUpdate = 0;                 // Timestamp of last location update
+let currentSection = null;                          // Track the current section
+let lastUpdate = 0;                                 // Timestamp of last location update
 let lat = null;
 let long = null;
 let alt = null;
@@ -37,8 +39,8 @@ let neverUpdatedLocation = true;
 let radarContext = null;
 let gpsIntervalId = null;
 let lastGPSUpdate = 0;
-let networkInfoUpdated = false;     // Track if network info has been updated
-const positionSimulator = new PositionSimulator(); // TODO: only create if needed
+let networkInfoUpdated = false;                     // Track if network info has been updated
+const positionSimulator = new PositionSimulator();  // TODO: only create if needed
 
 // Function to calculate the distance between two coordinates
 function calculateDistance(lat1, lon1, lat2, lon2) {
@@ -420,7 +422,7 @@ async function handlePositionUpdate(position) {
     }
 
     // Handle whether or not we're driving
-    if (speed > 1) {
+    if (ENABLE_SPEED_DISABLE && speed > SPEED_DISABLE_THRESHOLD) {
         if (!isDriving) {
             startedDriving();
         }
@@ -453,23 +455,27 @@ async function handlePositionUpdate(position) {
 // Function called when user starts driving
 function startedDriving() {
     console.log('*** Started driving ***');
-    // Find all buttons with class "no-driving" and disable them
-    const noDrivingButtons = document.querySelectorAll('.no-driving');
-    noDrivingButtons.forEach(button => {
-        button.classList.add('disabled');
-        button.disabled = true;
-    });
+    // Only disable sections if speed-based disabling is enabled and speed is above threshold
+    if (ENABLE_SPEED_DISABLE && speed > SPEED_DISABLE_THRESHOLD) {
+        const noDrivingButtons = document.querySelectorAll('.no-driving');
+        noDrivingButtons.forEach(button => {
+            button.classList.add('disabled');
+            button.disabled = true;
+        });
+    }
 }
 
 // Function called when user stops driving
 function stoppedDriving() {
     console.log('*** Stopped driving ***');
-    // Find all buttons with class "no-driving" and enable them
-    const noDrivingButtons = document.querySelectorAll('.no-driving');
-    noDrivingButtons.forEach(button => {
-        button.classList.remove('disabled');
-        button.disabled = false;
-    });
+    // Only enable sections if speed-based disabling is enabled
+    if (ENABLE_SPEED_DISABLE) {
+        const noDrivingButtons = document.querySelectorAll('.no-driving');
+        noDrivingButtons.forEach(button => {
+            button.classList.remove('disabled');
+            button.disabled = false;
+        });
+    }
 }
 
 // Function to update GPS data
