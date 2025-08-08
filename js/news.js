@@ -922,6 +922,19 @@ window.shareNews = async function (title, link, source, id) {
             alertBox.style.borderRadius = '5px';
             alertBox.style.boxShadow = '0 2px 5px rgba(0, 0, 0, 0.3)';
             alertBox.style.zIndex = '9999';
+            alertBox.style.textAlign = 'center';
+            alertBox.style.whiteSpace = 'nowrap';
+            alertBox.style.overflow = 'hidden';
+            alertBox.style.textOverflow = 'ellipsis';
+            alertBox.style.maxWidth = '90vw';
+            alertBox.style.fontSize = '15px';
+            alertBox.style.fontWeight = '600';
+            // Responsive: center and ellipsis on mobile
+            if (window.innerWidth <= 900) {
+                alertBox.style.fontSize = '13px';
+                alertBox.style.padding = '10px';
+                alertBox.style.maxWidth = '95vw';
+            }
             document.body.appendChild(alertBox);
 
             setTimeout(() => {

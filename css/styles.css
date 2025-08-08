@@ -775,6 +775,10 @@ body.dark-mode .share-icon img {
     font-weight: 500;
     color: #ff9500;
     white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    text-align: center;
+    display: block;
 }
 
 /* Loading Spinner */
@@ -1374,5 +1378,17 @@ body.dark-mode .option-button:hover:not(.active) {
         min-height: 0;
         max-width: 32px;
         max-height: 32px;
+    }
+
+    .notification,
+    .notification-message {
+        text-align: center !important;
+        white-space: nowrap !important;
+        overflow: hidden !important;
+        text-overflow: ellipsis !important;
+        width: 100%;
+        max-width: 95vw;
+        margin: 0 auto;
+        font-size: 13px;
     }
 }
