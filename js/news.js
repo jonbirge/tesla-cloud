@@ -320,7 +320,7 @@ export async function updateNews(clear = false) {
         const abortController = new AbortController();
         const timeoutId = setTimeout(() => {
             abortController.abort();
-        }, 2000); // 2 second timeout
+        }, 5000); // 4 second timeout (was 2 seconds)
 
         // Send the request with included feeds in the body and timeout
         const response = await fetch(BASE_URL, {
@@ -916,22 +916,22 @@ window.shareNews = async function (title, link, source, id) {
             alertBox.style.top = '20px';
             alertBox.style.left = '50%';
             alertBox.style.transform = 'translateX(-50%)';
-            alertBox.style.backgroundColor = "rgb(15, 181, 21) ";
+            alertBox.style.backgroundColor = "rgba(92, 230, 65, 1) ";
             alertBox.style.color = 'white';
             alertBox.style.padding = '15px';
             alertBox.style.borderRadius = '5px';
-            alertBox.style.boxShadow = '0 2px 5px rgba(0, 0, 0, 0.3)';
+            alertBox.style.boxShadow = '0 2px 5px rgba(0, 0, 0, 0.4)';
             alertBox.style.zIndex = '9999';
             alertBox.style.textAlign = 'center';
             alertBox.style.whiteSpace = 'nowrap';
             alertBox.style.overflow = 'hidden';
             alertBox.style.textOverflow = 'ellipsis';
             alertBox.style.maxWidth = '90vw';
-            alertBox.style.fontSize = '15px';
-            alertBox.style.fontWeight = '600';
+            alertBox.style.fontSize = '16pt';
+            alertBox.style.fontWeight = '700';
             // Responsive: center and ellipsis on mobile
             if (window.innerWidth <= 900) {
-                alertBox.style.fontSize = '13px';
+                alertBox.style.fontSize = '12pt';
                 alertBox.style.padding = '10px';
                 alertBox.style.maxWidth = '95vw';
             }
