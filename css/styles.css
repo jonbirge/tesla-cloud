@@ -1137,6 +1137,15 @@ body.dark-mode .option-button:hover:not(.active) {
         margin-top: 14px;
         margin-bottom: 7px;
     }
+
+    p {
+        text-align: left;
+    }
+
+    ul {
+        padding-left: 20px;
+        text-align: left;
+    }
     
     /* Layout adjustment */
     .frame-container {

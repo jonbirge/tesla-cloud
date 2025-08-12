@@ -38,7 +38,8 @@ body.dark-mode {
     padding: 4px;
     gap: 4px;
     position: relative;
-    width: 420px;
+    width: 100%;
+    max-width: 420px;
 }
 
 .weather-switch button {
@@ -416,7 +417,8 @@ body.dark-mode .notification-icon img {
     }
     
     .weather-switch {
-        width: 320px;
+        width: 100%;
+        max-width: 320px;
     }
     
     .weather-switch button {
@@ -495,5 +497,17 @@ body.dark-mode .notification-icon img {
     .moon-phase-icon {
         width: 14px;
         height: 14px;
+    }
+}
+
+/* Small Mobile Screens */
+@media only screen and (max-width: 600px) {
+    .weather-switch {
+        max-width: 100%;
+    }
+
+    .weather-switch button {
+        padding: 8px 12px;
+        font-size: 12pt;
     }
 }
