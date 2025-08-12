@@ -4,6 +4,9 @@
     "features": {
         "ghcr.io/devcontainers/features/php:1": {
             "version": "8.2"
+        },
+        "ghcr.io/devcontainers/features/node:1": {
+            "version": "20"
         }
     },
     "forwardPorts": [8000],
