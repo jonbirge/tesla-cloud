@@ -202,7 +202,7 @@ body.dark-mode .forecast-day.rain img.forecast-icon {
 }
 
 .forecast-date {
-    font-size: 12pt;
+    font-size: 10pt;
     font-weight: 650;
     margin-bottom: 8px;
     text-transform: uppercase;
@@ -221,7 +221,7 @@ body.dark-mode .forecast-date {
 }
 
 .forecast-temp {
-    font-size: 15pt;
+    font-size: 14pt;
     font-weight: 750;
     margin: 8px 0;
     color: var(--button-text);
@@ -234,9 +234,9 @@ body.dark-mode .forecast-temp {
 
 .forecast-desc {
     font-family: "Inter", sans-serif;
-    font-size: 14pt;
+    font-size: 13pt;
     font-style: italic;
-    font-weight: 600;
+    font-weight: 500;
     color: var(--button-text);
     text-shadow: 0 0 8px rgba(255, 255, 255, 0.8), 0 0 16px rgba(255, 255, 255, 0.6);
 }
