@@ -511,3 +511,10 @@ body.dark-mode .notification-icon img {
         font-size: 12pt;
     }
 }
+
+/* Hide 7th forecast day on mobile to save space */
+@media only screen and (max-width: 900px) {
+    #prem-forecast-container .forecast-day:nth-of-type(7) {
+        display: none;
+    }
+}

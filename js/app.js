@@ -602,14 +602,19 @@ function updateScrollIndicators() {
     const rightFrame = document.getElementById('rightFrame');
     const topFade = document.getElementById('top-fade');
     const bottomFade = document.getElementById('bottom-fade');
-    
-    if (!rightFrame || !topFade || !bottomFade) return;
-    
+
+    if (!topFade || !bottomFade) return;
+
+    const isMobile = window.matchMedia("only screen and (max-width: 900px)").matches;
+    const scrollElement = isMobile ? document.documentElement : rightFrame;
+
+    if (!scrollElement) return;
+
     // Check if we can scroll up (we've scrolled down from the top)
-    const canScrollUp = rightFrame.scrollTop > 5;
-    
+    const canScrollUp = scrollElement.scrollTop > 5;
+
     // Check if we can scroll down (there's more content below)
-    const canScrollDown = (rightFrame.scrollHeight - rightFrame.clientHeight - rightFrame.scrollTop) > 5;
+    const canScrollDown = (scrollElement.scrollHeight - scrollElement.clientHeight - scrollElement.scrollTop) > 5;
     
     // Update fade visibility
     topFade.style.opacity = canScrollUp ? '1' : '0';
@@ -620,37 +625,47 @@ function updateScrollIndicators() {
 function handleScrollScale() {
     const rightFrame = document.getElementById('rightFrame');
     const controlContainer = document.querySelector('.control-container');
-    
+    const scrollTopBtn = document.getElementById('scroll-to-top');
+
     // Check if we're on a mobile screen
     const isMobile = window.matchMedia("only screen and (max-width: 900px)").matches;
-    
+    const scrollElement = isMobile ? document.documentElement : rightFrame;
+
     // Update scroll indicators regardless of device type
     updateScrollIndicators();
-    
+
+    // Show or hide scroll-to-top button on mobile
+    if (scrollTopBtn) {
+        scrollTopBtn.style.display = (isMobile && scrollElement.scrollTop > 100) ? 'block' : 'none';
+    }
+
     // If mobile, maintain a fixed small scale and exit
     if (isMobile) {
-        // Keep consistent small scale on mobile devices
-        controlContainer.style.transformOrigin = 'top right';
+        if (controlContainer) {
+            controlContainer.style.transformOrigin = 'top right';
+        }
         return; // Exit early, let CSS handle the fixed scaling
     }
-    
+
     // Desktop behavior continues below
     // Define the threshold where scaling starts (pixels from top)
     const scrollThreshold = 60;
-    
+
     // Get current scroll position
-    const scrollTop = rightFrame.scrollTop;
-    
+    const scrollTop = scrollElement.scrollTop;
+
     if (scrollTop < scrollThreshold) {
         // Calculate scale factor between 1 and 2 based on scroll position
         const scaleFactor = 1 + 0.25*((scrollThreshold - scrollTop) / scrollThreshold);
-        
+
         // Apply transformation with top-right anchoring to keep both top and right positions fixed
-        controlContainer.style.transformOrigin = 'top right';
-        controlContainer.style.transform = `scale(${scaleFactor})`;
+        if (controlContainer) {
+            controlContainer.style.transformOrigin = 'top right';
+            controlContainer.style.transform = `scale(${scaleFactor})`;
+        }
     } else {
         // Reset to normal size when scrolled past threshold
-        controlContainer.style.transform = 'scale(1)';
+        if (controlContainer) controlContainer.style.transform = 'scale(1)';
     }
 }
 
@@ -901,14 +916,28 @@ document.addEventListener('DOMContentLoaded', async function () {
         }
     });
     
-    // Add scroll event listener for control container scaling
+    // Add scroll event listeners for control container scaling
     document.getElementById('rightFrame').addEventListener('scroll', handleScrollScale);
-    
+    window.addEventListener('scroll', handleScrollScale);
+
     // Apply initial scaling on page load
     handleScrollScale();
-    
+
     // Update scroll indicators when window is resized
     window.addEventListener('resize', updateScrollIndicators);
+
+    // Scroll-to-top button
+    const scrollTopBtn = document.getElementById('scroll-to-top');
+    if (scrollTopBtn) {
+        scrollTopBtn.addEventListener('click', () => {
+            const isMobile = window.matchMedia("only screen and (max-width: 900px)").matches;
+            if (isMobile) {
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            } else {
+                document.getElementById('rightFrame').scrollTo({ top: 0, behavior: 'smooth' });
+            }
+        });
+    }
 
     // Show the initial section from URL parameter
     const urlParams = new URLSearchParams(window.location.search);

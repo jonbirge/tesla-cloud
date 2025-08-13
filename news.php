@@ -291,6 +291,30 @@ function parseRSS($xml, $source) {
                 $link = (string)$item->link; // RSS format
             }
         }
+
+        // Try alternative fields for link if still empty
+        if (!$link && isset($item->guid)) {
+            $link = (string)$item->guid;
+        }
+        if (!$link && isset($item->id)) {
+            $link = (string)$item->id;
+        }
+
+        // Resolve relative URLs using channel link if available
+        if ($link && strpos($link, 'http') !== 0) {
+            $baseLink = '';
+            if (isset($feed->channel) && isset($feed->channel->link)) {
+                $baseLink = (string)$feed->channel->link;
+            }
+            if ($baseLink) {
+                $link = rtrim($baseLink, '/') . '/' . ltrim($link, '/');
+            }
+        }
+
+        // Validate URL format
+        if ($link && !filter_var($link, FILTER_VALIDATE_URL)) {
+            $link = "";
+        }
         
         // Find the title
         $title = isset($item->title) ? (string)$item->title : "No Title";
