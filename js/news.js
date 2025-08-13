@@ -432,7 +432,13 @@ export async function updateNews(clear = false) {
 
         const newsContainer = document.getElementById('newsHeadlines');
         if (newsContainer) {
-            newsContainer.innerHTML = `<p><em>${userMessage}</em></p>`;
+            // Clear the container and safely insert the message as text
+            newsContainer.innerHTML = '';
+            const p = document.createElement('p');
+            const em = document.createElement('em');
+            em.textContent = userMessage;
+            p.appendChild(em);
+            newsContainer.appendChild(p);
         }
     }
 
