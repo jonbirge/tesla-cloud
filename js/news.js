@@ -342,10 +342,23 @@ export async function updateNews(clear = false) {
         document.getElementById('news-loading').style.display = 'none';
         newsContainer.style.display = 'block';
 
-        // Add a unique ID to each item
+        // Add a unique ID to each item and sanitize links
         loadedItems.forEach(item => {
             // Create a unique ID based on title and source
             item.id = genItemID(item);
+
+            // Trim and validate link if present
+            if (item.link && typeof item.link === 'string') {
+                item.link = item.link.trim();
+                try {
+                    // Throws if invalid
+                    new URL(item.link);
+                } catch (e) {
+                    item.link = '';
+                }
+            } else {
+                item.link = '';
+            }
         });
         
         // Filter out items where the ID can be found in oldDisplayedItems
@@ -856,6 +869,39 @@ window.clickNews = async function (title, link, source, id) {
 // User clicks on the share button
 window.shareNews = async function (title, link, source, id) {
     console.log('Sharing news item:', title, link);
+
+    // If no link is available, show warning and exit
+    if (!link || link.trim() === '') {
+        const alertBox = document.createElement('div');
+        alertBox.textContent = 'No URL available to share';
+        alertBox.style.position = 'fixed';
+        alertBox.style.top = '20px';
+        alertBox.style.left = '50%';
+        alertBox.style.transform = 'translateX(-50%)';
+        alertBox.style.backgroundColor = 'rgba(255, 165, 0, 0.85)';
+        alertBox.style.color = 'white';
+        alertBox.style.padding = '15px';
+        alertBox.style.borderRadius = '5px';
+        alertBox.style.boxShadow = '0 2px 5px rgba(0, 0, 0, 0.4)';
+        alertBox.style.zIndex = '9999';
+        alertBox.style.textAlign = 'center';
+        alertBox.style.whiteSpace = 'nowrap';
+        alertBox.style.overflow = 'hidden';
+        alertBox.style.textOverflow = 'ellipsis';
+        alertBox.style.maxWidth = '90vw';
+        alertBox.style.fontSize = '16pt';
+        alertBox.style.fontWeight = '700';
+        if (window.innerWidth <= 900) {
+            alertBox.style.fontSize = '12pt';
+            alertBox.style.padding = '10px';
+            alertBox.style.maxWidth = '95vw';
+        }
+        document.body.appendChild(alertBox);
+        setTimeout(() => {
+            document.body.removeChild(alertBox);
+        }, 5000);
+        return;
+    }
 
     // Mark the news item as read when shared
     if (id) {

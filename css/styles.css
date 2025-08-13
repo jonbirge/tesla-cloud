@@ -175,6 +175,28 @@ hr {
     background: linear-gradient(to top, var(--bg-color), transparent);
 }
 
+/* Scroll-to-top arrow for mobile */
+.scroll-to-top {
+    display: none;
+    position: fixed;
+    top: 10px;
+    right: 10px;
+    background: rgba(0, 0, 0, 0.4);
+    color: white;
+    padding: 8px 12px;
+    border-radius: 20px;
+    z-index: 1000;
+    font-size: 20px;
+    line-height: 1;
+    cursor: pointer;
+}
+
+@media only screen and (min-width: 901px) {
+    .scroll-to-top {
+        display: none !important;
+    }
+}
+
 .section {
     display: none;
 }
