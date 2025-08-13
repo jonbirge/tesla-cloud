@@ -143,7 +143,7 @@ export async function fetchCityData(lat, long) {
 export function updatePremiumWeatherDisplay() {
     if (!forecastDataPrem) return;
 
-    // Extract daily summary (first 5 days)
+    // Extract daily summary (first 7 days)
     const dailyData = extractPremiumDailyForecast(forecastDataPrem.daily || []);
     const forecastDays = document.querySelectorAll('#prem-forecast-container .forecast-day');
 
@@ -674,7 +674,7 @@ function updateAQI(lat, lon) {
 // Helper: Extract 5 daily summaries from OpenWeather 3.0 API
 function extractPremiumDailyForecast(dailyList) {
     // dailyList is already daily summaries (up to 8 days)
-    return dailyList.slice(0, 5);
+    return dailyList.slice(0, 7);
 }
 
 // Helper: Format temperature based on user settings
