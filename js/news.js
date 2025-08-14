@@ -335,6 +335,11 @@ export async function updateNews(clear = false) {
         // Clear the timeout since request completed
         clearTimeout(timeoutId);
 
+        // Throw an error for non-2xx responses to provide better context to the user
+        if (!response.ok) {
+            throw new Error(`Server returned ${response.status} ${response.statusText}`);
+        }
+
         let loadedItems = await response.json();
         console.log('...Done! Count: ', loadedItems.length);
         
@@ -423,19 +428,30 @@ export async function updateNews(clear = false) {
             newsContainer.innerHTML = '<p><em>No unread headlines available</em></p>';
         }
     } catch (error) {
+        let userMessage;
+
         if (error.name === 'AbortError') {
-            console.error('News fetch timed out after 2 seconds');
+            console.error('News fetch timed out', error);
+            userMessage = 'The news request timed out. Please check your connection and try reloading.';
         } else {
             console.error('Error fetching news:', error);
+            const detail = error && error.message ? ` (${error.message})` : '';
+            userMessage = `Error loading headlines${detail}. Please try reloading.`;
         }
-        
+
         // Make sure to hide the spinner even in case of an error
         document.getElementById('news-loading').style.display = 'none';
         document.getElementById('newsHeadlines').style.display = 'block';
-        
+
         const newsContainer = document.getElementById('newsHeadlines');
         if (newsContainer) {
-            newsContainer.innerHTML = '<p><em>Error loading headlines</em></p>';
+            // Clear the container and safely insert the message as text
+            newsContainer.innerHTML = '';
+            const p = document.createElement('p');
+            const em = document.createElement('em');
+            em.textContent = userMessage;
+            p.appendChild(em);
+            newsContainer.appendChild(p);
         }
     }
 
