@@ -8,6 +8,9 @@ header('Cache-Control: no-cache, no-store, must-revalidate');
 header('Expires: 0');
 header('Content-Type: application/json');
 
+// Buffer output so we can return well-formed JSON even if a fatal error occurs
+ob_start();
+
 // Get version information directly using the function
 // TODO: Remove this once deployment is containerized
 $gitInfo = getGitInfo();
@@ -77,12 +80,24 @@ set_error_handler(function($errno, $errstr, $errfile, $errline) {
     return false; // Let PHP handle the error as well
 });
 
-// Register shutdown function to catch fatal errors
+// Register shutdown function to catch fatal errors and return safe JSON
 register_shutdown_function(function() {
     $error = error_get_last();
     if ($error && in_array($error['type'], [E_ERROR, E_PARSE, E_CORE_ERROR, E_COMPILE_ERROR])) {
         $message = date('[Y-m-d H:i:s] ') . "FATAL Error: {$error['message']} in {$error['file']} on line {$error['line']}\n";
         error_log($message);
+
+        // Ensure the client receives valid JSON even after a fatal error
+        if (ob_get_length()) {
+            ob_clean();
+        }
+        if (!headers_sent()) {
+            header('Content-Type: application/json');
+        }
+        global $allItems, $outputItemsGlobal;
+        $fallbackArray = $outputItemsGlobal ?? $allItems ?? [];
+        $fallback = json_encode($fallbackArray);
+        echo $fallback === false ? '[]' : $fallback;
     }
 });
 
@@ -114,6 +129,7 @@ $requestedFeeds = empty($includedFeeds) ? array_keys($feeds) : $includedFeeds;
 
 // Collect all items
 $allItems = [];
+$outputItemsGlobal = null; // Used for shutdown fallback
 $currentTime = time();
 $updatedTimestamps = false;
 
@@ -179,8 +195,17 @@ $outputItems = applyAgeFilter($outputItems, $maxAgeSeconds);
 // Limit number of stories if needed
 $outputItems = array_slice($outputItems, 0, $numStories);
 
-// Return filtered cached content
-echo json_encode($outputItems);
+// Store for potential shutdown fallback
+$outputItemsGlobal = $outputItems;
+
+// Return filtered cached content with sanity check
+$jsonOutput = json_encode($outputItems);
+if ($jsonOutput === false) {
+    error_log('JSON Encode Error: ' . json_last_error_msg());
+    $jsonOutput = '[]';
+}
+echo $jsonOutput;
+ob_end_flush();
 
 
 // ***** Utility functions *****
