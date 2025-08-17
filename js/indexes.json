@@ -1,0 +1,12 @@
+[
+  {"IndexName":"S&P 500","TrackingETF":"SPY","Coefficient":10.0239338555,"DateValid":"2025-08-15"},
+  {"IndexName":"Dow Jones Industrial Average","TrackingETF":"DIA","Coefficient":99.9846951260,"DateValid":"2025-08-15"},
+  {"IndexName":"NASDAQ 100","TrackingETF":"QQQ","Coefficient":41.0968664425,"DateValid":"2025-08-15"},
+  {"IndexName":"NASDAQ Composite","TrackingETF":"ONEQ","Coefficient":253.1964871194,"DateValid":"2025-08-15"},
+  {"IndexName":"Russell 2000","TrackingETF":"IWM","Coefficient":11.8286368440,"DateValid":"2025-08-15"},
+  {"IndexName":"Ten Year US Treasury","TrackingETF":"UTEN","Coefficient":0.0993102941,"DateValid":"2025-08-15"},
+  {"IndexName":"Two Year US Treasury","TrackingETF":"UTWO","Coefficient":0.0774393392,"DateValid":"2025-08-15"},
+  {"IndexName":"Hang Seng","TrackingETF":"2800.HK","Coefficient":971.1787086856,"DateValid":"2025-08-15"},
+  {"IndexName":"Nikkei 225","TrackingETF":"1321.T","Coefficient":0.9865433250,"DateValid":"2025-08-15"},
+  {"IndexName":"DAX","TrackingETF":"DAX","Coefficient":538.3723498233,"DateValid":"2025-08-15"}
+]

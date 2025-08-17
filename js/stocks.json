@@ -1,0 +1,11 @@
+[
+    {"StockName": "Bitcoin ETF", "Symbol": "BITC"},
+    {"StockName": "Tesla", "Symbol": "TSLA"},
+    {"StockName": "Apple", "Symbol": "AAPL"},
+    {"StockName": "Amazon", "Symbol": "AMZN"},
+    {"StockName": "Alphabet", "Symbol": "GOOGL"},
+    {"StockName": "Meta", "Symbol": "META"},
+    {"StockName": "Microsoft", "Symbol": "MSFT"},
+    {"StockName": "NVIDIA", "Symbol": "NVDA"},
+    {"StockName": "Berkshire Hathaway", "Symbol": "BRK.A"}
+]
