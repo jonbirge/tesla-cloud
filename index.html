@@ -398,7 +398,7 @@
             </div>
             <hr>
             <h2>Network Latency</h2>
-            <canvas id="pingChart" width="600" height="200">
+            <canvas id="pingChart" width="600" height="260">
             <hr>
             <h2>Testing</h2>
             <ul class="button-list">
@@ -596,9 +596,6 @@
                 <div class="settings-toggle-item news-toggle-item" data-setting="rss-lemonde" onclick="this.querySelector('input').click()">
                     <label>Le Monde</label><input type="checkbox" onchange="toggleSettingFrom(this)" checked><span class="settings-toggle-slider"></span>
                 </div>
-                <!-- <div class="settings-toggle-item news-toggle-item" data-setting="rss-cnn" onclick="this.querySelector('input').click()">
-                    <label>CNN</label><input type="checkbox" onchange="toggleSettingFrom(this)" checked><span class="settings-toggle-slider"></span>
-                </div> -->
                 <div class="settings-toggle-item news-toggle-item" data-setting="rss-newyorker" onclick="this.querySelector('input').click()">
                     <label>New Yorker</label><input type="checkbox" onchange="toggleSettingFrom(this)" checked><span class="settings-toggle-slider"></span>
                 </div>
@@ -660,49 +657,14 @@
                 </div>
             </div>
 
-            <h2>Market Indicators & Stocks</h2>
-            <div class="settings-controls news-source-grid">
-                <div class="settings-toggle-item news-toggle-item" data-setting="show-stock-spy"
-                    onclick="this.querySelector('input').click()">
-                    <label>S&P 500 Index</label>
-                    <input type="checkbox" onchange="toggleSettingFrom(this)" checked><span
-                        class="settings-toggle-slider"></span>
-                </div>
-                
-                <div class="settings-toggle-item news-toggle-item" data-setting="show-stock-dia"
-                    onclick="this.querySelector('input').click()">
-                    <label>Dow Jones Industrials</label>
-                    <input type="checkbox" onchange="toggleSettingFrom(this)" checked><span
-                        class="settings-toggle-slider"></span>
-                </div>
-
-                <div class="settings-toggle-item news-toggle-item" data-setting="show-stock-iwm"
-                    onclick="this.querySelector('input').click()">
-                    <label>Russell 2000</label>
-                    <input type="checkbox" onchange="toggleSettingFrom(this)" checked><span
-                        class="settings-toggle-slider"></span>
-                </div>
-                
-                <div class="settings-toggle-item news-toggle-item" data-setting="show-stock-ief"
-                    onclick="this.querySelector('input').click()">
-                    <label>10-Year Treasury</label>
-                    <input type="checkbox" onchange="toggleSettingFrom(this)" checked><span
-                        class="settings-toggle-slider"></span>
-                </div>
-                
-                <div class="settings-toggle-item news-toggle-item" data-setting="show-stock-btco"
-                    onclick="this.querySelector('input').click()">
-                    <label>BITC</label>
-                    <input type="checkbox" onchange="toggleSettingFrom(this)"><span
-                        class="settings-toggle-slider"></span>
-                </div>
-                
-                <div class="settings-toggle-item news-toggle-item" data-setting="show-stock-tsla"
-                    onclick="this.querySelector('input').click()">
-                    <label>TSLA</label>
-                    <input type="checkbox" onchange="toggleSettingFrom(this)"><span
-                        class="settings-toggle-slider"></span>
-                </div>
+            <h2>Financial Data</h2>
+            <h3>Indexes</h3>
+            <div id="stock-index-settings" class="settings-controls news-source-grid">
+                <!-- Index settings will be dynamically generated here -->
+            </div>
+            <h3>Stocks</h3>
+            <div id="stock-settings" class="settings-controls news-source-grid">
+                <!-- Stock settings will be dynamically generated here -->
             </div>
             
         </div>
@@ -751,7 +713,9 @@
                 <circle cx="12" cy="12" r="3" fill="currentColor"/>
             </svg>
         </div>
-        <div id="stock-indicators" style="display: flex;"></div>
+        <div id="stock-indicators" style="display: flex;">
+            <!-- Stock indicators will be dynamically generated here -->    
+        </div>
         <div id="network-status" class="status-indicator network-status unavailable" title="Network Status">
             <img src="assets/network.svg" class="network-icon">
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 28 24" width="28px" height="24px">

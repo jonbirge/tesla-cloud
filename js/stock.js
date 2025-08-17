@@ -2,54 +2,168 @@
 const STOCK_API_ENDPOINT = 'quote.php?symbol='; // Prefix for internal stock REST API
 const UPDATE_INTERVAL = 2 * 60 * 1000; // 2 minutes in milliseconds
 const CACHE_AGE_LIMIT = 1 * 60 * 1000; // minute in milliseconds
+const DISPLAY_ALTERNATE_INTERVAL = 5 * 1000; // 5 seconds in milliseconds
 
 // Global variables
 let stockUpdateTimer = null;
+let displayAlternateTimer = null;
 let stockDataCache = {}; // Cache object to store stock data by ticker
 let showChange = true; // Flag to show change in stock price
+let availableStocks = []; // List of available stocks from stocks.json
+let availableIndexes = []; // List of available indexes from indexes.json
 
 // Import settings to check visibility setting
 import { settings } from './settings.js';
 
-// List of supported stock tickers
-const STOCK_TICKERS = ['spy', 'dia', 'iwm', 'ief', 'btco', 'tsla'];
-
-// Dynamically create stock indicator elements
-function createStockIndicators() {
-    const container = document.getElementById('stock-indicators');
-    if (!container) return;
-
-    STOCK_TICKERS.forEach(ticker => {
-        const id = `stock-status-${ticker}`;
-        if (!document.getElementById(id)) {
-            const div = document.createElement('div');
-            div.id = id;
-            div.className = 'status-indicator stock-status neutral hidden';
-            div.innerHTML = `${ticker.toUpperCase()}<span id="stock-arrow"></span><span id="stock-value">--</span>`;
-            container.appendChild(div);
-        }
-    });
+// Load stock and index data
+async function loadStockAndIndexData() {
+    try {
+        const [stocksResponse, indexesResponse] = await Promise.all([
+            fetch('js/stocks.json'),
+            fetch('js/indexes.json')
+        ]);
+        
+        availableStocks = await stocksResponse.json();
+        availableIndexes = await indexesResponse.json();
+        
+        console.log('Loaded stock and index data');
+        updateStockIndicatorVisibility();
+    } catch (error) {
+        console.error('Error loading stock/index data:', error);
+    }
 }
 
-createStockIndicators();
+// Get all subscribed tickers (stocks + indexes)
+function getSubscribedTickers() {
+    const subscribedStocks = settings['subscribed-stocks'] || [];
+    const subscribedIndexes = settings['subscribed-indexes'] || [];
+    return [...subscribedStocks, ...subscribedIndexes];
+}
+
+// Generate complete HTML for all stock indicators
+function generateStockIndicatorsHTML() {
+    const subscribedTickers = getSubscribedTickers();
+    const masterEnabled = settings["show-stock-indicator"] !== false;
+    
+    if (!masterEnabled || subscribedTickers.length === 0) {
+        return ''; // Return empty string if disabled or no subscriptions
+    }
+    
+    return subscribedTickers.map(ticker => {
+        const cached = stockDataCache[ticker.toUpperCase()];
+        const displayData = getDisplayData(ticker, cached);
+        
+        return `
+            <div id="stock-status-${ticker.toLowerCase()}" class="status-indicator stock-status ${displayData.className}">
+                ${ticker.toUpperCase()}<span id="stock-arrow">${displayData.arrow}</span><span id="stock-value">${displayData.value}</span>
+            </div>
+        `;
+    }).join('');
+}
+
+// Get display data for a ticker
+function getDisplayData(ticker, cached) {
+    if (!cached) {
+        return {
+            className: 'neutral',
+            arrow: '--',
+            value: '--%'
+        };
+    }
+    
+    const { percentChange, price } = cached;
+    
+    if (percentChange === null || percentChange === undefined) {
+        return {
+            className: 'neutral',
+            arrow: '--',
+            value: '--%'
+        };
+    }
+    
+    // Determine class and arrow based on percentage change
+    let className, arrow;
+    if (percentChange > 0) {
+        className = 'up';
+        arrow = '▲';
+    } else if (percentChange < 0) {
+        className = 'down';
+        arrow = '▼';
+    } else {
+        className = 'neutral';
+        arrow = '—';
+    }
+    
+    // Determine value to display
+    let value;
+    if (settings['show-price-alt'] && !showChange) {
+        // Check if this ticker is an index by looking it up in availableIndexes
+        const isIndex = availableIndexes.some(index => index.TrackingETF === ticker.toUpperCase());
+        
+        if (isIndex && price) {
+            // Find the coefficient for this index
+            const indexData = availableIndexes.find(index => index.TrackingETF === ticker.toUpperCase());
+            if (indexData && indexData.Coefficient) {
+                // Calculate index value: ETF price * coefficient
+                const indexValue = parseFloat(price) * parseFloat(indexData.Coefficient);
+                value = indexValue.toFixed(2); // No dollar sign for indexes
+            } else {
+                value = '--';
+            }
+        } else if (price) {
+            // Regular stock - show with dollar sign
+            value = `$${parseFloat(price).toFixed(2)}`;
+        } else {
+            value = '--';
+        }
+    } else {
+        value = Math.abs(percentChange).toFixed(2) + '%';
+    }
+    
+    return { className, arrow, value };
+}
+
+// Update the stock indicators container with new HTML
+function updateStockIndicatorsContainer() {
+    const container = document.getElementById('stock-indicators');
+    if (!container) return;
+    
+    container.innerHTML = generateStockIndicatorsHTML();
+}
+
+// Initialize on load
+loadStockAndIndexData();
 
 // Function to start periodic updates
 export function startStockUpdates() {
     updateStockIndicatorVisibility();
 
-    const anyEnabled = STOCK_TICKERS.some(ticker =>
-        settings[`show-stock-${ticker}`] !== false
-    );
+    const subscribedTickers = getSubscribedTickers();
+    const anyEnabled = subscribedTickers.length > 0 && settings["show-stock-indicator"] !== false;
 
     if (anyEnabled) {
+        // Start data fetching timer
         if (!stockUpdateTimer) {
             fetchStockData();
             stockUpdateTimer = setInterval(fetchStockData, UPDATE_INTERVAL);
         }
+        
+        // Start display alternating timer if the setting is enabled
+        if (settings['show-price-alt'] && !displayAlternateTimer) {
+            displayAlternateTimer = setInterval(() => {
+                showChange = !showChange;
+                updateStockIndicatorsContainer();
+            }, DISPLAY_ALTERNATE_INTERVAL);
+        }
     } else {
+        // Stop both timers if disabled
         if (stockUpdateTimer) {
             clearInterval(stockUpdateTimer);
             stockUpdateTimer = null;
+        }
+        if (displayAlternateTimer) {
+            clearInterval(displayAlternateTimer);
+            displayAlternateTimer = null;
         }
     }
 }
@@ -60,17 +174,39 @@ export function stopStockUpdates() {
         clearInterval(stockUpdateTimer);
         stockUpdateTimer = null;
     }
+    if (displayAlternateTimer) {
+        clearInterval(displayAlternateTimer);
+        displayAlternateTimer = null;
+    }
     updateStockIndicatorVisibility();
+}
+
+// Function to start or stop the display alternating timer based on setting
+function updateDisplayAlternating() {
+    const shouldAlternate = settings['show-price-alt'] && 
+                           getSubscribedTickers().length > 0 && 
+                           settings["show-stock-indicator"] !== false;
+    
+    if (shouldAlternate && !displayAlternateTimer) {
+        // Start alternating timer
+        displayAlternateTimer = setInterval(() => {
+            showChange = !showChange;
+            updateStockIndicatorsContainer();
+        }, DISPLAY_ALTERNATE_INTERVAL);
+    } else if (!shouldAlternate && displayAlternateTimer) {
+        // Stop alternating timer
+        clearInterval(displayAlternateTimer);
+        displayAlternateTimer = null;
+        // Reset to showing percentage change
+        showChange = true;
+        updateStockIndicatorsContainer();
+    }
 }
 
 // Function to fetch stock data for all indicators
 export function fetchStockData() {
     console.log('Fetching financial data...');
     const currentTime = Date.now();
-
-    if (settings['show-price-alt']) {
-        showChange = !showChange; // Toggle before updating so cached data alternates
-    }
 
     // Flag to indicate if US markets are open
     let usMarketsOpen;
@@ -83,140 +219,72 @@ export function fetchStockData() {
     } else {
         usMarketsOpen = false;
     }
-    // console.log(`US markets open: ${usMarketsOpen}`);
     
-    // Find all stock indicators
-    const stockElements = document.querySelectorAll('[id^="stock-status-"]');
+    const subscribedTickers = getSubscribedTickers();
+    let pendingFetches = 0;
     
-    // Process each stock element independently using promises
-    stockElements.forEach(element => {
-        // Skip if the element is not visible
-        if (element.style.display === 'none') {
-            // console.log(`Skipping hidden element: ${element.id}`);
-            return;
-        }
-
-        // Extract ticker from the element ID and capitalize it
-        // Example: 'stock-status-aapl' -> 'AAPL'
-        const ticker = element.id.replace('stock-status-', '').toUpperCase();
+    // Process each subscribed ticker
+    subscribedTickers.forEach(ticker => {
+        const upperTicker = ticker.toUpperCase();
         
         // Check if we have valid cached data
-        // console.log('Cache age: ', (currentTime - (stockDataCache[ticker] ? stockDataCache[ticker].timestamp : 0)) / 1000, 'seconds');
-        if (stockDataCache[ticker] && 
-            (((currentTime - stockDataCache[ticker].timestamp) < CACHE_AGE_LIMIT) ||
+        if (stockDataCache[upperTicker] && 
+            (((currentTime - stockDataCache[upperTicker].timestamp) < CACHE_AGE_LIMIT) ||
             !usMarketsOpen)) {
-            // Use cached data
-            // console.log(`Using cached data for ${ticker}`);
-            updateStockDisplay(
-                element.id,
-                stockDataCache[ticker].percentChange,
-                stockDataCache[ticker].price);
+            // Use cached data - no fetch needed
             return;
         }
         
         // Cache miss or expired, fetch fresh data
-        console.log(`Fetching data for ${ticker}`);
+        console.log(`Fetching data for ${upperTicker}`);
+        pendingFetches++;
         
-        // Create and execute fetch promise without awaiting
-        fetch(`${STOCK_API_ENDPOINT}${ticker}`)
+        fetch(`${STOCK_API_ENDPOINT}${upperTicker}`)
             .then(response => {
                 if (!response.ok) {
-                    throw new Error(`Network response was not ok for ${ticker}`);
+                    throw new Error(`Network response was not ok for ${upperTicker}`);
                 }
                 return response.json();
             })
             .then(data => {
-                // Extract values from our simplified API response
-                const percentChange = data.percentChange;
-                const price = data.price;
-                
                 // Cache the data with current timestamp
-                stockDataCache[ticker] = {
-                    percentChange: percentChange,
-                    price: price,
+                stockDataCache[upperTicker] = {
+                    percentChange: data.percentChange,
+                    price: data.price,
                     timestamp: Date.now()
                 };
-                
-                // Update the stock status indicator
-                updateStockDisplay(
-                    element.id,
-                    percentChange,
-                    price);
             })
             .catch(error => {
-                console.error(`Error fetching stock data for ${ticker}:`, error);
-                // If there's an error, show dashes
-                updateStockDisplay(element.id, null);
+                console.error(`Error fetching stock data for ${upperTicker}:`, error);
+                // Cache null data to show dashes
+                stockDataCache[upperTicker] = {
+                    percentChange: null,
+                    price: null,
+                    timestamp: Date.now()
+                };
+            })
+            .finally(() => {
+                pendingFetches--;
+                // Update display when all fetches are complete or after each individual fetch
+                updateStockIndicatorsContainer();
             });
-    }); // for each ticker
+    });
+    
+    // If no fetches were needed (all cached), still update display
+    if (pendingFetches === 0) {
+        updateStockIndicatorsContainer();
+    }
 }
 
 export function setShowChange(value) {
     showChange = value;
-}
-
-// Function to update the stock display with the percentage change
-function updateStockDisplay(elementId, percentChange, price = null) {
-    const stockStatus = document.getElementById(elementId);
-    if (!stockStatus) {
-        // throw an error if the element is not found
-        console.error(`Element with ID ${elementId} not found.`);
-        return;
-    }
-
-    // Find child elements
-    const stockArrow = stockStatus.querySelector('span#stock-arrow');
-    const stockValue = stockStatus.querySelector('span#stock-value');
-    
-    if (!stockArrow || !stockValue) return;
-    
-    if (percentChange === null) {
-        // No data available
-        stockStatus.className = 'status-indicator stock-status neutral';
-        stockArrow.innerHTML = '--';
-        stockValue.innerHTML = '--%';
-        return;
-    }
-    
-    // Format the percentage change with two decimal places
-    const formattedChange = Math.abs(percentChange).toFixed(2);
-    
-    // Determine if the market is up, down, or unchanged
-    if (percentChange > 0) {
-        stockStatus.className = 'status-indicator stock-status up';
-        stockArrow.innerHTML = '▲'; // Up arrow
-    } else if (percentChange < 0) {
-        stockStatus.className = 'status-indicator stock-status down';
-        stockArrow.innerHTML = '▼'; // Down arrow
-    } else {
-        stockStatus.className = 'status-indicator stock-status neutral';
-        stockArrow.innerHTML = '—'; // Horizontal line for unchanged
-    }
-    
-    // Update the shown value
-    if (settings['show-price-alt'] && !showChange) {
-        stockValue.innerHTML = price ? `$${parseFloat(price).toFixed(2)}` : '--';
-    } else {
-        stockValue.innerHTML = formattedChange + '%';
-    }
+    updateDisplayAlternating();
 }
 
 // Function to update stock indicator visibility based on settings
 export function updateStockIndicatorVisibility() {
-    const stockIndicators = document.querySelectorAll('[id^="stock-status-"]');
-    stockIndicators.forEach(indicator => {
-        if (indicator) {
-            // Get the specific stock ticker from the ID
-            const ticker = indicator.id.replace('stock-status-', '');
-            const specificSetting = `show-stock-${ticker}`;
-            
-            // Primary check - individual setting
-            // With backward compatibility via master switch
-            const masterOk = settings["show-stock-indicator"] !== false; // For compatibility
-            const specificOk = settings[specificSetting] !== false;
-            
-            // Only show if specifically enabled
-            indicator.style.display = (masterOk && specificOk) ? '' : 'none';
-        }
-    });
+    // Simply regenerate the entire container
+    updateStockIndicatorsContainer();
+    // Update display alternating based on current settings
+    updateDisplayAlternating();
 }
