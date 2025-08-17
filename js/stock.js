@@ -68,6 +68,10 @@ export function fetchStockData() {
     console.log('Fetching financial data...');
     const currentTime = Date.now();
 
+    if (settings['show-price-alt']) {
+        showChange = !showChange; // Toggle before updating so cached data alternates
+    }
+
     // Flag to indicate if US markets are open
     let usMarketsOpen;
     // Check if US markets are open (9:30 AM to 4:00 PM ET)
@@ -145,10 +149,6 @@ export function fetchStockData() {
                 updateStockDisplay(element.id, null);
             });
     }); // for each ticker
-    
-    if (settings['show-price-alt']) {
-        showChange = !showChange; // Toggle the display mode
-    }
 }
 
 export function setShowChange(value) {
