@@ -461,7 +461,7 @@ async function fetchSettings() {
 // Function to clean up orphaned stock and index subscriptions
 async function cleanupOrphanedSubscriptions() {
     // Ensure we have the latest stock and index data
-    if (availableStocks.length === 0 || availableIndexes.length === 0) {
+    if (availableStocks.length === 0 && availableIndexes.length === 0) {
         await loadStockAndIndexData();
     }
 
