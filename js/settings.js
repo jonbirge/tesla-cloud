@@ -32,12 +32,8 @@ const defaultSettings = {
     // Stocks
     "show-price-alt": false,
     "show-stock-indicator": true,
-    "show-stock-spy": false,    // S&P 500
-    "show-stock-dia": false,    // Dow Jones
-    "show-stock-iwm": false,    // Russell 2000
-    "show-stock-ief": false,    // Treasury Bonds
-    "show-stock-btco": false,   // Bitcoin
-    "show-stock-tsla": false,   // Tesla
+    "subscribed-stocks": ["TSLA"],
+    "subscribed-indexes": ["SPY", "DIA"],
     // News forwarding
     "news-forwarding": false,
     "news-forward-only": false,
@@ -459,6 +455,105 @@ async function fetchSettings() {
     }
 }
 
+// Load available stocks and indexes for settings generation
+let availableStocks = [];
+let availableIndexes = [];
+
+// Load JSON data for stocks and indexes
+async function loadStockAndIndexData() {
+    try {
+        const [stocksResponse, indexesResponse] = await Promise.all([
+            fetch('js/stocks.json'),
+            fetch('js/indexes.json')
+        ]);
+        
+        availableStocks = await stocksResponse.json();
+        availableIndexes = await indexesResponse.json();
+        
+        // Generate settings UI after data is loaded
+        generateStockIndexSettings();
+    } catch (error) {
+        console.error('Error loading stock/index data:', error);
+    }
+}
+
+// Function to generate stock and index settings dynamically
+function generateStockIndexSettings() {
+    const stockContainer = document.querySelector('#stock-index-settings');
+    if (!stockContainer) return;
+    
+    let html = '';
+    
+    // Generate stock checkboxes
+    availableStocks.forEach(stock => {
+        html += `
+            <div class="settings-toggle-item news-toggle-item" data-setting="stock-${stock.Symbol}"
+                onclick="this.querySelector('input').click()">
+                <label>${stock.StockName} (${stock.Symbol})</label>
+                <input type="checkbox" onchange="toggleStockIndexSetting(this, 'stock', '${stock.Symbol}')">
+                <span class="settings-toggle-slider"></span>
+            </div>
+        `;
+    });
+    
+    // Generate index checkboxes
+    availableIndexes.forEach(index => {
+        html += `
+            <div class="settings-toggle-item news-toggle-item" data-setting="index-${index.TrackingETF}"
+                onclick="this.querySelector('input').click()">
+                <label>${index.IndexName} (${index.TrackingETF})</label>
+                <input type="checkbox" onchange="toggleStockIndexSetting(this, 'index', '${index.TrackingETF}')">
+                <span class="settings-toggle-slider"></span>
+            </div>
+        `;
+    });
+    
+    stockContainer.innerHTML = html;
+    
+    // Update UI based on current subscriptions
+    updateStockIndexUI();
+}
+
+// Function to handle stock/index subscription toggles
+window.toggleStockIndexSetting = function(element, type, symbol) {
+    const isChecked = element.checked;
+    const settingKey = type === 'stock' ? 'subscribed-stocks' : 'subscribed-indexes';
+    const currentList = settings[settingKey] || [];
+    
+    let newList;
+    if (isChecked) {
+        // Add to subscription list if not already present
+        newList = currentList.includes(symbol) ? currentList : [...currentList, symbol];
+    } else {
+        // Remove from subscription list
+        newList = currentList.filter(item => item !== symbol);
+    }
+    
+    saveSetting(settingKey, newList);
+}
+
+// Function to update stock/index UI based on current subscriptions
+function updateStockIndexUI() {
+    const subscribedStocks = settings['subscribed-stocks'] || [];
+    const subscribedIndexes = settings['subscribed-indexes'] || [];
+    
+    // Update stock checkboxes
+    availableStocks.forEach(stock => {
+        const checkbox = document.querySelector(`[data-setting="stock-${stock.Symbol}"] input`);
+        if (checkbox) {
+            checkbox.checked = subscribedStocks.includes(stock.Symbol);
+        }
+    });
+    
+    // Update index checkboxes
+    availableIndexes.forEach(index => {
+        const checkbox = document.querySelector(`[data-setting="index-${index.TrackingETF}"] input`);
+        if (checkbox) {
+            checkbox.checked = subscribedIndexes.includes(index.TrackingETF);
+        }
+    });
+}
+
 // Update UI state based on a specific setting
 function updateSetting(key, value) {
     const settingItems = document.querySelectorAll(`.settings-toggle-item[data-setting="${key}"]`);
@@ -504,6 +599,23 @@ function updateSetting(key, value) {
 
     // Handle settings effects
     switch (key) {
+        case 'subscribed-stocks':
+        case 'subscribed-indexes':
+            // Update stock/index UI and restart updates
+            updateStockIndexUI();
+            import('./stock.js').then(stockModule => {
+                if (typeof stockModule.updateStockIndicatorVisibility === 'function') {
+                    stockModule.updateStockIndicatorVisibility();
+                }
+                if (typeof stockModule.fetchStockData === 'function') {
+                    stockModule.fetchStockData();
+                }
+                if (typeof stockModule.startStockUpdates === 'function') {
+                    stockModule.startStockUpdates();
+                }
+            });
+            break;
+
         case 'imperial-units':
         case '24-hour-time':
             unitIsDirty = true;
@@ -537,33 +649,19 @@ function updateSetting(key, value) {
             // Special handling for the master switch
             // If it's being enabled, start updates
             if (value) {
-                startStockUpdates();
+                import('./stock.js').then(stockModule => {
+                    if (typeof stockModule.startStockUpdates === 'function') {
+                        stockModule.startStockUpdates();
+                    }
+                });
             } else {
-                stopStockUpdates();
+                import('./stock.js').then(stockModule => {
+                    if (typeof stockModule.stopStockUpdates === 'function') {
+                        stockModule.stopStockUpdates();
+                    }
+                });
             }
             // Update visibility state and fetch fresh data
-            import('./stock.js').then(stockModule => {
-                if (typeof stockModule.updateStockIndicatorVisibility === 'function') {
-                    stockModule.updateStockIndicatorVisibility();
-                }
-                if (typeof stockModule.fetchStockData === 'function') {
-                    stockModule.fetchStockData();
-                }
-            });
-            break;
-
-        case 'show-stock-spy':
-        case 'show-stock-dia':
-        case 'show-stock-ief':
-        case 'show-stock-btco':
-        case 'show-stock-tsla':
-        case 'show-stock-iwm':
-            // For active indicators, adjust visibility and restart updates if needed
-            if (value && settings["show-stock-indicator"] !== false) {
-                // Start updates if this is a newly enabled indicator
-                startStockUpdates();
-            }
-            // Update visibility and refresh data immediately
             import('./stock.js').then(stockModule => {
                 if (typeof stockModule.updateStockIndicatorVisibility === 'function') {
                     stockModule.updateStockIndicatorVisibility();
@@ -652,6 +750,9 @@ function setControlEnable(key, enabled = true) {
 
 // Initialize all toggle and text states based on 'settings' dictionary
 function initializeSettings() {
+    // Load stock/index data and generate settings
+    loadStockAndIndexData();
+    
     // Iterate through all keys in the settings object
     for (const key in settings) {
         if (settings.hasOwnProperty(key)) {
