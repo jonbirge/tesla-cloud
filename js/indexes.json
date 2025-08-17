@@ -21,13 +21,6 @@
   },
 
   {
-    "IndexName": "NASDAQ Composite",
-    "TrackingETF": "ONEQ",
-    "Coefficient": 253.1964871194,
-    "DateValid": "2025-08-15"
-  },
-
-  {
     "IndexName": "Russell 2000",
     "TrackingETF": "IWM",
     "Coefficient": 11.8286368440,
