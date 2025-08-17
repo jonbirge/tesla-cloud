@@ -7,5 +7,5 @@
     {"StockName": "Meta", "Symbol": "META"},
     {"StockName": "Microsoft", "Symbol": "MSFT"},
     {"StockName": "NVIDIA", "Symbol": "NVDA"},
-    {"StockName": "Berkshire Hathaway", "Symbol": "BRK.A"}
+    {"StockName": "Berkshire", "Symbol": "BRK.A"}
 ]

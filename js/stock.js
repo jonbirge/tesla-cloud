@@ -2,13 +2,13 @@
 const STOCK_API_ENDPOINT = 'quote.php?symbol='; // Prefix for internal stock REST API
 const UPDATE_INTERVAL = 2 * 60 * 1000; // 2 minutes in milliseconds
 const CACHE_AGE_LIMIT = 1 * 60 * 1000; // minute in milliseconds
+const DISPLAY_ALTERNATE_INTERVAL = 5 * 1000; // 5 seconds in milliseconds
 
 // Global variables
 let stockUpdateTimer = null;
+let displayAlternateTimer = null;
 let stockDataCache = {}; // Cache object to store stock data by ticker
 let showChange = true; // Flag to show change in stock price
-// let availableStocks = [];
-// let availableIndexes = [];
 
 // Import settings to check visibility setting
 import { settings } from './settings.js';
@@ -122,14 +122,28 @@ export function startStockUpdates() {
     const anyEnabled = subscribedTickers.length > 0 && settings["show-stock-indicator"] !== false;
 
     if (anyEnabled) {
+        // Start data fetching timer
         if (!stockUpdateTimer) {
             fetchStockData();
             stockUpdateTimer = setInterval(fetchStockData, UPDATE_INTERVAL);
         }
+        
+        // Start display alternating timer if the setting is enabled
+        if (settings['show-price-alt'] && !displayAlternateTimer) {
+            displayAlternateTimer = setInterval(() => {
+                showChange = !showChange;
+                updateStockIndicatorsContainer();
+            }, DISPLAY_ALTERNATE_INTERVAL);
+        }
     } else {
+        // Stop both timers if disabled
         if (stockUpdateTimer) {
             clearInterval(stockUpdateTimer);
             stockUpdateTimer = null;
+        }
+        if (displayAlternateTimer) {
+            clearInterval(displayAlternateTimer);
+            displayAlternateTimer = null;
         }
     }
 }
@@ -140,17 +154,39 @@ export function stopStockUpdates() {
         clearInterval(stockUpdateTimer);
         stockUpdateTimer = null;
     }
+    if (displayAlternateTimer) {
+        clearInterval(displayAlternateTimer);
+        displayAlternateTimer = null;
+    }
     updateStockIndicatorVisibility();
+}
+
+// Function to start or stop the display alternating timer based on setting
+function updateDisplayAlternating() {
+    const shouldAlternate = settings['show-price-alt'] && 
+                           getSubscribedTickers().length > 0 && 
+                           settings["show-stock-indicator"] !== false;
+    
+    if (shouldAlternate && !displayAlternateTimer) {
+        // Start alternating timer
+        displayAlternateTimer = setInterval(() => {
+            showChange = !showChange;
+            updateStockIndicatorsContainer();
+        }, DISPLAY_ALTERNATE_INTERVAL);
+    } else if (!shouldAlternate && displayAlternateTimer) {
+        // Stop alternating timer
+        clearInterval(displayAlternateTimer);
+        displayAlternateTimer = null;
+        // Reset to showing percentage change
+        showChange = true;
+        updateStockIndicatorsContainer();
+    }
 }
 
 // Function to fetch stock data for all indicators
 export function fetchStockData() {
     console.log('Fetching financial data...');
     const currentTime = Date.now();
-
-    if (settings['show-price-alt']) {
-        showChange = !showChange; // Toggle before updating so cached data alternates
-    }
 
     // Flag to indicate if US markets are open
     let usMarketsOpen;
@@ -222,10 +258,13 @@ export function fetchStockData() {
 
 export function setShowChange(value) {
     showChange = value;
+    updateDisplayAlternating();
 }
 
 // Function to update stock indicator visibility based on settings
 export function updateStockIndicatorVisibility() {
     // Simply regenerate the entire container
     updateStockIndicatorsContainer();
+    // Update display alternating based on current settings
+    updateDisplayAlternating();
 }
