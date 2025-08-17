@@ -9,6 +9,8 @@ let stockUpdateTimer = null;
 let displayAlternateTimer = null;
 let stockDataCache = {}; // Cache object to store stock data by ticker
 let showChange = true; // Flag to show change in stock price
+let availableStocks = []; // List of available stocks from stocks.json
+let availableIndexes = []; // List of available indexes from indexes.json
 
 // Import settings to check visibility setting
 import { settings } from './settings.js';
@@ -95,7 +97,25 @@ function getDisplayData(ticker, cached) {
     // Determine value to display
     let value;
     if (settings['show-price-alt'] && !showChange) {
-        value = price ? `$${parseFloat(price).toFixed(2)}` : '--';
+        // Check if this ticker is an index by looking it up in availableIndexes
+        const isIndex = availableIndexes.some(index => index.TrackingETF === ticker.toUpperCase());
+        
+        if (isIndex && price) {
+            // Find the coefficient for this index
+            const indexData = availableIndexes.find(index => index.TrackingETF === ticker.toUpperCase());
+            if (indexData && indexData.Coefficient) {
+                // Calculate index value: ETF price * coefficient
+                const indexValue = parseFloat(price) * parseFloat(indexData.Coefficient);
+                value = indexValue.toFixed(2); // No dollar sign for indexes
+            } else {
+                value = '--';
+            }
+        } else if (price) {
+            // Regular stock - show with dollar sign
+            value = `$${parseFloat(price).toFixed(2)}`;
+        } else {
+            value = '--';
+        }
     } else {
         value = Math.abs(percentChange).toFixed(2) + '%';
     }
