@@ -11,24 +11,42 @@ let showChange = true; // Flag to show change in stock price
 // Import settings to check visibility setting
 import { settings } from './settings.js';
 
+// List of supported stock tickers
+const STOCK_TICKERS = ['spy', 'dia', 'iwm', 'ief', 'btco', 'tsla'];
+
+// Dynamically create stock indicator elements
+function createStockIndicators() {
+    const container = document.getElementById('stock-indicators');
+    if (!container) return;
+
+    STOCK_TICKERS.forEach(ticker => {
+        const id = `stock-status-${ticker}`;
+        if (!document.getElementById(id)) {
+            const div = document.createElement('div');
+            div.id = id;
+            div.className = 'status-indicator stock-status neutral hidden';
+            div.innerHTML = `${ticker.toUpperCase()}<span id="stock-arrow"></span><span id="stock-value">--</span>`;
+            container.appendChild(div);
+        }
+    });
+}
+
+createStockIndicators();
+
 // Function to start periodic updates
 export function startStockUpdates() {
-    // Check if any stock indicators should be visible
     updateStockIndicatorVisibility();
 
-    // Check if any stock indicators are enabled
-    const anyEnabled = ['spy', 'dia', 'ief', 'btco', 'tsla'].some(ticker =>
+    const anyEnabled = STOCK_TICKERS.some(ticker =>
         settings[`show-stock-${ticker}`] !== false
     );
 
-    // Only fetch data if at least one indicator is enabled
     if (anyEnabled) {
         if (!stockUpdateTimer) {
             fetchStockData();
             stockUpdateTimer = setInterval(fetchStockData, UPDATE_INTERVAL);
         }
     } else {
-        // Stop updates if no indicators are enabled
         if (stockUpdateTimer) {
             clearInterval(stockUpdateTimer);
             stockUpdateTimer = null;
