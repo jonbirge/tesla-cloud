@@ -442,6 +442,9 @@ async function fetchSettings() {
             settings = await response.json();
             console.log('Settings loaded: ', settings);
 
+            // Clean up orphaned stock/index subscriptions
+            await cleanupOrphanedSubscriptions();
+
             // Activate the settings section button
             document.getElementById('settings-section').classList.remove('hidden');
 
@@ -452,6 +455,51 @@ async function fetchSettings() {
         }
     } catch (error) {
         console.error('Error fetching settings: ', error);
+    }
+}
+
+// Function to clean up orphaned stock and index subscriptions
+async function cleanupOrphanedSubscriptions() {
+    // Ensure we have the latest stock and index data
+    if (availableStocks.length === 0 || availableIndexes.length === 0) {
+        await loadStockAndIndexData();
+    }
+
+    let settingsChanged = false;
+
+    // Get valid symbols from JSON files
+    const validStockSymbols = availableStocks.map(stock => stock.Symbol);
+    const validIndexSymbols = availableIndexes.map(index => index.TrackingETF);
+
+    // Clean up subscribed stocks
+    const subscribedStocks = settings['subscribed-stocks'] || [];
+    const cleanedStocks = subscribedStocks.filter(symbol => validStockSymbols.includes(symbol));
+    if (cleanedStocks.length !== subscribedStocks.length) {
+        const removedStocks = subscribedStocks.filter(symbol => !validStockSymbols.includes(symbol));
+        console.log('Removing orphaned stock subscriptions:', removedStocks);
+        settings['subscribed-stocks'] = cleanedStocks;
+        settingsChanged = true;
+    }
+
+    // Clean up subscribed indexes
+    const subscribedIndexes = settings['subscribed-indexes'] || [];
+    const cleanedIndexes = subscribedIndexes.filter(symbol => validIndexSymbols.includes(symbol));
+    if (cleanedIndexes.length !== subscribedIndexes.length) {
+        const removedIndexes = subscribedIndexes.filter(symbol => !validIndexSymbols.includes(symbol));
+        console.log('Removing orphaned index subscriptions:', removedIndexes);
+        settings['subscribed-indexes'] = cleanedIndexes;
+        settingsChanged = true;
+    }
+
+    // Save cleaned settings back to server if changes were made
+    if (settingsChanged && isLoggedIn && hashedUser) {
+        console.log('Saving cleaned subscription settings to server');
+        try {
+            await saveSetting('subscribed-stocks', settings['subscribed-stocks']);
+            await saveSetting('subscribed-indexes', settings['subscribed-indexes']);
+        } catch (error) {
+            console.error('Error saving cleaned subscription settings:', error);
+        }
     }
 }
 
