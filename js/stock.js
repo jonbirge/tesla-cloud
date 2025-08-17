@@ -64,7 +64,7 @@ export function stopStockUpdates() {
 }
 
 // Function to fetch stock data for all indicators
-function fetchStockData() {
+export function fetchStockData() {
     console.log('Fetching financial data...');
     const currentTime = Date.now();
 
@@ -149,6 +149,10 @@ function fetchStockData() {
     if (settings['show-price-alt']) {
         showChange = !showChange; // Toggle the display mode
     }
+}
+
+export function setShowChange(value) {
+    showChange = value;
 }
 
 // Function to update the stock display with the percentage change
