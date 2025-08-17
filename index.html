@@ -596,9 +596,6 @@
                 <div class="settings-toggle-item news-toggle-item" data-setting="rss-lemonde" onclick="this.querySelector('input').click()">
                     <label>Le Monde</label><input type="checkbox" onchange="toggleSettingFrom(this)" checked><span class="settings-toggle-slider"></span>
                 </div>
-                <!-- <div class="settings-toggle-item news-toggle-item" data-setting="rss-cnn" onclick="this.querySelector('input').click()">
-                    <label>CNN</label><input type="checkbox" onchange="toggleSettingFrom(this)" checked><span class="settings-toggle-slider"></span>
-                </div> -->
                 <div class="settings-toggle-item news-toggle-item" data-setting="rss-newyorker" onclick="this.querySelector('input').click()">
                     <label>New Yorker</label><input type="checkbox" onchange="toggleSettingFrom(this)" checked><span class="settings-toggle-slider"></span>
                 </div>
@@ -661,8 +658,13 @@
             </div>
 
             <h2>Financial Data</h2>
+            <h3>Indexes</h3>
             <div id="stock-index-settings" class="settings-controls news-source-grid">
-                <!-- Stock and index settings will be dynamically generated here -->
+                <!-- Index settings will be dynamically generated here -->
+            </div>
+            <h3>Stocks</h3>
+            <div id="stock-settings" class="settings-controls news-source-grid">
+                <!-- Stock settings will be dynamically generated here -->
             </div>
             
         </div>

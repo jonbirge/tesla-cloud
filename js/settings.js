@@ -479,14 +479,29 @@ async function loadStockAndIndexData() {
 
 // Function to generate stock and index settings dynamically
 function generateStockIndexSettings() {
-    const stockContainer = document.querySelector('#stock-index-settings');
-    if (!stockContainer) return;
+    const indexContainer = document.querySelector('#stock-index-settings');
+    const stockContainer = document.querySelector('#stock-settings');
     
-    let html = '';
+    if (!indexContainer || !stockContainer) return;
+    
+    let indexHtml = '';
+    let stockHtml = '';
+    
+    // Generate index checkboxes (use IndexName only, no ETF symbol)
+    availableIndexes.forEach(index => {
+        indexHtml += `
+            <div class="settings-toggle-item news-toggle-item" data-setting="index-${index.TrackingETF}"
+                onclick="this.querySelector('input').click()">
+                <label>${index.IndexName}</label>
+                <input type="checkbox" onchange="toggleStockIndexSetting(this, 'index', '${index.TrackingETF}')">
+                <span class="settings-toggle-slider"></span>
+            </div>
+        `;
+    });
     
     // Generate stock checkboxes
     availableStocks.forEach(stock => {
-        html += `
+        stockHtml += `
             <div class="settings-toggle-item news-toggle-item" data-setting="stock-${stock.Symbol}"
                 onclick="this.querySelector('input').click()">
                 <label>${stock.StockName} (${stock.Symbol})</label>
@@ -496,19 +511,8 @@ function generateStockIndexSettings() {
         `;
     });
     
-    // Generate index checkboxes
-    availableIndexes.forEach(index => {
-        html += `
-            <div class="settings-toggle-item news-toggle-item" data-setting="index-${index.TrackingETF}"
-                onclick="this.querySelector('input').click()">
-                <label>${index.IndexName} (${index.TrackingETF})</label>
-                <input type="checkbox" onchange="toggleStockIndexSetting(this, 'index', '${index.TrackingETF}')">
-                <span class="settings-toggle-slider"></span>
-            </div>
-        `;
-    });
-    
-    stockContainer.innerHTML = html;
+    indexContainer.innerHTML = indexHtml;
+    stockContainer.innerHTML = stockHtml;
     
     // Update UI based on current subscriptions
     updateStockIndexUI();
