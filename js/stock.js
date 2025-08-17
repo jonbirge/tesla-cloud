@@ -7,8 +7,8 @@ const CACHE_AGE_LIMIT = 1 * 60 * 1000; // minute in milliseconds
 let stockUpdateTimer = null;
 let stockDataCache = {}; // Cache object to store stock data by ticker
 let showChange = true; // Flag to show change in stock price
-let availableStocks = [];
-let availableIndexes = [];
+// let availableStocks = [];
+// let availableIndexes = [];
 
 // Import settings to check visibility setting
 import { settings } from './settings.js';
