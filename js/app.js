@@ -876,6 +876,13 @@ document.addEventListener('visibilitychange', () => {
     }
 });
 
+document.addEventListener('DOMContentLoaded', function () {
+    var premCloseBtn = document.getElementById('prem-forecast-popup-close');
+    if (premCloseBtn) {
+        premCloseBtn.onclick = window.closePremiumPrecipPopup;
+    }
+});
+
 // Event listeners and initialization after DOM content is loaded
 document.addEventListener('DOMContentLoaded', async function () {
     // Log that the DOM is fully loaded
@@ -943,4 +950,10 @@ document.addEventListener('DOMContentLoaded', async function () {
     const urlParams = new URLSearchParams(window.location.search);
     const initialSection = urlParams.get('section') || DEFAULT_SECTION;
     showSection(initialSection);
+
+    // Moved in from wx.js...
+    var premCloseBtn = document.getElementById('prem-forecast-popup-close');
+    if (premCloseBtn) {
+        premCloseBtn.onclick = window.closePremiumPrecipPopup;
+    }
 });
