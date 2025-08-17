@@ -541,14 +541,17 @@ function updateSetting(key, value) {
             } else {
                 stopStockUpdates();
             }
-            // Update visibility state for all indicators
+            // Update visibility state and fetch fresh data
             import('./stock.js').then(stockModule => {
                 if (typeof stockModule.updateStockIndicatorVisibility === 'function') {
                     stockModule.updateStockIndicatorVisibility();
                 }
+                if (typeof stockModule.fetchStockData === 'function') {
+                    stockModule.fetchStockData();
+                }
             });
             break;
-            
+
         case 'show-stock-spy':
         case 'show-stock-dia':
         case 'show-stock-ief':
@@ -559,14 +562,27 @@ function updateSetting(key, value) {
             if (value && settings["show-stock-indicator"] !== false) {
                 // Start updates if this is a newly enabled indicator
                 startStockUpdates();
-            } else {
-                // Just update visibility for all
-                import('./stock.js').then(stockModule => {
-                    if (typeof stockModule.updateStockIndicatorVisibility === 'function') {
-                        stockModule.updateStockIndicatorVisibility();
-                    }
-                });
             }
+            // Update visibility and refresh data immediately
+            import('./stock.js').then(stockModule => {
+                if (typeof stockModule.updateStockIndicatorVisibility === 'function') {
+                    stockModule.updateStockIndicatorVisibility();
+                }
+                if (typeof stockModule.fetchStockData === 'function') {
+                    stockModule.fetchStockData();
+                }
+            });
+            break;
+
+        case 'show-price-alt':
+            import('./stock.js').then(stockModule => {
+                if (typeof stockModule.setShowChange === 'function') {
+                    stockModule.setShowChange(true);
+                }
+                if (typeof stockModule.fetchStockData === 'function') {
+                    stockModule.fetchStockData();
+                }
+            });
             break;
 
         case 'dark-mode':

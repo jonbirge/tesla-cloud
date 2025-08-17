@@ -519,7 +519,7 @@
                     </div>
                 </div>
 
-                <div class="settings-toggle-item" data-setting="show-price-alt"
+                <div class="settings-toggle-item news-toggle-item" data-setting="show-price-alt"
                     onclick="this.querySelector('input').click()">
                     <label>Alternate Stock Price and % Change</label>
                     <input type="checkbox" onchange="toggleSettingFrom(this)">
@@ -661,43 +661,43 @@
             </div>
 
             <h2>Market Indicators & Stocks</h2>
-            <div class="settings-controls">
-                <div class="settings-toggle-item" data-setting="show-stock-spy"
+            <div class="settings-controls news-source-grid">
+                <div class="settings-toggle-item news-toggle-item" data-setting="show-stock-spy"
                     onclick="this.querySelector('input').click()">
                     <label>S&P 500 Index</label>
                     <input type="checkbox" onchange="toggleSettingFrom(this)" checked><span
                         class="settings-toggle-slider"></span>
                 </div>
                 
-                <div class="settings-toggle-item" data-setting="show-stock-dia"
+                <div class="settings-toggle-item news-toggle-item" data-setting="show-stock-dia"
                     onclick="this.querySelector('input').click()">
                     <label>Dow Jones Industrials</label>
                     <input type="checkbox" onchange="toggleSettingFrom(this)" checked><span
                         class="settings-toggle-slider"></span>
                 </div>
 
-                <div class="settings-toggle-item" data-setting="show-stock-iwm"
+                <div class="settings-toggle-item news-toggle-item" data-setting="show-stock-iwm"
                     onclick="this.querySelector('input').click()">
                     <label>Russell 2000</label>
                     <input type="checkbox" onchange="toggleSettingFrom(this)" checked><span
                         class="settings-toggle-slider"></span>
                 </div>
                 
-                <div class="settings-toggle-item" data-setting="show-stock-ief"
+                <div class="settings-toggle-item news-toggle-item" data-setting="show-stock-ief"
                     onclick="this.querySelector('input').click()">
                     <label>10-Year Treasury</label>
                     <input type="checkbox" onchange="toggleSettingFrom(this)" checked><span
                         class="settings-toggle-slider"></span>
                 </div>
                 
-                <div class="settings-toggle-item" data-setting="show-stock-btco"
+                <div class="settings-toggle-item news-toggle-item" data-setting="show-stock-btco"
                     onclick="this.querySelector('input').click()">
                     <label>BITC</label>
                     <input type="checkbox" onchange="toggleSettingFrom(this)"><span
                         class="settings-toggle-slider"></span>
                 </div>
                 
-                <div class="settings-toggle-item" data-setting="show-stock-tsla"
+                <div class="settings-toggle-item news-toggle-item" data-setting="show-stock-tsla"
                     onclick="this.querySelector('input').click()">
                     <label>TSLA</label>
                     <input type="checkbox" onchange="toggleSettingFrom(this)"><span
@@ -751,24 +751,7 @@
                 <circle cx="12" cy="12" r="3" fill="currentColor"/>
             </svg>
         </div>
-        <div id="stock-status-spy" class="status-indicator stock-status neutral hidden">
-            S&P<span id="stock-arrow"></span><span id="stock-value">--</span>
-        </div>
-        <div id="stock-status-dia" class="status-indicator stock-status neutral hidden">
-            DOW<span id="stock-arrow"></span><span id="stock-value">--</span>
-        </div>
-        <div id="stock-status-iwm" class="status-indicator stock-status neutral hidden">
-            RUT<span id="stock-arrow"></span><span id="stock-value">--</span>
-        </div>
-        <div id="stock-status-ief" class="status-indicator stock-status neutral hidden">
-            10Y<span id="stock-arrow"></span><span id="stock-value">--</span>
-        </div>
-        <div id="stock-status-btco" class="status-indicator stock-status neutral hidden">
-            BITC<span id="stock-arrow"></span><span id="stock-value">--</span>
-        </div>
-        <div id="stock-status-tsla" class="status-indicator stock-status neutral hidden">
-            TSLA<span id="stock-arrow"></span><span id="stock-value">--</span>
-        </div>
+        <div id="stock-indicators" style="display: flex;"></div>
         <div id="network-status" class="status-indicator network-status unavailable" title="Network Status">
             <img src="assets/network.svg" class="network-icon">
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 28 24" width="28px" height="24px">
