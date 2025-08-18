@@ -140,12 +140,22 @@ export function showNotification(message) {
     // Create the notification element
     const notification = document.createElement('div');
     notification.className = 'notification';
-    notification.innerHTML = `
-        <div class="notification-icon">
-            <img src="assets/cloud.svg" alt="Alert" width="24" height="24">
-        </div>
-        <div class="notification-message">${message}</div>
-    `;
+
+    const iconDiv = document.createElement('div');
+    iconDiv.className = 'notification-icon';
+    const img = document.createElement('img');
+    img.src = 'assets/cloud.svg';
+    img.alt = 'Alert';
+    img.width = 24;
+    img.height = 24;
+    iconDiv.appendChild(img);
+
+    const messageDiv = document.createElement('div');
+    messageDiv.className = 'notification-message';
+    messageDiv.textContent = message;
+
+    notification.appendChild(iconDiv);
+    notification.appendChild(messageDiv);
     
     // Add the notification to the container
     notificationContainer.appendChild(notification);

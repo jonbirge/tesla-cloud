@@ -80,18 +80,29 @@ async function fetchLandmarkData(lat, long) {
         if (landmarkDiv) landmarkDiv.style.display = 'block';
         
         if (data.geonames && data.geonames.length > 0) {
-            let html = '<ul>';
+            const list = document.createElement('ul');
             data.geonames.forEach(article => {
                 // Add article if it matches the specified types
                 if (WIKI_TYPES.includes(article.feature)) {
                     const pageUrl = article.wikipediaUrl.startsWith('http') ? article.wikipediaUrl : 'http://' + article.wikipediaUrl;
-                    html += `<li><a href="${pageUrl}" target="_blank">${article.title}</a>: ${article.summary}</li>`;
+                    const li = document.createElement('li');
+                    const a = document.createElement('a');
+                    a.href = pageUrl;
+                    a.target = '_blank';
+                    a.rel = 'noopener noreferrer';
+                    a.textContent = article.title;
+                    li.appendChild(a);
+                    li.appendChild(document.createTextNode(`: ${article.summary}`));
+                    list.appendChild(li);
                 }
             });
-            html += '</ul>';
-            landmarkDiv.innerHTML = html;
+            landmarkDiv.replaceChildren(list);
         } else {
-            landmarkDiv.innerHTML = '<p><em>No nearby landmarks found.</em></p>';
+            const p = document.createElement('p');
+            const em = document.createElement('em');
+            em.textContent = 'No nearby landmarks found.';
+            p.appendChild(em);
+            landmarkDiv.replaceChildren(p);
         }
     } catch (error) {
         console.error('Error fetching Wikipedia data:', error);
@@ -100,7 +111,11 @@ async function fetchLandmarkData(lat, long) {
         if (loadingSpinner) loadingSpinner.style.display = 'none';
         if (landmarkDiv) {
             landmarkDiv.style.display = 'block';
-            landmarkDiv.innerHTML = '<p><em>Error loading landmark data.</em></p>';
+            const p = document.createElement('p');
+            const em = document.createElement('em');
+            em.textContent = 'Error loading landmark data.';
+            p.appendChild(em);
+            landmarkDiv.replaceChildren(p);
         }
     }
 }
@@ -239,7 +254,7 @@ function updateWindage(vehicleSpeed, vehicleHeading, windSpeed, windDirection) {
             // Convert mph to m/s (1 mph ≈ 0.44704 m/s)
             document.getElementById('headwind').innerText = Math.abs(Math.round(headWind * 0.44704));
         }
-        document.getElementById('headwind-arrow').innerHTML = (headWind > 0 ? '&#9660;' : '&#9650;'); // down/up filled triangles
+        document.getElementById('headwind-arrow').textContent = (headWind > 0 ? '▼' : '▲'); // down/up filled triangles
         // Change the label to TAILWIND when headWind is negative and use appropriate units
         if (!settings || settings["imperial-units"]) {
             document.getElementById('headwind-label').innerText = (headWind < 0) ? "TAILWIND (MPH)" : "HEADWIND (MPH)";
@@ -248,7 +263,7 @@ function updateWindage(vehicleSpeed, vehicleHeading, windSpeed, windDirection) {
         }
     } else {
         document.getElementById('headwind').innerText = '--';
-        document.getElementById('headwind-arrow').innerHTML = '';
+        document.getElementById('headwind-arrow').textContent = '';
         // Set label with appropriate units
         if (!settings || settings["imperial-units"]) {
             document.getElementById('headwind-label').innerText = "HEADWIND (MPH)";
@@ -264,10 +279,10 @@ function updateWindage(vehicleSpeed, vehicleHeading, windSpeed, windDirection) {
             // Convert mph to m/s
             document.getElementById('crosswind').innerText = Math.abs(Math.round(crossWind * 0.44704));
         }
-        document.getElementById('crosswind-arrow').innerHTML = (crossWind >= 0 ? '&#9654;' : '&#9664;'); // right/left triangles
+        document.getElementById('crosswind-arrow').textContent = (crossWind >= 0 ? '▶' : '◀'); // right/left triangles
     } else {
         document.getElementById('crosswind').innerText = '--';
-        document.getElementById('crosswind-arrow').innerHTML = '';
+        document.getElementById('crosswind-arrow').textContent = '';
     }
     // Set label with appropriate units
     if (!settings || settings["imperial-units"]) {
@@ -535,7 +550,8 @@ function updateServerNote() {
         .then(content => {
             // Update the note paragraph with the content in italic
             const noteElement = document.getElementById('note');
-            noteElement.innerHTML = content;
+            noteElement.textContent = content;
+            noteElement.style.fontStyle = 'italic';
 
             // Show the announcement section
             const announcementSection = document.getElementById('announcement');
@@ -588,11 +604,11 @@ function updateVersion() {
                     }
                 }
                 
-                versionElement.innerHTML = versionText;
+                versionElement.textContent = versionText;
             })
             .catch(error => {
                 console.error('Error fetching version:', error);
-                versionElement.innerHTML = 'Error loading version';
+                versionElement.textContent = 'Error loading version';
             });
     }
 }
@@ -702,7 +718,7 @@ window.loadExternalUrl = function (url, inFrame = false) {
     const externalSite = document.getElementById('external-site');
     
     // Clear any existing content
-    externalSite.innerHTML = '';
+    externalSite.replaceChildren();
     
     // Create and load iframe
     const iframe = document.createElement('iframe');
@@ -748,7 +764,7 @@ window.showSection = function (sectionId) {
         // Hide the external site container
         externalSite.style.display = 'none';
         // Clear any existing iframe content to prevent resource usage
-        externalSite.innerHTML = '';
+        externalSite.replaceChildren();
         // Remove external mode flag
         rightFrame.classList.remove('external');
     }
@@ -805,8 +821,14 @@ window.showSection = function (sectionId) {
         } else {
             console.log('Location not available for Wikipedia data.');
             document.getElementById('landmarks-loading').style.display = 'none';
-            document.getElementById('landmark-items').style.display = 'block';
-            document.getElementById('landmark-items').innerHTML = '<p><em>Location data not available. Please enable GPS.</em></p>';
+            const items = document.getElementById('landmark-items');
+            items.style.display = 'block';
+            items.replaceChildren();
+            const p = document.createElement('p');
+            const em = document.createElement('em');
+            em.textContent = 'Location data not available. Please enable GPS.';
+            p.appendChild(em);
+            items.appendChild(p);
         }
     }
 

@@ -300,12 +300,12 @@ export async function updateNews(clear = false) {
         // Clear the news container as needed
         if (clear) {
             console.log('Clearing news headlines...');
-            newsContainer.innerHTML = '';
+            newsContainer.replaceChildren();
             displayedItems = [];
         }
 
         // Show loading spinner if no items are displayed yet or only showing a message
-        const isEmpty = !newsContainer.innerHTML || newsContainer.innerHTML.trim() === '';
+        const isEmpty = newsContainer.childElementCount === 0;
         if (isEmpty) {
             document.getElementById('news-loading').style.display = 'flex';
             newsContainer.style.display = 'none';
@@ -414,18 +414,23 @@ export async function updateNews(clear = false) {
 
         // Update the news container with the new items
         if (displayedItems.length > 0) {
-            newsContainer.innerHTML = displayedItems.map(generateHTMLforItem).join('');
-            
+            newsContainer.replaceChildren(...displayedItems.map(generateElementForItem));
+
             // Set up the observer to track visible news items
             setupNewsObserver();
-            
+
             // Update notification dot status based on unread items
             updateNewsNotificationDot();
 
             // Update the visibility of share buttons
             setShareButtonsVisibility();
         } else {
-            newsContainer.innerHTML = '<p><em>No unread headlines available</em></p>';
+            newsContainer.replaceChildren();
+            const p = document.createElement('p');
+            const em = document.createElement('em');
+            em.textContent = 'No unread headlines available';
+            p.appendChild(em);
+            newsContainer.appendChild(p);
         }
     } catch (error) {
         let userMessage;
@@ -446,7 +451,7 @@ export async function updateNews(clear = false) {
         const newsContainer = document.getElementById('newsHeadlines');
         if (newsContainer) {
             // Clear the container and safely insert the message as text
-            newsContainer.innerHTML = '';
+            newsContainer.replaceChildren();
             const p = document.createElement('p');
             const em = document.createElement('em');
             em.textContent = userMessage;
@@ -604,9 +609,8 @@ function genItemID(item)
     return hexHash;
 }
 
-// Take news item and generate HTML
-function generateHTMLforItem(item)
-{
+// Take news item and generate DOM element
+function generateElementForItem(item) {
     // Determine if the timestamp should have the news-new-time class
     let timeClass = item.isUnread ? 'news-time news-new-time' : 'news-time';
 
@@ -624,18 +628,53 @@ function generateHTMLforItem(item)
         }
     }
 
-    return `
-        <div class="news-item" data-id="${item.id}" onclick="clickNews('${item.title}','${item.link}','${item.source}','${item.id}')">
-            <img src="${faviconUrl}" class="news-favicon" onerror="this.style.display='none'">
-            <div>
-                <span class="news-source">${item.source.toUpperCase()}</span>
-                <span class="${timeClass}" data-timestamp="${item.date}">${generateTimeAgoText(item.date)}</span>
-            </div>
-            <div class="news-title">${item.title}</div>
-            <button class="share-icon" onclick="shareNews('${item.title}','${item.link}','${item.source}','${item.id}'); event.stopPropagation();">
-                <img src="assets/share.svg">
-            </button>
-        </div>`;
+    const itemDiv = document.createElement('div');
+    itemDiv.className = 'news-item';
+    itemDiv.dataset.id = item.id;
+    itemDiv.addEventListener('click', () => {
+        clickNews(item.title, item.link, item.source, item.id);
+    });
+
+    const img = document.createElement('img');
+    img.src = faviconUrl;
+    img.className = 'news-favicon';
+    img.onerror = function () { this.style.display = 'none'; };
+    itemDiv.appendChild(img);
+
+    const metaDiv = document.createElement('div');
+
+    const sourceSpan = document.createElement('span');
+    sourceSpan.className = 'news-source';
+    sourceSpan.textContent = item.source.toUpperCase();
+    metaDiv.appendChild(sourceSpan);
+
+    const timeSpan = document.createElement('span');
+    timeSpan.className = timeClass;
+    timeSpan.dataset.timestamp = item.date;
+    timeSpan.textContent = generateTimeAgoText(item.date);
+    metaDiv.appendChild(timeSpan);
+
+    itemDiv.appendChild(metaDiv);
+
+    const titleDiv = document.createElement('div');
+    titleDiv.className = 'news-title';
+    titleDiv.textContent = item.title;
+    itemDiv.appendChild(titleDiv);
+
+    const shareButton = document.createElement('button');
+    shareButton.className = 'share-icon';
+    shareButton.addEventListener('click', (e) => {
+        e.stopPropagation();
+        shareNews(item.title, item.link, item.source, item.id);
+    });
+
+    const shareImg = document.createElement('img');
+    shareImg.src = 'assets/share.svg';
+    shareButton.appendChild(shareImg);
+
+    itemDiv.appendChild(shareButton);
+
+    return itemDiv;
 }
 
 // Function to set up intersection observer for news items

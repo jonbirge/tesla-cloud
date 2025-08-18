@@ -836,10 +836,15 @@ window.showPremiumPrecipGraph = function(dayIndex) {
     // Simple rule: Only show hourly forecasts for the first two days (index 0 and 1)
     if (dayIndex > 1) {
         // Beyond day 2 - show simplified message
-        hourlyContainer.innerHTML = `
-            <div style="grid-column: 1/-1; text-align: center; padding: 20px;">
-                <p>Detailed hourly forecast is only available for the next 2 days.</p>
-            </div>`;
+        hourlyContainer.replaceChildren();
+        const msgDiv = document.createElement('div');
+        msgDiv.style.gridColumn = '1/-1';
+        msgDiv.style.textAlign = 'center';
+        msgDiv.style.padding = '20px';
+        const p = document.createElement('p');
+        p.textContent = 'Detailed hourly forecast is only available for the next 2 days.';
+        msgDiv.appendChild(p);
+        hourlyContainer.appendChild(msgDiv);
         return;
     }
 
@@ -849,10 +854,15 @@ window.showPremiumPrecipGraph = function(dayIndex) {
 
     if (hoursDiff >= 48) {
         // Beyond hourly forecast limit - show simplified message
-        hourlyContainer.innerHTML = `
-            <div style="grid-column: 1/-1; text-align: center; padding: 20px;">
-                <p>Detailed hourly forecast is only available for the next 48 hours.</p>
-            </div>`;
+        hourlyContainer.replaceChildren();
+        const msgDiv = document.createElement('div');
+        msgDiv.style.gridColumn = '1/-1';
+        msgDiv.style.textAlign = 'center';
+        msgDiv.style.padding = '20px';
+        const p = document.createElement('p');
+        p.textContent = 'Detailed hourly forecast is only available for the next 48 hours.';
+        msgDiv.appendChild(p);
+        hourlyContainer.appendChild(msgDiv);
         return;
     }
 
@@ -866,9 +876,15 @@ window.showPremiumPrecipGraph = function(dayIndex) {
     if (hourlyContainer) {
         // Make sure we have at least one hour of data
         if (dayHourly.length === 0) {
-            hourlyContainer.innerHTML = `<div style="grid-column: 1/-1; text-align: center; padding: 20px;">
-                <p>No hourly data available for this day.</p>
-            </div>`;
+            hourlyContainer.replaceChildren();
+            const msgDiv = document.createElement('div');
+            msgDiv.style.gridColumn = '1/-1';
+            msgDiv.style.textAlign = 'center';
+            msgDiv.style.padding = '20px';
+            const p = document.createElement('p');
+            p.textContent = 'No hourly data available for this day.';
+            msgDiv.appendChild(p);
+            hourlyContainer.appendChild(msgDiv);
             return;
         }
         
@@ -879,9 +895,12 @@ window.showPremiumPrecipGraph = function(dayIndex) {
         hourlyContainer.style.padding = '0'; // Remove padding to align date heading with timeline
         
         // Create a timeline view with continuous weather rectangles
-        let timelineHTML = `
-            <div class="timeline-container">
-            <div class="timeline-weather-row">`;
+        hourlyContainer.replaceChildren();
+        const timelineContainer = document.createElement('div');
+        timelineContainer.className = 'timeline-container';
+        const weatherRow = document.createElement('div');
+        weatherRow.className = 'timeline-weather-row';
+        timelineContainer.appendChild(weatherRow);
                 
         // Create weather condition rectangles and detect weather changes for icon placement
         let prevWeatherMain = null;
@@ -896,7 +915,7 @@ window.showPremiumPrecipGraph = function(dayIndex) {
             const weatherCondition = item.weather[0].main.toLowerCase();
             const itemDate = new Date(item.dt * 1000);
             const hour = itemDate.getHours();
-            
+
             // Check for weather condition changes to place icons
             if (prevWeatherMain !== item.weather[0].main) {
                 weatherChangePoints.push(index);
@@ -907,62 +926,61 @@ window.showPremiumPrecipGraph = function(dayIndex) {
                 });
                 prevWeatherMain = item.weather[0].main;
             }
-            
+
             // Add the weather condition rectangle
-            timelineHTML += `
-                <div class="timeline-hour ${weatherCondition}"
-                data-hour="${hour}" data-temp="${item.temp}" data-weather="${item.weather[0].main}">
-                </div>
-            `;
+            const rect = document.createElement('div');
+            rect.className = `timeline-hour ${weatherCondition}`;
+            rect.dataset.hour = hour;
+            rect.dataset.temp = item.temp;
+            rect.dataset.weather = item.weather[0].main;
+            weatherRow.appendChild(rect);
         });
-            
-        timelineHTML += `</div>`;
-            
+
         // Add weather change icons
-        timelineHTML += `<div class="weather-icons">`;
-        
+        const iconsDiv = document.createElement('div');
+        iconsDiv.className = 'weather-icons';
         weatherChangeIcons.forEach(change => {
             // Position the icon exactly at the boundary between hours
             const iconLeft = change.position * hourWidth;
-            timelineHTML += `
-                <div class="weather-change-icon" style="left: ${iconLeft}%;">
-                    <img src="https://openweathermap.org/img/wn/${change.icon}.png" 
-                        alt="${change.description}" 
-                        title="${change.description}">
-                </div>
-            `;
+            const iconDiv = document.createElement('div');
+            iconDiv.className = 'weather-change-icon';
+            iconDiv.style.left = `${iconLeft}%`;
+            const img = document.createElement('img');
+            img.src = `https://openweathermap.org/img/wn/${change.icon}.png`;
+            img.alt = change.description;
+            img.title = change.description;
+            iconDiv.appendChild(img);
+            iconsDiv.appendChild(iconDiv);
         });
-        
-        timelineHTML += `</div>`;
-        
+        timelineContainer.appendChild(iconsDiv);
+
         // Add temperature indicators (every 3 hours)
-        timelineHTML += `<div class="temperature-indicators">`;
-        
+        const tempDiv = document.createElement('div');
+        tempDiv.className = 'temperature-indicators';
         dayHourly.forEach((item, index) => {
             const itemDate = new Date(item.dt * 1000);
             const hour = itemDate.getHours();
-            
+
             // Only show temperature every 3 hours
             if (hour % 3 === 0 || index === 0) {
                 // Center the temperature in each rectangle
                 const tempLeft = (index * hourWidth) + (hourWidth / 2);
-                timelineHTML += `
-                    <div class="temp-indicator" style="left: ${tempLeft}%;">
-                        ${formatTemperature(item.temp)}
-                    </div>
-                `;
+                const tempIndicator = document.createElement('div');
+                tempIndicator.className = 'temp-indicator';
+                tempIndicator.style.left = `${tempLeft}%`;
+                tempIndicator.textContent = formatTemperature(item.temp);
+                tempDiv.appendChild(tempIndicator);
             }
         });
-        
-        timelineHTML += `</div>`;
-        
+        timelineContainer.appendChild(tempDiv);
+
         // Add hour labels at the bottom (every 3 hours)
-        timelineHTML += `<div class="hour-labels">`;
-        
+        const labelsDiv = document.createElement('div');
+        labelsDiv.className = 'hour-labels';
         dayHourly.forEach((item, index) => {
             const itemDate = new Date(item.dt * 1000);
             const hour = itemDate.getHours();
-            
+
             // Only show labels every 3 hours
             if (hour % 3 === 0 || index === 0) {
                 // Position labels to align with the center of their corresponding rectangle
@@ -971,40 +989,40 @@ window.showPremiumPrecipGraph = function(dayIndex) {
                     hour: 'numeric',
                     minute: '2-digit'
                 });
-                
-                timelineHTML += `
-                    <div class="hour-label" style="left: ${labelLeft}%;">
-                        ${time}
-                    </div>
-                `;
+
+                const label = document.createElement('div');
+                label.className = 'hour-label';
+                label.style.left = `${labelLeft}%`;
+                label.textContent = time;
+                labelsDiv.appendChild(label);
             }
         });
-        
-        timelineHTML += `</div>`;
-        timelineHTML += `</div>`;
-        
+        timelineContainer.appendChild(labelsDiv);
+
+        hourlyContainer.appendChild(timelineContainer);
+
         // Add a legend for weather conditions
-        timelineHTML += `
-            <div class="weather-legend">
-        `;
-        
+        const legendDiv = document.createElement('div');
+        legendDiv.className = 'weather-legend';
+
         // Get unique weather conditions for legend
         const uniqueConditions = new Set();
         dayHourly.forEach(item => uniqueConditions.add(item.weather[0].main));
-        
+
         uniqueConditions.forEach(condition => {
             const conditionClass = condition.toLowerCase();
-            timelineHTML += `
-                <div class="legend-item ${conditionClass}">
-                    <div class="legend-color"></div>
-                    <span>${condition}</span>
-                </div>
-            `;
+            const legendItem = document.createElement('div');
+            legendItem.className = `legend-item ${conditionClass}`;
+            const colorDiv = document.createElement('div');
+            colorDiv.className = 'legend-color';
+            const span = document.createElement('span');
+            span.textContent = condition;
+            legendItem.appendChild(colorDiv);
+            legendItem.appendChild(span);
+            legendDiv.appendChild(legendItem);
         });
-        
-        timelineHTML += `</div>`;
-        
-        hourlyContainer.innerHTML = timelineHTML;
+
+        hourlyContainer.appendChild(legendDiv);
     }
 };
 

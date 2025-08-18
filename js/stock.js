@@ -40,25 +40,40 @@ function getSubscribedTickers() {
     return [...subscribedStocks, ...subscribedIndexes];
 }
 
-// Generate complete HTML for all stock indicators
-function generateStockIndicatorsHTML() {
+// Generate DOM elements for all stock indicators
+function generateStockIndicatorElements() {
+    const fragment = document.createDocumentFragment();
     const subscribedTickers = getSubscribedTickers();
     const masterEnabled = settings["show-stock-indicator"] !== false;
-    
+
     if (!masterEnabled || subscribedTickers.length === 0) {
-        return ''; // Return empty string if disabled or no subscriptions
+        return fragment; // Return empty fragment if disabled or no subscriptions
     }
-    
-    return subscribedTickers.map(ticker => {
+
+    subscribedTickers.forEach(ticker => {
         const cached = stockDataCache[ticker.toUpperCase()];
         const displayData = getDisplayData(ticker, cached);
-        
-        return `
-            <div id="stock-status-${ticker.toLowerCase()}" class="status-indicator stock-status ${displayData.className}">
-                ${ticker.toUpperCase()}<span id="stock-arrow">${displayData.arrow}</span><span id="stock-value">${displayData.value}</span>
-            </div>
-        `;
-    }).join('');
+
+        const div = document.createElement('div');
+        div.id = `stock-status-${ticker.toLowerCase()}`;
+        div.className = `status-indicator stock-status ${displayData.className}`;
+
+        div.appendChild(document.createTextNode(ticker.toUpperCase()));
+
+        const arrowSpan = document.createElement('span');
+        arrowSpan.id = `stock-arrow-${ticker.toLowerCase()}`;
+        arrowSpan.textContent = displayData.arrow;
+        div.appendChild(arrowSpan);
+
+        const valueSpan = document.createElement('span');
+        valueSpan.id = `stock-value-${ticker.toLowerCase()}`;
+        valueSpan.textContent = displayData.value;
+        div.appendChild(valueSpan);
+
+        fragment.appendChild(div);
+    });
+
+    return fragment;
 }
 
 // Get display data for a ticker
@@ -128,7 +143,9 @@ function updateStockIndicatorsContainer() {
     const container = document.getElementById('stock-indicators');
     if (!container) return;
     
-    container.innerHTML = generateStockIndicatorsHTML();
+    container.replaceChildren();
+    const elements = generateStockIndicatorElements();
+    container.appendChild(elements);
 }
 
 // Initialize on load
