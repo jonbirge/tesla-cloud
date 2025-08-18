@@ -173,7 +173,7 @@ function getDisplayData(ticker, cached) {
                 const indexValue = parseFloat(price) * parseFloat(indexData.Coefficient);
                 // Append unit string (trimmed) if Units is non-empty (no extra space)
                 const units = (indexData.Units || '').toString().trim();
-                value = indexValue.toFixed(2) + (units ? units : '');
+                value = indexValue.toFixed(2) + units;
             } else {
                 value = '--';
             }
