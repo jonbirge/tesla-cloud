@@ -1,64 +1,82 @@
 [
   {
-    "IndexName": "S&P 500",
+    "IndexName": "S&P",
+    "Description": "S&P 500",
     "TrackingETF": "SPY",
     "Coefficient": 10.0239338555,
+    "Units": "",
     "DateValid": "2025-08-15"
   },
 
   {
-    "IndexName": "Dow Jones Average",
+    "IndexName": "DOW",
+    "Description": "Dow Jones Industrials",
     "TrackingETF": "DIA",
     "Coefficient": 99.9846951260,
+    "Units": "",
     "DateValid": "2025-08-15"
   },
 
   {
-    "IndexName": "NASDAQ 100",
+    "IndexName": "NDX",
+    "Description": "NASDAQ 100",
     "TrackingETF": "QQQ",
     "Coefficient": 41.0968664425,
+    "Units": "",
     "DateValid": "2025-08-15"
   },
 
   {
-    "IndexName": "Russell 2000",
+    "IndexName": "R2K",
+    "Description": "Russell 2000",
     "TrackingETF": "IWM",
     "Coefficient": 11.8286368440,
+    "Units": "",
     "DateValid": "2025-08-15"
   },
 
   {
-    "IndexName": "Ten-Year Treasury",
+    "IndexName": "10Y",
+    "Description": "Ten-Year Treasury",
     "TrackingETF": "UTEN",
     "Coefficient": 0.0993102941,
+    "Units": "YLD",
     "DateValid": "2025-08-15"
   },
 
   {
-    "IndexName": "Two-Year Treasury",
+    "IndexName": "2Y",
+    "Description": "Two-Year Treasury",
     "TrackingETF": "UTWO",
     "Coefficient": 0.0774393392,
+    "Units": "YLD",
     "DateValid": "2025-08-15"
   },
 
   {
-    "IndexName": "Hang Seng",
+    "IndexName": "HSI",
+    "Description": "Hang Seng",
     "TrackingETF": "EWH",
     "Coefficient": 870.0000000000,
+    "Units": "",
     "DateValid": "2025-08-17"
   },
 
   {
-    "IndexName": "Nikkei 225",
+    "IndexName": "N225",
+    "Description": "Nikkei 225",
     "TrackingETF": "EWJ",
     "Coefficient": 570.0000000000,
+    "Units": "",
     "DateValid": "2025-08-17"
   },
 
   {
     "IndexName": "DAX",
+    "Description": "DAX",
     "TrackingETF": "DAX",
     "Coefficient": 538.3723498233,
+    "Units": "",
     "DateValid": "2025-08-15"
   }
 ]

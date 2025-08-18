@@ -535,9 +535,10 @@ function generateStockIndexSettings() {
     indexContainer.replaceChildren();
     stockContainer.replaceChildren();
 
-    // Generate index checkboxes (use IndexName only, no ETF symbol)
+    // Generate index checkboxes (use Description for full name, fallback to IndexName)
     availableIndexes.forEach(index => {
-        const div = createToggleItem('index', index.TrackingETF, index.IndexName);
+        const label = index.Description || index.IndexName || index.TrackingETF;
+        const div = createToggleItem('index', index.TrackingETF, label);
         indexContainer.appendChild(div);
     });
 

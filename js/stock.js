@@ -33,6 +33,47 @@ async function loadStockAndIndexData() {
     }
 }
 
+// Get all subscribed tickers (stocks + indexes) in JSON order: indexes first, then stocks.
+// Falls back to previous order if JSON not loaded yet.
+function getSubscribedTickersOrdered() {
+    const subscribedStocks = settings['subscribed-stocks'] || [];
+    const subscribedIndexes = settings['subscribed-indexes'] || [];
+
+    // If JSON data not loaded yet, preserve original behavior
+    if (availableStocks.length === 0 && availableIndexes.length === 0) {
+        return [...subscribedStocks, ...subscribedIndexes];
+    }
+
+    const stockSet = new Set(subscribedStocks.map(s => s.toUpperCase()));
+    const indexSet = new Set(subscribedIndexes.map(s => s.toUpperCase()));
+
+    const orderedIndexes = [];
+    availableIndexes.forEach(idx => {
+        if (indexSet.has((idx.TrackingETF || '').toUpperCase())) {
+            orderedIndexes.push(idx.TrackingETF);
+        }
+    });
+
+    const orderedStocks = [];
+    availableStocks.forEach(st => {
+        if (stockSet.has((st.Symbol || '').toUpperCase())) {
+            orderedStocks.push(st.Symbol);
+        }
+    });
+
+    // Append any subscribed symbols not present in the JSONs (preserve user setting order)
+    const seen = new Set([...orderedIndexes.map(s => s.toUpperCase()), ...orderedStocks.map(s => s.toUpperCase())]);
+    const extras = [];
+    [...subscribedIndexes, ...subscribedStocks].forEach(sym => {
+        if (!seen.has(sym.toUpperCase())) {
+            extras.push(sym);
+            seen.add(sym.toUpperCase());
+        }
+    });
+
+    return [...orderedIndexes, ...orderedStocks, ...extras];
+}
+
 // Get all subscribed tickers (stocks + indexes)
 function getSubscribedTickers() {
     const subscribedStocks = settings['subscribed-stocks'] || [];
@@ -43,7 +84,8 @@ function getSubscribedTickers() {
 // Generate DOM elements for all stock indicators
 function generateStockIndicatorElements() {
     const fragment = document.createDocumentFragment();
-    const subscribedTickers = getSubscribedTickers();
+    // Use the new ordered list (indexes first, in JSON order)
+    const subscribedTickers = getSubscribedTickersOrdered();
     const masterEnabled = settings["show-stock-indicator"] !== false;
 
     if (!masterEnabled || subscribedTickers.length === 0) {
@@ -54,11 +96,19 @@ function generateStockIndicatorElements() {
         const cached = stockDataCache[ticker.toUpperCase()];
         const displayData = getDisplayData(ticker, cached);
 
+        // Determine display name: use IndexName from indexes.json when ticker is an index,
+        // otherwise show the ticker symbol in uppercase.
+        let displayName = ticker.toUpperCase();
+        const indexEntry = availableIndexes.find(index => index.TrackingETF === ticker.toUpperCase());
+        if (indexEntry && indexEntry.IndexName) {
+            displayName = indexEntry.IndexName;
+        }
+
         const div = document.createElement('div');
         div.id = `stock-status-${ticker.toLowerCase()}`;
         div.className = `status-indicator stock-status ${displayData.className}`;
 
-        div.appendChild(document.createTextNode(ticker.toUpperCase()));
+        div.appendChild(document.createTextNode(displayName));
 
         const arrowSpan = document.createElement('span');
         arrowSpan.id = `stock-arrow-${ticker.toLowerCase()}`;
@@ -121,7 +171,9 @@ function getDisplayData(ticker, cached) {
             if (indexData && indexData.Coefficient) {
                 // Calculate index value: ETF price * coefficient
                 const indexValue = parseFloat(price) * parseFloat(indexData.Coefficient);
-                value = indexValue.toFixed(2); // No dollar sign for indexes
+                // Append unit string (trimmed) if Units is non-empty (no extra space)
+                const units = (indexData.Units || '').toString().trim();
+                value = indexValue.toFixed(2) + units;
             } else {
                 value = '--';
             }
