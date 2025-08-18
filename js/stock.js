@@ -54,11 +54,19 @@ function generateStockIndicatorElements() {
         const cached = stockDataCache[ticker.toUpperCase()];
         const displayData = getDisplayData(ticker, cached);
 
+        // Determine display name: use IndexName from indexes.json when ticker is an index,
+        // otherwise show the ticker symbol in uppercase.
+        let displayName = ticker.toUpperCase();
+        const indexEntry = availableIndexes.find(index => index.TrackingETF === ticker.toUpperCase());
+        if (indexEntry && indexEntry.IndexName) {
+            displayName = indexEntry.IndexName;
+        }
+
         const div = document.createElement('div');
         div.id = `stock-status-${ticker.toLowerCase()}`;
         div.className = `status-indicator stock-status ${displayData.className}`;
 
-        div.appendChild(document.createTextNode(ticker.toUpperCase()));
+        div.appendChild(document.createTextNode(displayName));
 
         const arrowSpan = document.createElement('span');
         arrowSpan.id = `stock-arrow-${ticker.toLowerCase()}`;
