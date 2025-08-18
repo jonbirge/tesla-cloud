@@ -781,62 +781,63 @@ export function setupNewsObserver() {
 }
 
 // Clean up resources when leaving the news section
-export function cleanupNewsObserver() {
-    // Mark all pending items as seen when leaving the news section
-    if (pendingReadItems.size > 0) {
-        console.log(`Marking ${pendingReadItems.size} news items as seen on section exit`);
-        console.log('Pending items:', Array.from(pendingReadItems));
-        
-        // Create a copy of the pending items to process
-        const itemsToProcess = Array.from(pendingReadItems);
-        
-        // Mark each pending item as seen using promises to ensure completion
-        const markPromises = itemsToProcess.map(id => {
-            return new Promise(async (resolve) => {
-                console.log(`Processing pending item: ${id}`);
-                
-                try {
-                    // Mark the news item as seen
-                    await markNewsSeen(id);
-                    
-                    // Update the UI element if it exists
-                    const timeElement = document.querySelector(`.news-item[data-id="${id}"] .news-time`);
-                    if (timeElement) {
-                        timeElement.classList.add('news-seen-transition');
-                        timeElement.classList.remove('news-new-time');
-                    }
-                    
-                    console.log(`Successfully marked item as seen: ${id}`);
-                } catch (error) {
-                    console.error(`Error marking item ${id} as seen:`, error);
-                }
-                
-                // Remove from the pending set
-                pendingReadItems.delete(id);
-                resolve();
-            });
-        });
-        
-        // Wait for all items to be processed
-        Promise.all(markPromises).then(() => {
-            console.log('All pending items have been processed');
-            // Make sure to update the notification dot after all items are processed
-            updateNewsNotificationDot();
-        });
-    } else {
-        console.log('No pending items to mark as seen');
-    }
-    
-    // Disconnect the observer
-    if (newsObserver) {
-        console.log('Disconnecting news observer');
-        newsObserver.disconnect();
-        newsObserver = null;
-    }
-    
-    // Make sure to update the notification dot before leaving
-    updateNewsNotificationDot();
-}
+// export function cleanupNewsObserver() {
+//     NOTE: appears unused; comment out for now
+//     // Mark all pending items as seen when leaving the news section
+//     if (pendingReadItems.size > 0) {
+//         console.log(`Marking ${pendingReadItems.size} news items as seen on section exit`);
+//         console.log('Pending items:', Array.from(pendingReadItems));
+//
+//        // Create a copy of the pending items to process
+//         const itemsToProcess = Array.from(pendingReadItems);
+//
+//         // Mark each pending item as seen using promises to ensure completion
+//         const markPromises = itemsToProcess.map(id => {
+//             return new Promise(async (resolve) => {
+//                 console.log(`Processing pending item: ${id}`);
+//
+//                 try {
+//                     // Mark the news item as seen
+//                     await markNewsSeen(id);
+//
+//                     // Update the UI element if it exists
+//                     const timeElement = document.querySelector(`.news-item[data-id="${id}"] .news-time`);
+//                     if (timeElement) {
+//                         timeElement.classList.add('news-seen-transition');
+//                         timeElement.classList.remove('news-new-time');
+//                     }
+//
+//                     console.log(`Successfully marked item as seen: ${id}`);
+//                 } catch (error) {
+//                     console.error(`Error marking item ${id} as seen:`, error);
+//                 }
+//
+//                 // Remove from the pending set
+//                 pendingReadItems.delete(id);
+//                 resolve();
+//             });
+//         });
+//
+//         // Wait for all items to be processed
+//         Promise.all(markPromises).then(() => {
+//             console.log('All pending items have been processed');
+//             // Make sure to update the notification dot after all items are processed
+//             updateNewsNotificationDot();
+//         });
+//     } else {
+//         console.log('No pending items to mark as seen');
+//     }
+//
+//     // Disconnect the observer
+//     if (newsObserver) {
+//         console.log('Disconnecting news observer');
+//         newsObserver.disconnect();
+//         newsObserver = null;
+//     }
+//
+//     // Make sure to update the notification dot before leaving
+//     updateNewsNotificationDot();
+// }
 
 // Function to check if there are any unread news items and update notification dot
 export function updateNewsNotificationDot() {

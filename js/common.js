@@ -50,10 +50,7 @@ export function highlightUpdate(id, content = null) {
 // Update src of element only if it needs to change to avoid reloads
 export function srcUpdate(id, url) {
     const element = document.getElementById(id);
-    const currentUrl = element.src;
-    console.log('current src:', currentUrl);
-    console.log('new src:', url);
-    if (!(url === currentUrl)) {
+    if (element && element.src !== url) {
         element.src = url;
         console.log('Updating src for', id);
     }
@@ -180,6 +177,23 @@ export function showNotification(message) {
             }
         }, 500);
     }, 5000);
+}
+
+// Update Chart.js axis and grid colors based on current theme
+export function updateChartAxisColors(chart) {
+    if (!chart) return;
+
+    const computedStyle = getComputedStyle(document.body);
+    const axisColor = computedStyle.getPropertyValue('--text-color').trim();
+    const gridColor = computedStyle.getPropertyValue('--separator-color').trim();
+
+    chart.options.scales.x.ticks.color = axisColor;
+    chart.options.scales.y.ticks.color = axisColor;
+    chart.options.scales.x.grid.color = gridColor;
+    chart.options.scales.y.grid.color = gridColor;
+    chart.options.scales.y.title.color = axisColor;
+    chart.options.scales.x.title.color = axisColor;
+    chart.update();
 }
 
 // ***** Initialization *****

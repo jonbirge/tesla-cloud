@@ -1,5 +1,6 @@
 // Import the console.log function from app.js
 import { hashedUser } from './settings.js';
+import { updateChartAxisColors } from './common.js';
 
 // Global variables
 const MAX_PING_MS = 500; // Maximum ping display value in milliseconds
@@ -214,23 +215,8 @@ function initializePingChart() {
 
 // Updates chart colors based on current theme settings
 export function updateNetChartAxisColors() {
-    // Console log
-    console.log('Updating chart axis colors...');
-
-    // Get computed values from body element instead of document.documentElement
-    const computedStyle = getComputedStyle(document.body);
-    const axisColor = computedStyle.getPropertyValue('--text-color').trim();
-    const gridColor = computedStyle.getPropertyValue('--separator-color').trim();
-
-    // Update chart options
     if (pingChart) {
-        pingChart.options.scales.x.ticks.color = axisColor;
-        pingChart.options.scales.y.ticks.color = axisColor;
-        pingChart.options.scales.x.grid.color = gridColor;
-        pingChart.options.scales.y.grid.color = gridColor;
-        pingChart.options.scales.y.title.color = axisColor;
-        pingChart.options.scales.x.title.color = axisColor;
-        pingChart.update();
+        updateChartAxisColors(pingChart);
     }
 }
 

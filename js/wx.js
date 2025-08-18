@@ -1,5 +1,5 @@
 // Import required functions from app.js
-import { formatTime, highlightUpdate, testMode, showNotification } from './common.js';
+import { formatTime, highlightUpdate, testMode, showNotification, updateChartAxisColors } from './common.js';
 import { autoDarkMode, settings } from './settings.js';
 
 // Parameters
@@ -437,23 +437,8 @@ function updatePrecipitationGraph() {
 
 // Function to update the axis colors of the rain chart
 export function updateRainChartAxisColors() {
-    // Console log
-    console.log('Updating rain chart axis colors...');
-
-    // Get computed values from body element instead of document.documentElement
-    const computedStyle = getComputedStyle(document.body);
-    const axisColor = computedStyle.getPropertyValue('--text-color').trim();
-    const gridColor = computedStyle.getPropertyValue('--separator-color').trim();
-
-    // Update chart options
     if (minutelyPrecipChart) {
-        minutelyPrecipChart.options.scales.x.ticks.color = axisColor;
-        minutelyPrecipChart.options.scales.y.ticks.color = axisColor;
-        minutelyPrecipChart.options.scales.x.grid.color = gridColor;
-        minutelyPrecipChart.options.scales.y.grid.color = gridColor;
-        minutelyPrecipChart.options.scales.y.title.color = axisColor;
-        minutelyPrecipChart.options.scales.x.title.color = axisColor;
-        minutelyPrecipChart.update();
+        updateChartAxisColors(minutelyPrecipChart);
     }
 }
 

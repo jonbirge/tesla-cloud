@@ -331,6 +331,7 @@ body.dark-mode .forecast-desc {
     margin-right: auto;
 }
 
+/* The following hourly forecast item styles appear unused
 .hourly-item {
     padding: 6px;
     border-radius: var(--button-radius);
@@ -366,6 +367,7 @@ body.dark-mode .forecast-desc {
     overflow: hidden;
     text-overflow: ellipsis;
 }
+*/
 
 .station-name {
     font-size: 11pt;
