@@ -532,38 +532,50 @@ function generateStockIndexSettings() {
     
     if (!indexContainer || !stockContainer) return;
     
-    let indexHtml = '';
-    let stockHtml = '';
-    
+    indexContainer.replaceChildren();
+    stockContainer.replaceChildren();
+
     // Generate index checkboxes (use IndexName only, no ETF symbol)
     availableIndexes.forEach(index => {
-        indexHtml += `
-            <div class="settings-toggle-item news-toggle-item" data-setting="index-${index.TrackingETF}"
-                onclick="this.querySelector('input').click()">
-                <label>${index.IndexName}</label>
-                <input type="checkbox" onchange="toggleStockIndexSetting(this, 'index', '${index.TrackingETF}')">
-                <span class="settings-toggle-slider"></span>
-            </div>
-        `;
+        const div = createToggleItem('index', index.TrackingETF, index.IndexName);
+        indexContainer.appendChild(div);
     });
-    
+
     // Generate stock checkboxes
     availableStocks.forEach(stock => {
-        stockHtml += `
-            <div class="settings-toggle-item news-toggle-item" data-setting="stock-${stock.Symbol}"
-                onclick="this.querySelector('input').click()">
-                <label>${stock.StockName} (${stock.Symbol})</label>
-                <input type="checkbox" onchange="toggleStockIndexSetting(this, 'stock', '${stock.Symbol}')">
-                <span class="settings-toggle-slider"></span>
-            </div>
-        `;
+        const div = createToggleItem('stock', stock.Symbol, `${stock.StockName} (${stock.Symbol})`);
+        stockContainer.appendChild(div);
     });
-    
-    indexContainer.innerHTML = indexHtml;
-    stockContainer.innerHTML = stockHtml;
-    
+
     // Update UI based on current subscriptions
     updateStockIndexUI();
+}
+
+function createToggleItem(type, symbol, labelText) {
+    const itemDiv = document.createElement('div');
+    itemDiv.className = 'settings-toggle-item news-toggle-item';
+    itemDiv.dataset.setting = `${type}-${symbol}`;
+    itemDiv.addEventListener('click', function() {
+        const input = this.querySelector('input');
+        if (input) input.click();
+    });
+
+    const label = document.createElement('label');
+    label.textContent = labelText;
+    itemDiv.appendChild(label);
+
+    const input = document.createElement('input');
+    input.type = 'checkbox';
+    input.addEventListener('change', function() {
+        toggleStockIndexSetting(this, type, symbol);
+    });
+    itemDiv.appendChild(input);
+
+    const span = document.createElement('span');
+    span.className = 'settings-toggle-slider';
+    itemDiv.appendChild(span);
+
+    return itemDiv;
 }
 
 // Function to handle stock/index subscription toggles
