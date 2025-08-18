@@ -33,6 +33,47 @@ async function loadStockAndIndexData() {
     }
 }
 
+// Get all subscribed tickers (stocks + indexes) in JSON order: indexes first, then stocks.
+// Falls back to previous order if JSON not loaded yet.
+function getSubscribedTickersOrdered() {
+    const subscribedStocks = settings['subscribed-stocks'] || [];
+    const subscribedIndexes = settings['subscribed-indexes'] || [];
+
+    // If JSON data not loaded yet, preserve original behavior
+    if (availableStocks.length === 0 && availableIndexes.length === 0) {
+        return [...subscribedStocks, ...subscribedIndexes];
+    }
+
+    const stockSet = new Set(subscribedStocks.map(s => s.toUpperCase()));
+    const indexSet = new Set(subscribedIndexes.map(s => s.toUpperCase()));
+
+    const orderedIndexes = [];
+    availableIndexes.forEach(idx => {
+        if (indexSet.has((idx.TrackingETF || '').toUpperCase())) {
+            orderedIndexes.push(idx.TrackingETF);
+        }
+    });
+
+    const orderedStocks = [];
+    availableStocks.forEach(st => {
+        if (stockSet.has((st.Symbol || '').toUpperCase())) {
+            orderedStocks.push(st.Symbol);
+        }
+    });
+
+    // Append any subscribed symbols not present in the JSONs (preserve user setting order)
+    const seen = new Set([...orderedIndexes.map(s => s.toUpperCase()), ...orderedStocks.map(s => s.toUpperCase())]);
+    const extras = [];
+    [...subscribedIndexes, ...subscribedStocks].forEach(sym => {
+        if (!seen.has(sym.toUpperCase())) {
+            extras.push(sym);
+            seen.add(sym.toUpperCase());
+        }
+    });
+
+    return [...orderedIndexes, ...orderedStocks, ...extras];
+}
+
 // Get all subscribed tickers (stocks + indexes)
 function getSubscribedTickers() {
     const subscribedStocks = settings['subscribed-stocks'] || [];
@@ -43,7 +84,8 @@ function getSubscribedTickers() {
 // Generate DOM elements for all stock indicators
 function generateStockIndicatorElements() {
     const fragment = document.createDocumentFragment();
-    const subscribedTickers = getSubscribedTickers();
+    // Use the new ordered list (indexes first, in JSON order)
+    const subscribedTickers = getSubscribedTickersOrdered();
     const masterEnabled = settings["show-stock-indicator"] !== false;
 
     if (!masterEnabled || subscribedTickers.length === 0) {
