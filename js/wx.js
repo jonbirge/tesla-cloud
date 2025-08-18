@@ -173,7 +173,10 @@ export function updatePremiumWeatherDisplay() {
             // Update date
             const dateElement = dayElement.querySelector('.forecast-date');
             if (dateElement) {
-                dateElement.textContent = date.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
+                // Split the date into weekday and month/day and render on two lines
+                const weekday = date.toLocaleDateString('en-US', { weekday: 'short' }).toUpperCase();
+                const monthDay = date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+                dateElement.innerHTML = `${weekday}<br>${monthDay}`;
             }
 
             // Update weather icon
