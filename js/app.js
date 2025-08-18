@@ -547,13 +547,36 @@ function updateServerNote() {
         })
         .then(data => {
             const content = (data && typeof data.note === 'string') ? data.note.trim() : '';
+            const mtime = (data && typeof data.mtime === 'number') ? data.mtime : null;
             const noteElement = document.getElementById('note');
             const announcementSection = document.getElementById('announcement');
             const aboutButton = document.getElementById('about-section');
 
             if (content && noteElement && announcementSection) {
-                noteElement.textContent = content;
-                noteElement.style.fontStyle = 'italic';
+                // Clear existing content
+                noteElement.replaceChildren();
+
+                // If mtime available, create a right-justified date "cell"
+                if (mtime) {
+                    try {
+                        const dateStr = new Date(mtime * 1000).toLocaleDateString();
+                        const dateSpan = document.createElement('span');
+                        dateSpan.className = 'note-date';
+                        dateSpan.textContent = dateStr;
+                        noteElement.appendChild(dateSpan);
+                    } catch (e) {
+                        // ignore date if conversion fails
+                    }
+                }
+
+                // Create the note text cell with italic content
+                const textSpan = document.createElement('span');
+                textSpan.className = 'note-text';
+                const em = document.createElement('em');
+                em.textContent = content;
+                textSpan.appendChild(em);
+                noteElement.appendChild(textSpan);
+
                 announcementSection.style.display = 'block';
 
                 if (aboutButton) {

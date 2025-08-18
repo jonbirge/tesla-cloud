@@ -7,6 +7,7 @@ header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
 
 $notePath = __DIR__ . '/NOTE';
 $noteText = '';
+$noteMTime = null;
 
 if (is_readable($notePath)) {
     // Read entire file and trim trailing whitespace
@@ -15,7 +16,12 @@ if (is_readable($notePath)) {
         // Normalize line endings and trim
         $noteText = trim(str_replace(["\r\n", "\r"], "\n", $content));
     }
+    // Get modification time (UNIX timestamp in seconds)
+    $mtime = filemtime($notePath);
+    if ($mtime !== false) {
+        $noteMTime = (int)$mtime;
+    }
 }
 
-// Return JSON object
-echo json_encode(['note' => $noteText], JSON_UNESCAPED_UNICODE);
+// Return JSON object including modification time (or null)
+echo json_encode(['note' => $noteText, 'mtime' => $noteMTime], JSON_UNESCAPED_UNICODE);

@@ -111,15 +111,65 @@ hr {
 }
 
 /* About */
+.announcement {
+    width: 100%;
+    box-sizing: border-box;
+}
 .announcement p {
     background-color: #03a8f422;
     color: var(--button-text);
     border-radius: var(--button-radius);
     padding: 18px;
     font-weight: 500;
+    /* two-column like layout: date (right) + note (left) */
+    display: flex;
+    align-items: flex-start;     /* top-align cells */
+    gap: 10px;
+    justify-content: flex-start;
+    /* match paragraph sizing/behavior: limit width like regular <p> */
+    max-width: 980px;
+    margin: 12px 0;
+    text-align: justify;
+    box-sizing: border-box;      /* include padding in width calculation */
+}
+
+/* Make only the NOTE text italic */
+.announcement p em {
     font-style: italic;
-    text-align: center;
-    max-width: 840px;
+}
+
+/* New cell styles for announcement date + text */
+.announcement p .note-date {
+    min-width: 120px;           /* reserves space for the date cell */
+    text-align: right;          /* right-justify the date and dash */
+    color: var(--text-color);
+    line-height: 1.2;
+    flex: 0 0 auto;
+    padding-right: 8px;
+}
+
+.announcement p .note-text {
+    text-align: left;           /* left-justify the note text */
+    flex: 1 1 auto;             /* allow note to take remaining space */
+    line-height: 1.2;
+}
+
+/* Stack date above note on narrow viewports */
+@media only screen and (max-width: 540px) {
+    .announcement p {
+        display: block;
+        text-align: left;
+    }
+    .announcement p .note-date {
+        display: block;
+        text-align: left;
+        min-width: auto;
+        padding-right: 0;
+        margin-bottom: 6px;
+    }
+    .announcement p .note-text {
+        display: block;
+    }
 }
 
 /* Layout */
