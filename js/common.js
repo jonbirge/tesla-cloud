@@ -18,11 +18,15 @@ export async function updateTimeZone(lat, long) {
             throw new Error('Timezone not returned from server.');
         }
         console.log('Timezone: ', tzData.timezoneId);
+        // Update global/exported timezone so formatters pick it up
+        locationTimeZone = tzData.timezoneId;
         return tzData.timezoneId;
     } catch (error) {
         console.error('Error fetching timezone: ', error);
         const tz = Intl.DateTimeFormat().resolvedOptions().timeZone;
         console.log('Fallback timezone: ', tz);
+        // Still update the global/exported timezone
+        locationTimeZone = tz;
         return tz;
     }
 }

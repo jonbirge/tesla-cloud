@@ -97,9 +97,9 @@ export function leaveSettings() {
 
 // Check for auto dark mode setting and implement it if enabled
 export function autoDarkMode(lat, long) {
-    // if lat or long are null, then replace with last known values
+    // If lat/long not provided, use last known from wx.js
     if (lat == null || long == null) {
-        if (lastLat && lastLong) {
+        if (lastLat != null && lastLong != null) {
             lat = lastLat;
             long = lastLong;
         } else {
@@ -108,28 +108,26 @@ export function autoDarkMode(lat, long) {
         }
     }
 
-    console.log('Auto dark mode check for coordinates: ', lat, long);
-    const sunrise = forecastDataPrem?.current.sunrise * 1000;
-    const sunset = forecastDataPrem?.current.sunset * 1000;
-    if (!sunrise || !sunset) {
+    // Prefer daily[0] sunrise/sunset; fall back to current.* if available
+    const sunriseSec = forecastDataPrem?.daily?.[0]?.sunrise ?? forecastDataPrem?.current?.sunrise;
+    const sunsetSec  = forecastDataPrem?.daily?.[0]?.sunset  ?? forecastDataPrem?.current?.sunset;
+
+    if (!sunriseSec || !sunsetSec) {
         console.log('Auto dark mode: No sunrise/sunset data available.');
         return;
     }
 
     if (settings && settings['auto-dark-mode']) {
-        const now = new Date();
-        const currentTime = now.getTime();
-        const sunriseTime = new Date(sunrise).getTime();
-        const sunsetTime = new Date(sunset).getTime();
+        const now = Date.now();
+        const sunriseTime = sunriseSec * 1000;
+        const sunsetTime = sunsetSec * 1000;
 
-        if (currentTime >= sunsetTime || currentTime < sunriseTime) {
-            console.log('Applying dark mode based on sunset...');
-            //turnOnDarkMode();
-            updateSetting('dark-mode', true);
-        } else {
-            console.log('Applying light mode based on sunrise...');
-            //turnOffDarkMode();
-            updateSetting('dark-mode', false);
+        const shouldBeDark = (now >= sunsetTime || now < sunriseTime);
+
+        // Only update if different to avoid redundant work
+        if (shouldBeDark !== !!settings['dark-mode']) {
+            console.log(shouldBeDark ? 'Applying dark mode based on sunset...' : 'Applying light mode based on sunrise...');
+            updateSetting('dark-mode', shouldBeDark);
         }
     } else {
         console.log('Auto dark mode disabled or coordinates not available.');
