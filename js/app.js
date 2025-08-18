@@ -538,42 +538,65 @@ function stopGPSUpdates() {
     }
 }
 
-// Check for NOTE file and display if present
+// Check for NOTE file and display if present (now via PHP endpoint to avoid 404s)
 function updateServerNote() {
-    fetch('NOTE', { cache: 'no-store' })
+    fetch('get_note.php', { cache: 'no-store' })
         .then(response => {
-            if (!response.ok) {
-                throw new Error('File not found.');
-            }
-            return response.text();
+            if (!response.ok) throw new Error('Network response not ok');
+            return response.json();
         })
-        .then(content => {
-            // Update the note paragraph with the content in italic
+        .then(data => {
+            const content = (data && typeof data.note === 'string') ? data.note.trim() : '';
+            const mtime = (data && typeof data.mtime === 'number') ? data.mtime : null;
             const noteElement = document.getElementById('note');
-            noteElement.textContent = content;
-            noteElement.style.fontStyle = 'italic';
-
-            // Show the announcement section
             const announcementSection = document.getElementById('announcement');
-            if (announcementSection) {
-                announcementSection.style.display = 'block';
-            }
-
-            // Add notification dot to About section button if it's not the current section
             const aboutButton = document.getElementById('about-section');
-            if (aboutButton) {
-                aboutButton.classList.add('has-notification');
-                aboutButton.setAttribute('data-count', '1'); // Set count to 1
+
+            if (content && noteElement && announcementSection) {
+                // Clear existing content
+                noteElement.replaceChildren();
+
+                // If mtime available, create a right-justified date "cell"
+                if (mtime) {
+                    try {
+                        const dateStr = new Date(mtime * 1000).toLocaleDateString();
+                        const dateSpan = document.createElement('span');
+                        dateSpan.className = 'note-date';
+                        dateSpan.textContent = dateStr;
+                        noteElement.appendChild(dateSpan);
+                    } catch (e) {
+                        // ignore date if conversion fails
+                    }
+                }
+
+                // Create the note text cell with italic content
+                const textSpan = document.createElement('span');
+                textSpan.className = 'note-text';
+                const em = document.createElement('em');
+                em.textContent = content;
+                textSpan.appendChild(em);
+                noteElement.appendChild(textSpan);
+
+                announcementSection.style.display = 'block';
+
+                if (aboutButton) {
+                    aboutButton.classList.add('has-notification');
+                    aboutButton.setAttribute('data-count', '1');
+                }
+            } else {
+                // No note: ensure announcement is hidden and no notification dot
+                if (announcementSection) announcementSection.style.display = 'none';
+                if (aboutButton) {
+                    aboutButton.classList.remove('has-notification');
+                    aboutButton.removeAttribute('data-count');
+                }
             }
         })
         .catch(error => {
-            console.log('No NOTE file available.');
-
-            // Ensure the announcement section is hidden
+            console.log('Could not retrieve server note:', error);
+            // Ensure the announcement section is hidden on error
             const announcementSection = document.getElementById('announcement');
-            if (announcementSection) {
-                announcementSection.style.display = 'none';
-            }
+            if (announcementSection) announcementSection.style.display = 'none';
         });
 }
 
