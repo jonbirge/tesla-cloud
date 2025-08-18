@@ -61,12 +61,12 @@ function generateStockIndicatorElements() {
         div.appendChild(document.createTextNode(ticker.toUpperCase()));
 
         const arrowSpan = document.createElement('span');
-        arrowSpan.id = 'stock-arrow';
+        arrowSpan.id = `stock-arrow-${ticker.toLowerCase()}`;
         arrowSpan.textContent = displayData.arrow;
         div.appendChild(arrowSpan);
 
         const valueSpan = document.createElement('span');
-        valueSpan.id = 'stock-value';
+        valueSpan.id = `stock-value-${ticker.toLowerCase()}`;
         valueSpan.textContent = displayData.value;
         div.appendChild(valueSpan);
 
