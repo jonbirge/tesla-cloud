@@ -1,5 +1,5 @@
 // Import required functions from app.js
-import { formatTime, highlightUpdate, testMode, showSpinner, hideSpinner, showNotification } from './common.js';
+import { formatTime, highlightUpdate, testMode, showNotification } from './common.js';
 import { autoDarkMode, settings } from './settings.js';
 
 // Parameters
@@ -33,10 +33,9 @@ export function fetchPremiumWeatherData(lat, long, silentLoad = false) {
     lastLat = lat;
     lastLong = long;
 
-    // Show loading spinner, hide forecast container - only if not silent loading
+    // Show loading state on forecast container when not silent loading
     if (!silentLoad) {
-        showSpinner('prem-forecast-loading');
-        document.getElementById('prem-forecast-container').style.display = 'none';
+        document.getElementById('prem-forecast-container').classList.add('loading');
     }
 
     // Fetch and update weather data
@@ -83,11 +82,9 @@ export function fetchPremiumWeatherData(lat, long, silentLoad = false) {
                 updateAQI(lat, long);
             }
 
-            // Hide spinner and show forecast when data is loaded - only if not silent loading
+            // Remove loading state when data is loaded - only if not silent loading
             if (!silentLoad) {
-                hideSpinner('prem-forecast-loading');
-                document.getElementById('prem-forecast-container').style.display = '';
-                document.getElementById('prem-forecast-container').classList.remove('hidden');
+                document.getElementById('prem-forecast-container').classList.remove('loading');
             }
 
             // Update auto-dark mode if enabled
@@ -96,9 +93,9 @@ export function fetchPremiumWeatherData(lat, long, silentLoad = false) {
         .catch(error => {
             console.error('Error fetching forecast data: ', error);
 
-            // In case of error, hide spinner - only if not silent loading
+            // In case of error, remove loading state - only if not silent loading
             if (!silentLoad) {
-                hideSpinner('prem-forecast-loading');
+                document.getElementById('prem-forecast-container').classList.remove('loading');
             }
         });
 }
@@ -245,11 +242,9 @@ export function updatePremiumWeatherDisplay() {
             }
         }
     }
-    // Hide spinner, show forecast
+    // Ensure forecast is visible and remove loading state
     const forecastContainer = document.getElementById('prem-forecast-container');
-    const loadingSpinner = document.getElementById('prem-forecast-loading');
-    if (forecastContainer) forecastContainer.classList.remove('hidden');
-    if (loadingSpinner) loadingSpinner.style.display = 'none';
+    if (forecastContainer) forecastContainer.classList.remove('loading');
 
     // Update precipitation graph with time-based x-axis
     updatePrecipitationGraph();
