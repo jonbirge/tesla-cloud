@@ -121,7 +121,9 @@ function getDisplayData(ticker, cached) {
             if (indexData && indexData.Coefficient) {
                 // Calculate index value: ETF price * coefficient
                 const indexValue = parseFloat(price) * parseFloat(indexData.Coefficient);
-                value = indexValue.toFixed(2); // No dollar sign for indexes
+                // Append unit string (trimmed) if Units is non-empty (no extra space)
+                const units = (indexData.Units || '').toString().trim();
+                value = indexValue.toFixed(2) + (units ? units : '');
             } else {
                 value = '--';
             }
