@@ -716,6 +716,8 @@ window.updateMapFrame = function () {
     let testModeMsg = teslaWazeContainer.querySelector('.test-mode-message');
     if (settings["map-choice"] === 'waze') {
         srcUpdate("teslawaze", "https://teslawaze.azurewebsites.net/");
+    } else if (settings["map-choice"] === 'rainmap') {
+        srcUpdate("teslawaze", "https://car.rainviewer.com/");
     } else {
         srcUpdate("teslawaze", "https://abetterrouteplanner.com/");
     }
