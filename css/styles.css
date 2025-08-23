@@ -840,6 +840,8 @@ body.dark-mode .share-icon img {
 .notification-icon {
     margin-right: 12px;
     color: var(--weather-warning-color);
+    display: flex;
+    align-items: center;
 }
 
 .notification-message {

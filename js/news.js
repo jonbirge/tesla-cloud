@@ -1,5 +1,6 @@
 // Imports
 import { settings, isDriving, hashedUser, isLoggedIn } from './settings.js';
+import { formatTime, highlightUpdate, testMode, showNotification } from './common.js';
 
 // Constants
 const BASE_URL = 'news.php?n=512';
@@ -927,34 +928,7 @@ window.shareNews = async function (title, link, source, id) {
 
     // If no link is available, show warning and exit
     if (!link || link.trim() === '') {
-        const alertBox = document.createElement('div');
-        alertBox.textContent = 'No URL available to share';
-        alertBox.style.position = 'fixed';
-        alertBox.style.top = '20px';
-        alertBox.style.left = '50%';
-        alertBox.style.transform = 'translateX(-50%)';
-        alertBox.style.backgroundColor = 'rgba(255, 165, 0, 0.85)';
-        alertBox.style.color = 'white';
-        alertBox.style.padding = '15px';
-        alertBox.style.borderRadius = '5px';
-        alertBox.style.boxShadow = '0 2px 5px rgba(0, 0, 0, 0.4)';
-        alertBox.style.zIndex = '9999';
-        alertBox.style.textAlign = 'center';
-        alertBox.style.whiteSpace = 'nowrap';
-        alertBox.style.overflow = 'hidden';
-        alertBox.style.textOverflow = 'ellipsis';
-        alertBox.style.maxWidth = '90vw';
-        alertBox.style.fontSize = '16pt';
-        alertBox.style.fontWeight = '700';
-        if (window.innerWidth <= 900) {
-            alertBox.style.fontSize = '12pt';
-            alertBox.style.padding = '10px';
-            alertBox.style.maxWidth = '95vw';
-        }
-        document.body.appendChild(alertBox);
-        setTimeout(() => {
-            document.body.removeChild(alertBox);
-        }, 5000);
+        showNotification('No URL available to share', 'error');
         return;
     }
 
@@ -978,8 +952,6 @@ window.shareNews = async function (title, link, source, id) {
                 setTimeout(() => {
                     timeElement.classList.remove('news-new-time');
                     timeElement.classList.remove('news-seen-transition');
-                    
-                    // Update notification dot after marking item as read
                     updateNewsNotificationDot();
                 }, 1500); // Match this to the CSS transition time
             }
@@ -1011,42 +983,13 @@ window.shareNews = async function (title, link, source, id) {
             body: JSON.stringify({ to, html, subject })
         });
         if (response.ok) {
-            const alertBox = document.createElement('div');
-            alertBox.textContent = 'Article shared successfully';
-            alertBox.style.position = 'fixed';
-            alertBox.style.top = '20px';
-            alertBox.style.left = '50%';
-            alertBox.style.transform = 'translateX(-50%)';
-            alertBox.style.backgroundColor = "rgba(33, 129, 13, 0.75) ";
-            alertBox.style.color = 'white';
-            alertBox.style.padding = '15px';
-            alertBox.style.borderRadius = '5px';
-            alertBox.style.boxShadow = '0 2px 5px rgba(0, 0, 0, 0.4)';
-            alertBox.style.zIndex = '9999';
-            alertBox.style.textAlign = 'center';
-            alertBox.style.whiteSpace = 'nowrap';
-            alertBox.style.overflow = 'hidden';
-            alertBox.style.textOverflow = 'ellipsis';
-            alertBox.style.maxWidth = '90vw';
-            alertBox.style.fontSize = '16pt';
-            alertBox.style.fontWeight = '700';
-            // Responsive: center and ellipsis on mobile
-            if (window.innerWidth <= 900) {
-                alertBox.style.fontSize = '12pt';
-                alertBox.style.padding = '10px';
-                alertBox.style.maxWidth = '95vw';
-            }
-            document.body.appendChild(alertBox);
-
-            setTimeout(() => {
-                document.body.removeChild(alertBox);
-            }, 5000);
+            showNotification('Article shared successfully', 'success');
         } else {
             const errorText = await response.text();
-            alert('Failed to share article: ' + errorText);
+            showNotification(`Failed to share article: ${errorText}`, 'error');
         }
     } catch (err) {
-        alert('Error sharing article: ' + err);
+        showNotification(`Error sharing article: ${err}`, 'error');
     }
 }
 
@@ -1067,28 +1010,6 @@ window.resumeNewsUpdates = function () {
         console.log('News updates resumed');
     }
 }
-
-// Debug function to check ${RESTDB_URL} news data
-// window.checkSeenNewsStorage = async function() {
-//     const seenIds = await getSeenNewsIds();
-//     const count = Object.keys(seenIds).length;
-    
-//     let oldestTimestamp = Date.now();
-//     if (Object.keys(seenIds).length > 0) {
-//         oldestTimestamp = Math.min(...Object.values(seenIds));
-//     }
-//     const oldestDate = new Date(oldestTimestamp);
-    
-//     console.log(`Seen news items in restdb: ${count}`);
-//     console.log(`Oldest item from: ${oldestDate.toLocaleString()}`);
-//     console.log('Sample items:', Object.keys(seenIds).slice(0, 5));
-    
-//     return {
-//         count,
-//         oldest: oldestDate,
-//         sample: Object.keys(seenIds).slice(0, 5)
-//     };
-// }
 
 // Clear all seen news data from ${RESTDB_URL}
 window.clearSeenNewsStorage = async function() {
@@ -1121,10 +1042,3 @@ window.clearSeenNewsStorage = async function() {
         return false;
     }
 }
-
-// Debug function to check pending items
-// window.checkPendingNewsItems = function() {
-//     console.log(`Currently pending read items: ${pendingReadItems.size}`);
-//     console.log('Pending IDs:', Array.from(pendingReadItems));
-//     return Array.from(pendingReadItems);
-// }
