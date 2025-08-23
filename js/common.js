@@ -150,8 +150,9 @@ export function showNotification(message) {
     const img = document.createElement('img');
     img.src = 'assets/cloud.svg';
     img.alt = 'Alert';
-    img.width = 24;
-    img.height = 24;
+    // Increase icon size for better visibility in pop-up alerts
+    img.width = 32;
+    img.height = 32;
     iconDiv.appendChild(img);
 
     const messageDiv = document.createElement('div');
