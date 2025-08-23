@@ -546,7 +546,7 @@ body.dark-mode .network-icon {
 
 .rain-status #rain-timing-text {
     color: var(--weather-warning-color);
-    font-size: 9pt;
+    font-size: 10pt;
     font-weight: 700;
     white-space: nowrap;
 }

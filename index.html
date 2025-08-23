@@ -662,11 +662,11 @@
             <h2>Financial Data</h2>
             <h3>Indexes</h3>
             <div id="stock-index-settings" class="settings-controls news-source-grid">
-                <!-- Index settings will be dynamically generated here -->
+                <!-- Index settings dynamically generated here -->
             </div>
             <h3>Stocks</h3>
             <div id="stock-settings" class="settings-controls news-source-grid">
-                <!-- Stock settings will be dynamically generated here -->
+                <!-- Stock settings dynamically generated here -->
             </div>
             
         </div>
@@ -674,7 +674,7 @@
         </div> <!-- End of regular sections -->
     
         <div id="external-site">
-            <!-- Where an iframe will be added for external website -->
+            <!-- iframe for external website -->
         </div>
 
         <div id="bottom-fade" class="scroll-indicator bottom-fade"></div>
@@ -700,7 +700,7 @@
         </div>
     </div>
 
-    <!-- Indicators and dark mode toggle -->
+    <!-- Indicators -->
     <div class="control-container">
         <!-- Rain indicator - hidden by default -->
         <div id="rain-indicator" class="status-indicator rain-status hidden" title="Rain expected within 15 minutes">
@@ -709,33 +709,26 @@
         </div>
         <div id="gps-status" class="status-indicator gps-status unavailable" title="GPS Status">
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24">
-                <!-- Outer circle -->
                 <circle cx="12" cy="12" r="8" fill="none" stroke="currentColor" stroke-width="2"/>
-                <!-- Inner circle -->
                 <circle cx="12" cy="12" r="3" fill="currentColor"/>
             </svg>
         </div>
         <div id="stock-indicators" style="display: flex;">
-            <!-- Stock indicators will be dynamically generated here -->    
+            <!-- Stock indicators dynamically generated here -->    
         </div>
         <div id="network-status" class="status-indicator network-status unavailable" title="Network Status">
             <img src="assets/network.svg" class="network-icon">
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 28 24" width="28px" height="24px">
-                <!-- Bar 1 (smallest) -->
                 <rect class="network-bar bar-1" x="2" y="13" width="4" height="6"/>
-                <!-- Bar 2 -->
                 <rect class="network-bar bar-2" x="8" y="10" width="4" height="9"/>
-                <!-- Bar 3 -->
                 <rect class="network-bar bar-3" x="14" y="7" width="4" height="12"/>
-                <!-- Bar 4 (tallest) -->
                 <rect class="network-bar bar-4" x="20" y="4" width="4" height="15"/>
             </svg>
         </div>
     </div>
 
-    <!-- Load section icons -->
+    <!-- Load SVG sprite file and inject it into the page -->
     <script async>
-        // Load SVG sprite file and inject it into the page
         fetch('assets/icons.svg')
             .then(response => response.text())
             .then(data => {
