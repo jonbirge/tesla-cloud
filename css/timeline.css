@@ -167,7 +167,7 @@
 }
 
 /* Mobile Landscape Mode */
-@media only screen and (max-width: 900px) and (orientation: landscape) {
+@media only screen and (max-width: 900px) {
     .timeline-container {
         height: 100px;
         margin-bottom: 35px;
@@ -188,7 +188,12 @@
     
     .temp-indicator, 
     .hour-label {
-        font-size: 10pt;
+        font-size: 9pt;  /* Reduced from 10pt */
+    }
+    
+    /* Hide every other hour label to prevent overlap */
+    .hour-label:nth-child(even) {
+        display: none;
     }
     
     .weather-legend {
@@ -198,7 +203,7 @@
     
     .legend-item {
         margin: 0 5px;
-        font-size: 10pt;
+        font-size: 9pt;  /* Reduced from 10pt */
     }
     
     .legend-color {

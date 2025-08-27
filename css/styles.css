@@ -1410,68 +1410,35 @@ body.dark-mode .option-button:hover:not(.active) {
     
     /* Option Switch adjustments for mobile */
     .option-button {
-        font-size: 11pt;
-        padding: 6px 10px;
+        font-size: 9pt;
+        padding: 5px 8px;
     }
-    
-    #in-map-toggle .option-button {
-        font-size: 10pt;
-        font-weight: 600;
-    }
-    
-    /* Logout button adjustment */
-    .logout-button {
-        font-size: 14pt;
-        padding: 12px 16px;
+
+    .option-switch-container {
+        padding: 6px 8px;
     }
     
     /* News sources grid */
     .news-source-grid {
-        grid-template-columns: repeat(auto-fill, 240px);
+        grid-template-columns: repeat(auto-fill, 170px);
     }
     
     .news-toggle-item {
-        font-size: 11pt;
+        font-size: 9pt;
+        padding: 6px 8px;
+        margin-top: 5px;
     }
-    
-    /* Control container (top right) */
-    .control-container {
-        display: none;
-    }
-    
-    .toggle-label {
+
+    /* Settings section headers */
+    #settings h2 {
         font-size: 13pt;
-    }
-    
-    /* Login button */
-    .login-button {
-        margin-top: 10px;
-        padding: 10px 15px;
-        font-size: 14pt;
+        margin-top: 18px;
+        margin-bottom: 5px;
     }
 
-    .share-icon {
-        right: 10px;
-    }
-
-    .share-icon img {
-        width: 100%;
-        height: auto;
-        min-width: 0;
-        min-height: 0;
-        max-width: 32px;
-        max-height: 32px;
-    }
-
-    .notification,
-    .notification-message {
-        text-align: center !important;
-        white-space: nowrap !important;
-        overflow: hidden !important;
-        text-overflow: ellipsis !important;
-        width: 100%;
-        max-width: 95vw;
-        margin: 0 auto;
-        font-size: 13px;
+    #settings h3 {
+        font-size: 12pt;
+        margin-top: 12px;
+        margin-bottom: 3px;
     }
 }

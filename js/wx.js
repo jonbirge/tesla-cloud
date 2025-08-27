@@ -980,6 +980,7 @@ window.showPremiumPrecipGraph = function(dayIndex) {
         // Add hour labels at the bottom (every 3 hours)
         const labelsDiv = document.createElement('div');
         labelsDiv.className = 'hour-labels';
+
         dayHourly.forEach((item, index) => {
             const itemDate = new Date(item.dt * 1000);
             const hour = itemDate.getHours();

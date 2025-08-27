@@ -437,7 +437,7 @@ body.dark-mode .notification-icon img {
 }
 
 /* Mobile Landscape Mode */
-@media only screen and (max-width: 900px) and (orientation: landscape) {
+@media only screen and (max-width: 900px) {
     .weather-switch-container {
         margin: 10px 0;
     }
