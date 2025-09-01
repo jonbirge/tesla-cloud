@@ -170,6 +170,9 @@ hr {
     .announcement p .note-text {
         display: block;
     }
+    .control-container {
+        display: none;
+    }
 }
 
 /* Layout */
@@ -533,6 +536,23 @@ body.dark-mode .network-icon {
 
 .gps-status {
     color: var(--status-unavailable);
+}
+
+.gps-status svg {
+    width: 24px;
+    height: 24px;
+    flex-shrink: 0;
+    display: block;
+}
+
+.gps-status .gps-outer {
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 2;
+}
+
+.gps-status .gps-inner {
+    fill: currentColor;
 }
 
 /* Rain Status Indicator */
