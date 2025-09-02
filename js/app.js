@@ -70,7 +70,7 @@ async function fetchLandmarkData(lat, long) {
     
     const baseUrl = 'https://secure.geonames.org/findNearbyWikipediaJSON';
     const url =
-    `${baseUrl}?lat=${lat}&lng=${long}&radius=15&maxRows=150&username=${GEONAMES_USERNAME}`;
+    `${baseUrl}?lat=${lat}&lng=${long}&radius=10&maxRows=50&username=${GEONAMES_USERNAME}`;
     try {
         const response = await fetch(url);
         const data = await response.json();
