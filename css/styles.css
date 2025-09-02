@@ -1220,6 +1220,11 @@ body.dark-mode .option-button:hover:not(.active) {
         padding-left: 20px;
         text-align: left;
     }
+
+    /* Hide control div */
+    .control-container {
+        display: none;
+    }
     
     /* Layout adjustment */
     .frame-container {
@@ -1372,7 +1377,7 @@ body.dark-mode .option-button:hover:not(.active) {
     }
     
     .news-title {
-        font-size: 13pt;
+        font-size: 12pt;
         margin-right: 40px;
     }
     
@@ -1383,7 +1388,7 @@ body.dark-mode .option-button:hover:not(.active) {
     
     .settings-toggle-item {
         padding: 8px 10px;
-        font-size: 12pt;
+        font-size: 11pt;
     }
     
     .settings-toggle-item span.settings-toggle-slider {
