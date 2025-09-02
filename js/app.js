@@ -374,7 +374,7 @@ async function handlePositionUpdate(position) {
             gpsStatusElement.style.color = 'var(--status-unavailable)';
             gpsStatusElement.title = 'GPS Unavailable';
             gpsStatusElement.classList.remove('hidden'); // Show indicator when GPS is unavailable
-        } else if (acc > 10) { // Only show indicator when accuracy is worse than 25m
+        } else {
             gpsStatusElement.classList.remove('hidden');
             
             // Interpolate between yellow and green based on accuracy
@@ -394,10 +394,6 @@ async function handlePositionUpdate(position) {
             }
 
             gpsStatusElement.title = `GPS Accuracy: ${Math.round(acc)}m`;
-        } else {
-            // Hide GPS status if accuracy is good
-            gpsStatusElement.style.color = 'var(--status-good)';
-            gpsStatusElement.classList.add('hidden');
         }
     }
 
