@@ -781,60 +781,7 @@ body.dark-mode .share-icon img {
     filter: brightness(0) invert(0.8) grayscale(1);
 }
 
-/* Notification System */
-#notification-container {
-    position: fixed;
-    top: 20px;
-    left: 50%;
-    transform: translateX(-50%);
-    z-index: 9999;
-    max-width: 80%;
-    min-width: 200px;
-}
-
-.notification {
-    display: flex;
-    align-items: center;
-    background-color: rgba(0, 0, 0, 0.75);
-    padding: 12px 16px;
-    border-radius: 8px;
-    margin-bottom: 10px;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-    opacity: 0;
-    transform: translateY(-20px);
-    transition: opacity 0.3s, transform 0.3s;
-    white-space: nowrap;
-    width: auto;
-    display: inline-flex;
-}
-
-.notification.show {
-    opacity: 1;
-    transform: translateY(0);
-}
-
-.notification.hide {
-    opacity: 0;
-    transform: translateY(-20px);
-}
-
-.notification-icon {
-    margin-right: 12px;
-    color: var(--weather-warning-color);
-    display: flex;
-    align-items: center;
-}
-
-.notification-message {
-    font-size: 14pt;
-    font-weight: 500;
-    color: #ff9500;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    text-align: center;
-    display: block;
-}
+/* Announcement and notification styles moved to css/notify.css */
 
 /* Loading Spinner */
 .loading-container {
@@ -1171,23 +1118,7 @@ body.dark-mode .option-button:hover:not(.active) {
     padding-top: 30px;
 }
 
-/* Stack date above note on narrow viewports */
-@media only screen and (max-width: 540px) {
-    .announcement p {
-        display: block;
-        text-align: left;
-    }
-    .announcement p .note-date {
-        display: block;
-        text-align: left;
-        min-width: auto;
-        padding-right: 0;
-        margin-bottom: 6px;
-    }
-    .announcement p .note-text {
-        display: block;
-    }
-}
+/* Stack date above note on narrow viewports moved to css/notify.css */
 
 /* Mobile Landscape Mode */
 @media only screen and (max-width: 900px) {
