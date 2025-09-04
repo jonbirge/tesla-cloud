@@ -154,24 +154,6 @@ hr {
     line-height: 1.2;
 }
 
-/* Stack date above note on narrow viewports */
-@media only screen and (max-width: 540px) {
-    .announcement p {
-        display: block;
-        text-align: left;
-    }
-    .announcement p .note-date {
-        display: block;
-        text-align: left;
-        min-width: auto;
-        padding-right: 0;
-        margin-bottom: 6px;
-    }
-    .announcement p .note-text {
-        display: block;
-    }
-}
-
 /* Layout */
 .frame-container {
     display: flex;
@@ -755,13 +737,12 @@ body.dark-mode .network-icon {
     transition: color 0.3s ease, font-weight 0.3s ease;
 }
 
-/* Add styling for new article timestamps */
 .news-time.news-new-time {
     color: var(--tesla-blue);
     font-weight: 600;
 }
 
-/* Add transition class for when an item is being marked as seen */
+/* Transition class for when an item is being marked as seen */
 .news-time.news-seen-transition {
     transition: color 1.5s ease, font-weight 1.5s ease;
 }
@@ -788,7 +769,7 @@ body.dark-mode .network-icon {
 
 .share-icon {
     position: absolute;
-    right: 21px;
+    right: 3px;
     top: 50%;
     transform: translateY(-50%);
     background: none;
@@ -1190,6 +1171,24 @@ body.dark-mode .option-button:hover:not(.active) {
     padding-top: 30px;
 }
 
+/* Stack date above note on narrow viewports */
+@media only screen and (max-width: 540px) {
+    .announcement p {
+        display: block;
+        text-align: left;
+    }
+    .announcement p .note-date {
+        display: block;
+        text-align: left;
+        min-width: auto;
+        padding-right: 0;
+        margin-bottom: 6px;
+    }
+    .announcement p .note-text {
+        display: block;
+    }
+}
+
 /* Mobile Landscape Mode */
 @media only screen and (max-width: 900px) {
     :root {
@@ -1370,15 +1369,29 @@ body.dark-mode .option-button:hover:not(.active) {
     .news-item {
         padding: 8px 8px 8px 50px;
     }
+
+    .news-source {
+        font-size: 11pt;
+    }
+
+    .news-time {
+        font-size: 11pt;
+    }
     
     .news-favicon {
-        width: 26px;
-        height: 26px;
+        width: 28px;
+        height: 28px;
+        left: 11px;
     }
     
     .news-title {
         font-size: 12pt;
         margin-right: 40px;
+    }
+
+    .share-icon {
+        transform: scale(75%) translateY(-65%);
+        right: -3px;
     }
     
     /* Settings adjustments */
