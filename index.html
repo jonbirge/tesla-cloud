@@ -75,7 +75,6 @@
                 About
             </button>
         </div> <!-- End of section buttons -->
-        <button id="login-button" class="login-button" onclick="showLoginModal()">Login</button>
     </div> <!-- End of left frame -->
     
     <!-- Section content -->
@@ -456,11 +455,9 @@
             <ul>
                 <li>Bookmark this page using the star in the browser menu.</li>
                 <li>Make the browser easily available by dragging it to the left-hand side of the dock at the bottom of the screen.</li>
-                <li>Settings are saved by default, but you can logout (under Settings) to disable this.</li>
-                <li>You can also create a user ID that will allow settings to be saved across multiple browsers:</li>
+                <li>Settings are saved locally by default. You can create a user ID that will allow settings to be saved across multiple browsers:</li>
                 <ol>
-                    <li>Ensure you're logged out of the default user account in Settings.</li>
-                    <li>Select the 'login' button on the main page and choose an ID with 9 or more characters.</li>
+                    <li>In Settings, select "Login" and choose an ID with 9 or more characters.</li>
                     <li>The user ID can be anything you can remember, like your phone number; it is encrypted before being sent to our servers.</li>
                 </ol>
             </ul>
@@ -476,7 +473,7 @@
         </div>
         
         <div id="settings" class="section">
-            <button id="logout-button" class="logout-button hidden" onclick="handleLogout()">Logout</button>
+            <button id="logout-button" class="logout-button" onclick="handleLogout()">Login</button>
         
             <h2>General Settings</h2>
             <div class="settings-controls">
