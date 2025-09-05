@@ -739,26 +739,6 @@ body.dark-mode .spinner {
     margin: 20px 0;
 }
 
-/* Login Styles */
-.login-button {
-    color: var(--button-text);
-    background-color: var(--button-bg);
-    border-radius: var(--button-radius);
-    font-size: 16pt;
-    font-weight: 600;
-    padding: 16px 20px;
-    border: none;
-    cursor: pointer;
-    text-align: center;
-    margin-top: 15px;
-    width: 100%;
-    transition: background-color 0.3s;
-}
-
-.login-button:hover {
-    background-color: var(--active-section-bg);
-}
-
 /* Modal Login Dialog */
 .modal {
     display: none;

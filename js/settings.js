@@ -402,21 +402,12 @@ async function autoCreateUser() {
 
 // Update login/logout button visibility based on state
 function updateLoginState() {
-    const loginButton = document.getElementById('login-button');
     const logoutButton = document.getElementById('logout-button');
 
-    if (isLoggedIn) {
-        loginButton.classList.add('hidden');
-        logoutButton.classList.remove('hidden');
-        if (currentUser) {
-            logoutButton.textContent = `Logout ${currentUser}`;
-        } else {
-            logoutButton.textContent = 'Logout default user';
-        }
+    if (currentUser) {
+        logoutButton.textContent = `Logout ${currentUser}`;
     } else {
-        loginButton.classList.remove('hidden');
-        logoutButton.classList.add('hidden');
-        logoutButton.textContent = 'Logout';
+        logoutButton.textContent = 'Login';
     }
 }
 
@@ -892,26 +883,24 @@ window.closeLoginModal = function () {
     document.getElementById('login-modal').style.display = 'none';
 }
 
-// Function to handle logout
-window.handleLogout = function () {
-    isLoggedIn = false;
-    currentUser = null;
-    hashedUser = null;
-    
-    // Update UI
-    updateLoginState();
-    
-    // Hide settings section
-    document.getElementById('settings-section').classList.add('hidden');
-    
-    // If currently in settings section, redirect to default section
-    const settingsSection = document.getElementById('settings');
-    if (settingsSection.style.display === 'block') {
-        showSection('news');
+// Function to handle login/logout button
+window.handleLogout = async function () {
+    if (currentUser) {
+        // Logging out of a named user; revert to auto-generated account
+        deleteCookie('userid');
+        currentUser = null;
+        hashedUser = null;
+
+        const autoUser = getCookie('auto-userid');
+        if (autoUser && await validateAutoUserId(autoUser)) {
+            await fetchSettings();
+            await initializeNewsStorage();
+            updateNews(true);
+        }
+    } else {
+        // Default user active, show login dialog
+        showLoginModal();
     }
-    
-    // Ensure we won't auto login to a named user
-    deleteCookie('userid');
 }
 
 // Function to handle login from dialog
