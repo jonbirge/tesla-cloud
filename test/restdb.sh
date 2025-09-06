@@ -5,7 +5,7 @@
 # =============================================================================
 
 # Configuration parameters
-BASE_URL="https://teslas.cloud/php/rest_db.php"  # Base URL for the REST API
+BASE_URL="${BASE_URL:-http://localhost:8000/php/rest_db.php}"  # Base URL for the REST API
 VERBOSE=false               # Set to true for detailed output
 TEMP_DIR="/tmp/restdb_test" # Directory for temporary files
 KEEP_DATA=false             # Whether to keep test data after running tests
@@ -494,6 +494,16 @@ echo "Verbose mode: $VERBOSE"
 echo "Keep test data: $KEEP_DATA"
 echo "Temp directory: $TEMP_DIR"
 echo ""
+
+# Verify that the endpoint exists before running tests
+status=$(curl -s -o /dev/null -w "%{http_code}" "$BASE_URL")
+if [ "$status" -eq 404 ]; then
+    echo "❌ $BASE_URL returned HTTP 404. Start a local server with: php -S localhost:8000"
+    exit 1
+elif [ "$status" -eq 000 ]; then
+    echo "❌ Unable to connect to $BASE_URL. Start a local server with: php -S localhost:8000"
+    exit 1
+fi
 
 # Run the test suite
 run_test_suite
