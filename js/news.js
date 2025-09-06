@@ -286,6 +286,14 @@ export async function updateNews(clear = false) {
         const includedFeeds = [];
         if (settings && settings["rss-feeds"] && Array.isArray(settings["rss-feeds"])) {
             includedFeeds.push(...settings["rss-feeds"]);
+        } else if (settings) {
+            // Fallback: check for individual RSS settings (for backward compatibility)
+            for (const key in settings) {
+                if (key.startsWith('rss-') && settings[key] === true) {
+                    const feedId = key.substring(4); // Remove 'rss-' prefix
+                    includedFeeds.push(feedId);
+                }
+            }
         }
         
         // Get the news container element

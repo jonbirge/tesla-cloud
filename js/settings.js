@@ -422,6 +422,9 @@ async function fetchSettings() {
             settings = await response.json();
             console.log('Settings loaded: ', settings);
 
+            // Migration: Convert old individual RSS settings to new rss-feeds array immediately
+            migrateRSSSettings();
+
             // Clean up orphaned stock/index subscriptions
             await cleanupOrphanedSubscriptions();
 
@@ -863,9 +866,6 @@ function migrateRSSSettings() {
 function initializeSettings() {
     // Load stock/index data and generate settings
     loadStockAndIndexData();
-    
-    // Migration: Convert old individual RSS settings to new rss-feeds array
-    migrateRSSSettings();
     
     // Iterate through all keys in the settings object
     for (const key in settings) {
