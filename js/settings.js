@@ -752,14 +752,14 @@ function updateSetting(key, value) {
                 
                 // Only update news immediately if live_news_updates is true
                 if (live_news_updates) {
-                    console.log(`RSS setting "${key}" changed to ${value}, updating news feed immediately`);
+                    // console.log(`RSS setting "${key}" changed to ${value}, updating news feed immediately`);
                     import('./news.js').then(newsModule => {
                         if (typeof newsModule.updateNews === 'function') {
                             newsModule.updateNews(isDrop);
                         }
                     });
                 } else {
-                    console.log(`RSS setting "${key}" changed to ${value}, will update later (live_news_updates is false)`);
+                    // console.log(`RSS setting "${key}" changed to ${value}, will update later (live_news_updates is false)`);
                     // Mark RSS as dirty so we can update after all settings are loaded
                     rssIsDirty = true;
                     rssDrop = rssDrop || isDrop; // If any feed was dropped, set flag

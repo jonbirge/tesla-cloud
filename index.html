@@ -154,6 +154,7 @@
                 <div class="spinner"></div>
             </div>
             <div id="newsHeadlines" class="news-headlines">
+                <!-- News headlines will be dynamically inserted here -->
             </div>
         </div>
 
@@ -694,10 +695,10 @@
     <div id="login-modal" class="modal">
         <div class="modal-content">
             <h2>Login</h2>
-            <p>Enter a user ID to login or create a new account.</p>
+            <p>Enter a user ID (minimum of 9 characters) to login or create a new account.</p>
             <div class="login-form">
                 <label for="user-id">User ID</label>
-                <input type="text" id="user-id" placeholder="Enter user ID (minimum 9 characters)">
+                <input type="text" id="user-id" placeholder="Enter user ID" minlength="9" required>
                 <div id="login-error" class="error-message"></div>
                 <div class="button-container">
                     <button id="login-cancel" class="modal-button cancel">Cancel</button>

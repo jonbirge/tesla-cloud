@@ -305,7 +305,7 @@ export function fetchStockData() {
         }
         
         // Cache miss or expired, fetch fresh data
-        console.log(`Fetching data for ${upperTicker}`);
+        // console.log(`Fetching data for ${upperTicker}`);
         pendingFetches++;
         
         fetch(`${STOCK_API_ENDPOINT}${upperTicker}`)
