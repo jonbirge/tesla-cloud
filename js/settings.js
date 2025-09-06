@@ -170,8 +170,9 @@ export async function saveSetting(key, value) {
             newFeeds = currentFeeds.filter(feed => feed !== feedId);
         }
         
-        // Update the rss-feeds setting instead of the individual setting
-        return saveSetting('rss-feeds', newFeeds);
+        // Update the rss-feeds setting directly without recursive call
+        key = 'rss-feeds';
+        value = newFeeds;
     }
     
     // Handle local settings
@@ -599,8 +600,17 @@ function updateRSSFeedsUI(feedsArray) {
             const feedId = settingName.substring(4); // Remove 'rss-' prefix
             const checkbox = toggle.querySelector('input[type="checkbox"]');
             if (checkbox) {
+                // Temporarily remove the inline onchange attribute to prevent triggering events
+                const originalOnChange = checkbox.getAttribute('onchange');
+                checkbox.removeAttribute('onchange');
+                
                 // Update the checkbox state
                 checkbox.checked = feedsArray.includes(feedId);
+                
+                // Restore the onchange attribute
+                if (originalOnChange) {
+                    checkbox.setAttribute('onchange', originalOnChange);
+                }
             }
         }
     });
