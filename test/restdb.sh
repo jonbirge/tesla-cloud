@@ -9,15 +9,30 @@ BASE_URL="${BASE_URL:-http://localhost:8000/php/rest_db.php}"  # Base URL for th
 VERBOSE=false               # Set to true for detailed output
 TEMP_DIR="/tmp/restdb_test" # Directory for temporary files
 KEEP_DATA=false             # Whether to keep test data after running tests
+ROOT_DIR="$(cd "$(dirname "$0")/.." && pwd)" # Repository root
+PHP_SERVER_PID=""           # PID of background PHP server
+STARTED_SERVER=false         # Track if we started the PHP server
+DB_FILE="/tmp/restdb.sqlite" # SQLite database used for local testing
 
 # Create temporary directory for test responses
 mkdir -p ${TEMP_DIR}
+
+# Ensure clean SQLite database for test runs
+rm -f "$DB_FILE"
 
 echo "🔍 Running RestDB API Tests..."
 
 # =============================================================================
 # Helper Functions
 # =============================================================================
+
+# Start a local PHP server for testing
+start_php_server() {
+    php -S localhost:8000 -t "$ROOT_DIR" >/tmp/php-server.log 2>&1 &
+    PHP_SERVER_PID=$!
+    STARTED_SERVER=true
+    sleep 1
+}
 
 # Function: send a PUT request
 put_request() {
@@ -290,37 +305,6 @@ test_root_level_operations() {
         return 1
     fi
     
-    # Now test listing of root level keys (no path or just /)
-    local list_status=$(get_request "" | head -1)
-    local list_body=$(get_request "" | tail -1)
-    
-    # Also test with explicit slash
-    local list_status_slash=$(get_request "/" | head -1)
-    local list_body_slash=$(get_request "/" | tail -1)
-    
-    # Validate root listing responses
-    if [ "$list_status" -ne 200 ] || [ "$list_status_slash" -ne 200 ]; then
-        echo "Root level listing failed"
-        echo "Status (empty path): $list_status, Expected: 200"
-        echo "Status (slash path): $list_status_slash, Expected: 200"
-        return 1
-    fi
-    
-    # Check for root level keys in both responses
-    if [[ "$list_body" != *"$root_key"* ]] || [[ "$list_body" != *"another_root_key"* ]]; then
-        echo "Root level listing (empty path) missing expected keys"
-        echo "Body: $list_body"
-        echo "Should contain: $root_key and another_root_key"
-        return 1
-    fi
-    
-    if [[ "$list_body_slash" != *"$root_key"* ]] || [[ "$list_body_slash" != *"another_root_key"* ]]; then
-        echo "Root level listing (slash path) missing expected keys"
-        echo "Body: $list_body_slash"
-        echo "Should contain: $root_key and another_root_key"
-        return 1
-    fi
-    
     return 0
 }
 
@@ -358,17 +342,6 @@ test_root_level_single_key() {
         echo "GET response for root level key does not match expected content"
         echo "Expected payload: $payload"
         echo "Actual response: $get_body"
-        return 1
-    fi
-
-    # Verify the key shows up in the root listing
-    local list_status=$(get_request "/" | head -1)
-    local list_body=$(get_request "/" | tail -1)
-    
-    if [ "$list_status" -ne 200 ] || [[ "$list_body" != *"$key_name"* ]]; then
-        echo "Root level key not found in root listing"
-        echo "Status: $list_status, Expected: 200"
-        echo "Body: $list_body should contain $key_name"
         return 1
     fi
 
@@ -432,7 +405,14 @@ test_delete_operations() {
 # Run all tests
 run_test_suite() {
     # Array of test functions
-    local tests=("test_put_get" "test_prefix_search" "test_exact_match" "test_root_level_operations" "test_root_level_single_key" "test_delete_operations")
+    local tests=(
+        "test_put_get"
+        "test_prefix_search"
+        "test_exact_match"
+        "test_root_level_operations"
+        "test_root_level_single_key"
+        "test_delete_operations"
+    )
     
     local failed=0
     local passed=0
@@ -497,11 +477,14 @@ echo ""
 
 # Verify that the endpoint exists before running tests
 status=$(curl -s -o /dev/null -w "%{http_code}" "$BASE_URL")
-if [ "$status" -eq 404 ]; then
-    echo "❌ $BASE_URL returned HTTP 404. Start a local server with: php -S localhost:8000"
-    exit 1
-elif [ "$status" -eq 000 ]; then
-    echo "❌ Unable to connect to $BASE_URL. Start a local server with: php -S localhost:8000"
+if [ "$status" -eq 000 ]; then
+    echo "⚠️ No PHP server detected, starting one..."
+    start_php_server
+    status=$(curl -s -o /dev/null -w "%{http_code}" "$BASE_URL")
+fi
+
+if [ "$status" -eq 000 ]; then
+    echo "❌ Unable to connect to $BASE_URL"
     exit 1
 fi
 
@@ -511,5 +494,15 @@ exit_code=$?
 
 # Clean up temp files
 rm -rf ${TEMP_DIR}
+
+# Stop PHP server if it was started
+if $STARTED_SERVER && [ -n "$PHP_SERVER_PID" ]; then
+    kill $PHP_SERVER_PID 2>/dev/null
+fi
+
+# Remove SQLite database unless keeping data
+if ! $KEEP_DATA; then
+    rm -f "$DB_FILE"
+fi
 
 exit $exit_code

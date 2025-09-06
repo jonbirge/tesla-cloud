@@ -20,7 +20,7 @@ Run a local PHP server to exercise the backend APIs:
 php -S localhost:8000
 ```
 
-The RestDB test script defaults to this address. To run the tests:
+The RestDB test script automatically launches a temporary PHP server and uses a throwaway SQLite database, so no external database configuration is required. To run the tests:
 
 ```bash
 ./test/restdb.sh
