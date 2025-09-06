@@ -989,17 +989,17 @@ export function enableLiveNewsUpdates() {
     console.log('Enabling live news updates');
     live_news_updates = true;
     
-    // If any RSS settings were changed during startup, update now
-    if (rssIsDirty) {
-        console.log('RSS settings were changed, triggering update now');
-        import('./news.js').then(newsModule => {
-            if (typeof newsModule.updateNews === 'function') {
-                newsModule.updateNews(rssDrop);
-            }
-        });
-        rssIsDirty = false;
-        rssDrop = false;
-    }
+    // Always trigger initial news update to ensure news loads on page load
+    console.log('Triggering initial news update');
+    import('./news.js').then(newsModule => {
+        if (typeof newsModule.updateNews === 'function') {
+            newsModule.updateNews(rssIsDirty && rssDrop);
+        }
+    });
+    
+    // Reset flags after triggering update
+    rssIsDirty = false;
+    rssDrop = false;
 }
 
 // Function called by the toggle UI elements
