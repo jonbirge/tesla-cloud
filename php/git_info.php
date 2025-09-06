@@ -7,6 +7,7 @@
  */
 
 function getGitInfo() {
+    $repoDir = dirname(__DIR__);
     $gitInfo = [
         'commit' => 'unknown',
         'branch' => null,
@@ -37,9 +38,9 @@ function getGitInfo() {
         
         // Set git config to ignore ownership checks
         $gitSafeDir = 'git -c safe.directory=* ';
-        
+
         // Get commit hash
-        $result = exec($gitSafeDir . '-C ' . escapeshellarg(__DIR__) . ' rev-parse --short HEAD 2>/dev/null', $output, $returnCode);
+        $result = exec($gitSafeDir . '-C ' . escapeshellarg($repoDir) . ' rev-parse --short HEAD 2>/dev/null', $output, $returnCode);
         if ($returnCode === 0 && !empty($result)) {
             $gitInfo['commit'] = trim($result);
         } else {
@@ -47,7 +48,7 @@ function getGitInfo() {
         }
         
         // Get branch name
-        $result = exec($gitSafeDir . '-C ' . escapeshellarg(__DIR__) . ' rev-parse --abbrev-ref HEAD 2>/dev/null', $output, $returnCode);
+        $result = exec($gitSafeDir . '-C ' . escapeshellarg($repoDir) . ' rev-parse --abbrev-ref HEAD 2>/dev/null', $output, $returnCode);
         if ($returnCode === 0 && !empty($result) && $result !== 'HEAD') {
             $gitInfo['branch'] = trim($result);
         } else {
@@ -55,7 +56,7 @@ function getGitInfo() {
         }
         
         // Get tag name (if any)
-        $result = exec($gitSafeDir . '-C ' . escapeshellarg(__DIR__) . ' describe --tags --exact-match 2>/dev/null', $output, $returnCode);
+        $result = exec($gitSafeDir . '-C ' . escapeshellarg($repoDir) . ' describe --tags --exact-match 2>/dev/null', $output, $returnCode);
         if ($returnCode === 0 && !empty($result)) {
             $gitInfo['tag'] = trim($result);
         }
@@ -70,7 +71,7 @@ function getGitInfo() {
     $gitInfo['diagnostic']['method'] = 'file_based';
     
     // Get commit hash and branch name from .git/HEAD
-    $gitHeadFile = __DIR__ . '/.git/HEAD';
+    $gitHeadFile = $repoDir . '/.git/HEAD';
     if (file_exists($gitHeadFile)) {
         $headContent = trim(file_get_contents($gitHeadFile));
         if (strpos($headContent, 'ref:') === 0) {
@@ -79,7 +80,7 @@ function getGitInfo() {
             $gitInfo['branch'] = $branchName;
 
             // Resolve branch to commit hash
-            $branchRefFile = __DIR__ . '/.git/refs/heads/' . $branchName;
+            $branchRefFile = $repoDir . '/.git/refs/heads/' . $branchName;
             if (file_exists($branchRefFile)) {
                 $gitInfo['commit'] = substr(trim(file_get_contents($branchRefFile)), 0, 8);
             } else {
@@ -94,7 +95,7 @@ function getGitInfo() {
     }
 
     // Check for tag name
-    $gitTagsDir = __DIR__ . '/.git/refs/tags/';
+    $gitTagsDir = $repoDir . '/.git/refs/tags/';
     if (is_dir($gitTagsDir)) {
         $tags = scandir($gitTagsDir);
         foreach ($tags as $tag) {

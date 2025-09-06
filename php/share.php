@@ -10,7 +10,7 @@ error_reporting(E_ALL);
 ini_set('display_errors', 1);
 
 // Load the .env file (default path is './.env')
-$dotenv = new DotEnv();
+$dotenv = new DotEnv(__DIR__ . '/../.env');
 
 // Get all variables as an associative array
 $_ENV = $dotenv->getAll();

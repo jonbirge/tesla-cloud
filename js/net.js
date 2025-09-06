@@ -255,7 +255,7 @@ async function pingTestServer() {
     // Send a low-overhead HEAD request to the server
     const startTime = performance.now();
     try {
-        const response = await fetch('ping.php', {
+        const response = await fetch('php/ping.php', {
             method: 'HEAD'
         });
         
@@ -292,7 +292,7 @@ async function pingTestServer() {
     // Add last ping time to form data as a string
     formData.append('ping', pingData.at(-1).toFixed(1));
     try {
-        const response = await fetch('ping.php', {
+        const response = await fetch('php/ping.php', {
             method: 'POST',
             body: formData,
             cache: 'no-store'

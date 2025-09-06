@@ -7,7 +7,7 @@
 require_once 'dotenv.php';
 
 // Load the .env file (default path is './.env')
-$dotenv = new DotEnv();
+$dotenv = new DotEnv(__DIR__ . '/../.env');
 
 // Get all variables as an associative array
 $_ENV = $dotenv->getAll();

@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Define the path to your DotEnv.php file
-DOTENV_PATH="../dotenv.php"
+DOTENV_PATH="../php/dotenv.php"
 
 # Define test environment files (relative to current directory)
 TEST_ENVS_DIR="./test_envs"

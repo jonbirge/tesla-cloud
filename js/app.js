@@ -536,7 +536,7 @@ function stopGPSUpdates() {
 
 // Check for NOTE file and display if present (now via PHP endpoint to avoid 404s)
 function updateServerNote() {
-    fetch('get_note.php', { cache: 'no-store' })
+    fetch('php/get_note.php', { cache: 'no-store' })
         .then(response => {
             if (!response.ok) throw new Error('Network response not ok');
             return response.json();
@@ -596,11 +596,11 @@ function updateServerNote() {
         });
 }
 
-// Show git version from vers.php
+// Show git version from php/vers.php
 function updateVersion() {
     const versionElement = document.getElementById('version');
     if (versionElement) {
-        fetch('vers.php')
+        fetch('php/vers.php')
             .then(response => response.json())
             .then(data => {
                 let versionText = '';
@@ -952,7 +952,7 @@ document.addEventListener('DOMContentLoaded', async function () {
     // Begin network sensing
     startPingTest();
 
-    // Get version from vers.php asyncly
+    // Get version from php/vers.php asyncly
     updateVersion();
 
     // Add event listeners for login modal
