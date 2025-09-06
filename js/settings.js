@@ -184,9 +184,6 @@ export async function saveSetting(key, value) {
     // Update server if logged in
     if (isLoggedIn && hashedUser) {
         try {
-            // Update the local settings cache with boolean value
-            settings[key] = value;
-
             // Update the server with the boolean value using the RESTful API
             const response = await fetch(`settings.php/${encodeURIComponent(hashedUser)}/${encodeURIComponent(key)}`, {
                 method: 'PUT',
