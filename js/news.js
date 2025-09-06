@@ -284,15 +284,8 @@ export async function updateNews(clear = false) {
     try {
         // Collect included RSS feeds from user settings
         const includedFeeds = [];
-        if (settings) {
-            // Collect all RSS feed settings that are set to true
-            for (const key in settings) {
-                if (key.startsWith('rss-') && settings[key] === true) {
-                    // Extract feed ID after the "rss-" prefix
-                    const feedId = key.substring(4);
-                    includedFeeds.push(feedId);
-                }
-            }
+        if (settings && settings["rss-feeds"] && Array.isArray(settings["rss-feeds"])) {
+            includedFeeds.push(...settings["rss-feeds"]);
         }
         
         // Get the news container element
