@@ -595,7 +595,15 @@ function updateRSSFeedsUI(feedsArray) {
             const feedId = settingName.substring(4); // Remove 'rss-' prefix
             const checkbox = toggle.querySelector('input[type="checkbox"]');
             if (checkbox) {
+                // Temporarily remove the onchange handler to prevent infinite loop
+                const originalOnChange = checkbox.onchange;
+                checkbox.onchange = null;
+                
+                // Update the checkbox state
                 checkbox.checked = feedsArray.includes(feedId);
+                
+                // Restore the onchange handler
+                checkbox.onchange = originalOnChange;
             }
         }
     });
@@ -671,6 +679,21 @@ function updateSetting(key, value) {
         case 'rss-feeds':
             // Update individual RSS checkboxes based on the array
             updateRSSFeedsUI(value);
+            
+            // Only update news immediately if live_news_updates is true
+            if (live_news_updates) {
+                console.log(`RSS feeds setting changed, updating news feed immediately`);
+                import('./news.js').then(newsModule => {
+                    if (typeof newsModule.updateNews === 'function') {
+                        newsModule.updateNews(false);
+                    }
+                });
+            } else {
+                console.log(`RSS feeds setting changed, will update later (live_news_updates is false)`);
+                // Mark RSS as dirty so we can update after all settings are loaded
+                rssIsDirty = true;
+                rssDrop = false; // Not a drop, just a change
+            }
             break;
             
         case 'subscribed-stocks':
@@ -766,23 +789,7 @@ function updateSetting(key, value) {
             break;
             
         default:
-            // Handle RSS-related settings
-            if (key === 'rss-feeds') {
-                // Only update news immediately if live_news_updates is true
-                if (live_news_updates) {
-                    console.log(`RSS feeds setting changed, updating news feed immediately`);
-                    import('./news.js').then(newsModule => {
-                        if (typeof newsModule.updateNews === 'function') {
-                            newsModule.updateNews(false);
-                        }
-                    });
-                } else {
-                    console.log(`RSS feeds setting changed, will update later (live_news_updates is false)`);
-                    // Mark RSS as dirty so we can update after all settings are loaded
-                    rssIsDirty = true;
-                    rssDrop = false; // Not a drop, just a change
-                }
-            }
+            // Handle any other settings that need special processing here
             break;
     }
 }
