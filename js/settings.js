@@ -155,6 +155,24 @@ export async function attemptLogin() {
 export async function saveSetting(key, value) {
     console.log(`Setting "${key}" updated to ${value} (local)`);
     
+    // Handle backward compatibility with individual RSS settings
+    if (key.startsWith('rss-')) {
+        const feedId = key.substring(4);
+        const currentFeeds = settings['rss-feeds'] || [];
+        let newFeeds;
+        
+        if (value) {
+            // Add feed if not already present
+            newFeeds = currentFeeds.includes(feedId) ? currentFeeds : [...currentFeeds, feedId];
+        } else {
+            // Remove feed
+            newFeeds = currentFeeds.filter(feed => feed !== feedId);
+        }
+        
+        // Update the rss-feeds setting instead of the individual setting
+        return saveSetting('rss-feeds', newFeeds);
+    }
+    
     // Handle local settings
     settings[key] = value;
 
@@ -761,23 +779,6 @@ function updateSetting(key, value) {
                     rssIsDirty = true;
                     rssDrop = false; // Not a drop, just a change
                 }
-            } else if (key.startsWith('rss-')) {
-                // Handle backward compatibility with individual RSS settings
-                const feedId = key.substring(4);
-                const currentFeeds = settings['rss-feeds'] || [];
-                let newFeeds;
-                
-                if (value) {
-                    // Add feed if not already present
-                    newFeeds = currentFeeds.includes(feedId) ? currentFeeds : [...currentFeeds, feedId];
-                } else {
-                    // Remove feed
-                    newFeeds = currentFeeds.filter(feed => feed !== feedId);
-                }
-                
-                // Update the rss-feeds setting
-                saveSetting('rss-feeds', newFeeds);
-                return; // Don't process further since we're delegating to rss-feeds
             }
             break;
     }
@@ -828,15 +829,24 @@ function migrateRSSSettings() {
     
     // Collect all feeds that are currently enabled
     const enabledFeeds = [];
+    const oldRSSKeys = [];
     for (const key in settings) {
-        if (key.startsWith('rss-') && settings[key] === true) {
-            const feedId = key.substring(4); // Remove 'rss-' prefix
-            enabledFeeds.push(feedId);
+        if (key.startsWith('rss-')) {
+            oldRSSKeys.push(key); // Keep track of old keys to remove
+            if (settings[key] === true) {
+                const feedId = key.substring(4); // Remove 'rss-' prefix
+                enabledFeeds.push(feedId);
+            }
         }
     }
     
     // Set the new rss-feeds array
     settings['rss-feeds'] = enabledFeeds;
+    
+    // Remove old individual RSS settings from local settings object
+    oldRSSKeys.forEach(key => {
+        delete settings[key];
+    });
     
     // Save the new setting if user is logged in
     if (isLoggedIn && hashedUser) {
@@ -844,6 +854,9 @@ function migrateRSSSettings() {
     }
     
     console.log(`Migrated ${enabledFeeds.length} RSS feeds:`, enabledFeeds);
+    if (oldRSSKeys.length > 0) {
+        console.log(`Removed ${oldRSSKeys.length} old individual RSS settings from local cache`);
+    }
 }
 
 // Initialize all toggle and text states based on 'settings' dictionary
