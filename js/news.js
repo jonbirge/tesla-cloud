@@ -284,12 +284,13 @@ export async function updateNews(clear = false) {
     try {
         // Collect included RSS feeds from user settings
         const includedFeeds = [];
-        if (settings) {
-            // Collect all RSS feed settings that are set to true
+        if (settings && settings["rss-feeds"] && Array.isArray(settings["rss-feeds"])) {
+            includedFeeds.push(...settings["rss-feeds"]);
+        } else if (settings) {
+            // Fallback: check for individual RSS settings (for backward compatibility)
             for (const key in settings) {
                 if (key.startsWith('rss-') && settings[key] === true) {
-                    // Extract feed ID after the "rss-" prefix
-                    const feedId = key.substring(4);
+                    const feedId = key.substring(4); // Remove 'rss-' prefix
                     includedFeeds.push(feedId);
                 }
             }

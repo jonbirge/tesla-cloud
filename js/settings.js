@@ -38,35 +38,8 @@ const defaultSettings = {
     "news-forwarding": false,
     "news-forward-only": false,
     "forwarding-email": "",
-    // News sources
-    "rss-wsj": true,
-    "rss-nyt": true,
-    "rss-wapo": false,
-    "rss-latimes": false,
-    "rss-bos": false,
-    "rss-den": false,
-    "rss-chi": false,
-    "rss-bloomberg": false,
-    "rss-ap": false,
-    "rss-bbc": false,
-    "rss-economist": false,
-    "rss-lemonde": false,
-    "rss-cnn": false,
-    "rss-newyorker": false,
-    "rss-notateslaapp": true,
-    "rss-teslarati": true,
-    "rss-insideevs": true,
-    "rss-thedrive": false,
-    "rss-techcrunch": false,
-    "rss-caranddriver": true,
-    "rss-theverge": false,
-    "rss-arstechnica": false,
-    "rss-engadget": true,
-    "rss-gizmodo": false,
-    "rss-wired": false,
-    "rss-spacenews": false,
-    "rss-defensenews": false,
-    "rss-aviationweek": false,
+    // News sources - single array instead of individual boolean settings
+    "rss-feeds": ["wsj", "nyt", "notateslaapp", "teslarati", "insideevs", "caranddriver", "engadget"],
 };
 
 // Function that sets driving state
@@ -181,6 +154,24 @@ export async function attemptLogin() {
 // Function to change a setting (updating both local cache and server)
 export async function saveSetting(key, value) {
     console.log(`Setting "${key}" updated to ${value} (local)`);
+    
+    // Handle backward compatibility with individual RSS settings
+    if (key.startsWith('rss-')) {
+        const feedId = key.substring(4);
+        const currentFeeds = settings['rss-feeds'] || [];
+        let newFeeds;
+        
+        if (value) {
+            // Add feed if not already present
+            newFeeds = currentFeeds.includes(feedId) ? currentFeeds : [...currentFeeds, feedId];
+        } else {
+            // Remove feed
+            newFeeds = currentFeeds.filter(feed => feed !== feedId);
+        }
+        
+        // Update the rss-feeds setting instead of the individual setting
+        return saveSetting('rss-feeds', newFeeds);
+    }
     
     // Handle local settings
     settings[key] = value;
@@ -431,6 +422,9 @@ async function fetchSettings() {
             settings = await response.json();
             console.log('Settings loaded: ', settings);
 
+            // Migration: Convert old individual RSS settings to new rss-feeds array immediately
+            migrateRSSSettings();
+
             // Clean up orphaned stock/index subscriptions
             await cleanupOrphanedSubscriptions();
 
@@ -586,6 +580,27 @@ window.toggleStockIndexSetting = function(element, type, symbol) {
     saveSetting(settingKey, newList);
 }
 
+// Function to update RSS feed checkboxes based on the rss-feeds array
+function updateRSSFeedsUI(feedsArray) {
+    if (!Array.isArray(feedsArray)) {
+        feedsArray = [];
+    }
+    
+    // Get all RSS feed toggle items
+    const rssToggles = document.querySelectorAll('.settings-toggle-item[data-setting^="rss-"]');
+    
+    rssToggles.forEach(toggle => {
+        const settingName = toggle.getAttribute('data-setting');
+        if (settingName && settingName.startsWith('rss-')) {
+            const feedId = settingName.substring(4); // Remove 'rss-' prefix
+            const checkbox = toggle.querySelector('input[type="checkbox"]');
+            if (checkbox) {
+                checkbox.checked = feedsArray.includes(feedId);
+            }
+        }
+    });
+}
+
 // Function to update stock/index UI based on current subscriptions
 function updateStockIndexUI() {
     const subscribedStocks = settings['subscribed-stocks'] || [];
@@ -653,6 +668,11 @@ function updateSetting(key, value) {
 
     // Handle settings effects
     switch (key) {
+        case 'rss-feeds':
+            // Update individual RSS checkboxes based on the array
+            updateRSSFeedsUI(value);
+            break;
+            
         case 'subscribed-stocks':
         case 'subscribed-indexes':
             // Update stock/index UI and restart updates
@@ -747,22 +767,20 @@ function updateSetting(key, value) {
             
         default:
             // Handle RSS-related settings
-            if (key.startsWith('rss-')) {
-                const isDrop = !value; // If unchecked, it's a drop
-                
+            if (key === 'rss-feeds') {
                 // Only update news immediately if live_news_updates is true
                 if (live_news_updates) {
-                    // console.log(`RSS setting "${key}" changed to ${value}, updating news feed immediately`);
+                    console.log(`RSS feeds setting changed, updating news feed immediately`);
                     import('./news.js').then(newsModule => {
                         if (typeof newsModule.updateNews === 'function') {
-                            newsModule.updateNews(isDrop);
+                            newsModule.updateNews(false);
                         }
                     });
                 } else {
-                    // console.log(`RSS setting "${key}" changed to ${value}, will update later (live_news_updates is false)`);
+                    console.log(`RSS feeds setting changed, will update later (live_news_updates is false)`);
                     // Mark RSS as dirty so we can update after all settings are loaded
                     rssIsDirty = true;
-                    rssDrop = rssDrop || isDrop; // If any feed was dropped, set flag
+                    rssDrop = false; // Not a drop, just a change
                 }
             }
             break;
@@ -799,6 +817,48 @@ function setControlEnable(key, enabled = true) {
                 }
             }
         });
+    }
+}
+
+// Migration function to convert old individual RSS settings to new rss-feeds array
+function migrateRSSSettings() {
+    // Check if we already have the new rss-feeds setting
+    if (settings['rss-feeds'] && Array.isArray(settings['rss-feeds'])) {
+        console.log('RSS feeds already using new format, skipping migration');
+        return;
+    }
+    
+    console.log('Migrating RSS settings from individual booleans to array format');
+    
+    // Collect all feeds that are currently enabled
+    const enabledFeeds = [];
+    const oldRSSKeys = [];
+    for (const key in settings) {
+        if (key.startsWith('rss-')) {
+            oldRSSKeys.push(key); // Keep track of old keys to remove
+            if (settings[key] === true) {
+                const feedId = key.substring(4); // Remove 'rss-' prefix
+                enabledFeeds.push(feedId);
+            }
+        }
+    }
+    
+    // Set the new rss-feeds array
+    settings['rss-feeds'] = enabledFeeds;
+    
+    // Remove old individual RSS settings from local settings object
+    oldRSSKeys.forEach(key => {
+        delete settings[key];
+    });
+    
+    // Save the new setting if user is logged in
+    if (isLoggedIn && hashedUser) {
+        saveSetting('rss-feeds', enabledFeeds);
+    }
+    
+    console.log(`Migrated ${enabledFeeds.length} RSS feeds:`, enabledFeeds);
+    if (oldRSSKeys.length > 0) {
+        console.log(`Removed ${oldRSSKeys.length} old individual RSS settings from local cache`);
     }
 }
 
@@ -929,17 +989,17 @@ export function enableLiveNewsUpdates() {
     console.log('Enabling live news updates');
     live_news_updates = true;
     
-    // If any RSS settings were changed during startup, update now
-    if (rssIsDirty) {
-        console.log('RSS settings were changed, triggering update now');
-        import('./news.js').then(newsModule => {
-            if (typeof newsModule.updateNews === 'function') {
-                newsModule.updateNews(rssDrop);
-            }
-        });
-        rssIsDirty = false;
-        rssDrop = false;
-    }
+    // Always trigger initial news update to ensure news loads on page load
+    console.log('Triggering initial news update');
+    import('./news.js').then(newsModule => {
+        if (typeof newsModule.updateNews === 'function') {
+            newsModule.updateNews(rssIsDirty && rssDrop);
+        }
+    });
+    
+    // Reset flags after triggering update
+    rssIsDirty = false;
+    rssDrop = false;
 }
 
 // Function called by the toggle UI elements
