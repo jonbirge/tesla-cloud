@@ -8,6 +8,7 @@ header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
 $notePath = __DIR__ . '/NOTE';
 $noteText = '';
 $noteMTime = null;
+$noteHash = null; // <-- Added: will hold md5 hash if file exists and is readable
 
 if (is_readable($notePath)) {
     // Read entire file and trim trailing whitespace
@@ -21,7 +22,13 @@ if (is_readable($notePath)) {
     if ($mtime !== false) {
         $noteMTime = (int)$mtime;
     }
+
+    // Compute MD5 hash of the file contents (use md5_file for efficiency)
+    $md5 = md5_file($notePath);
+    if ($md5 !== false) {
+        $noteHash = $md5;
+    }
 }
 
-// Return JSON object including modification time (or null)
-echo json_encode(['note' => $noteText, 'mtime' => $noteMTime], JSON_UNESCAPED_UNICODE);
+// Return JSON object including modification time and md5 (or null)
+echo json_encode(['note' => $noteText, 'mtime' => $noteMTime, 'md5' => $noteHash], JSON_UNESCAPED_UNICODE);
