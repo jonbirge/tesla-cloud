@@ -15,6 +15,7 @@ let rssDrop = false;            // Flag to indicate if an RSS feed has been drop
 let unitIsDirty = false;        // Flag to indicate if unit/time settings have changed
 let settings = {};              // Initialize settings object
 let live_news_updates = false;  // Flag to control whether news updates should be triggered immediately
+let isUpdatingRSSUI = false;    // Flag to prevent infinite loops during RSS UI updates
 
 // Export settings object so it's accessible to other modules
 export { settings, currentUser, isLoggedIn, hashedUser, isDriving, live_news_updates };
@@ -169,8 +170,9 @@ export async function saveSetting(key, value) {
             newFeeds = currentFeeds.filter(feed => feed !== feedId);
         }
         
-        // Update the rss-feeds setting instead of the individual setting
-        return saveSetting('rss-feeds', newFeeds);
+        // Update the rss-feeds setting directly without recursive call
+        key = 'rss-feeds';
+        value = newFeeds;
     }
     
     // Handle local settings
@@ -182,9 +184,6 @@ export async function saveSetting(key, value) {
     // Update server if logged in
     if (isLoggedIn && hashedUser) {
         try {
-            // Update the local settings cache with boolean value
-            settings[key] = value;
-
             // Update the server with the boolean value using the RESTful API
             const response = await fetch(`settings.php/${encodeURIComponent(hashedUser)}/${encodeURIComponent(key)}`, {
                 method: 'PUT',
@@ -586,6 +585,9 @@ function updateRSSFeedsUI(feedsArray) {
         feedsArray = [];
     }
     
+    // Set flag to prevent infinite loops
+    isUpdatingRSSUI = true;
+    
     // Get all RSS feed toggle items
     const rssToggles = document.querySelectorAll('.settings-toggle-item[data-setting^="rss-"]');
     
@@ -595,10 +597,25 @@ function updateRSSFeedsUI(feedsArray) {
             const feedId = settingName.substring(4); // Remove 'rss-' prefix
             const checkbox = toggle.querySelector('input[type="checkbox"]');
             if (checkbox) {
+                // Temporarily remove the inline onchange attribute to prevent triggering events
+                const originalOnChange = checkbox.getAttribute('onchange');
+                checkbox.removeAttribute('onchange');
+                
+                // Update the checkbox state
                 checkbox.checked = feedsArray.includes(feedId);
+                
+                // Restore the onchange attribute
+                if (originalOnChange) {
+                    checkbox.setAttribute('onchange', originalOnChange);
+                }
             }
         }
     });
+    
+    // Clear flag after UI update is complete
+    setTimeout(() => {
+        isUpdatingRSSUI = false;
+    }, 0);
 }
 
 // Function to update stock/index UI based on current subscriptions
@@ -671,6 +688,21 @@ function updateSetting(key, value) {
         case 'rss-feeds':
             // Update individual RSS checkboxes based on the array
             updateRSSFeedsUI(value);
+            
+            // Only update news immediately if live_news_updates is true
+            if (live_news_updates) {
+                console.log(`RSS feeds setting changed, updating news feed immediately`);
+                import('./news.js').then(newsModule => {
+                    if (typeof newsModule.updateNews === 'function') {
+                        newsModule.updateNews(false);
+                    }
+                });
+            } else {
+                console.log(`RSS feeds setting changed, will update later (live_news_updates is false)`);
+                // Mark RSS as dirty so we can update after all settings are loaded
+                rssIsDirty = true;
+                rssDrop = false; // Not a drop, just a change
+            }
             break;
             
         case 'subscribed-stocks':
@@ -766,23 +798,7 @@ function updateSetting(key, value) {
             break;
             
         default:
-            // Handle RSS-related settings
-            if (key === 'rss-feeds') {
-                // Only update news immediately if live_news_updates is true
-                if (live_news_updates) {
-                    console.log(`RSS feeds setting changed, updating news feed immediately`);
-                    import('./news.js').then(newsModule => {
-                        if (typeof newsModule.updateNews === 'function') {
-                            newsModule.updateNews(false);
-                        }
-                    });
-                } else {
-                    console.log(`RSS feeds setting changed, will update later (live_news_updates is false)`);
-                    // Mark RSS as dirty so we can update after all settings are loaded
-                    rssIsDirty = true;
-                    rssDrop = false; // Not a drop, just a change
-                }
-            }
+            // Handle any other settings that need special processing here
             break;
     }
 }
@@ -1004,6 +1020,12 @@ export function enableLiveNewsUpdates() {
 
 // Function called by the toggle UI elements
 window.toggleSettingFrom = function(element) {
+    // Prevent recursive calls during RSS UI updates
+    if (isUpdatingRSSUI) {
+        console.log('Ignoring toggle during RSS UI update to prevent infinite loop');
+        return;
+    }
+    
     console.log('Toggle setting from UI element.');
     // const settingItem = element.closest('.settings-toggle-item');
     // Find closest element with a data-setting attribute
