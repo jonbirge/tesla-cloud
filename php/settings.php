@@ -4,7 +4,7 @@ require_once 'dotenv.php';
 
 // Settings management API
 // Provides a simple RESTful key-value store for user settings
-// Format: settings.php/{userId}[/{key}]
+// Format: php/settings.php/{userId}[/{key}]
 header('Content-Type: application/json');
 
 // Enable error reporting for debugging
@@ -25,7 +25,7 @@ $defaultSettings = [
 ];
 
 // Load the .env file (default path is './.env')
-$dotenv = new DotEnv();
+$dotenv = new DotEnv(__DIR__ . '/../.env');
 
 // Retrieve a specific variable
 // $dbHost = $dotenv->get('DB_HOST');

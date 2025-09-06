@@ -5,7 +5,7 @@
 header('Content-Type: application/json; charset=utf-8');
 header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
 
-$notePath = __DIR__ . '/NOTE';
+$notePath = __DIR__ . '/../NOTE';
 $noteText = '';
 $noteMTime = null;
 $noteHash = null; // <-- Added: will hold md5 hash if file exists and is readable

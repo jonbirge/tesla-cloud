@@ -53,7 +53,7 @@ function getRequestPath() {
 }
 
 // Load the .env file (default path is './.env')
-$dotenv = new DotEnv();
+$dotenv = new DotEnv(__DIR__ . '/../.env');
 $_ENV = $dotenv->getAll();
 
 $host = $_ENV['SQL_HOST'];

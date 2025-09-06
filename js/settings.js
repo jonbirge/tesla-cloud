@@ -185,7 +185,7 @@ export async function saveSetting(key, value) {
     if (isLoggedIn && hashedUser) {
         try {
             // Update the server with the boolean value using the RESTful API
-            const response = await fetch(`settings.php/${encodeURIComponent(hashedUser)}/${encodeURIComponent(key)}`, {
+            const response = await fetch(`php/settings.php/${encodeURIComponent(hashedUser)}/${encodeURIComponent(key)}`, {
                 method: 'PUT',
                 headers: {
                     'Content-Type': 'application/json'
@@ -275,7 +275,7 @@ async function validateHashedUserId(hashedId)
 {
     try {
         // Use HEAD request to check if the user exists
-        const response = await fetch(`settings.php/${encodeURIComponent(hashedId)}`, {
+        const response = await fetch(`php/settings.php/${encodeURIComponent(hashedId)}`, {
             method: 'HEAD'
         });
         
@@ -350,7 +350,7 @@ async function createNewUser(userId, hashedId = null) {
             hashedId = await hashUserId(userId);
         }
         
-        const response = await fetch(`settings.php/${encodeURIComponent(hashedId)}`, {
+        const response = await fetch(`php/settings.php/${encodeURIComponent(hashedId)}`, {
             method: 'POST'
         });
         
@@ -373,7 +373,7 @@ async function createNewUser(userId, hashedId = null) {
 // Function to generate an auto-generated user from the server and return the hash
 async function autoCreateUser() {
     try {
-        const response = await fetch('settings.php', {
+        const response = await fetch('php/settings.php', {
             method: 'POST'
         });
         if (response.ok) {
@@ -412,7 +412,7 @@ async function fetchSettings() {
     try {
         // Fetch settings using RESTful API
         console.log('Fetching settings for user: ', hashedUser);
-        const response = await fetch(`settings.php/${encodeURIComponent(hashedUser)}`, {
+        const response = await fetch(`php/settings.php/${encodeURIComponent(hashedUser)}`, {
             method: 'GET'
         });
 

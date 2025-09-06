@@ -39,7 +39,7 @@ export function fetchPremiumWeatherData(lat, long, silentLoad = false) {
     }
 
     // Fetch and update weather data
-    fetch(`openwx.php/data/3.0/onecall?lat=${lat}&lon=${long}&units=imperial`)
+    fetch(`php/openwx.php/data/3.0/onecall?lat=${lat}&lon=${long}&units=imperial`)
         .then(response => response.json())
         .then(forecastDataLocal => {
             if (forecastDataLocal) {
@@ -103,7 +103,7 @@ export function fetchPremiumWeatherData(lat, long, silentLoad = false) {
 // Fetch city data based on latitude and longitude
 export async function fetchCityData(lat, long) {
     try {
-        const response = await fetch(`openwx.php/geo/1.0/reverse?lat=${lat}&lon=${long}&limit=1`);
+        const response = await fetch(`php/openwx.php/geo/1.0/reverse?lat=${lat}&lon=${long}&limit=1`);
         const data = await response.json();
         
         if (data && data.length > 0) {
@@ -631,7 +631,7 @@ function toggleRainIndicator(show, minutesUntilRain = 0) {
 
 // Fetches and updates the Air Quality Index (AQI) from openweather.org
 function updateAQI(lat, lon) {
-    fetch(`openwx.php/data/2.5/air_pollution?lat=${lat}&lon=${lon}`)
+    fetch(`php/openwx.php/data/2.5/air_pollution?lat=${lat}&lon=${lon}`)
         .then(response => response.json())
         .then(data => {
             const aqi = data.list[0].main.aqi;

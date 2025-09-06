@@ -5,7 +5,7 @@
 # =============================================================================
 
 # Configuration parameters
-BASE_URL="https://teslas.cloud/restdb.php"  # Base URL for the REST API
+BASE_URL="https://teslas.cloud/php/rest_db.php"  # Base URL for the REST API
 VERBOSE=false               # Set to true for detailed output
 TEMP_DIR="/tmp/restdb_test" # Directory for temporary files
 KEEP_DATA=false             # Whether to keep test data after running tests

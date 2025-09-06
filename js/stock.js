@@ -1,5 +1,5 @@
 // Configuration
-const STOCK_API_ENDPOINT = 'quote.php?symbol='; // Prefix for internal stock REST API
+const STOCK_API_ENDPOINT = 'php/quote.php?symbol='; // Prefix for internal stock REST API
 const UPDATE_INTERVAL = 2 * 60 * 1000; // 2 minutes in milliseconds
 const CACHE_AGE_LIMIT = 1 * 60 * 1000; // minute in milliseconds
 const DISPLAY_ALTERNATE_INTERVAL = 5 * 1000; // 5 seconds in milliseconds

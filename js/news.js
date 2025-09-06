@@ -3,8 +3,8 @@ import { settings, isDriving, hashedUser, isLoggedIn } from './settings.js';
 import { formatTime, highlightUpdate, testMode, showNotification } from './common.js';
 
 // Constants
-const BASE_URL = 'news.php?n=512';
-const RESTDB_URL = 'rest_db.php';
+const BASE_URL = 'php/news.php?n=512';
+const RESTDB_URL = 'php/rest_db.php';
 const NEWS_REFRESH_INTERVAL = 2.5;  // minutes
 
 // Variables
@@ -61,7 +61,7 @@ export async function initializeNewsStorage() {
     }
 }
 
-// Helper functions for rest_db.php management
+// Helper functions for php/rest_db.php management
 async function ensureUserDirectoryExists(retryCount = 2) {
     const DIRECTORY_CHECK_INTERVAL = 60000; // Only try once per minute at most
 
@@ -180,7 +180,7 @@ async function ensureUserDirectoryExists(retryCount = 2) {
     }
 }
 
-// Get seen news IDs from rest_db.php
+// Get seen news IDs from php/rest_db.php
 async function getSeenNewsIds() {
     // If not logged in, return empty object
     if (!isLoggedIn || !hashedUser || !directoryInitialized) {
@@ -978,7 +978,7 @@ window.shareNews = async function (title, link, source, id) {
 
     // Communicate with the forwarding server
     try {
-        const response = await fetch('share.php', {
+        const response = await fetch('php/share.php', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ to, html, subject })
@@ -1036,7 +1036,7 @@ window.clearSeenNewsStorage = async function() {
         // Clear the cache
         cachedSeenNewsIds = {};
         
-        console.log('Cleared all seen news data from rest_db.php');
+        console.log('Cleared all seen news data from php/rest_db.php');
         return true;
     } catch (error) {
         console.error('Error clearing seen news data:', error);
