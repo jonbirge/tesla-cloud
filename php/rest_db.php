@@ -52,32 +52,42 @@ function getRequestPath() {
     return $path;
 }
 
-// Load the .env file (default path is './.env')
-$dotenv = new DotEnv(__DIR__ . '/../.env');
-$_ENV = $dotenv->getAll();
-
-$host = $_ENV['SQL_HOST'];
-$username = $_ENV['SQL_USER'];
-$password = $_ENV['SQL_PASS'];
-$dbname = $_ENV['SQL_DB_NAME'];
-
-// Open a connection to the database
+// Load configuration if available
 try {
-    $pdo = new PDO("mysql:host=$host;dbname=$dbname", $username, $password);
-    $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-    
-    // Check if key_value table exists, if not create it
-    $tableCheck = $pdo->query("SHOW TABLES LIKE 'key_value'");
-    if ($tableCheck->rowCount() == 0) {
-        // Table doesn't exist, create it
-        $pdo->exec("CREATE TABLE key_value (
-            `key` VARCHAR(255) NOT NULL PRIMARY KEY,
-            `value` TEXT NULL,
-            `life_time` FLOAT DEFAULT 2,
-            `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-            `updated_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
-        )");
+    $dotenv = new DotEnv(__DIR__ . '/../.env');
+    $_ENV = $dotenv->getAll();
+} catch (Exception $e) {
+    // Missing or unreadable .env is fine; we'll fall back to defaults
+    $_ENV = [];
+}
+
+// Determine database connection
+try {
+    if (isset($_ENV['SQL_HOST'])) {
+        // Use MySQL/MariaDB credentials from .env
+        $host = $_ENV['SQL_HOST'];
+        $username = $_ENV['SQL_USER'];
+        $password = $_ENV['SQL_PASS'];
+        $dbname = $_ENV['SQL_DB_NAME'];
+        $dsn = "mysql:host=$host;dbname=$dbname";
+        $pdo = new PDO($dsn, $username, $password);
+    } else {
+        // Fall back to SQLite database for local testing
+        $dbPath = $_ENV['SQLITE_PATH'] ?? sys_get_temp_dir() . '/restdb.sqlite';
+        $dsn = 'sqlite:' . $dbPath;
+        $pdo = new PDO($dsn);
     }
+
+    $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+
+    // Create table if it doesn't exist
+    $pdo->exec("CREATE TABLE IF NOT EXISTS key_value (
+        `key` VARCHAR(255) NOT NULL PRIMARY KEY,
+        `value` TEXT NULL,
+        `life_time` FLOAT DEFAULT 2,
+        `created_at` DATETIME DEFAULT CURRENT_TIMESTAMP,
+        `updated_at` DATETIME DEFAULT CURRENT_TIMESTAMP
+    )");
 } catch (PDOException $e) {
     http_response_code(500);
     echo json_encode(['error' => 'Database connection failed: ' . $e->getMessage()]);
