@@ -218,7 +218,7 @@ function turnOffDarkMode() {
 // Initialize settings with defaults
 function setDefaultSettings() {
     settings = { ...defaultSettings };
-    // initializeSettings();
+    initializeSettings();
     updateRadarVisibility();
     console.log('Settings initialized to defaults');
 }
@@ -413,9 +413,13 @@ async function fetchSettings() {
             initializeSettings();
         } else {
             console.error('Error fetching settings: ', response.statusText);
+            // Initialize UI even if settings fetch failed
+            initializeSettings();
         }
     } catch (error) {
         console.error('Error fetching settings: ', error);
+        // Initialize UI even if settings fetch failed
+        initializeSettings();
     }
 }
 
@@ -492,10 +496,8 @@ async function loadStockAndIndexData() {
 // Load JSON data for news sources
 async function loadNewsSourcesData() {
     try {
-        console.log('Loading news sources data...');
         const response = await fetch('js/news-sources.json');
         availableNewsSources = await response.json();
-        console.log('Loaded news sources data:', availableNewsSources.length, 'sources');
         
         // Generate settings UI after data is loaded
         generateNewsSourceSettings();
@@ -613,17 +615,11 @@ function updateStockIndexUI() {
 
 // Function to generate news source settings dynamically
 function generateNewsSourceSettings() {
-    console.log('Generating news source settings...');
     const generalContainer = document.querySelector('#news-general-settings');
     const businessContainer = document.querySelector('#news-business-settings');
     const teslaContainer = document.querySelector('#news-tesla-settings');
     
-    console.log('Containers found:', !!generalContainer, !!businessContainer, !!teslaContainer);
-    
-    if (!generalContainer || !businessContainer || !teslaContainer) {
-        console.error('News source containers not found in DOM');
-        return;
-    }
+    if (!generalContainer || !businessContainer || !teslaContainer) return;
     
     generalContainer.replaceChildren();
     businessContainer.replaceChildren();
@@ -648,7 +644,6 @@ function generateNewsSourceSettings() {
         }
     });
 
-    console.log('News source settings generated successfully');
     // Update UI based on current settings
     updateNewsSourceUI();
 }
@@ -890,8 +885,10 @@ function initializeSettings() {
     // Load stock/index data and generate settings
     loadStockAndIndexData();
     
-    // Load news sources data and generate settings
-    loadNewsSourcesData();
+    // Load news sources data and generate settings - use setTimeout to ensure DOM is ready
+    setTimeout(() => {
+        loadNewsSourcesData();
+    }, 100);
     
     // Iterate through all keys in the settings object
     for (const key in settings) {
