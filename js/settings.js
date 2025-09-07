@@ -38,35 +38,7 @@ const defaultSettings = {
     "news-forwarding": false,
     "news-forward-only": false,
     "forwarding-email": "",
-    // News sources
-    "rss-wsj": true,
-    "rss-nyt": true,
-    "rss-wapo": false,
-    "rss-latimes": false,
-    "rss-bos": false,
-    "rss-den": false,
-    "rss-chi": false,
-    "rss-bloomberg": false,
-    "rss-ap": false,
-    "rss-bbc": false,
-    "rss-economist": false,
-    "rss-lemonde": false,
-    "rss-cnn": false,
-    "rss-newyorker": false,
-    "rss-notateslaapp": true,
-    "rss-teslarati": true,
-    "rss-insideevs": true,
-    "rss-thedrive": false,
-    "rss-techcrunch": false,
-    "rss-caranddriver": true,
-    "rss-theverge": false,
-    "rss-arstechnica": false,
-    "rss-engadget": true,
-    "rss-gizmodo": false,
-    "rss-wired": false,
-    "rss-spacenews": false,
-    "rss-defensenews": false,
-    "rss-aviationweek": false,
+    // News sources - will be populated dynamically from news-sources.json
 };
 
 // Function that sets driving state
@@ -496,6 +468,9 @@ async function cleanupOrphanedSubscriptions() {
 let availableStocks = [];
 let availableIndexes = [];
 
+// Load available news sources for settings generation
+let availableNewsSources = [];
+
 // Load JSON data for stocks and indexes
 async function loadStockAndIndexData() {
     try {
@@ -512,6 +487,34 @@ async function loadStockAndIndexData() {
     } catch (error) {
         console.error('Error loading stock/index data:', error);
     }
+}
+
+// Load JSON data for news sources
+async function loadNewsSourcesData() {
+    try {
+        console.log('Loading news sources data...');
+        const response = await fetch('js/news-sources.json');
+        availableNewsSources = await response.json();
+        console.log('Loaded news sources data:', availableNewsSources.length, 'sources');
+        
+        // Generate settings UI after data is loaded
+        generateNewsSourceSettings();
+        
+        // Update default settings based on JSON
+        updateDefaultNewsSettings();
+    } catch (error) {
+        console.error('Error loading news sources data:', error);
+    }
+}
+
+// Update default settings based on news sources JSON
+function updateDefaultNewsSettings() {
+    availableNewsSources.forEach(source => {
+        const key = `rss-${source.id}`;
+        if (!(key in defaultSettings)) {
+            defaultSettings[key] = source.defaultEnabled || false;
+        }
+    });
 }
 
 // Function to generate stock and index settings dynamically
@@ -604,6 +607,86 @@ function updateStockIndexUI() {
         const checkbox = document.querySelector(`[data-setting="index-${index.TrackingETF}"] input`);
         if (checkbox) {
             checkbox.checked = subscribedIndexes.includes(index.TrackingETF);
+        }
+    });
+}
+
+// Function to generate news source settings dynamically
+function generateNewsSourceSettings() {
+    console.log('Generating news source settings...');
+    const generalContainer = document.querySelector('#news-general-settings');
+    const businessContainer = document.querySelector('#news-business-settings');
+    const teslaContainer = document.querySelector('#news-tesla-settings');
+    
+    console.log('Containers found:', !!generalContainer, !!businessContainer, !!teslaContainer);
+    
+    if (!generalContainer || !businessContainer || !teslaContainer) {
+        console.error('News source containers not found in DOM');
+        return;
+    }
+    
+    generalContainer.replaceChildren();
+    businessContainer.replaceChildren();
+    teslaContainer.replaceChildren();
+
+    // Generate news source checkboxes by category
+    availableNewsSources.forEach(source => {
+        const div = createNewsToggleItem(source);
+        
+        switch (source.category) {
+            case 'general':
+                generalContainer.appendChild(div);
+                break;
+            case 'business':
+                businessContainer.appendChild(div);
+                break;
+            case 'tesla':
+                teslaContainer.appendChild(div);
+                break;
+            default:
+                generalContainer.appendChild(div);
+        }
+    });
+
+    console.log('News source settings generated successfully');
+    // Update UI based on current settings
+    updateNewsSourceUI();
+}
+
+function createNewsToggleItem(source) {
+    const itemDiv = document.createElement('div');
+    itemDiv.className = 'settings-toggle-item news-toggle-item';
+    itemDiv.dataset.setting = `rss-${source.id}`;
+    itemDiv.addEventListener('click', function() {
+        const input = this.querySelector('input');
+        if (input) input.click();
+    });
+
+    const label = document.createElement('label');
+    label.textContent = source.name;
+    itemDiv.appendChild(label);
+
+    const input = document.createElement('input');
+    input.type = 'checkbox';
+    input.addEventListener('change', function() {
+        toggleSettingFrom(this);
+    });
+    itemDiv.appendChild(input);
+
+    const span = document.createElement('span');
+    span.className = 'settings-toggle-slider';
+    itemDiv.appendChild(span);
+
+    return itemDiv;
+}
+
+// Function to update news source UI based on current settings
+function updateNewsSourceUI() {
+    availableNewsSources.forEach(source => {
+        const settingKey = `rss-${source.id}`;
+        const checkbox = document.querySelector(`[data-setting="${settingKey}"] input`);
+        if (checkbox) {
+            checkbox.checked = settings[settingKey] || false;
         }
     });
 }
@@ -806,6 +889,9 @@ function setControlEnable(key, enabled = true) {
 function initializeSettings() {
     // Load stock/index data and generate settings
     loadStockAndIndexData();
+    
+    // Load news sources data and generate settings
+    loadNewsSourcesData();
     
     // Iterate through all keys in the settings object
     for (const key in settings) {
