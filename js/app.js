@@ -17,6 +17,7 @@ const WX_DISTANCE_THRESHOLD = 25000;                // meters
 const WX_TIME_THRESHOLD = 60;                       // minutes
 const MAX_SPEED = 50;                               // Max speed for wind display (mph)
 const MIN_GPS_UPDATE_INTERVAL = 1000;               // ms - minimum time between updates
+const MAX_GPS_RETRIES = 3;                           // Max consecutive GPS failures before giving up
 const WIKI_TYPES = ['event','airport','landmark'];  // Types of Wikipedia data to fetch
 const ENABLE_SPEED_DISABLE = false;                 // Set to false to disable speed-based section disabling
 const SPEED_DISABLE_THRESHOLD = 1.5;                // Speed in mph above which disabling occurs
@@ -39,6 +40,8 @@ let neverUpdatedLocation = true;
 let radarContext = null;
 let gpsIntervalId = null;
 let lastGPSUpdate = 0;
+let gpsPermissionDenied = false;                    // Track if GPS permission was denied
+let gpsFailureCount = 0;                            // Count consecutive GPS failures
 let networkInfoUpdated = false;                     // Track if network info has been updated
 const positionSimulator = new PositionSimulator();  // TODO: only create if needed
 
@@ -357,6 +360,9 @@ function shouldUpdateLongRangeData() {
 
 // Function to handle position updates from GPS
 async function handlePositionUpdate(position) {
+    // Reset GPS failure count on successful position update
+    gpsFailureCount = 0;
+    
     lat = position.coords.latitude;
     long = position.coords.longitude;
     alt = position.coords.altitude;
@@ -491,9 +497,14 @@ function stoppedDriving() {
 
 // Function to update GPS data
 function updateGPS() {
+    // Don't try GPS if permission was denied or max retries exceeded
+    if (gpsPermissionDenied || gpsFailureCount >= MAX_GPS_RETRIES) {
+        return false;
+    }
+    
     if (!testMode) {
         if (navigator.geolocation) {
-            navigator.geolocation.getCurrentPosition(handlePositionUpdate);
+            navigator.geolocation.getCurrentPosition(handlePositionUpdate, handleGPSError);
         } else {
             console.log('Geolocation is not supported by this browser.');
             return false;
@@ -531,6 +542,36 @@ function stopGPSUpdates() {
         clearInterval(gpsIntervalId);
         gpsIntervalId = null;
         console.log('GPS updates paused');
+    }
+}
+
+// Function to handle GPS errors gracefully
+function handleGPSError(error) {
+    gpsFailureCount++;
+    console.log(`GPS error (attempt ${gpsFailureCount}/${MAX_GPS_RETRIES}):`, error.message);
+    
+    // Check error type
+    if (error.code === error.PERMISSION_DENIED) {
+        gpsPermissionDenied = true;
+        console.log('GPS permission denied by user');
+    }
+    
+    // Update GPS status indicator to show error state
+    const gpsStatusElement = document.getElementById('gps-status');
+    if (gpsStatusElement) {
+        gpsStatusElement.style.color = 'var(--status-unavailable)';
+        if (gpsPermissionDenied) {
+            gpsStatusElement.title = 'GPS Permission Denied';
+        } else {
+            gpsStatusElement.title = 'GPS Error: ' + error.message;
+        }
+        gpsStatusElement.classList.remove('hidden');
+    }
+    
+    // Stop GPS updates if permission denied or max retries exceeded
+    if (gpsPermissionDenied || gpsFailureCount >= MAX_GPS_RETRIES) {
+        console.log('Stopping GPS updates due to permission denial or max retries exceeded');
+        stopGPSUpdates();
     }
 }
 
