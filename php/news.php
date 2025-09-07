@@ -37,37 +37,44 @@ $numStories = max(1, min($maxStories, $numStories));
 $maxAgeDays = isset($_GET['age']) ? floatval($_GET['age']) : 2.0;
 $maxAgeSeconds = $maxAgeDays * 86400; // Convert days to seconds
 
-// List of RSS feeds to fetch - now with individual cache durations in minutes
-$feeds = [
-    'wsj' => ['url' => 'https://feeds.content.dowjones.io/public/rss/RSSWorldNews', 'cache' => 5],
-    'nyt' => ['url' => 'https://rss.nytimes.com/services/xml/rss/nyt/HomePage.xml', 'cache' => 5],
-    'wapo' => ['url' => 'https://www.washingtonpost.com/arcio/rss/category/politics/', 'cache' => 15],
-    'latimes' => ['url' => 'https://www.latimes.com/rss2.0.xml', 'cache' => 15],
-    'bos' => ['url' => 'https://www.boston.com/tag/local-news/feed', 'cache' => 15],
-    'den' => ['url' => 'https://www.denverpost.com/feed/', 'cache' => 15],
-    'chi' => ['url' => 'https://www.chicagotribune.com/news/feed/', 'cache' => 15],
-    'bbc' => ['url' => 'http://feeds.bbci.co.uk/news/world/rss.xml', 'cache' => 15],
-    'lemonde' => ['url' => 'https://www.lemonde.fr/rss/une.xml', 'cache' => 30],
-    'bloomberg' => ['url' => 'https://feeds.bloomberg.com/news.rss', 'cache' => 15],
-    'economist' => ['url' => 'https://www.economist.com/latest/rss.xml', 'cache' => 60],
-    'newyorker' => ['url' => 'https://www.newyorker.com/feed/news', 'cache' => 60],
-    //'cnn' => ['url' => 'https://openrss.org/www.cnn.com', 'cache' => 15, 'icon' => 'https://www.cnn.com/'],
-    'ap' => ['url' => 'https://news.google.com/rss/search?q=when:24h+allinurl:apnews.com&hl=en-US&gl=US&ceid=US:en', 'cache' => 15, 'icon' => 'https://apnews.com/'],
-    'notateslaapp' => ['url' => 'https://www.notateslaapp.com/rss', 'cache' => 30],
-    'teslarati' => ['url' => 'https://www.teslarati.com/feed/', 'cache' => 30],
-    'insideevs' => ['url' => 'https://insideevs.com/rss/articles/all/', 'cache' => 30],
-    'thedrive' => ['url' => 'https://www.thedrive.com/feed', 'cache' => 30],
-    'caranddriver' => ['url' => 'https://www.caranddriver.com/rss/all.xml/', 'cache' => 30],
-    'techcrunch' => ['url' => 'https://techcrunch.com/feed/', 'cache' => 30],
-    'arstechnica' => ['url' => 'https://feeds.arstechnica.com/arstechnica/index', 'cache' => 30],
-    'engadget' => ['url' => 'https://www.engadget.com/rss.xml', 'cache' => 30],
-    'gizmodo' => ['url' => 'https://gizmodo.com/rss', 'cache' => 30],
-    'theverge' => ['url' => 'https://www.theverge.com/rss/index.xml', 'cache' => 30],
-    'wired' => ['url' => 'https://www.wired.com/feed/rss', 'cache' => 30],
-    'spacenews' => ['url' => 'https://spacenews.com/feed/', 'cache' => 30],
-    'defensenews' => ['url' => 'https://www.defensenews.com/arc/outboundfeeds/rss/?outputType=xml', 'cache' => 30],
-    'aviationweek' => ['url' => 'https://aviationweek.com/awn/rss-feed-by-content-source', 'cache' => 30]
-];
+// Load RSS feeds from JSON file
+function loadNewsSourcesFromJson() {
+    $jsonFile = __DIR__ . '/../js/news-sources.json';
+    if (!file_exists($jsonFile)) {
+        logMessage("News sources JSON file not found: $jsonFile");
+        return [];
+    }
+    
+    $jsonContent = file_get_contents($jsonFile);
+    if ($jsonContent === false) {
+        logMessage("Failed to read news sources JSON file: $jsonFile");
+        return [];
+    }
+    
+    $sources = json_decode($jsonContent, true);
+    if ($sources === null) {
+        logMessage("Failed to parse news sources JSON file: $jsonFile");
+        return [];
+    }
+    
+    // Convert to the format expected by the rest of the code
+    $feeds = [];
+    foreach ($sources as $source) {
+        $feedData = [
+            'url' => $source['url'],
+            'cache' => $source['cache']
+        ];
+        if (isset($source['icon'])) {
+            $feedData['icon'] = $source['icon'];
+        }
+        $feeds[$source['id']] = $feedData;
+    }
+    
+    return $feeds;
+}
+
+// List of RSS feeds to fetch - loaded from JSON
+$feeds = loadNewsSourcesFromJson();
 
 // Set up error logging
 ini_set('log_errors', 1);
