@@ -28,10 +28,23 @@ function getUserLocation() {
             },
             (error) => {
                 console.log('Error getting location: ', error.message);
+                // Reset location data when GPS fails
+                userLocation.latitude = null;
+                userLocation.longitude = null;
+                userLocation.altitude = null;
+            },
+            {
+                enableHighAccuracy: false,
+                timeout: 10000,
+                maximumAge: 300000
             }
         );
     } else {
         console.log('Geolocation is not supported by this browser');
+        // Ensure location data is null when geolocation is not supported
+        userLocation.latitude = null;
+        userLocation.longitude = null;
+        userLocation.altitude = null;
     }
 }
 

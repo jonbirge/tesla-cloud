@@ -489,13 +489,66 @@ function stoppedDriving() {
     }
 }
 
+// Function to handle GPS errors gracefully
+function handleGPSError(error) {
+    console.log('GPS Error:', error.message);
+    
+    // Update GPS status indicator to show unavailable
+    const gpsStatusElement = document.getElementById('gps-status');
+    if (gpsStatusElement) {
+        gpsStatusElement.style.color = 'var(--status-unavailable)';
+        gpsStatusElement.classList.remove('hidden');
+        
+        // Set appropriate title based on error type
+        switch(error.code) {
+            case error.PERMISSION_DENIED:
+                gpsStatusElement.title = 'GPS Permission Denied';
+                break;
+            case error.POSITION_UNAVAILABLE:
+                gpsStatusElement.title = 'GPS Position Unavailable';
+                break;
+            case error.TIMEOUT:
+                gpsStatusElement.title = 'GPS Timeout';
+                break;
+            default:
+                gpsStatusElement.title = 'GPS Error';
+                break;
+        }
+    }
+    
+    // Reset GPS-dependent display elements to indicate no data
+    const accuracyElement = document.getElementById('accuracy');
+    if (accuracyElement) {
+        accuracyElement.innerText = '--';
+    }
+    
+    const altitudeElement = document.getElementById('altitude');
+    if (altitudeElement) {
+        altitudeElement.innerText = '--';
+    }
+    
+    const headingElement = document.getElementById('heading');
+    if (headingElement) {
+        headingElement.innerText = '--';
+    }
+}
+
 // Function to update GPS data
 function updateGPS() {
     if (!testMode) {
         if (navigator.geolocation) {
-            navigator.geolocation.getCurrentPosition(handlePositionUpdate);
+            navigator.geolocation.getCurrentPosition(
+                handlePositionUpdate,
+                handleGPSError,
+                {
+                    enableHighAccuracy: true,
+                    timeout: 10000,
+                    maximumAge: 60000
+                }
+            );
         } else {
             console.log('Geolocation is not supported by this browser.');
+            handleGPSError({ code: 0, message: 'Geolocation not supported by browser' });
             return false;
         }
     } else { // testing
