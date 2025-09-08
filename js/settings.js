@@ -281,7 +281,7 @@ async function hashUserId(userId) {
 }
 
 // Internal helper function
-async function validateHashedUserId(hashedId)
+async function validateHashedUserId(hashedId, userId = null)
 {
     try {
         // Use HEAD request to check if the user exists
@@ -341,7 +341,7 @@ async function validateUserId(userId) {
     // Hash the user ID before sending to the server
     const hashedId = await hashUserId(userId);
 
-    if (await validateHashedUserId(hashedId)) {
+    if (await validateHashedUserId(hashedId, userId)) {
         currentUser = userId;
         setCookie('userid', userId);
         updateLoginState();
