@@ -146,9 +146,9 @@ if ($method === 'POST') {
                         if ($currentPath === $dbPath) continue;
                         
                         // Check if this segment exists
-                        $stmt = $pdo->prepare("SELECT COUNT(*) as count FROM key_value WHERE `key` = ?");
+                        $stmt = $pdo->prepare("SELECT 1 FROM key_value WHERE `key` = ? LIMIT 1");
                         $stmt->execute([$currentPath]);
-                        $exists = $stmt->fetch(PDO::FETCH_ASSOC)['count'] > 0;
+                        $exists = $stmt->fetch() !== false;
                         
                         if (!$exists) {
                             // Create directory entry
@@ -232,9 +232,9 @@ if ($method === 'POST') {
         $parentDir = implode('/', $parts);
         
         // Check if parent directory exists
-        $stmt = $pdo->prepare("SELECT COUNT(*) as count FROM key_value WHERE `key` = ? AND `value` IS NULL");
+        $stmt = $pdo->prepare("SELECT 1 FROM key_value WHERE `key` = ? AND `value` IS NULL LIMIT 1");
         $stmt->execute([$parentDir]);
-        $parentExists = $stmt->fetch(PDO::FETCH_ASSOC)['count'] > 0;
+        $parentExists = $stmt->fetch() !== false;
         
         if (!$parentExists) {
             // Try to create the parent directory structure
@@ -250,9 +250,9 @@ if ($method === 'POST') {
                     $currentPath .= $part;
                     
                     // Check if this segment exists
-                    $stmt = $pdo->prepare("SELECT COUNT(*) as count FROM key_value WHERE `key` = ?");
+                    $stmt = $pdo->prepare("SELECT 1 FROM key_value WHERE `key` = ? LIMIT 1");
                     $stmt->execute([$currentPath]);
-                    $exists = $stmt->fetch(PDO::FETCH_ASSOC)['count'] > 0;
+                    $exists = $stmt->fetch() !== false;
                     
                     if (!$exists) {
                         // Create directory entry
@@ -309,15 +309,15 @@ if ($method === 'POST') {
         
         if (!empty($prefix)) {
             // Not root directory, check if it exists
-            $stmt = $pdo->prepare("SELECT COUNT(*) as count FROM key_value WHERE `key` = ? AND `value` IS NULL");
+            $stmt = $pdo->prepare("SELECT 1 FROM key_value WHERE `key` = ? AND `value` IS NULL LIMIT 1");
             $stmt->execute([$prefix]);
-            $dirExists = $stmt->fetch(PDO::FETCH_ASSOC)['count'] > 0;
+            $dirExists = $stmt->fetch() !== false;
             
             if (!$dirExists) {
                 // Directory doesn't exist
-                $stmt = $pdo->prepare("SELECT COUNT(*) as count FROM key_value WHERE `key` = ?");
+                $stmt = $pdo->prepare("SELECT 1 FROM key_value WHERE `key` = ? LIMIT 1");
                 $stmt->execute([$prefix]);
-                $keyExists = $stmt->fetch(PDO::FETCH_ASSOC)['count'] > 0;
+                $keyExists = $stmt->fetch() !== false;
                 
                 if ($keyExists) {
                     // This is a key, not a directory
