@@ -77,7 +77,7 @@
     "url": "https://www.lemonde.fr/rss/une.xml",
     "cache": 30,
     "category": "general",
-    "defaultEnabled": true
+    "defaultEnabled": false
   },
   {
     "id": "newyorker",
@@ -85,7 +85,7 @@
     "url": "https://www.newyorker.com/feed/news",
     "cache": 60,
     "category": "general",
-    "defaultEnabled": true
+    "defaultEnabled": false
   },
   {
     "id": "ap",
@@ -93,7 +93,7 @@
     "url": "https://news.google.com/rss/search?q=when:24h+allinurl:apnews.com&hl=en-US&gl=US&ceid=US:en",
     "cache": 15,
     "category": "general",
-    "defaultEnabled": true,
+    "defaultEnabled": false,
     "icon": "https://apnews.com/"
   },
   {
