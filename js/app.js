@@ -1,7 +1,7 @@
 // Imports
 import { srcUpdate, testMode, updateTimeZone, GEONAMES_USERNAME } from './common.js';
 import { PositionSimulator } from './location.js';
-import { attemptLogin, leaveSettings, settings, isDriving, setDrivingState, enableLiveNewsUpdates } from './settings.js';
+import { attemptLogin, leaveSettings, settings, isDriving, setDrivingState, enableLiveNewsUpdates, saveSetting } from './settings.js';
 import { fetchPremiumWeatherData, fetchCityData, SAT_URLS, forecastDataPrem, currentRainAlert } from './wx.js';
 import { updateNetworkInfo, updatePingChart, startPingTest } from './net.js';
 import { setupNewsObserver, startNewsTimeUpdates, initializeNewsStorage } from './news.js';
@@ -591,6 +591,7 @@ function updateServerNote() {
         .then(data => {
             const content = (data && typeof data.note === 'string') ? data.note.trim() : '';
             const mtime = (data && typeof data.mtime === 'number') ? data.mtime : null;
+            const noteHash = (data && typeof data.md5 === 'string') ? data.md5 : null;
             const noteElement = document.getElementById('note');
             const announcementSection = document.getElementById('announcement');
             const aboutButton = document.getElementById('about-section');
@@ -598,6 +599,11 @@ function updateServerNote() {
             if (content && noteElement && announcementSection) {
                 // Clear existing content
                 noteElement.replaceChildren();
+
+                // Store the note hash in the note element for later retrieval
+                if (noteHash) {
+                    noteElement.setAttribute('data-note-hash', noteHash);
+                }
 
                 // If mtime available, create a right-justified date "cell"
                 if (mtime) {
@@ -622,9 +628,16 @@ function updateServerNote() {
 
                 announcementSection.style.display = 'block';
 
-                if (aboutButton) {
+                // Check if user has already seen this note before showing notification
+                const lastSeenHash = settings['last-note-hash-seen'];
+                const shouldShowNotification = !noteHash || !lastSeenHash || noteHash !== lastSeenHash;
+
+                if (aboutButton && shouldShowNotification) {
                     aboutButton.classList.add('has-notification');
                     aboutButton.setAttribute('data-count', '1');
+                } else if (aboutButton) {
+                    aboutButton.classList.remove('has-notification');
+                    aboutButton.removeAttribute('data-count');
                 }
             } else {
                 // No note: ensure announcement is hidden and no notification dot
@@ -851,12 +864,21 @@ window.showSection = function (sectionId) {
         }, 100);
     }
 
-    // If switching to about section, clear the notification dot
+    // If switching to about section, clear the notification dot and mark note as seen
     if (sectionId === 'about') {
         const aboutButton = document.getElementById('about-section');
         if (aboutButton) {
             aboutButton.classList.remove('has-notification');
             aboutButton.removeAttribute('data-count'); // Remove count attribute
+        }
+        
+        // Mark the current note as seen by updating the last-note-hash-seen setting
+        const noteElement = document.getElementById('note');
+        if (noteElement) {
+            const noteHash = noteElement.getAttribute('data-note-hash');
+            if (noteHash) {
+                saveSetting('last-note-hash-seen', noteHash);
+            }
         }
     }
 
