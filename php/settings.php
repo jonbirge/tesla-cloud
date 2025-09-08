@@ -489,9 +489,10 @@ function userSettingsExist($userId) {
     global $dbConnection;
     
     try {
-        $stmt = $dbConnection->prepare("SELECT 1 FROM user_settings WHERE user_id = ? LIMIT 1");
+        $stmt = $dbConnection->prepare("SELECT COUNT(*) as count FROM user_settings WHERE user_id = ? LIMIT 1");
         $stmt->execute([$userId]);
-        $exists = $stmt->rowCount() > 0;
+        $row = $stmt->fetch();
+        $exists = $row['count'] > 0;
         return $exists;
     } catch (PDOException $e) {
         $errorMsg = "Database error checking if user settings exist: " . $e->getMessage();
@@ -508,14 +509,16 @@ function loadUserSettings($userId) {
         $settings = [];
         $stmt = $dbConnection->prepare("SELECT setting_key, setting_value FROM user_settings WHERE user_id = ?");
         $stmt->execute([$userId]);
-        $rowCount = $stmt->rowCount();
         
-        if ($rowCount > 0) {
-            while ($row = $stmt->fetch()) {
-                // Parse stored JSON value or use as is if parsing fails
-                $value = json_decode($row['setting_value'], true);
-                $settings[$row['setting_key']] = ($value !== null) ? $value : $row['setting_value'];
-            }
+        $hasRows = false;
+        while ($row = $stmt->fetch()) {
+            $hasRows = true;
+            // Parse stored JSON value or use as is if parsing fails
+            $value = json_decode($row['setting_value'], true);
+            $settings[$row['setting_key']] = ($value !== null) ? $value : $row['setting_value'];
+        }
+        
+        if ($hasRows) {
             return $settings;
         }
         
