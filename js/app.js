@@ -894,6 +894,55 @@ window.showSection = function (sectionId) {
         }
     }
 
+    // Handle weather section when GPS is not available
+    if (sectionId === 'weather') {
+        if (gpsPermissionDenied || gpsFailureCount >= MAX_GPS_RETRIES) {
+            console.log('Location not available for weather data.');
+            const forecastContainer = document.getElementById('prem-forecast-container');
+            if (forecastContainer) {
+                forecastContainer.style.display = 'none';
+            }
+            
+            // Create or show GPS unavailable message
+            let gpsUnavailableMsg = document.getElementById('weather-gps-unavailable');
+            if (!gpsUnavailableMsg) {
+                gpsUnavailableMsg = document.createElement('div');
+                gpsUnavailableMsg.id = 'weather-gps-unavailable';
+                gpsUnavailableMsg.style.textAlign = 'center';
+                gpsUnavailableMsg.style.padding = '2rem';
+                gpsUnavailableMsg.style.color = 'var(--text-muted)';
+                
+                const p = document.createElement('p');
+                const em = document.createElement('em');
+                em.textContent = 'GPS information is not available. Weather forecast requires location access.';
+                p.appendChild(em);
+                gpsUnavailableMsg.appendChild(p);
+                
+                // Insert after the weather section header
+                const weatherSection = document.getElementById('weather');
+                const firstH2 = weatherSection.querySelector('h2');
+                if (firstH2 && firstH2.nextSibling) {
+                    weatherSection.insertBefore(gpsUnavailableMsg, firstH2.nextSibling);
+                } else {
+                    weatherSection.appendChild(gpsUnavailableMsg);
+                }
+            }
+            gpsUnavailableMsg.style.display = 'block';
+        } else {
+            // GPS is available, show normal forecast container
+            const forecastContainer = document.getElementById('prem-forecast-container');
+            if (forecastContainer) {
+                forecastContainer.style.display = '';
+            }
+            
+            // Hide GPS unavailable message if it exists
+            const gpsUnavailableMsg = document.getElementById('weather-gps-unavailable');
+            if (gpsUnavailableMsg) {
+                gpsUnavailableMsg.style.display = 'none';
+            }
+        }
+    }
+
     // Hide all sections first
     const sections = document.querySelectorAll('.section');
     sections.forEach(section => {
