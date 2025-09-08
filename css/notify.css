@@ -3,38 +3,33 @@
     background-color: #03a8f422;
     color: var(--button-text);
     border-radius: var(--button-radius);
-    padding: 18px 3px 18px 3px;
+    padding: 18px;
     font-weight: 500;
-    display: flex;
-    /* align-items: flex-start;     /* top-align cells */
-    /* gap: 10px; */
-    /* justify-content: flex-start; */
     max-width: 980px;
-    /* margin: 12px 0; */
-    /* text-align: justify; */
-    box-sizing: border-box;      /* include padding in width calculation */
+    box-sizing: border-box;  /* include padding in width calculation */
+    display: flex;
+    margin: 0px;
 }
 
 /* Make only the NOTE text italic */
 .announcement p em {
     font-style: italic;
+    margin: 0px;
 }
 
 /* New cell styles for announcement date + text */
 .announcement p .note-date {
-    min-width: 120px;           /* reserves space for the date cell */
-    text-align: left;          /* right-justify the date and dash */
+    min-width: 110px;
+    text-align: left;
     color: var(--text-color);
-    line-height: 1.2;
-    /* flex: 0 0 auto; */
-    /* padding-right: 8px; */
-    padding-left: 15px;
 }
 
-.announcement p .note-text {
-    text-align: left;           /* left-justify the note text */
-    flex: 1 1 auto;             /* allow note to take remaining space */
-    line-height: 1.2;
+@media only screen and (max-width: 900px) {
+    .announcement p .note-date {
+        min-width: 90px;
+        text-align: left;
+        color: var(--text-color);
+    }
 }
 
 /* Notification System */
