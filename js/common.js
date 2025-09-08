@@ -224,6 +224,116 @@ export function showNotification(message, type = 'warning') {
     }, 5000);
 }
 
+// Show a weather alert modal that requires acknowledgment
+export function showWeatherAlertModal(alert) {
+    // Remove any existing weather alert modal
+    const existingModal = document.getElementById('weather-alert-modal');
+    if (existingModal) {
+        existingModal.remove();
+    }
+
+    // Create modal overlay
+    const modalOverlay = document.createElement('div');
+    modalOverlay.id = 'weather-alert-modal';
+    modalOverlay.style.cssText = `
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.8);
+        z-index: 10000;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    `;
+
+    // Create modal content
+    const modalContent = document.createElement('div');
+    modalContent.style.cssText = `
+        background-color: #1a1a1a;
+        border: 3px solid #ff0000;
+        border-radius: 12px;
+        padding: 24px;
+        max-width: 600px;
+        width: 90%;
+        text-align: center;
+        box-shadow: 0 8px 32px rgba(255, 0, 0, 0.3);
+    `;
+
+    // Create alert icon
+    const alertIcon = document.createElement('div');
+    alertIcon.style.cssText = `
+        font-size: 48px;
+        color: #ff0000;
+        margin-bottom: 16px;
+    `;
+    alertIcon.innerHTML = '⚠️';
+
+    // Create alert title
+    const alertTitle = document.createElement('h2');
+    alertTitle.style.cssText = `
+        color: #ff0000;
+        margin: 0 0 16px 0;
+        font-size: 24px;
+        font-weight: bold;
+    `;
+    alertTitle.textContent = alert.event || 'Weather Alert';
+
+    // Create alert description
+    const alertDescription = document.createElement('p');
+    alertDescription.style.cssText = `
+        color: white;
+        margin: 0 0 24px 0;
+        line-height: 1.4;
+        font-size: 16px;
+    `;
+    alertDescription.textContent = alert.description || 'Significant weather event detected.';
+
+    // Create time info
+    const timeInfo = document.createElement('p');
+    timeInfo.style.cssText = `
+        color: #ccc;
+        margin: 0 0 24px 0;
+        font-size: 14px;
+    `;
+    const startTime = new Date(alert.start * 1000).toLocaleString();
+    const endTime = new Date(alert.end * 1000).toLocaleString();
+    timeInfo.textContent = `Valid: ${startTime} - ${endTime}`;
+
+    // Create acknowledge button
+    const acknowledgeBtn = document.createElement('button');
+    acknowledgeBtn.style.cssText = `
+        background-color: #ff0000;
+        color: white;
+        border: none;
+        padding: 12px 24px;
+        border-radius: 6px;
+        font-size: 16px;
+        font-weight: bold;
+        cursor: pointer;
+        min-width: 120px;
+    `;
+    acknowledgeBtn.textContent = 'Acknowledge';
+    acknowledgeBtn.onclick = () => {
+        modalOverlay.remove();
+    };
+
+    // Assemble modal
+    modalContent.appendChild(alertIcon);
+    modalContent.appendChild(alertTitle);
+    modalContent.appendChild(alertDescription);
+    modalContent.appendChild(timeInfo);
+    modalContent.appendChild(acknowledgeBtn);
+    modalOverlay.appendChild(modalContent);
+
+    // Add to page
+    document.body.appendChild(modalOverlay);
+
+    // Focus the acknowledge button for keyboard accessibility
+    acknowledgeBtn.focus();
+}
+
 // ***** Initialization *****
 
 // URL parameters

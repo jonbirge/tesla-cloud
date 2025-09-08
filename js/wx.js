@@ -1,5 +1,5 @@
 // Import required functions from app.js
-import { formatTime, highlightUpdate, testMode, showNotification } from './common.js';
+import { formatTime, highlightUpdate, testMode, showNotification, showWeatherAlertModal } from './common.js';
 import { autoDarkMode, settings } from './settings.js';
 
 // Parameters
@@ -17,13 +17,15 @@ let lastLong = null;
 let minutelyPrecipChart = null;
 let precipGraphUpdateInterval = null;   // Timer for updating the precipitation graph
 let currentRainAlert = false;           // Flag to track if we're currently under a rain alert
+let currentWeatherAlerts = [];          // Array to store current weather alerts
+let lastAlertCheck = 0;                 // Timestamp of last alert check to avoid duplicate popups
 let city = null;                        // Variable to store the city name
 let state = null;                       // Variable to store the state name
 let country = null;                     // Variable to store the country name
 let inCONUS = null;                     // In the continental US (CONUS)
 
 // Export these variables for use in other modules
-export { SAT_URLS, forecastDataPrem, lastLat, lastLong, city, state, currentRainAlert };
+export { SAT_URLS, forecastDataPrem, lastLat, lastLong, city, state, currentRainAlert, currentWeatherAlerts };
 
 // Fetches premium weather data from OpenWeather API
 export function fetchPremiumWeatherData(lat, long, silentLoad = false) {
@@ -49,9 +51,14 @@ export function fetchPremiumWeatherData(lat, long, silentLoad = false) {
                 if (testMode) {
                     console.log('TEST MODE: Generating random precipitation data');
                     generateTestMinutelyData(forecastDataPrem);
+                    // Add test weather alerts
+                    generateTestWeatherAlerts(forecastDataPrem);
                 } // test mode
                 
                 updatePremiumWeatherDisplay();
+
+                // Process weather alerts from API response
+                processWeatherAlerts(forecastDataLocal);
 
                 // Update time and location of weather data, using FormatTime
                 const weatherUpdateTime = formatTime(new Date(forecastDataLocal.current.dt * 1000), {
@@ -92,6 +99,21 @@ export function fetchPremiumWeatherData(lat, long, silentLoad = false) {
         })
         .catch(error => {
             console.error('Error fetching forecast data: ', error);
+
+            // In test mode, create dummy forecast data with alerts for testing
+            if (testMode) {
+                console.log('TEST MODE: API failed, creating dummy forecast data with alerts');
+                forecastDataPrem = {
+                    current: { dt: Math.floor(Date.now() / 1000), temp: 32 },
+                    daily: [],
+                    hourly: [],
+                    minutely: []
+                };
+                generateTestWeatherAlerts(forecastDataPrem);
+                processWeatherAlerts(forecastDataPrem);
+                updateWeatherAlertIndicator();
+                updateWeatherAlertsDisplay(); // Make sure to show alerts in weather section
+            }
 
             // In case of error, remove loading state - only if not silent loading
             if (!silentLoad) {
@@ -251,6 +273,100 @@ export function updatePremiumWeatherDisplay() {
 
     // Update precipitation graph with time-based x-axis
     updatePrecipitationGraph();
+
+    // Update weather alerts display
+    updateWeatherAlertsDisplay();
+}
+
+// Update weather alerts display in the weather section
+function updateWeatherAlertsDisplay() {
+    // Find or create alerts container
+    let alertsContainer = document.getElementById('weather-alerts-container');
+    if (!alertsContainer) {
+        alertsContainer = document.createElement('div');
+        alertsContainer.id = 'weather-alerts-container';
+        alertsContainer.style.cssText = `
+            margin: 16px 0;
+            padding: 0;
+        `;
+        
+        // Insert after the forecast container
+        const forecastContainer = document.getElementById('prem-forecast-container');
+        if (forecastContainer && forecastContainer.parentNode) {
+            forecastContainer.parentNode.insertBefore(alertsContainer, forecastContainer.nextSibling);
+        }
+    }
+
+    // Clear existing alerts
+    alertsContainer.innerHTML = '';
+
+    // Show current active alerts
+    if (currentWeatherAlerts.length > 0) {
+        const alertsTitle = document.createElement('h2');
+        alertsTitle.textContent = 'Active Weather Alerts';
+        alertsTitle.style.cssText = `
+            color: #ff0000;
+            margin: 16px 0 12px 0;
+            font-size: 18px;
+        `;
+        alertsContainer.appendChild(alertsTitle);
+
+        currentWeatherAlerts.forEach(alert => {
+            const alertItem = document.createElement('div');
+            alertItem.style.cssText = `
+                background-color: rgba(255, 0, 0, 0.1);
+                border: 1px solid #ff0000;
+                border-radius: 8px;
+                padding: 12px;
+                margin-bottom: 8px;
+            `;
+
+            const alertHeader = document.createElement('div');
+            alertHeader.style.cssText = `
+                display: flex;
+                align-items: center;
+                margin-bottom: 8px;
+            `;
+
+            const alertIcon = document.createElement('span');
+            alertIcon.innerHTML = '⚠️';
+            alertIcon.style.cssText = `
+                font-size: 20px;
+                margin-right: 8px;
+            `;
+
+            const alertTitle = document.createElement('strong');
+            alertTitle.textContent = alert.event || 'Weather Alert';
+            alertTitle.style.cssText = `
+                color: #ff0000;
+                font-size: 16px;
+            `;
+
+            alertHeader.appendChild(alertIcon);
+            alertHeader.appendChild(alertTitle);
+
+            const alertDescription = document.createElement('p');
+            alertDescription.textContent = alert.description || 'Weather alert in effect.';
+            alertDescription.style.cssText = `
+                margin: 0 0 8px 0;
+                line-height: 1.3;
+                color: var(--text-color);
+            `;
+
+            const alertTime = document.createElement('div');
+            alertTime.style.cssText = `
+                font-size: 12px;
+                color: #999;
+            `;
+            const endTime = new Date(alert.end * 1000).toLocaleString();
+            alertTime.textContent = `Until: ${endTime}`;
+
+            alertItem.appendChild(alertHeader);
+            alertItem.appendChild(alertDescription);
+            alertItem.appendChild(alertTime);
+            alertsContainer.appendChild(alertItem);
+        });
+    }
 }
 
 // Helper function to create hourly segments for a forecast day
@@ -802,6 +918,35 @@ function generateTestMinutelyData(forecastData) {
     return forecastData;
 }
 
+// Generate test weather alerts for demo purposes
+function generateTestWeatherAlerts(forecastData) {
+    const now = Math.floor(Date.now() / 1000);
+    const testAlerts = [
+        {
+            sender_name: "National Weather Service - TEST MODE",
+            event: "Winter Storm Warning",
+            start: now - 3600, // Started 1 hour ago
+            end: now + 21600, // Ends in 6 hours
+            description: "Heavy snow expected. Total snow accumulations of 8 to 14 inches possible. Winds could gust as high as 40 mph. Travel will be very difficult to impossible.",
+            tags: ["Snow", "Wind"]
+        },
+        {
+            sender_name: "Emergency Management - TEST MODE",
+            event: "High Wind Watch", 
+            start: now + 1800, // Starts in 30 minutes
+            end: now + 14400, // Ends in 4 hours
+            description: "Sustained winds of 35 to 45 mph with gusts up to 65 mph possible. Damaging winds could blow down trees and power lines.",
+            tags: ["Wind"]
+        }
+    ];
+    
+    // Add alerts to forecast data
+    forecastData.alerts = testAlerts;
+    console.log('TEST MODE: Added test weather alerts', testAlerts);
+    
+    return forecastData;
+}
+
 // Show forecast window (used to be a graph) for a premium forecast day
 window.showPremiumPrecipGraph = function(dayIndex) {
     if (!forecastDataPrem) return;
@@ -1056,4 +1201,96 @@ window.switchWeatherImage = function (type) {
     // Update slider position for three states
     const positions = { 'latest': 0, 'loop': 1, 'latest_ir': 2 };
     weatherSwitch.style.setProperty('--slider-position', positions[type]);
+}
+
+// Process weather alerts from OpenWeather API response
+function processWeatherAlerts(weatherData) {
+    if (!weatherData || !weatherData.alerts) {
+        // Clear any existing alerts if no alert data
+        currentWeatherAlerts = [];
+        updateWeatherAlertIndicator();
+        return;
+    }
+
+    const now = Date.now() / 1000; // Current time in Unix timestamp
+    const activeAlerts = weatherData.alerts.filter(alert => 
+        alert.start <= now && alert.end >= now
+    );
+
+    // Check for new significant alerts that need popup
+    const newSignificantAlerts = activeAlerts.filter(alert => 
+        isSignificantAlert(alert) && 
+        !currentWeatherAlerts.some(existing => 
+            existing.event === alert.event && 
+            existing.start === alert.start
+        )
+    );
+
+    // Update current alerts array
+    currentWeatherAlerts = activeAlerts;
+
+    // Show popup for new significant alerts
+    if (newSignificantAlerts.length > 0 && (now - lastAlertCheck) > 300) { // 5 min cooldown
+        showWeatherAlertModal(newSignificantAlerts[0]); // Show first alert
+        lastAlertCheck = now;
+    }
+
+    // Update alert indicators
+    updateWeatherAlertIndicator();
+}
+
+// Determine if an alert is considered "significant" and should trigger popup
+function isSignificantAlert(alert) {
+    const significantEvents = [
+        'Tornado Warning', 'Tornado Watch',
+        'Severe Thunderstorm Warning', 'Severe Thunderstorm Watch',
+        'Flash Flood Warning', 'Flash Flood Watch',
+        'Flood Warning', 'Flood Watch',
+        'Winter Storm Warning', 'Winter Storm Watch',
+        'Blizzard Warning', 'Blizzard Watch',
+        'Ice Storm Warning',
+        'High Wind Warning', 'High Wind Watch',
+        'Hurricane Warning', 'Hurricane Watch',
+        'Tropical Storm Warning', 'Tropical Storm Watch'
+    ];
+    
+    return significantEvents.some(event => 
+        alert.event && alert.event.toLowerCase().includes(event.toLowerCase())
+    );
+}
+
+// Update the red dot weather alert indicator
+function updateWeatherAlertIndicator() {
+    const hasSignificantAlerts = currentWeatherAlerts.some(alert => isSignificantAlert(alert));
+    
+    // Find or create alert indicator dot
+    let alertDot = document.getElementById('weather-alert-dot');
+    if (!alertDot) {
+        alertDot = document.createElement('span');
+        alertDot.id = 'weather-alert-dot';
+        alertDot.style.cssText = `
+            display: inline-block;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            margin-left: 8px;
+            vertical-align: middle;
+            margin-top: -2px;
+        `;
+        
+        // Add to weather section button
+        const weatherButton = document.getElementById('wx-section');
+        if (weatherButton) {
+            weatherButton.appendChild(alertDot);
+        }
+    }
+    
+    // Show/hide and color the dot
+    if (hasSignificantAlerts) {
+        alertDot.style.backgroundColor = '#ff0000';
+        alertDot.style.display = 'inline-block';
+        alertDot.title = 'Weather Alert Active';
+    } else {
+        alertDot.style.display = 'none';
+    }
 }
