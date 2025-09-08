@@ -332,15 +332,22 @@ async function createNewUser(userId, hashedId = null) {
             hashedId = await hashUserId(userId);
         }
         
+        // Create new user with current settings directly
+        console.log('Creating new user with preserved settings:', userId);
+        console.log('Current settings to preserve:', settings);
+        
         const response = await fetch(`php/settings.php/${encodeURIComponent(hashedId)}`, {
-            method: 'POST'
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                preserveSettings: settings
+            })
         });
         
         if (response.ok) {
-            console.log('Created new user with default settings:', userId);
-            for (const [key, value] of Object.entries(settings)) {
-                await saveSetting(key, value);
-            }
+            console.log('Created new user with preserved settings:', userId);
             return true;
         } else {
             console.log('Failed to create new user:', userId);
