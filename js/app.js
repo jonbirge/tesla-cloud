@@ -567,6 +567,12 @@ function handleGPSError(error) {
         }
         gpsStatusElement.classList.remove('hidden');
     }
+
+    // If GPS was denied by user, update the "GPS Accuracy" display to say "Denied"
+    if (gpsPermissionDenied) {
+        document.getElementById('accuracy').innerText = 'DENIED';
+        document.getElementById('accuracy').style.color = 'red';
+    }
     
     // Stop GPS updates if permission denied or max retries exceeded
     if (gpsPermissionDenied || gpsFailureCount >= MAX_GPS_RETRIES) {
@@ -914,7 +920,7 @@ window.showSection = function (sectionId) {
                 
                 const p = document.createElement('p');
                 const em = document.createElement('em');
-                em.textContent = 'GPS information is not available. Weather forecast requires location access.';
+                em.textContent = 'GPS information not available. Forecast requires location access.';
                 p.appendChild(em);
                 gpsUnavailableMsg.appendChild(p);
                 
