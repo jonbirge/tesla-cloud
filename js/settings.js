@@ -38,7 +38,7 @@ const defaultSettings = {
     "news-forwarding": false,
     "news-forward-only": false,
     "forwarding-email": "",
-    // News sources - will be populated dynamically from news-sources.json
+    // News feed settings populated dynamically from news-sources.json
 };
 
 // Function that sets driving state
