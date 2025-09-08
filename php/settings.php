@@ -491,7 +491,7 @@ function userSettingsExist($userId) {
     try {
         $stmt = $dbConnection->prepare("SELECT 1 FROM user_settings WHERE user_id = ? LIMIT 1");
         $stmt->execute([$userId]);
-        $exists = $stmt->rowCount() > 0;
+        $exists = $stmt->fetch() !== false;
         return $exists;
     } catch (PDOException $e) {
         $errorMsg = "Database error checking if user settings exist: " . $e->getMessage();
