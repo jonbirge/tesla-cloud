@@ -54,67 +54,97 @@ function getClientIP() {
 }
 
 // Establish database connection
+// Use SQLite for development if MySQL not configured
 if (!$dbHost || !$dbName || !$dbUser) {
-    logMessage("Missing required database configuration", "ERROR");
-    http_response_code(500);
-    echo json_encode(['error' => 'Database configuration missing']);
-    exit;
-}
-
-// Connect to database
-try {
-    $dsn = "mysql:host={$dbHost};port={$dbPort};dbname={$dbName};charset=utf8mb4";
-    $options = [
-        PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
-        PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
-        PDO::ATTR_EMULATE_PREPARES => false,
-    ];
+    // Fall back to SQLite for development
+    $sqliteDb = '/tmp/teslacloud_settings.db';
+    $dbConnection = new PDO("sqlite:$sqliteDb");
+    $dbConnection->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
     
-    $dbConnection = new PDO($dsn, $dbUser, $dbPass, $options);
+    // Create tables for SQLite
+    $dbConnection->exec("CREATE TABLE IF NOT EXISTS user_settings (
+        user_id TEXT NOT NULL,
+        setting_key TEXT NOT NULL,
+        setting_value TEXT,
+        updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+        PRIMARY KEY (user_id, setting_key)
+    )");
     
-    // Check if the required table exists, create it if not
-    $tableCheck = $dbConnection->query("SHOW TABLES LIKE 'user_settings'");
-    if ($tableCheck->rowCount() == 0) {
-        $sql = "CREATE TABLE user_settings (
-            user_id VARCHAR(255) NOT NULL,
-            setting_key VARCHAR({$maxKeyLength}) NOT NULL,
-            setting_value TEXT,
-            updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-            PRIMARY KEY (user_id, setting_key)
-        )";
-        $dbConnection->exec($sql);
+    $dbConnection->exec("CREATE TABLE IF NOT EXISTS user_ids (
+        user_id TEXT PRIMARY KEY,
+        initial_login DATETIME DEFAULT CURRENT_TIMESTAMP,
+        last_login DATETIME DEFAULT CURRENT_TIMESTAMP,
+        last_ip TEXT,
+        login_count INTEGER DEFAULT 0,
+        auto_created INTEGER DEFAULT 0
+    )");
+    
+    $dbConnection->exec("CREATE TABLE IF NOT EXISTS login_hist (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        user_id TEXT NOT NULL,
+        login_time DATETIME DEFAULT CURRENT_TIMESTAMP,
+        ip_address TEXT NOT NULL
+    )");
+    
+    logMessage("Using SQLite database for development", "INFO");
+} else {
+    // Connect to MySQL
+    try {
+        $dsn = "mysql:host={$dbHost};port={$dbPort};dbname={$dbName};charset=utf8mb4";
+        $options = [
+            PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
+            PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
+            PDO::ATTR_EMULATE_PREPARES => false,
+        ];
+        
+        $dbConnection = new PDO($dsn, $dbUser, $dbPass, $options);
+        
+        // Check if the required table exists, create it if not
+        $tableCheck = $dbConnection->query("SHOW TABLES LIKE 'user_settings'");
+        if ($tableCheck->rowCount() == 0) {
+            $sql = "CREATE TABLE user_settings (
+                user_id VARCHAR(255) NOT NULL,
+                setting_key VARCHAR({$maxKeyLength}) NOT NULL,
+                setting_value TEXT,
+                updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+                PRIMARY KEY (user_id, setting_key)
+            )";
+            $dbConnection->exec($sql);
+        }
+        
+        // Check if user_ids table exists, create it if not
+        $userIdsTableCheck = $dbConnection->query("SHOW TABLES LIKE 'user_ids'");
+        if ($userIdsTableCheck->rowCount() == 0) {
+            $sql = "CREATE TABLE user_ids (
+                user_id VARCHAR(255) NOT NULL,
+                initial_login TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                last_login TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                last_ip VARCHAR(45),
+                login_count INT DEFAULT 0,
+                auto_created TINYINT DEFAULT 0,
+                PRIMARY KEY (user_id)
+            )";
+            $dbConnection->exec($sql);
+        }
+        
+        // Check if login_hist table exists, create it if not
+        $loginHistTableCheck = $dbConnection->query("SHOW TABLES LIKE 'login_hist'");
+        if ($loginHistTableCheck->rowCount() == 0) {
+            $sql = "CREATE TABLE login_hist (
+                id INT AUTO_INCREMENT PRIMARY KEY,
+                user_id VARCHAR(255) NOT NULL,
+                login_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                ip_address VARCHAR(45) NOT NULL
+            )";
+            $dbConnection->exec($sql);
+        }
+    } catch (PDOException $e) {
+        $errorMessage = "Database connection failed: " . $e->getMessage();
+        logMessage($errorMessage, "ERROR");
+        http_response_code(500);
+        echo json_encode(['error' => 'Database connection failed']);
+        exit;
     }
-    
-    // Check if user_ids table exists, create it if not
-    $userIdsTableCheck = $dbConnection->query("SHOW TABLES LIKE 'user_ids'");
-    if ($userIdsTableCheck->rowCount() == 0) {
-        $sql = "CREATE TABLE user_ids (
-            user_id VARCHAR(255) NOT NULL,
-            initial_login TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-            last_login TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-            login_count INT DEFAULT 0,
-            PRIMARY KEY (user_id)
-        )";
-        $dbConnection->exec($sql);
-    }
-    
-    // Check if login_hist table exists, create it if not
-    $loginHistTableCheck = $dbConnection->query("SHOW TABLES LIKE 'login_hist'");
-    if ($loginHistTableCheck->rowCount() == 0) {
-        $sql = "CREATE TABLE login_hist (
-            id INT AUTO_INCREMENT PRIMARY KEY,
-            user_id VARCHAR(255) NOT NULL,
-            login_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-            ip_address VARCHAR(45) NOT NULL
-        )";
-        $dbConnection->exec($sql);
-    }
-} catch (PDOException $e) {
-    $errorMessage = "Database connection failed: " . $e->getMessage();
-    logMessage($errorMessage, "ERROR");
-    http_response_code(500);
-    echo json_encode(['error' => 'Database connection failed']);
-    exit;
 }
 
 // Parse the request URI to extract user and key
@@ -160,6 +190,16 @@ switch ($method) {
             exit;
         }
         
+        // Parse the request body to check for preserveSettings
+        $requestData = json_decode(file_get_contents('php://input'), true);
+        $settingsToUse = $defaultSettings;
+        
+        // If preserveSettings is provided, use those instead of defaults
+        if (isset($requestData['preserveSettings']) && is_array($requestData['preserveSettings'])) {
+            $settingsToUse = array_merge($defaultSettings, $requestData['preserveSettings']);
+            logMessage("POST: Using preserved settings for new user", "INFO");
+        }
+        
         // Generate userId if none is provided
         if (!$userId) {
             $userId = bin2hex(string: random_bytes(length: 4)); // Generate a random user ID
@@ -169,14 +209,14 @@ switch ($method) {
         }
 
         if (initializeUserIdEntry(userId: $userId, auto_created: $automated)) {
-            saveUserSettings(userId: $userId, settings: $defaultSettings); // Default settings
+            saveUserSettings(userId: $userId, settings: $settingsToUse);
             http_response_code(201); // Created
             echo json_encode([
                 'success' => true, 
                 'userId' => $userId,
                 'auto_generated' => $automated,
-                'message' => 'User settings created with default values.',
-                'settings' => $defaultSettings
+                'message' => 'User settings created with ' . (isset($requestData['preserveSettings']) ? 'preserved' : 'default') . ' values.',
+                'settings' => $settingsToUse
             ]);
         } else {
             logMessage("POST: Failed to create user settings for $userId", "ERROR");
