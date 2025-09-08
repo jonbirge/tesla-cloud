@@ -311,6 +311,24 @@ hr {
     opacity: 0;
 }
 
+/* Weather alert dot */
+.section-button.has-weather-alert {
+    position: relative;
+}
+
+.section-button.has-weather-alert::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    right: 16px;
+    transform: translateY(-50%);
+    width: 12px;
+    height: 12px;
+    background-color: #ff0000;
+    border-radius: 50%;
+    opacity: 1;
+}
+
 /* Link Button Lists */
 .button-list {
     list-style: none;
