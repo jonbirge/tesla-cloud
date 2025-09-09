@@ -432,6 +432,9 @@ export async function updateNews(clear = false) {
             em.textContent = 'No unread headlines available';
             p.appendChild(em);
             newsContainer.appendChild(p);
+            
+            // Update notification dot since there are no news items
+            updateNewsNotificationDot();
         }
     } catch (error) {
         let userMessage;
