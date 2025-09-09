@@ -7,6 +7,9 @@ import { updateNetworkInfo, updatePingChart, startPingTest } from './net.js';
 import { setupNewsObserver, startNewsTimeUpdates, initializeNewsStorage } from './news.js';
 import { startStockUpdates, stopStockUpdates } from './stock.js';
 
+// Exports
+export { gpsPermissionDenied };
+
 // Parameters
 const DEFAULT_SECTION = 'navigation';               // Default section to show
 const LATLON_UPDATE_INTERVAL = 2;                   // seconds

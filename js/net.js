@@ -1,5 +1,6 @@
 // Import the console.log function from app.js
 import { hashedUser } from './settings.js';
+import { gpsPermissionDenied } from './app.js';
 
 // Global variables
 const MAX_PING_MS = 500; // Maximum ping display value in milliseconds
@@ -15,6 +16,12 @@ let userLocation = {
 
 // Get user's current geolocation coordinates
 function getUserLocation() {
+    // Don't try to get location if GPS permission was denied in app.js
+    if (gpsPermissionDenied) {
+        // console.log('Skipping location request - GPS permission denied');
+        return;
+    }
+    
     if (navigator.geolocation) {
         navigator.geolocation.getCurrentPosition(
             (position) => {
