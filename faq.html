@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tesla Cloud FAQ</title>
+    <style>
+        body {
+            font-family: Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 2rem;
+            background-color: #fff;
+        }
+        h1 {
+            color: #3B82F6;
+            border-bottom: 2px solid #3B82F6;
+            padding-bottom: 0.5rem;
+        }
+        h2 {
+            color: #1F2937;
+            margin-top: 2rem;
+            margin-bottom: 1rem;
+        }
+        .question {
+            font-weight: 600;
+            color: #374151;
+            margin-bottom: 0.5rem;
+        }
+        .answer {
+            margin-bottom: 1.5rem;
+            padding-left: 1rem;
+            border-left: 3px solid #E5E7EB;
+        }
+        code {
+            background-color: #F3F4F6;
+            padding: 0.25rem 0.5rem;
+            border-radius: 0.25rem;
+            font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+        }
+        .tip {
+            background-color: #EFF6FF;
+            border: 1px solid #BFDBFE;
+            border-radius: 0.5rem;
+            padding: 1rem;
+            margin: 1rem 0;
+        }
+        @media (prefers-color-scheme: dark) {
+            body {
+                background-color: #1F2937;
+                color: #F9FAFB;
+            }
+            h2 {
+                color: #E5E7EB;
+            }
+            .question {
+                color: #D1D5DB;
+            }
+            .answer {
+                border-left-color: #4B5563;
+            }
+            code {
+                background-color: #374151;
+                color: #F9FAFB;
+            }
+            .tip {
+                background-color: #1E3A8A;
+                border-color: #3B82F6;
+                color: #BFDBFE;
+            }
+        }
+    </style>
+</head>
+<body>
+    <h1>Tesla Cloud FAQ</h1>
+    
+    <h2>Getting Started</h2>
+    
+    <div class="question">Q: What is Tesla Cloud?</div>
+    <div class="answer">
+        Tesla Cloud is a web application designed for Tesla's in-car browser. It provides news, weather, navigation, and other features optimized for vehicle use. This is an educational father-son project and is not affiliated with Tesla, Inc.
+    </div>
+    
+    <div class="question">Q: How do I use Tesla Cloud in my Tesla?</div>
+    <div class="answer">
+        Simply navigate to teslas.cloud in your Tesla's web browser. For the best experience, bookmark the page and add the browser to your dock for easy access.
+    </div>
+    
+    <h2>Features</h2>
+    
+    <div class="question">Q: What features are available?</div>
+    <div class="answer">
+        Tesla Cloud includes:
+        <ul>
+            <li><strong>Dashboard:</strong> GPS navigation with relative wind indicator and altitude display</li>
+            <li><strong>News:</strong> Aggregated news feeds with customizable sources</li>
+            <li><strong>Weather:</strong> Extended forecast, current conditions, and precipitation radar</li>
+            <li><strong>Travel:</strong> Links to mapping tools, destination information, and travel planning</li>
+            <li><strong>Reference:</strong> Quick access to AI agents, learning tools, and password managers</li>
+            <li><strong>Media:</strong> Links to streaming services and entertainment</li>
+            <li><strong>Network:</strong> Network diagnostics and latency monitoring</li>
+        </ul>
+    </div>
+    
+    <div class="question">Q: Why does some data show "--" or appear unavailable?</div>
+    <div class="answer">
+        Tesla Cloud relies on GPS location and external APIs for much of its functionality. If GPS is disabled or external services are unavailable, some features may show placeholder data. This is normal and expected behavior.
+    </div>
+    
+    <h2>Settings & Account</h2>
+    
+    <div class="question">Q: Do I need to create an account?</div>
+    <div class="answer">
+        No account is required for basic functionality. Settings are saved locally by default. However, you can create a user ID (9+ characters) to sync settings across multiple devices or browsers.
+    </div>
+    
+    <div class="question">Q: How do I sync my settings across devices?</div>
+    <div class="answer">
+        <ol>
+            <li>Go to the Settings section</li>
+            <li>Click the "Login" button</li>
+            <li>Enter a user ID of your choosing (9+ characters)</li>
+            <li>Your settings will now sync across any browser where you use this ID</li>
+        </ol>
+    </div>
+    
+    <div class="question">Q: What information is stored on your servers?</div>
+    <div class="answer">
+        Very minimal data is stored: only your encrypted user ID (if you choose to create one) and associated settings like news feed preferences. Email addresses are only stored if you enable news forwarding. No personal information is collected or sold.
+    </div>
+    
+    <h2>Troubleshooting</h2>
+    
+    <div class="question">Q: The GPS/location features aren't working. What should I do?</div>
+    <div class="answer">
+        Make sure you've granted location permission to the browser. In Tesla's browser, this is typically handled automatically, but you may need to refresh the page or restart the browser if GPS data isn't appearing.
+    </div>
+    
+    <div class="question">Q: Some external links don't work or load slowly.</div>
+    <div class="answer">
+        Tesla's browser has limitations on external content and some websites may not load properly. Tesla Cloud is optimized for the vehicle's browser, but not all external sites are guaranteed to work perfectly.
+    </div>
+    
+    <div class="question">Q: The app seems slow or unresponsive.</div>
+    <div class="answer">
+        Try refreshing the page or restarting Tesla's browser. Tesla Cloud is designed to be lightweight, but complex external content (like maps or streaming services) may affect performance.
+    </div>
+    
+    <h2>Privacy & Support</h2>
+    
+    <div class="question">Q: How can I contact support or provide feedback?</div>
+    <div class="answer">
+        Email <code>feedback@teslas.cloud</code> for questions, issues, or link suggestions. This project is maintained by volunteers, so please be patient with responses.
+    </div>
+    
+    <div class="question">Q: Is my data private?</div>
+    <div class="answer">
+        Yes. Tesla Cloud follows a privacy-first approach:
+        <ul>
+            <li>No tracking or analytics</li>
+            <li>No personal data collection beyond what you explicitly provide</li>
+            <li>Email addresses (if provided) are only used for news forwarding</li>
+            <li>Settings are encrypted before being stored</li>
+        </ul>
+    </div>
+    
+    <div class="tip">
+        <strong>Pro Tip:</strong> For the best Tesla Cloud experience, bookmark the page, enable location services, and add the browser to your bottom dock for quick access while driving.
+    </div>
+</body>
+</html>
