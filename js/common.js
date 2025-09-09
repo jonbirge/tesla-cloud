@@ -149,35 +149,30 @@ export function showNotification(message, type = 'warning') {
     
     // Create the notification element
     const notification = document.createElement('div');
-    notification.className = 'notification';
+    notification.className = `notification ${type}`;
 
     const iconDiv = document.createElement('div');
     iconDiv.className = 'notification-icon';
     const img = document.createElement('img');
     
-    // Set icon and styling based on notification type
+    // Set icon based on notification type
     switch (type) {
         case 'success':
             iconDiv.style.display = 'none';
-            notification.style.backgroundColor = 'rgba(33, 129, 13, 0.85)';
             break;
         case 'error':
             img.src = 'assets/warn.svg';
             img.alt = 'Error';
-            notification.style.backgroundColor = 'rgba(255, 165, 0, 0.85)';
             break;
         case 'warning':
             img.src = 'assets/cloud.svg';
             img.alt = 'Alert';
-            notification.style.backgroundColor = 'rgba(0, 0, 0, 0.75)';
             break;
         case 'info':
             iconDiv.style.display = 'none';
-            notification.style.backgroundColor = 'rgba(70, 70, 70, 0.9)';
             break;
         default:
             iconDiv.style.display = 'none';
-            notification.style.backgroundColor = 'rgba(0, 0, 0, 0.75)';
             break;
     }
     
@@ -189,25 +184,6 @@ export function showNotification(message, type = 'warning') {
     const messageDiv = document.createElement('div');
     messageDiv.className = 'notification-message';
     messageDiv.textContent = message;
-    
-    // Set text color based on type
-    switch (type) {
-        case 'success':
-            messageDiv.style.color = 'white';
-            break;
-        case 'error':
-            messageDiv.style.color = 'white';
-            break;
-        case 'warning':
-            messageDiv.style.color = '#ff9500';
-            break;
-        case 'info':
-            messageDiv.style.color = 'white';
-            break;
-        default:
-            messageDiv.style.color = 'white';
-            break;
-    }
 
     notification.appendChild(iconDiv);
     notification.appendChild(messageDiv);

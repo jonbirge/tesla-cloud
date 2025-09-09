@@ -53,7 +53,7 @@
 .notification {
     display: flex;
     align-items: center;
-    background-color: rgba(0, 0, 0, 0.75);
+    background-color: var(--notification-bg);
     padding: 12px 16px;
     border-radius: 8px;
     margin-bottom: 10px;
@@ -63,6 +63,22 @@
     transition: opacity 0.3s, transform 0.3s;
     white-space: nowrap;
     width: auto;
+}
+
+.notification.success {
+    background-color: var(--notification-success-bg);
+}
+
+.notification.error {
+    background-color: var(--notification-error-bg);
+}
+
+.notification.info {
+    background-color: var(--notification-info-bg);
+}
+
+body.dark-mode .notification {
+    box-shadow: 0 4px 8px rgba(255, 255, 255, 0.1);
 }
 
 .notification.show {
@@ -85,12 +101,18 @@
 .notification-message {
     font-size: 14pt;
     font-weight: 500;
-    color: #ff9500;
+    color: var(--notification-text);
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
     text-align: center;
     display: block;
+}
+
+.notification.success .notification-message,
+.notification.error .notification-message,
+.notification.info .notification-message {
+    color: var(--notification-text-alt);
 }
 
 /* Loading Spinner */
