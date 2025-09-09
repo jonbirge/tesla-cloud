@@ -130,7 +130,7 @@ export async function attemptLogin() {
             await fetchSettings();
         } else {
             console.log('No user IDs found, creating new auto-generated user...');
-            setDefaultSettings();
+            await setDefaultSettings();
             const newAutoUser = await autoCreateUser(); // Create a new user and log them in
             if (await validateAutoUserId(newAutoUser)) {
                 for (const [key, value] of Object.entries(settings)) {
@@ -215,8 +215,22 @@ function turnOffDarkMode() {
     updateDarkModeDependants();
 }
 
+// Load default settings from JSON files before applying them
+async function loadDefaultSettings() {
+    try {
+        const response = await fetch('js/news-sources.json');
+        availableNewsSources = await response.json();
+        updateDefaultNewsSettings();
+    } catch (error) {
+        console.error('Error loading news sources data for defaults:', error);
+    }
+}
+
 // Initialize settings with defaults
-function setDefaultSettings() {
+async function setDefaultSettings() {
+    // Load defaults from JSON first
+    await loadDefaultSettings();
+    
     settings = { ...defaultSettings };
     initializeSettings();
     updateRadarVisibility();
@@ -363,11 +377,17 @@ async function createNewUser(userId, hashedId = null) {
 async function autoCreateUser() {
     try {
         const response = await fetch('php/settings.php', {
-            method: 'POST'
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                preserveSettings: settings
+            })
         });
         if (response.ok) {
             let data = await response.json();
-            console.log('Auto-generated user ID:', data.userId);
+            console.log('Auto-generated user ID with preserved settings:', data.userId);
             return data.userId;
         } else {
             console.log('Failed to fetch random user ID from server');
@@ -522,6 +542,10 @@ function updateDefaultNewsSettings() {
         const key = `rss-${source.id}`;
         if (!(key in defaultSettings)) {
             defaultSettings[key] = source.defaultEnabled || false;
+        }
+        // Also update current settings if they exist and don't have this key
+        if (settings && !(key in settings)) {
+            settings[key] = source.defaultEnabled || false;
         }
     });
 }
