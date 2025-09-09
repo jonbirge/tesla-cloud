@@ -18,7 +18,7 @@ let userLocation = {
 function getUserLocation() {
     // Don't try to get location if GPS permission was denied in app.js
     if (gpsPermissionDenied) {
-        console.log('Skipping location request - GPS permission denied');
+        // console.log('Skipping location request - GPS permission denied');
         return;
     }
     
