@@ -390,7 +390,7 @@ body.dark-mode .moon-phase-icon {
 }
 
 /* Notification styles */
-.notification {
+/* .notification {
     display: flex;
     align-items: center;
     padding: 15px;
@@ -419,7 +419,7 @@ body.dark-mode .notification {
 .notification-message {
     font-size: 18px;
     font-weight: 700;
-}
+} */
 
 /* Cloud icon styles */
 .rain-status img,
@@ -432,8 +432,9 @@ body.dark-mode .notification-icon img {
     filter: invert(74%) sepia(69%) saturate(5422%) hue-rotate(359deg) brightness(101%) contrast(107%);
 }
 
-.notification-icon {
-    margin-right: 12px;
+/* Additional section-specific styling */
+#satellite {
+    padding-top: 30px;
 }
 
 /* Mobile Landscape Mode */
@@ -449,11 +450,11 @@ body.dark-mode .notification-icon img {
     
     .weather-switch button {
         padding: 10px 16px;
-        font-size: 14pt;
+        font-size: 11pt;
     }
     
     .weather-image {
-        max-width: 95%;
+        max-width: 100%;
     }
     
     .forecast-container {
@@ -531,7 +532,7 @@ body.dark-mode .notification-icon img {
 
     .weather-switch button {
         padding: 8px 12px;
-        font-size: 12pt;
+        font-size: 11pt;
     }
 
     #prem-forecast-container .forecast-day:nth-of-type(7) {

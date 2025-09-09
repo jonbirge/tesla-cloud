@@ -24,6 +24,10 @@
     color: var(--text-color);
 }
 
+.notification-icon {
+    margin-right: 12px;
+}
+
 @media only screen and (max-width: 900px) {
     .announcement p .note-date {
         min-width: 90px;

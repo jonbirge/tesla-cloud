@@ -934,31 +934,16 @@ body.dark-mode .option-button:hover:not(.active) {
     background-color: rgba(255, 255, 255, 0.1);
 }
 
-/* Additional section-specific styling */
-#satellite {
-    padding-top: 30px;
-}
-
 /* Mobile Landscape Mode */
 @media only screen and (max-width: 900px) {
     :root {
         --heading-font-size: 14pt;
         --heading-font-weight: 500;
-        --button-radius: 10px;
+        --button-radius: 9px;
     }
     
     body {
         font-size: 12pt;
-    }
-    
-    h1 {
-        font-size: 16pt;
-        margin-bottom: 5px;
-    }
-    
-    h2 {
-        margin-top: 14px;
-        margin-bottom: 7px;
     }
 
     p {
@@ -971,15 +956,15 @@ body.dark-mode .option-button:hover:not(.active) {
     }
 
     .logout-button {
-    border-radius: var(--button-radius);
-    font-size: 14pt;
-    font-weight: 600;
-    padding: 7px 20px;
-    border: none;
-    cursor: pointer;
-    text-align: center;
-    margin-top: 15px;
-    transition: background-color 0.3s;
+        border-radius: var(--button-radius);
+        font-size: 12pt;
+        font-weight: 600;
+        padding: 7px 20px;
+        border: none;
+        cursor: pointer;
+        text-align: center;
+        margin-top: 15px;
+        transition: background-color 0.3s;
     }
     
     /* Hide control div */
@@ -1006,7 +991,7 @@ body.dark-mode .option-button:hover:not(.active) {
         width: 100%;
         height: auto;
         max-height: none;
-        padding: 5px;
+        padding: 3px;
         overflow: visible;
         -webkit-overflow-scrolling: touch;
         scrollbar-width: none;
@@ -1021,7 +1006,6 @@ body.dark-mode .option-button:hover:not(.active) {
         flex-direction: row;
         flex-wrap: wrap;
         width: 100%;
-        /* gap: 4px; */
         overflow: visible;
     }
     
@@ -1030,7 +1014,7 @@ body.dark-mode .option-button:hover:not(.active) {
     }
     
     .section-button {
-        font-size: 14pt;
+        font-size: 13pt;
         padding: 0px 9px;
         white-space: nowrap;
         height: 32px;
@@ -1058,7 +1042,7 @@ body.dark-mode .option-button:hover:not(.active) {
     /* Right frame takes remaining space */
     .right-frame {
         height: auto;
-        padding: 10px 15px;
+        padding: 1px 3px;
         overflow: visible;
     }
     
@@ -1106,7 +1090,7 @@ body.dark-mode .option-button:hover:not(.active) {
     }
     
     .stat-label {
-        font-size: 11pt;
+        font-size: 12pt;
     }
     
     /* Teslawaze container adjustment */
@@ -1124,7 +1108,7 @@ body.dark-mode .option-button:hover:not(.active) {
     .button-list a {
         padding: 15px 5px;
         height: 30px;
-        font-size: 13pt;
+        font-size: 12pt;
     }
     
     /* News-related mobile adjustments moved to css/news.css */
@@ -1172,15 +1156,15 @@ body.dark-mode .option-button:hover:not(.active) {
     }
 
     /* Settings section headers */
-    #settings h2 {
+    h2 {
         font-size: 13pt;
         margin-top: 18px;
-        margin-bottom: 5px;
+        margin-bottom: 3px;
     }
 
-    #settings h3 {
+    h3 {
         font-size: 12pt;
-        margin-top: 12px;
-        margin-bottom: 3px;
+        margin-top: 7px;
+        margin-bottom: 7px;
     }
 }
