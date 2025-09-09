@@ -935,6 +935,9 @@ window.shareNews = async function (title, link, source, id) {
         return;
     }
 
+    // Show immediate feedback that sharing is in progress
+    showNotification('Sharing article...', 'info');
+
     // Mark the news item as read when shared
     if (id) {
         // Remove from pending items if it was there
@@ -985,14 +988,11 @@ window.shareNews = async function (title, link, source, id) {
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ to, html, subject })
         });
-        if (response.ok) {
-            showNotification('Article shared successfully', 'success');
-        } else {
-            const errorText = await response.text();
-            showNotification(`Failed to share article: ${errorText}`, 'error');
-        }
+        // Note: No additional notifications shown after backend response per user feedback
+        // to simplify the experience since users can't act on the result anyway
     } catch (err) {
-        showNotification(`Error sharing article: ${err}`, 'error');
+        // Note: No error notifications shown after backend response per user feedback
+        console.error('Error sharing article:', err);
     }
 }
 

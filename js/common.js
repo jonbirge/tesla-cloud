@@ -165,6 +165,10 @@ export function showNotification(message, type = 'warning') {
             img.alt = 'Alert';
             notification.style.backgroundColor = 'rgba(0, 0, 0, 0.75)';
             break;
+        case 'info':
+            iconDiv.style.display = 'none';
+            notification.style.backgroundColor = 'rgba(70, 70, 70, 0.9)';
+            break;
         default:
             iconDiv.style.display = 'none';
             notification.style.backgroundColor = 'rgba(0, 0, 0, 0.75)';
@@ -190,6 +194,9 @@ export function showNotification(message, type = 'warning') {
             break;
         case 'warning':
             messageDiv.style.color = '#ff9500';
+            break;
+        case 'info':
+            messageDiv.style.color = 'white';
             break;
         default:
             messageDiv.style.color = 'white';
