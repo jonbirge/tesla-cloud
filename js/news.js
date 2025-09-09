@@ -935,6 +935,9 @@ window.shareNews = async function (title, link, source, id) {
         return;
     }
 
+    // Show immediate feedback that sharing is in progress
+    showNotification('Sharing article...', 'warning');
+
     // Mark the news item as read when shared
     if (id) {
         // Remove from pending items if it was there
