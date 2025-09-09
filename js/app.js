@@ -42,6 +42,9 @@ let gpsIntervalId = null;
 let lastGPSUpdate = 0;
 let gpsPermissionDenied = false;                    // Track if GPS permission was denied
 let gpsFailureCount = 0;                            // Count consecutive GPS failures
+
+// Export GPS permission state for other modules to check
+export { gpsPermissionDenied };
 let networkInfoUpdated = false;                     // Track if network info has been updated
 const positionSimulator = new PositionSimulator();  // TODO: only create if needed
 
