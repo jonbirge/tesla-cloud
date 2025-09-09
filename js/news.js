@@ -403,6 +403,28 @@ export async function updateNews(clear = false) {
                 item.isUnread = !(item.id in cachedSeenNewsIds);
             });
         }
+        
+        // Clean up cached seen news IDs when sources are removed (clear=true indicates news source removal)
+        if (clear && cachedSeenNewsIds !== null) {
+            // Create new displayed items array to know which IDs should be kept
+            const allDisplayedItems = [...loadedItems, ...oldDisplayedItems];
+            const displayedItemIds = new Set(allDisplayedItems.map(item => item.id));
+            
+            // Create a cleaned cache containing only IDs for articles that are still displayed
+            const cleanedCache = {};
+            for (const [articleId, timestamp] of Object.entries(cachedSeenNewsIds)) {
+                if (displayedItemIds.has(articleId)) {
+                    cleanedCache[articleId] = timestamp;
+                }
+            }
+            
+            // Update the cache if any entries were removed
+            const removedCount = Object.keys(cachedSeenNewsIds).length - Object.keys(cleanedCache).length;
+            if (removedCount > 0) {
+                console.log(`Cleaned up ${removedCount} seen news IDs for removed sources`);
+                cachedSeenNewsIds = cleanedCache;
+            }
+        }
 
         // If anything has made it past all the filters, sort by date
         if (loadedItems.length > 0) {
