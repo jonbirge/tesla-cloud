@@ -970,6 +970,18 @@ body.dark-mode .option-button:hover:not(.active) {
         text-align: left;
     }
 
+    .logout-button {
+    border-radius: var(--button-radius);
+    font-size: 14pt;
+    font-weight: 600;
+    padding: 7px 20px;
+    border: none;
+    cursor: pointer;
+    text-align: center;
+    margin-top: 15px;
+    transition: background-color 0.3s;
+    }
+    
     /* Hide control div */
     .control-container {
         display: none;
@@ -1009,7 +1021,7 @@ body.dark-mode .option-button:hover:not(.active) {
         flex-direction: row;
         flex-wrap: wrap;
         width: 100%;
-        gap: 4px;
+        /* gap: 4px; */
         overflow: visible;
     }
     
@@ -1021,7 +1033,7 @@ body.dark-mode .option-button:hover:not(.active) {
         font-size: 14pt;
         padding: 0px 9px;
         white-space: nowrap;
-        height: 40px;
+        height: 32px;
     }
 
     .section-button.has-notification {
@@ -1158,8 +1170,6 @@ body.dark-mode .option-button:hover:not(.active) {
     .option-switch-container {
         padding: 6px 8px;
     }
-    
-    /* News-related rules moved to css/news.css */
 
     /* Settings section headers */
     #settings h2 {
