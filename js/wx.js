@@ -53,6 +53,8 @@ export function fetchPremiumWeatherData(lat, long, silentLoad = false) {
                     generateTestMinutelyData(forecastDataPrem);
                     // Add test weather alerts
                     generateTestWeatherAlerts(forecastDataPrem);
+                    // Process test alerts immediately
+                    processWeatherAlerts(forecastDataPrem);
                 } // test mode
                 
                 updatePremiumWeatherDisplay();
@@ -304,11 +306,7 @@ function updateWeatherAlertsDisplay() {
     if (currentWeatherAlerts.length > 0) {
         const alertsTitle = document.createElement('h2');
         alertsTitle.textContent = 'Active Weather Alerts';
-        alertsTitle.style.cssText = `
-            color: #ff0000;
-            margin: 16px 0 12px 0;
-            font-size: 18px;
-        `;
+        // Use the same style as other headings like "Extended Forecast"
         alertsContainer.appendChild(alertsTitle);
 
         currentWeatherAlerts.forEach(alert => {
@@ -357,7 +355,8 @@ function updateWeatherAlertsDisplay() {
             alertDescription.style.cssText = `
                 margin: 0 0 8px 0;
                 line-height: 1.3;
-                color: var(--text-color);
+                color: black;
+                font-style: italic;
             `;
 
             const alertTime = document.createElement('div');
@@ -940,8 +939,8 @@ function generateTestWeatherAlerts(forecastData) {
         {
             sender_name: "Emergency Management - TEST MODE",
             event: "High Wind Watch", 
-            start: now + 1800, // Starts in 30 minutes
-            end: now + 14400, // Ends in 4 hours
+            start: now - 1800, // Started 30 minutes ago
+            end: now + 18000, // Ends in 5 hours
             description: "Sustained winds of 35 to 45 mph with gusts up to 65 mph possible. Damaging winds could blow down trees and power lines.",
             tags: ["Wind"]
         }
@@ -1244,6 +1243,9 @@ function processWeatherAlerts(weatherData) {
 
     // Update alert indicators
     updateWeatherAlertIndicator();
+    
+    // Update weather alerts display in the weather section
+    updateWeatherAlertsDisplay();
 }
 
 // Determine if an alert is considered "significant" and should trigger popup
