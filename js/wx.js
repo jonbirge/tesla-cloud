@@ -1,5 +1,5 @@
 // Import required functions from app.js
-import { formatTime, highlightUpdate, testMode, showNotification, showWeatherAlertModal } from './common.js';
+import { formatTime, highlightUpdate, testMode, isTestMode, showNotification, showWeatherAlertModal } from './common.js';
 import { autoDarkMode, settings } from './settings.js';
 
 // Parameters
@@ -47,11 +47,15 @@ export function fetchPremiumWeatherData(lat, long, silentLoad = false) {
             if (forecastDataLocal) {
                 forecastDataPrem = forecastDataLocal;
                 
-                // If in test mode, generate random precipitation data for minutely forecast
-                if (testMode) {
-                    console.log('TEST MODE: Generating random precipitation data');
+                // If in test mode for weather, generate random precipitation data for minutely forecast
+                if (isTestMode('wx')) {
+                    console.log('TEST MODE (wx): Generating random precipitation data');
                     generateTestMinutelyData(forecastDataPrem);
-                    // Add test weather alerts
+                }
+                
+                // If in test mode for alerts, add test weather alerts
+                if (isTestMode('alert')) {
+                    console.log('TEST MODE (alert): Adding test weather alerts');
                     generateTestWeatherAlerts(forecastDataPrem);
                     // Process test alerts immediately
                     processWeatherAlerts(forecastDataPrem);
@@ -69,7 +73,7 @@ export function fetchPremiumWeatherData(lat, long, silentLoad = false) {
                 });
 
                 // Update station info robustly
-                if (testMode) {
+                if (isTestMode('wx') || isTestMode('alert')) {
                     const stationStr = `TEST WX @ ${weatherUpdateTime}`;
                     highlightUpdate('prem-station-info', stationStr);
                 } else if (city && state) {
@@ -103,8 +107,8 @@ export function fetchPremiumWeatherData(lat, long, silentLoad = false) {
             console.error('Error fetching forecast data: ', error);
 
             // In test mode, create dummy forecast data with alerts for testing
-            if (testMode) {
-                console.log('TEST MODE: API failed, creating dummy forecast data with alerts');
+            if (isTestMode('alert')) {
+                console.log('TEST MODE (alert): API failed, creating dummy forecast data with alerts');
                 forecastDataPrem = {
                     current: { dt: Math.floor(Date.now() / 1000), temp: 32 },
                     daily: [],

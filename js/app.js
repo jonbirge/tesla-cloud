@@ -1,5 +1,5 @@
 // Imports
-import { srcUpdate, testMode, updateTimeZone, GEONAMES_USERNAME } from './common.js';
+import { srcUpdate, testMode, isTestMode, updateTimeZone, GEONAMES_USERNAME, showNotification } from './common.js';
 import { PositionSimulator } from './location.js';
 import { attemptLogin, leaveSettings, settings, isDriving, setDrivingState, enableLiveNewsUpdates, saveSetting } from './settings.js';
 import { fetchPremiumWeatherData, fetchCityData, SAT_URLS, forecastDataPrem, currentRainAlert } from './wx.js';
@@ -505,14 +505,15 @@ function updateGPS() {
         return false;
     }
     
-    if (!testMode) {
+    if (!isTestMode('gps')) {
         if (navigator.geolocation) {
             navigator.geolocation.getCurrentPosition(handlePositionUpdate, handleGPSError);
         } else {
             console.log('Geolocation is not supported by this browser.');
             return false;
         }
-    } else { // testing
+    } else { // GPS testing mode
+        console.log('TEST MODE (gps): Using simulated GPS position');
         handlePositionUpdate(positionSimulator.getPosition());
     }
     return true;
@@ -657,6 +658,12 @@ function updateServerNote() {
             const announcementSection = document.getElementById('announcement');
             if (announcementSection) announcementSection.style.display = 'none';
         });
+}
+
+// Show a test notification for testing the notification system
+function showTestNotification() {
+    console.log('TEST MODE (note): Displaying test notification');
+    showNotification('This is a test notification to verify the notification system is working properly. You can dismiss this message.', 'info');
 }
 
 // Show git version from php/vers.php
@@ -1063,6 +1070,13 @@ document.addEventListener('DOMContentLoaded', async function () {
     
     // Check for NOTE file and display if present
     updateServerNote();
+
+    // Show test notification if note test mode is active
+    if (isTestMode('note')) {
+        setTimeout(() => {
+            showTestNotification();
+        }, 1000); // Show after 1 second to ensure page is fully loaded
+    }
 
     // Initialize radar display
     initializeRadar();

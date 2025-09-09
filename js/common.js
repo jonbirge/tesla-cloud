@@ -355,7 +355,27 @@ export function showWeatherAlertModal(alert) {
 // URL parameters
 const urlParams = new URLSearchParams(window.location.search);
 const testParam = urlParams.get('test');
-testMode = testParam === 'true';
+
+// Parse test parameter - can be 'true', 'all', or comma-separated components
+let activeTestModes = new Set();
+if (testParam) {
+    if (testParam === 'true' || testParam === 'all') {
+        // Enable all test modes for backward compatibility and 'all' keyword
+        activeTestModes = new Set(['wx', 'gps', 'alert', 'note']);
+    } else {
+        // Parse comma-separated list of test components
+        activeTestModes = new Set(testParam.split(',').map(mode => mode.trim().toLowerCase()));
+    }
+}
+
+// Backward compatibility - set testMode to true if any test modes are active
+testMode = activeTestModes.size > 0;
+
 if (testMode) {
-    console.log('##### TEST MODE #####');
+    console.log('##### TEST MODE ##### Active modes:', Array.from(activeTestModes).join(', '));
+}
+
+// Helper function to check if a specific test mode is active
+export function isTestMode(component) {
+    return activeTestModes.has(component.toLowerCase());
 }
