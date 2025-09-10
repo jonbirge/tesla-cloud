@@ -45,6 +45,9 @@
     z-index: 9999;
     max-width: 80%;
     min-width: 200px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
 }
 
 .notification {
@@ -60,7 +63,6 @@
     transition: opacity 0.3s, transform 0.3s;
     white-space: nowrap;
     width: auto;
-    display: inline-flex;
 }
 
 .notification.show {
