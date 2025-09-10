@@ -664,17 +664,17 @@ function showTestNotification() {
     console.log('TEST MODE (note): Displaying three test notifications with different lengths');
     
     // Short notification
-    showNotification('Lorem ipsum dolor.', 'info');
+    showNotification('Lorem ipsum dolor sit amet.', 'info');
     
     // Medium notification after 1.5 seconds
     setTimeout(() => {
         showNotification('Lorem ipsum dolor sit amet, consectetur adipiscing elit sed do eiusmod tempor.', 'success');
-    }, 1500);
+    }, 1000);
     
     // Long notification after 3 seconds
     setTimeout(() => {
-        showNotification('Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit.', 'warning');
-    }, 3000);
+        showNotification('Lorem ipsum dolor sit amet! Consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit.', 'warning');
+    }, 2000);
 }
 
 // Show git version from php/vers.php
