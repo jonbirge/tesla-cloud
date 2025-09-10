@@ -77,8 +77,8 @@
     background-color: var(--notification-info-bg);
 }
 
-body.dark-mode .notification {
-    box-shadow: 0 4px 8px rgba(255, 255, 255, 0.1);
+.dark-mode .notification {
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.75);
 }
 
 .notification.show {
