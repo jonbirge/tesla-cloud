@@ -23,6 +23,12 @@
     --stock-up: #0fa215;
     --stock-down: #dc3545;
     --stock-neutral: #888888;
+    --notification-bg: rgba(255, 255, 255, 0.9);
+    --notification-success-bg: rgba(255, 255, 255, 0.9);
+    --notification-error-bg: rgba(255, 255, 255, 0.9);
+    --notification-info-bg: rgba(255, 255, 255, 0.9);
+    --notification-text: #333333;
+    --notification-text-alt: #333333;
 }
 
 body.dark-mode {
@@ -43,6 +49,12 @@ body.dark-mode {
     --stock-up: #3ad45b;
     --stock-down: #ff4d5e;
     --stock-neutral: #888888;
+    --notification-bg: rgba(70, 70, 70, 0.9);
+    --notification-success-bg: rgba(70, 70, 70, 0.9);
+    --notification-error-bg: rgba(70, 70, 70, 0.9);
+    --notification-info-bg: rgba(70, 70, 70, 0.9);
+    --notification-text: #ffffff;
+    --notification-text-alt: #ffffff;
 }
 
 /* Basic HTML Elements */
