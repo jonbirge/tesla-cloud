@@ -1,5 +1,5 @@
 // Imports
-import { srcUpdate, testMode, isTestMode, updateTimeZone, GEONAMES_USERNAME, showNotification } from './common.js';
+import { srcUpdate, testMode, isTestMode, updateTimeZone, GEONAMES_USERNAME, showNotification, gpsPermissionDenied, setGpsPermissionDenied } from './common.js';
 import { PositionSimulator } from './location.js';
 import { attemptLogin, leaveSettings, settings, isDriving, setDrivingState, enableLiveNewsUpdates, saveSetting } from './settings.js';
 import { fetchPremiumWeatherData, fetchCityData, SAT_URLS, forecastDataPrem, currentRainAlert } from './wx.js';
@@ -8,7 +8,7 @@ import { setupNewsObserver, startNewsTimeUpdates, initializeNewsStorage } from '
 import { startStockUpdates, stopStockUpdates } from './stock.js';
 
 // Exports
-export { gpsPermissionDenied };
+// (none - app.js is the main module)
 
 // Parameters
 const DEFAULT_SECTION = 'navigation';               // Default section to show
@@ -43,7 +43,6 @@ let neverUpdatedLocation = true;
 let radarContext = null;
 let gpsIntervalId = null;
 let lastGPSUpdate = 0;
-let gpsPermissionDenied = false;                    // Track if GPS permission was denied
 let gpsFailureCount = 0;                            // Count consecutive GPS failures
 let networkInfoUpdated = false;                     // Track if network info has been updated
 const positionSimulator = new PositionSimulator();  // TODO: only create if needed
@@ -556,7 +555,7 @@ function handleGPSError(error) {
     
     // Check error type
     if (error.code === error.PERMISSION_DENIED) {
-        gpsPermissionDenied = true;
+        setGpsPermissionDenied(true);
         console.log('GPS permission denied by user');
     }
     
@@ -662,8 +661,20 @@ function updateServerNote() {
 
 // Show a test notification for testing the notification system
 function showTestNotification() {
-    console.log('TEST MODE (note): Displaying test notification');
-    showNotification('This is a test notification to verify the notification system is working properly. You can dismiss this message.', 'info');
+    console.log('TEST MODE (note): Displaying three test notifications with different lengths');
+    
+    // Short notification
+    showNotification('Lorem ipsum dolor.', 'info');
+    
+    // Medium notification after 1.5 seconds
+    setTimeout(() => {
+        showNotification('Lorem ipsum dolor sit amet, consectetur adipiscing elit sed do eiusmod tempor.', 'success');
+    }, 1500);
+    
+    // Long notification after 3 seconds
+    setTimeout(() => {
+        showNotification('Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit.', 'warning');
+    }, 3000);
 }
 
 // Show git version from php/vers.php
@@ -1044,13 +1055,6 @@ document.addEventListener('visibilitychange', () => {
         resumeNewsUpdates();
         resumePingTest();
         startStockUpdates();
-    }
-});
-
-document.addEventListener('DOMContentLoaded', function () {
-    var premCloseBtn = document.getElementById('prem-forecast-popup-close');
-    if (premCloseBtn) {
-        premCloseBtn.onclick = window.closePremiumPrecipPopup;
     }
 });
 

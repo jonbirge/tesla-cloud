@@ -5,9 +5,15 @@ import { settings } from './settings.js';
 const GEONAMES_USERNAME = 'birgefuller';
 let locationTimeZone = browserTimeZone();
 let testMode = false; // Set to true if test parameter exists
+let gpsPermissionDenied = false; // Track if GPS permission was denied
 
 // Exports
-export { locationTimeZone, testMode, GEONAMES_USERNAME }
+export { locationTimeZone, testMode, GEONAMES_USERNAME, gpsPermissionDenied }
+
+// Function to update GPS permission denied status
+export function setGpsPermissionDenied(denied) {
+    gpsPermissionDenied = denied;
+}
 
 // Set time zone based on location
 export async function updateTimeZone(lat, long) {

@@ -1,6 +1,6 @@
 // Import the console.log function from app.js
 import { hashedUser } from './settings.js';
-import { gpsPermissionDenied } from './app.js';
+import { gpsPermissionDenied } from './common.js';
 
 // Global variables
 const MAX_PING_MS = 500; // Maximum ping display value in milliseconds
