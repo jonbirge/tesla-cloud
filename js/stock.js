@@ -11,6 +11,7 @@ let stockDataCache = {}; // Cache object to store stock data by ticker
 let showChange = true; // Flag to show change in stock price
 let availableStocks = []; // List of available stocks from stocks.json
 let availableIndexes = []; // List of available indexes from indexes.json
+let isUpdating = false; // Flag to prevent duplicate update processes
 
 // Import settings to check visibility setting
 import { settings } from './settings.js';
@@ -211,7 +212,7 @@ export function startStockUpdates() {
     const anyEnabled = subscribedTickers.length > 0 && settings["show-stock-indicator"] !== false;
 
     if (anyEnabled) {
-        // Start data fetching timer
+        // Start data fetching timer only if not already running
         if (!stockUpdateTimer) {
             fetchStockData();
             stockUpdateTimer = setInterval(fetchStockData, UPDATE_INTERVAL);
@@ -274,7 +275,14 @@ function updateDisplayAlternating() {
 
 // Function to fetch stock data for all indicators
 export function fetchStockData() {
+    // Prevent concurrent fetch operations
+    if (isUpdating) {
+        console.log('Stock data fetch already in progress, skipping...');
+        return;
+    }
+    
     console.log('Fetching financial data...');
+    isUpdating = true;
     const currentTime = Date.now();
 
     // Flag to indicate if US markets are open
@@ -336,12 +344,18 @@ export function fetchStockData() {
                 pendingFetches--;
                 // Update display when all fetches are complete or after each individual fetch
                 updateStockIndicatorsContainer();
+                
+                // Reset updating flag when all fetches are complete
+                if (pendingFetches === 0) {
+                    isUpdating = false;
+                }
             });
     });
     
-    // If no fetches were needed (all cached), still update display
+    // If no fetches were needed (all cached), still update display and reset flag
     if (pendingFetches === 0) {
         updateStockIndicatorsContainer();
+        isUpdating = false;
     }
 }
 

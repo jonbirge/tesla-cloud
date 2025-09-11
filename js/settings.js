@@ -440,13 +440,13 @@ async function fetchSettings() {
             initializeSettings();
         } else {
             console.error('Error fetching settings: ', response.statusText);
-            // Initialize UI even if settings fetch failed
-            initializeSettings();
+            // Initialize with defaults if settings fetch failed
+            await setDefaultSettings();
         }
     } catch (error) {
         console.error('Error fetching settings: ', error);
-        // Initialize UI even if settings fetch failed
-        initializeSettings();
+        // Initialize with defaults if settings fetch failed
+        await setDefaultSettings();
     }
 }
 
@@ -770,9 +770,8 @@ function updateSetting(key, value) {
                 if (typeof stockModule.updateStockIndicatorVisibility === 'function') {
                     stockModule.updateStockIndicatorVisibility();
                 }
-                if (typeof stockModule.fetchStockData === 'function') {
-                    stockModule.fetchStockData();
-                }
+                // Only call startStockUpdates, which will handle fetchStockData internally
+                // to avoid duplicate API calls
                 if (typeof stockModule.startStockUpdates === 'function') {
                     stockModule.startStockUpdates();
                 }
