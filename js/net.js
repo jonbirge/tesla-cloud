@@ -1,6 +1,6 @@
 // Import the console.log function from app.js
 import { hashedUser } from './settings.js';
-import { gpsPermissionDenied } from './common.js';
+import { gpsPermissionDenied, debugLog } from './common.js';
 
 // Global variables
 const MAX_PING_MS = 500; // Maximum ping display value in milliseconds
@@ -91,7 +91,11 @@ export function startPingTest() {
     // Only initialize the chart if it doesn't exist yet
     if (!pingChart) {
         pingData = [];
-        initializePingChart();
+        try {
+            initializePingChart();
+        } catch (error) {
+            console.log('Chart.js not available, ping will work without visualization:', error.message);
+        }
     }
 
     // Start pinging every 5 seconds if not already running
@@ -114,6 +118,12 @@ function destroyPingChart() {
 
 // Creates and configures the chart visualization for ping data
 function initializePingChart() {
+    // Check if Chart.js is available
+    if (typeof Chart === 'undefined') {
+        console.log('Chart.js is not available - ping will work without visualization');
+        return;
+    }
+    
     // First, ensure any existing chart is destroyed
     destroyPingChart();
     
@@ -246,6 +256,20 @@ async function pingTestServer() {
     // Get updated location data
     getUserLocation();
 
+    // Prepare location info string for debug logging
+    let locationInfo = '';
+    if (userLocation.latitude !== null && userLocation.longitude !== null) {
+        locationInfo = `lat: ${userLocation.latitude.toFixed(4)}, lng: ${userLocation.longitude.toFixed(4)}`;
+        if (userLocation.altitude !== null) {
+            locationInfo += `, alt: ${userLocation.altitude.toFixed(1)}m`;
+        }
+    } else {
+        locationInfo = 'no location data';
+    }
+
+    // Debug log: ping attempt
+    debugLog(`Network ping attempt started (${locationInfo})`);
+
     // Prepare form data with user and location information
     const formData = new FormData();
     formData.append('user_id', hashedUser || 'anonymous');
@@ -273,6 +297,9 @@ async function pingTestServer() {
         await response.text();
         const pingTime = performance.now() - startTime; // ms
         
+        // Debug log: ping success
+        debugLog(`Network ping successful: ${pingTime.toFixed(1)}ms (${locationInfo})`);
+        
         // Discard the first ping
         // if (!pingTestServer.firstPingDiscarded) {
         //     pingTestServer.firstPingDiscarded = true;
@@ -293,12 +320,17 @@ async function pingTestServer() {
             updatePingChart(true);  // Update with animation
         }
     } catch (error) {
+        // Debug log: ping failure
+        debugLog(`Network ping failed: ${error.message} (${locationInfo})`);
         console.log('Ping HEAD failed: ', error);
     }
 
     // Add last ping time to form data as a string
     formData.append('ping', pingData.at(-1).toFixed(1));
     try {
+        // Debug log: POST attempt
+        debugLog(`Network ping POST data attempt (${locationInfo})`);
+        
         const response = await fetch('php/ping.php', {
             method: 'POST',
             body: formData,
@@ -308,7 +340,12 @@ async function pingTestServer() {
         if (!response.ok) {
             throw new Error('Network response was not ok');
         }
+        
+        // Debug log: POST success
+        debugLog(`Network ping POST data successful (${locationInfo})`);
     } catch (error) {
+        // Debug log: POST failure
+        debugLog(`Network ping POST data failed: ${error.message} (${locationInfo})`);
         console.log('Ping POST failed: ', error);
     }
 }
