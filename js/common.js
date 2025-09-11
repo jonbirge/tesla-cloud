@@ -371,12 +371,12 @@ export function isTestMode(component) {
     return activeTestModes.has(component.toLowerCase());
 }
 
-// Debug logging function - writes to debug section if debug mode is on, console if not
+// Debug logging function - writes to debug section if debug mode is on, does nothing if not
 export function debugLog(message) {
-    const timestamp = new Date().toLocaleTimeString();
-    const logMessage = `[${timestamp}] ${message}`;
-    
     if (debugMode) {
+        const timestamp = new Date().toLocaleTimeString();
+        const logMessage = `[${timestamp}] ${message}`;
+        
         // Write to debug section if it exists
         const debugElement = document.getElementById('debug-output');
         if (debugElement) {
@@ -390,8 +390,6 @@ export function debugLog(message) {
             // Fallback to console if debug element not found
             console.log('DEBUG: ' + logMessage);
         }
-    } else {
-        // Write to console when debug mode is off
-        console.log(logMessage);
     }
+    // Do nothing when debug mode is off
 }
