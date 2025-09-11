@@ -1183,7 +1183,7 @@ body.dark-mode .option-button:hover:not(.active) {
     /* Fix external site iframe positioning in mobile mode */
     #external-site {
         position: fixed;
-        top: 0;
+        top: 120px; /* Space for horizontal section menu */
         left: 0;
         right: 0;
         bottom: 0;
