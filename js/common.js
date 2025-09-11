@@ -5,10 +5,11 @@ import { settings } from './settings.js';
 const GEONAMES_USERNAME = 'birgefuller';
 let locationTimeZone = browserTimeZone();
 let testMode = false; // Set to true if test parameter exists
+let debugMode = false; // Set to true if debug parameter exists
 let gpsPermissionDenied = false; // Track if GPS permission was denied
 
 // Exports
-export { locationTimeZone, testMode, GEONAMES_USERNAME, gpsPermissionDenied }
+export { locationTimeZone, testMode, debugMode, GEONAMES_USERNAME, gpsPermissionDenied }
 
 // Function to update GPS permission denied status
 export function setGpsPermissionDenied(denied) {
@@ -337,6 +338,14 @@ export function showWeatherAlertModal(alert) {
 // URL parameters
 const urlParams = new URLSearchParams(window.location.search);
 const testParam = urlParams.get('test');
+const debugParam = urlParams.get('debug');
+
+// Set debug mode if debug parameter exists
+debugMode = debugParam !== null;
+
+if (debugMode) {
+    console.log('##### DEBUG MODE ##### Debug mode enabled');
+}
 
 // Parse test parameter - can be 'true', 'all', or comma-separated components
 let activeTestModes = new Set();
@@ -360,4 +369,29 @@ if (testMode) {
 // Helper function to check if a specific test mode is active
 export function isTestMode(component) {
     return activeTestModes.has(component.toLowerCase());
+}
+
+// Debug logging function - writes to debug section if debug mode is on, console if not
+export function debugLog(message) {
+    const timestamp = new Date().toLocaleTimeString();
+    const logMessage = `[${timestamp}] ${message}`;
+    
+    if (debugMode) {
+        // Write to debug section if it exists
+        const debugElement = document.getElementById('debug-output');
+        if (debugElement) {
+            // Append to existing content with line break
+            const currentContent = debugElement.textContent;
+            debugElement.textContent = currentContent + (currentContent ? '\n' : '') + logMessage;
+            
+            // Auto-scroll to bottom of debug output
+            debugElement.scrollTop = debugElement.scrollHeight;
+        } else {
+            // Fallback to console if debug element not found
+            console.log('DEBUG: ' + logMessage);
+        }
+    } else {
+        // Write to console when debug mode is off
+        console.log(logMessage);
+    }
 }

@@ -1,5 +1,5 @@
 // Imports
-import { srcUpdate, testMode, isTestMode, updateTimeZone, GEONAMES_USERNAME, showNotification, gpsPermissionDenied, setGpsPermissionDenied } from './common.js';
+import { srcUpdate, testMode, debugMode, isTestMode, updateTimeZone, GEONAMES_USERNAME, showNotification, gpsPermissionDenied, setGpsPermissionDenied } from './common.js';
 import { PositionSimulator } from './location.js';
 import { attemptLogin, leaveSettings, settings, isDriving, setDrivingState, enableLiveNewsUpdates, saveSetting } from './settings.js';
 import { fetchPremiumWeatherData, fetchCityData, SAT_URLS, forecastDataPrem, currentRainAlert } from './wx.js';
@@ -903,6 +903,14 @@ window.showSection = function (sectionId) {
         }
     }
 
+    // Debug section - initialize debug output if switching to debug section
+    if (sectionId === 'debug') {
+        const debugOutput = document.getElementById('debug-output');
+        if (debugOutput && !debugOutput.textContent) {
+            debugOutput.textContent = 'Debug mode active. Debug information will appear here.';
+        }
+    }
+
     // Satellite section
     if (sectionId === 'satellite') {
         // Load weather image when satellite section is shown
@@ -1065,6 +1073,14 @@ document.addEventListener('DOMContentLoaded', async function () {
 
     // Attempt login from URL parameter or cookie
     await attemptLogin();
+    
+    // Show debug button if debug mode is active
+    if (debugMode) {
+        const debugButton = document.getElementById('debug-section');
+        if (debugButton) {
+            debugButton.classList.remove('hidden');
+        }
+    }
     
     // Initialize news storage system (create user directory if needed)
     await initializeNewsStorage();
