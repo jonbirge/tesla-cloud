@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ping Chart Test</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .test-section { margin: 20px 0; padding: 20px; border: 1px solid #ccc; }
+        .success { color: green; }
+        .error { color: red; }
+        .info { color: blue; }
+        #pingChart { border: 1px solid #333; }
+    </style>
+</head>
+<body>
+    <h1>Tesla Cloud Ping Chart Test</h1>
+    
+    <div class="test-section">
+        <h2>Test Results</h2>
+        <div id="test-results"></div>
+    </div>
+    
+    <div class="test-section">
+        <h2>Chart Display Area</h2>
+        <canvas id="pingChart" width="600" height="260"></canvas>
+    </div>
+
+    <script>
+        // Test log
+        const results = document.getElementById('test-results');
+        function log(message, type = 'info') {
+            const div = document.createElement('div');
+            div.className = type;
+            div.textContent = `${new Date().toLocaleTimeString()}: ${message}`;
+            results.appendChild(div);
+        }
+
+        // Mock Chart.js for testing
+        window.Chart = function(ctx, config) {
+            log('Chart.js constructor called - SUCCESS', 'success');
+            this.ctx = ctx;
+            this.config = config;
+            this.data = config.data || { labels: [], datasets: [] };
+            this.options = config.options || {};
+            
+            // Draw test chart
+            ctx.fillStyle = '#4169E1';
+            ctx.fillRect(50, 50, 500, 160);
+            ctx.fillStyle = 'white';
+            ctx.font = '16px Arial';
+            ctx.textAlign = 'center';
+            ctx.fillText('TEST CHART DISPLAYED', 300, 130);
+            
+            this.update = function() {
+                log('Chart update called', 'success');
+            };
+            this.destroy = function() {
+                log('Chart destroy called', 'info');
+            };
+        };
+
+        // Simulate the net.js functionality
+        let pingChart = null;
+        let pingData = [10, 15, 12, 8, 20, 18, 14, 11];
+        const MAX_PING_MS = 500;
+
+        // Copy the actual waitForChartJs function
+        function waitForChartJs(callback, maxAttempts = 20, currentAttempt = 1) {
+            if (typeof Chart !== 'undefined') {
+                callback();
+            } else if (currentAttempt <= maxAttempts) {
+                log(`Waiting for Chart.js to load... (attempt ${currentAttempt}/${maxAttempts})`, 'info');
+                setTimeout(() => waitForChartJs(callback, maxAttempts, currentAttempt + 1), 100);
+            } else {
+                log('Chart.js failed to load after maximum attempts', 'error');
+                showChartFallbackMessage();
+            }
+        }
+
+        function showChartFallbackMessage() {
+            const chartCanvas = document.getElementById('pingChart');
+            if (chartCanvas) {
+                const ctx = chartCanvas.getContext('2d');
+                ctx.fillStyle = '#666666';
+                ctx.font = '16px Inter';
+                ctx.textAlign = 'center';
+                ctx.fillText('Chart library unavailable', chartCanvas.width / 2, chartCanvas.height / 2 - 10);
+                ctx.fillText('Ping data is still being collected', chartCanvas.width / 2, chartCanvas.height / 2 + 20);
+                log('Fallback message displayed', 'info');
+            }
+        }
+
+        function initializePingChart() {
+            if (pingChart) {
+                pingChart.destroy();
+                pingChart = null;
+                log('Existing chart destroyed', 'info');
+            }
+            
+            const chartCanvas = document.getElementById('pingChart');
+            if (!chartCanvas) {
+                log('Chart canvas not found', 'error');
+                return;
+            }
+
+            waitForChartJs(() => {
+                const ctx = chartCanvas.getContext('2d');
+                log('Initializing ping chart...', 'info');
+                
+                pingChart = new Chart(ctx, {
+                    type: 'line',
+                    data: {
+                        labels: Array.from({ length: pingData.length }, (_, i) => i),
+                        datasets: [{
+                            label: 'Ping (ms)',
+                            data: pingData,
+                            borderColor: '#4169E1',
+                            borderWidth: 3,
+                            fill: false
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        scales: {
+                            y: { beginAtZero: true, max: MAX_PING_MS }
+                        }
+                    }
+                });
+
+                log('Ping chart initialized successfully!', 'success');
+            });
+        }
+
+        // Run tests
+        log('Starting ping chart test...', 'info');
+        log('Chart.js available: ' + (typeof Chart !== 'undefined'), 'info');
+        
+        // Test 1: Chart initialization
+        setTimeout(() => {
+            log('Testing chart initialization...', 'info');
+            initializePingChart();
+        }, 500);
+
+        // Test 2: Chart update
+        setTimeout(() => {
+            log('Testing chart update...', 'info');
+            if (pingChart) {
+                pingChart.update();
+            } else {
+                log('Chart not available for update test', 'error');
+            }
+        }, 1500);
+
+        // Test 3: Fallback when Chart.js is unavailable
+        setTimeout(() => {
+            log('Testing fallback scenario...', 'info');
+            // Temporarily remove Chart.js
+            const originalChart = window.Chart;
+            delete window.Chart;
+            
+            setTimeout(() => {
+                initializePingChart();
+                // Restore Chart.js after test
+                setTimeout(() => {
+                    window.Chart = originalChart;
+                }, 3000);
+            }, 100);
+        }, 2500);
+    </script>
+</body>
+</html>
