@@ -828,6 +828,35 @@ window.loadExternalUrl = function (url, inFrame = false) {
     iframe.src = url;
     externalSite.appendChild(iframe);
     
+    // Add close button for mobile devices
+    if (window.innerWidth <= 900) {
+        const closeButton = document.createElement('button');
+        closeButton.innerHTML = '✕ Close';
+        closeButton.style.cssText = `
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: rgba(0, 0, 0, 0.8);
+            color: white;
+            padding: 8px 12px;
+            border-radius: 20px;
+            border: none;
+            z-index: 1001;
+            font-size: 14px;
+            font-weight: bold;
+            cursor: pointer;
+        `;
+        
+        closeButton.addEventListener('click', function() {
+            // Close external site by showing the previous section
+            const urlParams = new URLSearchParams(window.location.search);
+            const currentSectionFromUrl = urlParams.get('section') || 'navigation';
+            showSection(currentSectionFromUrl);
+        });
+        
+        externalSite.appendChild(closeButton);
+    }
+    
     // Show the external site container
     externalSite.style.display = 'block';
     
