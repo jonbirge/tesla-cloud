@@ -1179,4 +1179,19 @@ body.dark-mode .option-button:hover:not(.active) {
         margin-top: 7px;
         margin-bottom: 7px;
     }
+
+    /* Fix external site iframe positioning in mobile mode */
+    #external-site {
+        position: fixed;
+        top: 120px; /* Space for horizontal section menu */
+        left: 0;
+        right: 0;
+        bottom: 0;
+        z-index: 1000;
+    }
+
+    #external-site iframe {
+        width: 100%;
+        height: 100%;
+    }
 }
