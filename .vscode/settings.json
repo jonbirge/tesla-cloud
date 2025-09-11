@@ -1,5 +1,5 @@
 {
     "github.copilot.chat.commitMessageGeneration.instructions": [
-        
+        "Don't use the word refactor in commit messages unless it really is a trivial refactor of the code with no functionality change."
     ]
 }
