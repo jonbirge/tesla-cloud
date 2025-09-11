@@ -3,7 +3,7 @@ import { srcUpdate, testMode, isTestMode, updateTimeZone, GEONAMES_USERNAME, sho
 import { PositionSimulator } from './location.js';
 import { attemptLogin, leaveSettings, settings, isDriving, setDrivingState, enableLiveNewsUpdates, saveSetting } from './settings.js';
 import { fetchPremiumWeatherData, fetchCityData, SAT_URLS, forecastDataPrem, currentRainAlert } from './wx.js';
-import { updateNetworkInfo, updatePingChart, startPingTest } from './net.js';
+import { updateNetworkInfo, updatePingChart, startPingTest, ensurePingChartInitialized } from './net.js';
 import { setupNewsObserver, startNewsTimeUpdates, initializeNewsStorage } from './news.js';
 import { startStockUpdates, stopStockUpdates } from './stock.js';
 
@@ -922,6 +922,7 @@ window.showSection = function (sectionId) {
             updateNetworkInfo();
             networkInfoUpdated = true;
         }
+        ensurePingChartInitialized();  // Ensure chart is ready
         updatePingChart(true);  // with animation
     }
 

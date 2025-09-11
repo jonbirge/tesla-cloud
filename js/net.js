@@ -112,6 +112,35 @@ function destroyPingChart() {
     }
 }
 
+// Waits for Chart.js library to load and retries chart initialization
+function waitForChartJs(callback, maxAttempts = 20, currentAttempt = 1) {
+    if (typeof Chart !== 'undefined') {
+        // Chart.js is loaded, proceed with initialization
+        callback();
+    } else if (currentAttempt <= maxAttempts) {
+        // Chart.js not loaded yet, wait and retry
+        console.log(`Waiting for Chart.js to load... (attempt ${currentAttempt}/${maxAttempts})`);
+        setTimeout(() => waitForChartJs(callback, maxAttempts, currentAttempt + 1), 100);
+    } else {
+        // Give up after maxAttempts and show fallback message
+        console.error('Chart.js failed to load after maximum attempts');
+        showChartFallbackMessage();
+    }
+}
+
+// Shows a fallback message when Chart.js fails to load
+function showChartFallbackMessage() {
+    const chartCanvas = document.getElementById('pingChart');
+    if (chartCanvas) {
+        const ctx = chartCanvas.getContext('2d');
+        ctx.fillStyle = '#666666';
+        ctx.font = '16px Inter';
+        ctx.textAlign = 'center';
+        ctx.fillText('Chart library unavailable', chartCanvas.width / 2, chartCanvas.height / 2 - 10);
+        ctx.fillText('Ping data is still being collected', chartCanvas.width / 2, chartCanvas.height / 2 + 20);
+    }
+}
+
 // Creates and configures the chart visualization for ping data
 function initializePingChart() {
     // First, ensure any existing chart is destroyed
@@ -120,22 +149,24 @@ function initializePingChart() {
     const chartCanvas = document.getElementById('pingChart');
     if (!chartCanvas) return;
 
-    // Get the 2D context for the chart
-    const ctx = chartCanvas.getContext('2d');
+    // Wait for Chart.js to load before proceeding
+    waitForChartJs(() => {
+        // Get the 2D context for the chart
+        const ctx = chartCanvas.getContext('2d');
 
-    // Logging
-    console.log('Initializing ping chart...');
-    
-    // Get the Tesla blue color from CSS
-    const teslaBlue = getComputedStyle(document.documentElement).getPropertyValue('--tesla-blue').trim();
-    
-    // Create gradient
-    const gradient = ctx.createLinearGradient(0, 0, 0, 400);
-    gradient.addColorStop(0, teslaBlue + '50');  // 25% opacity at top
-    gradient.addColorStop(0.75, teslaBlue + '00');  // 0% opacity at bottom
-    gradient.addColorStop(1, teslaBlue + '00');  // 0% opacity at bottom
-    
-    pingChart = new Chart(ctx, {
+        // Logging
+        console.log('Initializing ping chart...');
+        
+        // Get the Tesla blue color from CSS
+        const teslaBlue = getComputedStyle(document.documentElement).getPropertyValue('--tesla-blue').trim();
+        
+        // Create gradient
+        const gradient = ctx.createLinearGradient(0, 0, 0, 400);
+        gradient.addColorStop(0, teslaBlue + '50');  // 25% opacity at top
+        gradient.addColorStop(0.75, teslaBlue + '00');  // 0% opacity at bottom
+        gradient.addColorStop(1, teslaBlue + '00');  // 0% opacity at bottom
+        
+        pingChart = new Chart(ctx, {
         type: 'line',
         data: {
             labels: [],
@@ -211,12 +242,13 @@ function initializePingChart() {
                 }
             }
         }
+        });
+
+        updateNetChartAxisColors(); // Ensure initial colors are right
+
+        // Logging
+        console.log('Ping chart initialized');
     });
-
-    updateNetChartAxisColors(); // Ensure initial colors are right
-
-    // Logging
-    console.log('Ping chart initialized');
 }
 
 // Updates chart colors based on current theme settings
@@ -313,6 +345,14 @@ async function pingTestServer() {
     }
 }
 
+// Ensures the ping chart is initialized, retrying if necessary
+export function ensurePingChartInitialized() {
+    if (!pingChart) {
+        console.log('Ping chart not initialized, attempting to initialize...');
+        initializePingChart();
+    }
+}
+
 // Updates the ping chart with current data, with optional animation
 export function updatePingChart(animated = false) {
     if (pingChart) {
@@ -328,6 +368,10 @@ export function updatePingChart(animated = false) {
         } else {
             pingChart.update('none'); // Update without animation for better performance
         }
+    } else {
+        // Chart not initialized, try to initialize it
+        console.log('Chart not available for update, attempting to initialize...');
+        ensurePingChartInitialized();
     }
 }
 
