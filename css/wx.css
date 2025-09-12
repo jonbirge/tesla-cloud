@@ -300,23 +300,26 @@ body.dark-mode .forecast-desc {
     position: absolute;
     right: 10px;
     top: 10px;
-    background: rgba(205, 205, 205, 0.75);
-    border: none;
+    background: #808080;
+    border: 1px solid #666;
     width: 30px;
     height: 30px;
-    border-radius: 50%;
+    border-radius: 4px;
     cursor: pointer;
     display: flex;
     justify-content: center;
-    font-size: 24px;
-    font-weight: 600;
+    align-items: center;
+    font-size: 18px;
+    font-weight: 700;
+    color: #fff;
     line-height: 1;
     transition: all 0.2s ease;
 }
 
 .forecast-popup-close:hover {
-    background: rgba(0, 0, 0, 0.2);
-    color: #333;
+    background: #666;
+    border-color: #444;
+    color: #fff;
 }
 
 .hourly-forecast {
