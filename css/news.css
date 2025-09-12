@@ -86,7 +86,7 @@ body.dark-mode .share-icon img {
 }
 
 .news-toggle-item {
-    padding: 9px 15px 9px 50px;
+    padding: 9px 15px 9px 45px;
     margin-top: 7px;
     border-radius: 9px;
     width: auto;
@@ -99,8 +99,8 @@ body.dark-mode .share-icon img {
     left: 12px;
     top: 50%;
     transform: translateY(-50%);
-    width: 32px;
-    height: 32px;
+    width: 24px;
+    height: 24px;
     border-radius: 4px;
     opacity: 0.8;
 }

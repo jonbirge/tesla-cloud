@@ -692,11 +692,11 @@ function createNewsToggleItem(source) {
     let faviconUrl = '';
     if (source.icon && typeof source.icon === 'string' && source.icon.trim() !== '') {
         // Use the domain from the icon key
-        faviconUrl = `https://www.google.com/s2/favicons?domain=${source.icon}&sz=48`;
+        faviconUrl = `https://www.google.com/s2/favicons?domain=${source.icon}&sz=24`;
     } else {
         try {
             const url = new URL(source.url);
-            faviconUrl = `https://www.google.com/s2/favicons?domain=${url.hostname}&sz=48`;
+            faviconUrl = `https://www.google.com/s2/favicons?domain=${url.hostname}&sz=24`;
         } catch (e) {
             console.error('Error parsing URL for favicon:', e);
         }
