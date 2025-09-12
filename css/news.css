@@ -86,11 +86,23 @@ body.dark-mode .share-icon img {
 }
 
 .news-toggle-item {
-    padding: 9px 15px;
+    padding: 9px 15px 9px 45px;
     margin-top: 7px;
     border-radius: 9px;
     width: auto;
     font-size: 15pt;
+    position: relative;
+}
+
+.news-source-favicon {
+    position: absolute;
+    left: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 24px;
+    height: 24px;
+    border-radius: 4px;
+    opacity: 0.8;
 }
 
 /* Mobile adjustments for news-related elements */
@@ -132,5 +144,9 @@ body.dark-mode .share-icon img {
         font-size: 9pt;
         padding: 6px 8px;
         margin-top: 5px;
+    }
+
+    .news-source-favicon {
+        display: none;
     }
 }

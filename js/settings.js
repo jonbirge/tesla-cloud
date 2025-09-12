@@ -688,6 +688,32 @@ function createNewsToggleItem(source) {
         if (input) input.click();
     });
 
+    // Extract domain for favicon either from the source.icon or from source.url
+    let faviconUrl = '';
+    if (source.icon && typeof source.icon === 'string' && source.icon.trim() !== '') {
+        // Use the domain from the icon key
+        faviconUrl = `https://www.google.com/s2/favicons?domain=${source.icon}&sz=24`;
+    } else {
+        try {
+            const url = new URL(source.url);
+            faviconUrl = `https://www.google.com/s2/favicons?domain=${url.hostname}&sz=24`;
+        } catch (e) {
+            console.error('Error parsing URL for favicon:', e);
+        }
+    }
+
+    // Create favicon image element
+    const img = document.createElement('img');
+    img.src = faviconUrl;
+    img.className = 'news-source-favicon';
+    img.onerror = function () { 
+        // Only hide on error if not on mobile (CSS will handle mobile suppression)
+        if (!window.matchMedia('(max-width: 900px)').matches) {
+            this.style.display = 'none'; 
+        }
+    };
+    itemDiv.appendChild(img);
+
     const label = document.createElement('label');
     label.textContent = source.name;
     itemDiv.appendChild(label);
