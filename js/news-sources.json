@@ -5,7 +5,8 @@
     "url": "https://feeds.content.dowjones.io/public/rss/RSSWorldNews",
     "cache": 5,
     "category": "general",
-    "defaultEnabled": false
+    "defaultEnabled": false,
+    "icon": "https://wsj.com"
   },
   {
     "id": "nyt",
@@ -61,7 +62,8 @@
     "url": "http://feeds.bbci.co.uk/news/world/rss.xml",
     "cache": 15,
     "category": "general",
-    "defaultEnabled": false
+    "defaultEnabled": false,
+    "icon": "https://www.bbc.com"
   },
   {
     "id": "economist",
@@ -94,7 +96,7 @@
     "cache": 15,
     "category": "general",
     "defaultEnabled": false,
-    "icon": "https://apnews.com/"
+    "icon": "https://apnews.com"
   },
   {
     "id": "bloomberg",
@@ -142,7 +144,8 @@
     "url": "https://feeds.arstechnica.com/arstechnica/index",
     "cache": 30,
     "category": "business",
-    "defaultEnabled": false
+    "defaultEnabled": false,
+    "icon": "https://arstechnica.com"
   },
   {
     "id": "engadget",
@@ -217,3 +220,4 @@
     "defaultEnabled": false
   }
 ]
+
