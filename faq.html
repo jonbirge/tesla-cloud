@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Tesla Cloud FAQ</title>
+    <title>teslas.cloud FAQ</title>
     <link rel="icon" type="image/svg+xml" href="assets/favicon.svg">
     <link rel="preconnect" href="https://fonts.googleapis.com" crossorigin>
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -48,29 +48,34 @@
     </style>
 </head>
 <body>
-    <h1>Tesla Cloud FAQ</h1>
+    <h1>teslas.cloud FAQ</h1>
     
-    <h2>Getting Started</h2>
-    
-    <div class="question">Q: What is Tesla Cloud?</div>
-    <div class="answer">
-        Tesla Cloud is a comprehensive web application designed specifically for Tesla's in-car browser. It provides news, weather, navigation, and other essential features optimized for vehicle use. This is an educational father-son project and is not affiliated with Tesla, Inc.
-    </div>
-    
-    <div class="question">Q: How do I use Tesla Cloud in my Tesla?</div>
-    <div class="answer">
-        Simply navigate to <strong>teslas.cloud</strong> in your Tesla's web browser. For the best experience:
+    <div class="tip">
+        <strong>Quick Tips:</strong>
         <ul>
-            <li>Bookmark the page using the star in the browser menu</li>
-            <li>Add the browser to your dock for easy access while driving</li>
-            <li>Allow location services for GPS-dependent features</li>
-            <li>Consider creating a user ID to sync settings across devices</li>
+            <li>Bookmark teslas.cloud and add the browser to your dock</li>
+            <li>Enable location services for full functionality</li>
+            <li>Create a user ID to sync settings across devices</li>
+            <li>Dashboard lets you monitor road conditions while still navigating using the car's system</li>
+            <li>Use the Network section to monitor connectivity during a trip</li>
         </ul>
     </div>
 
-    <div class="question">Q: Is Tesla Cloud free to use?</div>
+    <h2>Getting Started</h2>
+    
+    <div class="question">Q: What is teslas.cloud?</div>
     <div class="answer">
-        Yes, Tesla Cloud is completely free to use. There are no subscriptions, premium features, or hidden costs. It's maintained as an educational project to benefit the Tesla community.
+        teslas.cloud is a comprehensive web application designed specifically for Tesla's in-car browser. It provides news, weather, navigation, and other essential features optimized for vehicle use. This is an educational father-son project and is not affiliated with Tesla, Inc.
+    </div>
+
+    <div class="question">Q: Why is it "teslas" and not "tesla"?</div>
+    <div class="answer">
+        Because some guy in China is squatting on the "tesla.cloud" domain.
+    </div>
+
+    <div class="question">Q: Is teslas.cloud free to use?</div>
+    <div class="answer">
+        Yes, teslas.cloud is completely free to use. It's maintained as an educational project to benefit the Tesla community.
     </div>
     
     <h2>Dashboard Section</h2>
@@ -79,7 +84,7 @@
     <div class="answer">
         The Dashboard is your navigation hub featuring:
         <ul>
-            <li><strong>Relative Wind Indicator:</strong> A circular radar display showing wind direction relative to your vehicle's heading</li>
+            <li><strong>Relative Wind Indicator (Optional):</strong> A circular radar display showing wind direction relative to your vehicle's heading</li>
             <li><strong>GPS Coordinates:</strong> Current latitude and longitude with precision indicators</li>
             <li><strong>Altitude Display:</strong> Elevation above sea level</li>
             <li><strong>Vehicle Heading:</strong> Compass direction in degrees</li>
@@ -89,7 +94,7 @@
 
     <div class="question">Q: What is TeslaWaze and how do I use it?</div>
     <div class="answer">
-        TeslaWaze is an embedded navigation service that provides turn-by-turn directions with real-time traffic data. You can search for destinations, get route suggestions, and view traffic conditions directly within Tesla Cloud. It's designed to complement your Tesla's built-in navigation.
+        TeslaWaze is a service developed by some brilliant unknown engineer that allows you to view traffic conditions and speed traps. It's a nice complement to your Tesla's built-in navigation. It was NOT developed by us, and we're just embedding it in the app.
     </div>
 
     <div class="question">Q: Why does the GPS data show "--" or seem inaccurate?</div>
@@ -97,7 +102,7 @@
         GPS data depends on location services being enabled in your Tesla's browser and having a clear view of satellites. If you see "--", try:
         <ul>
             <li>Refreshing the page to re-request location permissions</li>
-            <li>Moving to an area with better satellite reception</li>
+            <li>Waiting for better GPS reception</li>
             <li>Ensuring location services are enabled in browser settings</li>
         </ul>
     </div>
@@ -106,14 +111,7 @@
     
     <div class="question">Q: How does the News section work?</div>
     <div class="answer">
-        The News section aggregates headlines from multiple Tesla and automotive sources including:
-        <ul>
-            <li>Tesla news from major automotive publications</li>
-            <li>Electric vehicle industry updates</li>
-            <li>General tech news relevant to Tesla owners</li>
-            <li>Market updates and stock information</li>
-        </ul>
-        Articles are refreshed regularly and can be shared via email if you're logged in.
+        The News section aggregates headlines from multiple sources. You can click on the headlines (if you're not moving) to read the full articles. You can also forward articles to your email (see below).
     </div>
 
     <div class="question">Q: Can I customize which news sources appear?</div>
@@ -123,14 +121,14 @@
 
     <div class="question">Q: How does news sharing work?</div>
     <div class="answer">
-        When logged in, you can share interesting articles via email. Click the share button on any article, and it will be sent to your configured email address. This feature requires you to have email forwarding enabled in your user settings.
+        When logged in, you can forward interesting articles to yourself for later reading via email. Click the share button on any article, and it will be sent to your configured email address. This feature requires you to have email forwarding enabled in your user settings.
     </div>
     
     <h2>Weather Section</h2>
     
     <div class="question">Q: What weather information is available?</div>
     <div class="answer">
-        The Weather section provides comprehensive meteorological data:
+        The Weather section provides:
         <ul>
             <li><strong>Current Conditions:</strong> Temperature, humidity, wind speed and direction</li>
             <li><strong>Extended Forecast:</strong> 7-day outlook with highs and lows</li>
@@ -140,50 +138,21 @@
         </ul>
     </div>
 
-    <div class="question">Q: How accurate is the weather radar?</div>
-    <div class="answer">
-        The precipitation radar uses data from national weather services and is updated every 15-30 minutes. It's designed to help you plan charging stops and routes around weather conditions. The radar shows both current conditions and short-term precipitation forecasts.
-    </div>
-
-    <div class="question">Q: Why do I see weather alerts in the navigation bar?</div>
-    <div class="answer">
-        Weather alerts appear as red dots in the top navigation when severe weather conditions are detected in your area. These alerts help you stay informed about conditions that might affect driving safety or charging availability.
-    </div>
-    
     <h2>Landmarks Section</h2>
     
-    <div class="question">Q: What are Landmarks in Tesla Cloud?</div>
+    <div class="question">Q: What is this section do?</div>
     <div class="answer">
-        The Landmarks section provides quick access to important locations and points of interest:
-        <ul>
-            <li>Tesla Supercharger locations with availability status</li>
-            <li>Service centers and showrooms</li>
-            <li>Popular destination chargers</li>
-            <li>Tourist attractions and scenic routes</li>
-            <li>Emergency services and hospitals</li>
-        </ul>
-    </div>
-
-    <div class="question">Q: How are landmark locations determined?</div>
-    <div class="answer">
-        Landmarks are curated based on relevance to Tesla owners and electric vehicle travel. The list includes official Tesla locations, popular EV-friendly destinations, and user-suggested points of interest that have been verified for accuracy.
+        The Landmarks section provides nearby points of interest from Wikipedia. You can leave it open while you drive and it will continuously update as you move.
     </div>
     
     <h2>Network Section</h2>
     
-    <div class="question">Q: What does the Network section monitor?</div>
+    <div class="question">Q: What graph in the Network section monitor?</div>
     <div class="answer">
-        The Network section provides real-time connectivity diagnostics:
-        <ul>
-            <li><strong>Connection Status:</strong> Overall network health indicator</li>
-            <li><strong>Latency Monitoring:</strong> Response times to various servers</li>
-            <li><strong>Speed Tests:</strong> Download and upload speed measurements</li>
-            <li><strong>Regional Performance:</strong> Network quality in different geographic areas</li>
-            <li><strong>Historical Trends:</strong> Connection quality over time</li>
-        </ul>
+        The Network section provides real-time car network diagnostics by measuring latency to our server. It's a complement to the cell signal display in the car that is actually measuring the network performance, not just signal strength. 
     </div>
 
-    <div class="question">Q: How do I interpret the network status indicators?</div>
+    <div class="question">Q: How do I interpret the network status indicator at the top of the window?</div>
     <div class="answer">
         Network status is shown with color-coded indicators:
         <ul>
@@ -194,12 +163,22 @@
         </ul>
         The bar indicator in the top-right corner gives you an at-a-glance view of your current connection quality.
     </div>
+
+    <div class="question">Q: What is the network "exit" location?</div>
+    <div class="answer">
+        When your car connects to the internet, it does so through a cellular connection. Most car companies, like Tesla, actually route you through a network tunnel (VPN) that they control. As such, you may actually be accessing the internet from quite a distance from your actual location when all is said and done. This shows you where you actually "appear to be" on the internet. 
+    </div>
+
+    <div class="question">Q: Great. Why do i care?</div>
+    <div class="answer">
+        First, it will introduce latency if the server that is handling your network traffic is far away. Second, some services (like streaming video) may be blocked if they notice a difference between your GPS position and your network location.
+    </div>
     
     <h2>Travel Section</h2>
     
     <div class="question">Q: What travel resources are available?</div>
     <div class="answer">
-        The Travel section is your comprehensive trip planning toolkit:
+        The Travel section has links to various tools and resources for planning trips in your Tesla:
         <ul>
             <li><strong>Route Planning:</strong> Links to mapping services optimized for electric vehicles</li>
             <li><strong>Charging Networks:</strong> Access to various charging network apps and websites</li>
@@ -207,18 +186,6 @@
             <li><strong>Destination Guides:</strong> EV-friendly hotels, restaurants, and attractions</li>
             <li><strong>Emergency Resources:</strong> Roadside assistance and towing services</li>
         </ul>
-    </div>
-
-    <div class="question">Q: How do I plan a long-distance trip?</div>
-    <div class="answer">
-        For long-distance travel planning:
-        <ol>
-            <li>Use the route planning tools to map your journey</li>
-            <li>Check charging station availability along your route</li>
-            <li>Review weather conditions for your travel dates</li>
-            <li>Bookmark important charging locations and alternate routes</li>
-            <li>Consider downloading offline maps as a backup</li>
-        </ol>
     </div>
     
     <h2>Media Section</h2>
@@ -235,11 +202,6 @@
         </ul>
         <em>Note: Media features are disabled while driving for safety.</em>
     </div>
-
-    <div class="question">Q: Why are some media features disabled while driving?</div>
-    <div class="answer">
-        Tesla Cloud automatically detects when the vehicle is in motion and disables entertainment features that could distract the driver. This includes video streaming, games, and other interactive content. Audio-only features like music and podcasts remain available.
-    </div>
     
     <h2>Reference Section</h2>
     
@@ -255,29 +217,14 @@
         </ul>
     </div>
 
-    <div class="question">Q: Is it safe to access password managers through Tesla Cloud?</div>
+    <div class="question">Q: Is it safe to access password managers through teslas.cloud?</div>
     <div class="answer">
-        Tesla Cloud provides links to password manager websites but doesn't store or access your credentials. When you click these links, you're taken directly to the official sites where you log in normally. Always verify you're on the correct website before entering sensitive information.
-    </div>
-    
-    <h2>Toys Section</h2>
-    
-    <div class="question">Q: What games and entertainment are available in Toys?</div>
-    <div class="answer">
-        The Toys section includes various browser-based entertainment:
-        <ul>
-            <li><strong>Classic Games:</strong> Retro arcade games and puzzles</li>
-            <li><strong>Educational Games:</strong> Learning-focused interactive content</li>
-            <li><strong>Multiplayer Options:</strong> Games you can play with passengers</li>
-            <li><strong>Brain Teasers:</strong> Puzzles and logic games</li>
-            <li><strong>Simulation Games:</strong> Simple strategy and simulation titles</li>
-        </ul>
-        <em>Note: Games are only available when parked for safety reasons.</em>
+        teslas.cloud provides links to password manager websites but doesn't store or access your credentials. When you click these links, you're taken directly to the official sites where you log in normally. Always verify you're on the correct website before entering sensitive information.
     </div>
     
     <h2>Settings & Account Management</h2>
     
-    <div class="question">Q: Do I need to create an account to use Tesla Cloud?</div>
+    <div class="question">Q: Do I need to create an account to use teslas.cloud?</div>
     <div class="answer">
         No account is required for basic functionality. All settings are saved locally in your browser by default. However, creating a user ID provides several benefits:
         <ul>
@@ -302,7 +249,7 @@
 
     <div class="question">Q: What settings can I customize?</div>
     <div class="answer">
-        You can customize numerous aspects of Tesla Cloud:
+        You can customize numerous aspects of teslas.cloud:
         <ul>
             <li><strong>Display:</strong> Dark/light mode, text size, layout preferences</li>
             <li><strong>News:</strong> Source selection, update frequency, email forwarding</li>
@@ -314,13 +261,12 @@
 
     <div class="question">Q: What information is stored on your servers?</div>
     <div class="answer">
-        We follow a privacy-first approach and store minimal data:
+        We follow a privacy-first approach and store minimal data, none of which can be associated with you personally unless you choose to use an e-mail address that reveals your identity. The only data stored on our servers is:
         <ul>
             <li>Encrypted user ID (only if you create one)</li>
             <li>Settings preferences associated with your ID</li>
-            <li>Email address (only if news forwarding is enabled)</li>
-            <li>No personal information, browsing history, or location data</li>
-            <li>No tracking or analytics beyond basic usage statistics</li>
+            <li>Email address (if you provide one for news forwarding)</li>
+            <li>Location of ping requests</li>>
         </ul>
     </div>
     
@@ -360,7 +306,7 @@
             <li>Checking your network connection status</li>
             <li>Closing other browser tabs to free up memory</li>
         </ol>
-        Tesla Cloud is designed to be lightweight, but external content may sometimes affect performance.
+        teslas.cloud is designed to be lightweight, but external content may sometimes affect performance.
     </div>
 
     <div class="question">Q: Why do stock prices and some data show "--"?</div>
@@ -372,7 +318,7 @@
             <li>Services requiring authentication are not configured</li>
             <li>Regional restrictions on certain data sources</li>
         </ul>
-        This is normal behavior and doesn't affect core Tesla Cloud functionality.
+        This is normal behavior and doesn't affect core teslas.cloud functionality.
     </div>
 
     <div class="question">Q: How do I report bugs or suggest improvements?</div>
@@ -391,80 +337,42 @@
     
     <div class="question">Q: How is my data protected?</div>
     <div class="answer">
-        Tesla Cloud prioritizes your privacy:
+        teslas.cloud prioritizes your privacy:
         <ul>
             <li><strong>No tracking:</strong> We don't use analytics or tracking scripts</li>
             <li><strong>Minimal data collection:</strong> Only essential settings are stored</li>
-            <li><strong>Encryption:</strong> User IDs and settings are encrypted before storage</li>
+            <li><strong>Encryption:</strong> User IDs is encrypted so users can use something like their phone number</li>
             <li><strong>No data selling:</strong> We never share or sell user information</li>
-            <li><strong>Local storage:</strong> Most data is stored locally in your browser</li>
+            <li><strong>Local storage:</strong> Most data (other than settings) is stored locally in your browser</li>
         </ul>
     </div>
 
     <div class="question">Q: Can I delete my account and data?</div>
     <div class="answer">
-        Yes, you can delete your account at any time:
-        <ol>
-            <li>Go to Settings and log in with your user ID</li>
-            <li>Click the account management options</li>
-            <li>Select "Delete Account" to remove all server-stored data</li>
-            <li>Clear your browser cache to remove local data</li>
-        </ol>
-        Account deletion is immediate and irreversible.
+        Not yet. Given that there's nothing interesting in the settings data (which is all we store) we haven't implemented this feature yet. If you want to delete your user ID and associated settings, please contact us at <code>feedback@teslas.cloud</code> and we'll take care of it.
     </div>
 
-    <div class="question">Q: Is Tesla Cloud safe to use while driving?</div>
-    <div class="answer">
-        Tesla Cloud includes several safety features:
-        <ul>
-            <li>Entertainment features are automatically disabled while driving</li>
-            <li>Navigation and essential information remain accessible</li>
-            <li>Large, touch-friendly interface elements</li>
-            <li>Minimal driver distraction design</li>
-        </ul>
-        Always prioritize safe driving and use voice commands when possible.
-    </div>
-    
-    <h2>Support & Community</h2>
+    <h2>Support</h2>
     
     <div class="question">Q: How can I get help or contact support?</div>
     <div class="answer">
         For support:
         <ul>
-            <li><strong>Email:</strong> <code>feedback@teslas.cloud</code> for technical issues</li>
-            <li><strong>FAQ:</strong> Check this page first for common questions</li>
-            <li><strong>Community:</strong> Tesla owner forums often discuss Tesla Cloud</li>
+            <li><strong>Email:</strong> <code>feedback@teslas.cloud</code> for technical issues.</li>
+            <li><strong>FAQ:</strong> Check this page for common questions; it will be updated often.</li>
             <li><strong>Updates:</strong> Follow announcements in the About section</li>
         </ul>
         Response times vary as this is a volunteer project.
     </div>
 
-    <div class="question">Q: Can I contribute to Tesla Cloud development?</div>
+    <div class="question">Q: Can I contribute to teslas.cloud development?</div>
     <div class="answer">
-        While Tesla Cloud is primarily a father-son educational project, we welcome:
-        <ul>
-            <li>Bug reports and detailed feedback</li>
-            <li>Suggestions for new features or improvements</li>
-            <li>Links to useful Tesla-related resources</li>
-            <li>Testing and feedback on new features</li>
-        </ul>
-        Contact us at <code>feedback@teslas.cloud</code> if you'd like to contribute.
+        Sure! Contact us at <code>feedback@teslas.cloud</code> if you'd like to contribute.
     </div>
 
-    <div class="question">Q: Is there a mobile app version?</div>
+    <div class="question">Q: Is there a mobile version?</div>
     <div class="answer">
-        Tesla Cloud is designed as a web application that works in any browser, including mobile devices. There's no separate mobile app, but the responsive design ensures it works well on phones and tablets as well as in your Tesla's browser.
-    </div>
-    
-    <div class="tip">
-        <strong>Pro Tips for the Best Experience:</strong>
-        <ul>
-            <li>Bookmark teslas.cloud and add the browser to your dock</li>
-            <li>Enable location services for full functionality</li>
-            <li>Create a user ID to sync settings across devices</li>
-            <li>Check the News section regularly for Tesla-related updates</li>
-            <li>Use the Network section to monitor connectivity before long trips</li>
-        </ul>
+        teslas.cloud is a web application that works in any browser, including mobile devices.
     </div>
 </body>
 </html>
