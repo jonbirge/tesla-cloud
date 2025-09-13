@@ -1,0 +1,35 @@
+# Git and development files
+.git
+.gitignore
+.github
+.vscode
+
+# Development container files
+.devcontainer
+
+# Documentation (included in image but not needed for build context efficiency)
+README.md
+SECURITY.md
+LICENSE
+
+# Test files (we'll include these for validation but could exclude for production)
+# test/
+
+# Temporary files and logs
+/tmp/
+*.log
+*.tmp
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# IDE files
+*.swp
+*.swo
+*~

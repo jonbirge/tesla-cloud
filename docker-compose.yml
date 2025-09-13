@@ -1,0 +1,23 @@
+services:
+  tesla-cloud:
+    build: .
+    ports:
+      - "8000:8000"
+    volumes:
+      # Mount a volume for persistent SQLite data
+      - tesla-cloud-data:/tmp/tesla-cloud
+    environment:
+      # Add any environment variables here if needed
+      - PHP_DISPLAY_ERRORS=Off
+      - PHP_LOG_ERRORS=On
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:8000/php/vers.php", "||", "exit", "1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 5s
+    restart: unless-stopped
+
+volumes:
+  tesla-cloud-data:
+    driver: local
