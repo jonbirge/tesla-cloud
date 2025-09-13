@@ -5,7 +5,8 @@
     "TrackingETF": "SPY",
     "Coefficient": 10.0239338555,
     "Units": "",
-    "DateValid": "2025-08-15"
+    "DateValid": "2025-08-15",
+    "icon": "standardandpoors.com"
   },
 
   {
@@ -14,7 +15,8 @@
     "TrackingETF": "DIA",
     "Coefficient": 99.9846951260,
     "Units": "",
-    "DateValid": "2025-08-15"
+    "DateValid": "2025-08-15",
+    "icon": "dowjones.com"
   },
 
   {
@@ -23,7 +25,8 @@
     "TrackingETF": "QQQ",
     "Coefficient": 41.0968664425,
     "Units": "",
-    "DateValid": "2025-08-15"
+    "DateValid": "2025-08-15",
+    "icon": "nasdaq.com"
   },
 
   {
@@ -32,7 +35,8 @@
     "TrackingETF": "IWM",
     "Coefficient": 11.8286368440,
     "Units": "",
-    "DateValid": "2025-08-15"
+    "DateValid": "2025-08-15",
+    "icon": "ftserussell.com"
   },
 
   {
@@ -41,7 +45,8 @@
     "TrackingETF": "UTEN",
     "Coefficient": 0.0993102941,
     "Units": "YLD",
-    "DateValid": "2025-08-15"
+    "DateValid": "2025-08-15",
+    "icon": "treasury.gov"
   },
 
   {
@@ -50,7 +55,8 @@
     "TrackingETF": "UTWO",
     "Coefficient": 0.0774393392,
     "Units": "YLD",
-    "DateValid": "2025-08-15"
+    "DateValid": "2025-08-15",
+    "icon": "treasury.gov"
   },
 
   {
@@ -77,6 +83,7 @@
     "TrackingETF": "DAX",
     "Coefficient": 538.3723498233,
     "Units": "",
-    "DateValid": "2025-08-15"
+    "DateValid": "2025-08-15",
+    "icon": "deutsche-boerse.com"
   }
 ]
