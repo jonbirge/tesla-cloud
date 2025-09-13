@@ -115,10 +115,12 @@ export function fetchPremiumWeatherData(lat, long, silentLoad = false) {
                     hourly: [],
                     minutely: []
                 };
+                generateTestDailyForecast(forecastDataPrem);
                 generateTestWeatherAlerts(forecastDataPrem);
                 processWeatherAlerts(forecastDataPrem);
                 updateWeatherAlertIndicator();
                 updateWeatherAlertsDisplay(); // Make sure to show alerts in weather section
+                updatePremiumWeatherDisplay(); // Update the display with test data
             }
 
             // In case of error, remove loading state - only if not silent loading
@@ -179,8 +181,8 @@ export function updatePremiumWeatherDisplay() {
             const hourlyAvail = index < 2 ? true : false;
 
             // Update weather condition class
-            // Only use clear for the first two days, use actual weather for last three days
-            const weatherClass = index < 2 ? 'clear' : day.weather[0].main.toLowerCase();
+            // Use actual weather for all days to show predominant weather type
+            const weatherClass = day.weather[0].main.toLowerCase();
             const hourlyClass = hourlyAvail ? 'hourly-avail' : '';
             dayElement.className = `forecast-day ${hourlyClass} ${weatherClass}`;
 
@@ -954,6 +956,39 @@ function generateTestWeatherAlerts(forecastData) {
     forecastData.alerts = testAlerts;
     console.log('TEST MODE: Added test weather alerts', testAlerts);
     
+    return forecastData;
+}
+
+// Generate test daily forecast data with various weather conditions to test backgrounds
+function generateTestDailyForecast(forecastData) {
+    const now = Math.floor(Date.now() / 1000);
+    const daySeconds = 24 * 60 * 60;
+    
+    const weatherTypes = [
+        { main: "Snow", description: "heavy snow", icon: "13d" },
+        { main: "Rain", description: "moderate rain", icon: "10d" },
+        { main: "Clouds", description: "overcast clouds", icon: "04d" },
+        { main: "Thunderstorm", description: "thunderstorm", icon: "11d" },
+        { main: "Clear", description: "clear sky", icon: "01d" },
+        { main: "Clouds", description: "few clouds", icon: "02d" },
+        { main: "Rain", description: "light rain", icon: "09d" }
+    ];
+    
+    for (let i = 0; i < 7; i++) {
+        const dayTime = now + (i * daySeconds);
+        const weather = weatherTypes[i % weatherTypes.length];
+        
+        forecastData.daily.push({
+            dt: dayTime,
+            temp: {
+                min: 20 + (i * 5),
+                max: 35 + (i * 5)
+            },
+            weather: [weather]
+        });
+    }
+    
+    console.log('TEST MODE: Generated test daily forecast with various weather conditions');
     return forecastData;
 }
 
