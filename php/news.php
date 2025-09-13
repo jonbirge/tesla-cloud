@@ -39,7 +39,7 @@ $maxAgeSeconds = $maxAgeDays * 86400; // Convert days to seconds
 
 // Load RSS feeds from JSON file
 function loadNewsSourcesFromJson() {
-    $jsonFile = __DIR__ . '/../js/news-sources.json';
+    $jsonFile = __DIR__ . '/../json/news-sources.json';
     if (!file_exists($jsonFile)) {
         logMessage("News sources JSON file not found: $jsonFile");
         return [];

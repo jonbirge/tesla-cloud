@@ -218,7 +218,7 @@ function turnOffDarkMode() {
 // Load default settings from JSON files before applying them
 async function loadDefaultSettings() {
     try {
-        const response = await fetch('js/news-sources.json');
+    const response = await fetch('json/news-sources.json');
         availableNewsSources = await response.json();
         updateDefaultNewsSettings();
     } catch (error) {
@@ -506,8 +506,8 @@ let availableNewsSources = [];
 async function loadStockAndIndexData() {
     try {
         const [stocksResponse, indexesResponse] = await Promise.all([
-            fetch('js/stocks.json'),
-            fetch('js/indexes.json')
+            fetch('json/stocks.json'),
+            fetch('json/indexes.json')
         ]);
         
         availableStocks = await stocksResponse.json();
@@ -523,7 +523,7 @@ async function loadStockAndIndexData() {
 // Load JSON data for news sources
 async function loadNewsSourcesData() {
     try {
-        const response = await fetch('js/news-sources.json');
+    const response = await fetch('json/news-sources.json');
         availableNewsSources = await response.json();
         
         // Generate settings UI after data is loaded
