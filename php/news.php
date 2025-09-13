@@ -111,8 +111,9 @@ register_shutdown_function(function() {
     }
 });
 
-// Check if we're receiving a POST request with included feeds
+// Check if we're receiving a POST request with included feeds and user info
 $includedFeeds = [];
+$hashedUser = null;
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     // Get the request body
     $requestBody = file_get_contents('php://input');
@@ -122,6 +123,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if (isset($requestData['includedFeeds']) && is_array($requestData['includedFeeds'])) {
         $includedFeeds = $requestData['includedFeeds'];
         logMessage("Received included feeds: " . implode(', ', $includedFeeds));
+    }
+    
+    // Check if hashedUser is provided for read status filtering
+    if (isset($requestData['hashedUser']) && is_string($requestData['hashedUser']) && !empty($requestData['hashedUser'])) {
+        $hashedUser = $requestData['hashedUser'];
+        logMessage("Received user for read filtering: " . $hashedUser);
     }
 }
 
@@ -199,6 +206,9 @@ logMessage("Total stories fetched: $totalStories");
 // Apply inclusion filters to data
 $outputItems = applyInclusionFilters($allItems, $requestedFeeds);
 
+// Apply read status filter if user is provided
+$outputItems = applyReadStatusFilter($outputItems, $hashedUser);
+
 // Filter items by age
 $outputItems = applyAgeFilter($outputItems, $maxAgeSeconds);
 
@@ -217,6 +227,73 @@ if ($jsonOutput === false) {
 echo $jsonOutput;
 ob_end_flush();
 
+
+// Get read news IDs for a specific user from rest_db
+function getReadNewsIds($hashedUser) {
+    global $version;
+    
+    if (empty($hashedUser)) {
+        return [];
+    }
+    
+    try {
+        // Use PDO to directly access the same database as rest_db.php
+        // Determine database connection (same logic as rest_db.php)
+        try {
+            // Check for .env file
+            $envPath = __DIR__ . '/../.env';
+            if (file_exists($envPath)) {
+                require_once __DIR__ . '/dotenv.php';
+                $dotenv = new DotEnv($envPath);
+                $env = $dotenv->getAll();
+            } else {
+                $env = [];
+            }
+            
+            if (isset($env['SQL_HOST'])) {
+                // Use MySQL/MariaDB credentials from .env
+                $host = $env['SQL_HOST'];
+                $username = $env['SQL_USER'];
+                $password = $env['SQL_PASS'];
+                $dbname = $env['SQL_DB_NAME'];
+                $dsn = "mysql:host=$host;dbname=$dbname";
+                $pdo = new PDO($dsn, $username, $password);
+            } else {
+                // Fall back to SQLite database for local testing
+                $dbPath = $env['SQLITE_PATH'] ?? sys_get_temp_dir() . '/restdb.sqlite';
+                $dsn = 'sqlite:' . $dbPath;
+                $pdo = new PDO($dsn);
+            }
+            
+            $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+            
+            // Get all keys under the user directory prefix
+            $stmt = $pdo->prepare("SELECT `key`, `value` FROM key_value WHERE `key` LIKE ? AND `value` IS NOT NULL");
+            $stmt->execute([$hashedUser . '/%']);
+            $results = $stmt->fetchAll(PDO::FETCH_ASSOC);
+            
+            $readIds = [];
+            foreach ($results as $item) {
+                // Extract the article ID from the path
+                $articleId = basename($item['key']);
+                $readIds[$articleId] = true; // Just track that it's read
+            }
+            
+            logMessage("Found " . count($readIds) . " read news items for user: " . $hashedUser);
+            return $readIds;
+            
+        } catch (PDOException $e) {
+            logMessage("Database error fetching read news IDs: " . $e->getMessage());
+            return [];
+        }
+        
+    } catch (Exception $e) {
+        logMessage("Exception fetching read news IDs: " . $e->getMessage());
+        return [];
+    }
+    
+    return [];
+}
 
 // ***** Utility functions *****
 
@@ -410,6 +487,65 @@ function applyInclusionFilters($items, $includedFeeds) {
     logMessage("After filtering: " . count($filteredItems) . " items remain");
     
     return $filteredItems;
+}
+
+// Function to filter out read news items for a specific user
+function applyReadStatusFilter($items, $hashedUser) {
+    if (empty($hashedUser)) {
+        // No user provided, return all items
+        logMessage("No user provided for read filtering - returning all items");
+        return $items;
+    }
+    
+    // Get read news IDs for this user
+    $readNewsIds = getReadNewsIds($hashedUser);
+    
+    if (empty($readNewsIds)) {
+        // No read items found, return all items
+        logMessage("No read items found for user - returning all items");
+        return $items;
+    }
+    
+    // Filter out read items
+    $filteredItems = array_filter($items, function($item) use ($readNewsIds) {
+        // Generate the same ID that the frontend generates
+        $itemId = genItemID($item);
+        return !isset($readNewsIds[$itemId]);
+    });
+    
+    // Re-index array after filtering
+    $filteredItems = array_values($filteredItems);
+    $originalCount = count($items);
+    $filteredCount = count($filteredItems);
+    logMessage("Read status filtering: {$filteredCount} unread items out of {$originalCount} total items");
+    
+    return $filteredItems;
+}
+
+// Generate unique IDs for news items (same logic as frontend)
+function genItemID($item) {
+    // Combine all relevant item properties into a single string,
+    // excluding the date to avoid getting fooled by minor updates
+    $dataToHash = $item['source'] . $item['title'];
+    
+    // Generate a hash - first convert string to a numerical hash
+    $hash = 0;
+    for ($i = 0; $i < strlen($dataToHash); $i++) {
+        $char = ord($dataToHash[$i]);
+        $hash = (($hash << 5) - $hash) + $char;
+        $hash = $hash & 0xFFFFFFFF; // Convert to 32bit integer
+    }
+    
+    // Convert numerical hash to a 16-character hexadecimal string
+    // Use absolute value to handle negative numbers
+    $hexHash = dechex(abs($hash));
+    
+    // If longer than 16 chars, truncate
+    if (strlen($hexHash) > 16) {
+        $hexHash = substr($hexHash, 0, 16);
+    }
+    
+    return $hexHash;
 }
 
 // Function to filter items by age
