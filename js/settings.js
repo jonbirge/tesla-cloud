@@ -38,7 +38,7 @@ const defaultSettings = {
     "news-forwarding": false,
     "news-forward-only": false,
     "forwarding-email": "",
-    // News feed settings populated dynamically from news-sources.json
+    // News feed settings populated dynamically from news-feeds.json
 };
 
 // Function that sets driving state
@@ -218,11 +218,20 @@ function turnOffDarkMode() {
 // Load default settings from JSON files before applying them
 async function loadDefaultSettings() {
     try {
-    const response = await fetch('json/news-sources.json');
-        availableNewsSources = await response.json();
+        const response = await fetch('json/news-feeds.json');
+        const feedData = await response.json();
+        
+        // Handle both old array format and new object format for backward compatibility
+        if (Array.isArray(feedData)) {
+            availableNewsSources = feedData;
+        } else {
+            availableNewsSources = feedData.feeds || [];
+            availableNewsSections = feedData.sections || [];
+        }
+        
         updateDefaultNewsSettings();
     } catch (error) {
-        console.error('Error loading news sources data for defaults:', error);
+        console.error('Error loading news feeds data for defaults:', error);
     }
 }
 
@@ -499,8 +508,9 @@ async function cleanupOrphanedSubscriptions() {
 let availableStocks = [];
 let availableIndexes = [];
 
-// Load available news sources for settings generation
+// Load available news feeds for settings generation
 let availableNewsSources = [];
+let availableNewsSections = [];
 
 // Load JSON data for stocks and indexes
 async function loadStockAndIndexData() {
@@ -520,23 +530,32 @@ async function loadStockAndIndexData() {
     }
 }
 
-// Load JSON data for news sources
+// Load JSON data for news feeds
 async function loadNewsSourcesData() {
     try {
-    const response = await fetch('json/news-sources.json');
-        availableNewsSources = await response.json();
+    const response = await fetch('json/news-feeds.json');
+        const feedData = await response.json();
         
-        // Generate settings UI after data is loaded
+        // Handle both old array format and new object format for backward compatibility
+        if (Array.isArray(feedData)) {
+            availableNewsSources = feedData;
+        } else {
+            availableNewsSources = feedData.feeds || [];
+            availableNewsSections = feedData.sections || [];
+        }
+        
+        // Generate sections first, then settings UI after data is loaded
+        generateNewsSections();
         generateNewsSourceSettings();
         
         // Update default settings based on JSON
         updateDefaultNewsSettings();
     } catch (error) {
-        console.error('Error loading news sources data:', error);
+        console.error('Error loading news feeds data:', error);
     }
 }
 
-// Update default settings based on news sources JSON
+// Update default settings based on news feeds JSON
 function updateDefaultNewsSettings() {
     availableNewsSources.forEach(source => {
         const key = `rss-${source.id}`;
@@ -661,6 +680,53 @@ function updateStockIndexUI() {
         if (checkbox) {
             checkbox.checked = subscribedIndexes.includes(index.TrackingETF);
         }
+    });
+}
+
+// Function to generate news sections dynamically
+function generateNewsSections() {
+    // Find the parent container where sections should be inserted
+    const newsFeedsContainer = document.querySelector('#settings .sections div[id="settings"] h2');
+    if (!newsFeedsContainer) return;
+    
+    // Find the News Feeds h2 element
+    let newsFeedsH2 = null;
+    const h2Elements = document.querySelectorAll('#settings h2');
+    for (const h2 of h2Elements) {
+        if (h2.textContent.trim() === 'News Feeds') {
+            newsFeedsH2 = h2;
+            break;
+        }
+    }
+    
+    if (!newsFeedsH2) return;
+    
+    // Remove existing hardcoded sections (h3 and div elements that follow)
+    let nextElement = newsFeedsH2.nextElementSibling;
+    while (nextElement && (nextElement.tagName === 'H3' || 
+           (nextElement.tagName === 'DIV' && nextElement.id && nextElement.id.includes('news-') && nextElement.id.includes('-settings')))) {
+        const elementToRemove = nextElement;
+        nextElement = nextElement.nextElementSibling;
+        elementToRemove.remove();
+    }
+    
+    // Generate sections from JSON data
+    availableNewsSections.forEach(section => {
+        // Create h3 element
+        const h3 = document.createElement('h3');
+        h3.textContent = section.title;
+        
+        // Create div container
+        const div = document.createElement('div');
+        div.id = section.containerId;
+        div.className = 'settings-controls news-source-grid';
+        
+        // Add comment inside div
+        div.appendChild(document.createComment(` ${section.title} news source settings dynamically generated here `));
+        
+        // Insert after the News Feeds h2
+        newsFeedsH2.insertAdjacentElement('afterend', div);
+        newsFeedsH2.insertAdjacentElement('afterend', h3);
     });
 }
 

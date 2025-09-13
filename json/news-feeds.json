@@ -1,4 +1,22 @@
-[
+{
+  "sections": [
+    {
+      "id": "general",
+      "title": "General",
+      "containerId": "news-general-settings"
+    },
+    {
+      "id": "business",
+      "title": "Business & Technology", 
+      "containerId": "news-business-settings"
+    },
+    {
+      "id": "tesla",
+      "title": "Electric Vehicles",
+      "containerId": "news-tesla-settings"
+    }
+  ],
+  "feeds": [
   {
     "id": "wsj",
     "name": "Wall Street Journal",
@@ -219,5 +237,6 @@
     "category": "business",
     "defaultEnabled": false
   }
-]
+  ]
+}
 
