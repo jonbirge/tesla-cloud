@@ -10,7 +10,7 @@
 
   {
     "IndexName": "DOW",
-    "Description": "Dow Jones Industrials",
+    "Description": "DJI Average",
     "TrackingETF": "DIA",
     "Coefficient": 99.9846951260,
     "Units": "",
