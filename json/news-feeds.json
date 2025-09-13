@@ -3,17 +3,20 @@
     {
       "id": "general",
       "title": "General",
-      "containerId": "news-general-settings"
+      "containerId": "news-general-settings",
+      "priority": 1
     },
     {
       "id": "business",
       "title": "Business & Technology", 
-      "containerId": "news-business-settings"
+      "containerId": "news-business-settings",
+      "priority": 2
     },
     {
       "id": "tesla",
       "title": "Electric Vehicles",
-      "containerId": "news-tesla-settings"
+      "containerId": "news-tesla-settings",
+      "priority": 3
     }
   ],
   "feeds": [

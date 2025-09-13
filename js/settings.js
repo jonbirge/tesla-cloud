@@ -708,8 +708,16 @@ function generateNewsSections() {
         elementToRemove.remove();
     }
     
-    // Generate sections from JSON data
-    availableNewsSections.forEach(section => {
+    // Sort sections by priority (lower numbers first)
+    const sortedSections = [...availableNewsSections].sort((a, b) => {
+        const priorityA = a.priority || 999; // Default to high number if no priority
+        const priorityB = b.priority || 999;
+        return priorityA - priorityB;
+    });
+    
+    // Create all section elements first
+    const sectionElements = [];
+    sortedSections.forEach(section => {
         // Create h3 element
         const h3 = document.createElement('h3');
         h3.textContent = section.title;
@@ -722,9 +730,14 @@ function generateNewsSections() {
         // Add comment inside div
         div.appendChild(document.createComment(` ${section.title} news source settings dynamically generated here `));
         
-        // Insert after the News Feeds h2
-        newsFeedsH2.insertAdjacentElement('afterend', div);
-        newsFeedsH2.insertAdjacentElement('afterend', h3);
+        sectionElements.push(h3, div);
+    });
+    
+    // Insert all elements in order after the News Feeds h2
+    let insertAfter = newsFeedsH2;
+    sectionElements.forEach(element => {
+        insertAfter.insertAdjacentElement('afterend', element);
+        insertAfter = element;
     });
 }
 
