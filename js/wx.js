@@ -181,7 +181,8 @@ export function updatePremiumWeatherDisplay() {
             const hourlyAvail = index < 2 ? true : false;
 
             // Update weather condition class
-            const weatherClass = day.weather[0].main.toLowerCase();
+            // Only use clear for the first two days when hourly stripes are enabled
+            const weatherClass = (settings["show-hourly-stripes"] !== false && index < 2) ? 'clear' : day.weather[0].main.toLowerCase();
             const hourlyClass = hourlyAvail ? 'hourly-avail' : '';
             dayElement.className = `forecast-day ${hourlyClass} ${weatherClass}`;
 
