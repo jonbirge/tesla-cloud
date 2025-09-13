@@ -685,13 +685,9 @@ function updateStockIndexUI() {
 
 // Function to generate news sections dynamically
 function generateNewsSections() {
-    // Find the parent container where sections should be inserted
-    const newsFeedsContainer = document.querySelector('#settings .sections div[id="settings"] h2');
-    if (!newsFeedsContainer) return;
-    
     // Find the News Feeds h2 element
     let newsFeedsH2 = null;
-    const h2Elements = document.querySelectorAll('#settings h2');
+    const h2Elements = document.querySelectorAll('h2');
     for (const h2 of h2Elements) {
         if (h2.textContent.trim() === 'News Feeds') {
             newsFeedsH2 = h2;
@@ -699,7 +695,9 @@ function generateNewsSections() {
         }
     }
     
-    if (!newsFeedsH2) return;
+    if (!newsFeedsH2) {
+        return;
+    }
     
     // Remove existing hardcoded sections (h3 and div elements that follow)
     let nextElement = newsFeedsH2.nextElementSibling;
