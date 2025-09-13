@@ -1,13 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-  <!-- Chart bars representing stock/financial data -->
-  <rect x="3" y="13" width="2.5" height="8" rx="0.5"/>
-  <rect x="7" y="8" width="2.5" height="13" rx="0.5"/>
-  <rect x="11" y="11" width="2.5" height="10" rx="0.5"/>
-  <rect x="15" y="6" width="2.5" height="15" rx="0.5"/>
-  <rect x="19" y="9" width="2.5" height="12" rx="0.5"/>
-  <!-- Upward trend line -->
-  <path d="M3 19 L7 15 L11 17 L15 11 L19 13 L21 9"/>
-  <!-- Arrow pointing up -->
-  <path d="M19 7 L21 9 L19 11"/>
+  <!-- Simple line graph representing stock trend -->
+  <path d="M3 18 L6 15 L9 12 L12 14 L15 10 L18 8 L21 6"/>
+  <!-- Small upward arrow to indicate growth -->
+  <path d="M19 8 L21 6 L19 4"/>
 </svg>
