@@ -563,13 +563,13 @@ function generateStockIndexSettings() {
     // Generate index checkboxes (use Description for full name, fallback to IndexName)
     availableIndexes.forEach(index => {
         const label = index.Description || index.IndexName || index.TrackingETF;
-        const div = createToggleItem('index', index.TrackingETF, label);
+        const div = createToggleItem('index', index.TrackingETF, label, index.icon);
         indexContainer.appendChild(div);
     });
 
     // Generate stock checkboxes
     availableStocks.forEach(stock => {
-        const div = createToggleItem('stock', stock.Symbol, `${stock.StockName} (${stock.Symbol})`);
+        const div = createToggleItem('stock', stock.Symbol, `${stock.StockName} (${stock.Symbol})`, stock.icon);
         stockContainer.appendChild(div);
     });
 
@@ -577,7 +577,7 @@ function generateStockIndexSettings() {
     updateStockIndexUI();
 }
 
-function createToggleItem(type, symbol, labelText) {
+function createToggleItem(type, symbol, labelText, iconUrl) {
     const itemDiv = document.createElement('div');
     itemDiv.className = 'settings-toggle-item news-toggle-item';
     itemDiv.dataset.setting = `${type}-${symbol}`;
@@ -585,6 +585,26 @@ function createToggleItem(type, symbol, labelText) {
         const input = this.querySelector('input');
         if (input) input.click();
     });
+
+    // Create icon element
+    const img = document.createElement('img');
+    if (iconUrl && typeof iconUrl === 'string' && iconUrl.trim() !== '') {
+        // Use the provided icon URL (domain for Google favicon service)
+        img.src = `https://www.google.com/s2/favicons?domain=${iconUrl}&sz=24`;
+    } else {
+        // Use default stock icon
+        img.src = 'assets/stock-default.svg';
+    }
+    img.className = 'news-source-favicon'; // Reuse existing CSS class
+    img.onerror = function () { 
+        // Fallback to default icon on error
+        this.src = 'assets/stock-default.svg';
+        // Only hide on error if not on mobile (CSS will handle mobile suppression)
+        if (!window.matchMedia('(max-width: 900px)').matches && this.src.includes('favicons')) {
+            this.style.display = 'none'; 
+        }
+    };
+    itemDiv.appendChild(img);
 
     const label = document.createElement('label');
     label.textContent = labelText;

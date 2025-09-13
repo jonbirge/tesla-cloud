@@ -1,11 +1,42 @@
 [
-    {"StockName": "Bitcoin ETF", "Symbol": "BITC"},
-    {"StockName": "Tesla", "Symbol": "TSLA"},
-    {"StockName": "Apple", "Symbol": "AAPL"},
-    {"StockName": "Amazon", "Symbol": "AMZN"},
-    {"StockName": "Alphabet", "Symbol": "GOOGL"},
-    {"StockName": "Meta", "Symbol": "META"},
-    {"StockName": "Microsoft", "Symbol": "MSFT"},
-    {"StockName": "NVIDIA", "Symbol": "NVDA"},
-    {"StockName": "Berkshire", "Symbol": "BRK.A"}
+    {
+        "StockName": "Bitcoin ETF",
+        "Symbol": "BITC",
+        "icon": "bitcoin.org"
+    },
+    {
+        "StockName": "Tesla",
+        "Symbol": "TSLA",
+        "icon": "tesla.com"
+    },
+    {
+        "StockName": "Apple",
+        "Symbol": "AAPL",
+        "icon": "apple.com"
+    },
+    {
+        "StockName": "Amazon",
+        "Symbol": "AMZN",
+        "icon": "amazon.com"
+    },
+    {
+        "StockName": "Alphabet",
+        "Symbol": "GOOGL",
+        "icon": "google.com"
+    },
+    {
+        "StockName": "Meta",
+        "Symbol": "META",
+        "icon": "meta.com"
+    },
+    {
+        "StockName": "Microsoft",
+        "Symbol": "MSFT",
+        "icon": "microsoft.com"
+    },
+    {
+        "StockName": "NVIDIA",
+        "Symbol": "NVDA",
+        "icon": "nvidia.com"
+    }
 ]
