@@ -323,13 +323,23 @@ export async function updateNews(clear = false) {
             abortController.abort();
         }, 5000); // 4 second timeout (was 2 seconds)
 
-        // Send the request with included feeds in the body and timeout
+        // Send the request with included feeds and user info in the body and timeout
+        const requestBody = { includedFeeds };
+        
+        // Add user information if logged in for server-side read filtering
+        if (isLoggedIn && hashedUser) {
+            requestBody.hashedUser = hashedUser;
+            console.log('Including user info for server-side read filtering:', hashedUser);
+        } else {
+            console.log('No user logged in - server will return all news items');
+        }
+        
         const response = await fetch(BASE_URL, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
             },
-            body: JSON.stringify({ includedFeeds }),
+            body: JSON.stringify(requestBody),
             signal: abortController.signal
         });
 
@@ -365,6 +375,14 @@ export async function updateNews(clear = false) {
             } else {
                 item.link = '';
             }
+            
+            // Mark all items from server as unread since server-side filtering already handled read items
+            if (isLoggedIn && hashedUser) {
+                item.isUnread = true;
+            } else {
+                // If no user is logged in, we need to check against cached seen IDs for consistency
+                item.isUnread = !cachedSeenNewsIds || !(item.id in cachedSeenNewsIds);
+            }
         });
         
         // Filter out items where the ID can be found in oldDisplayedItems
@@ -386,21 +404,24 @@ export async function updateNews(clear = false) {
         
         // Track if we have unread items among newly loaded items...
         if (loadedItems.length > 0) {            
-            // Mark each item's read status
-            loadedItems.forEach(item => {
-                // Check if this is a new item
-                item.isUnread = !(item.id in cachedSeenNewsIds);
-            });
-
-            // Remove items that have isUnread flag set to false
-            loadedItems = loadedItems.filter(item => item.isUnread);
+            console.log('Received news items from server (already filtered for read status if user is logged in)');
+            
+            // If user is not logged in, we still need to filter against cached seen IDs
+            if (!isLoggedIn || !hashedUser) {
+                console.log('No user logged in - applying client-side read filtering');
+                loadedItems = loadedItems.filter(item => item.isUnread);
+            }
         }
 
         // ...and update the read status of old displayed items
         if (oldDisplayedItems.length > 0) {
             oldDisplayedItems.forEach(item => {
                 // Check if this is a new item
-                item.isUnread = !(item.id in cachedSeenNewsIds);
+                if (isLoggedIn && hashedUser) {
+                    item.isUnread = true; // Server already filtered, so all items from server are unread
+                } else {
+                    item.isUnread = !cachedSeenNewsIds || !(item.id in cachedSeenNewsIds);
+                }
             });
         }
 
