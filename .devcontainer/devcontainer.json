@@ -15,5 +15,19 @@
             "label": "Web server",
             "onAutoForward": "openBrowser"
         }
+    },
+    "remoteUser": "vscode",
+    "postCreateCommand": "chmod +x ./test/restdb.sh ./test/dotenv.sh || true",
+    "customizations": {
+        "vscode": {
+            "settings": {
+                "terminal.integrated.defaultProfile.linux": "bash"
+            },
+            "extensions": [
+                "ms-azuretools.vscode-docker",
+                "ms-vscode-remote.remote-containers",
+                "bmewburn.vscode-intelephense-client"
+            ]
+        }
     }
 }
