@@ -40,12 +40,23 @@ export function fetchPremiumWeatherData(lat, long, silentLoad = false) {
         document.getElementById('prem-forecast-container').classList.add('loading');
     }
 
-    // Fetch and update weather data
-    fetch(`php/openwx.php/data/3.0/onecall?lat=${lat}&lon=${long}&units=imperial`)
-        .then(response => response.json())
-        .then(forecastDataLocal => {
-            if (forecastDataLocal) {
-                forecastDataPrem = forecastDataLocal;
+    // Fetch both OneCall API (for current, hourly, minutely) and 5-day forecast API (for extended forecast)
+    const oneCallPromise = fetch(`php/openwx.php/data/3.0/onecall?lat=${lat}&lon=${long}&units=imperial`)
+        .then(response => response.json());
+    
+    const forecastPromise = fetch(`php/openwx.php/data/2.5/forecast?lat=${lat}&lon=${long}&units=imperial`)
+        .then(response => response.json());
+
+    Promise.all([oneCallPromise, forecastPromise])
+        .then(([oneCallData, forecastData]) => {
+            if (oneCallData) {
+                // Start with OneCall data as the base
+                forecastDataPrem = oneCallData;
+                
+                // Merge the 5-day forecast data for extended forecasts
+                if (forecastData && forecastData.list) {
+                    forecastDataPrem = mergeForecastData(oneCallData, forecastData);
+                }
                 
                 // If in test mode for weather, generate random precipitation data for minutely forecast
                 if (isTestMode('wx')) {
@@ -64,10 +75,10 @@ export function fetchPremiumWeatherData(lat, long, silentLoad = false) {
                 updatePremiumWeatherDisplay();
 
                 // Process weather alerts from API response
-                processWeatherAlerts(forecastDataLocal);
+                processWeatherAlerts(oneCallData);
 
                 // Update time and location of weather data, using FormatTime
-                const weatherUpdateTime = formatTime(new Date(forecastDataLocal.current.dt * 1000), {
+                const weatherUpdateTime = formatTime(new Date(oneCallData.current.dt * 1000), {
                     hour: '2-digit',
                     minute: '2-digit'
                 });
@@ -106,9 +117,9 @@ export function fetchPremiumWeatherData(lat, long, silentLoad = false) {
         .catch(error => {
             console.error('Error fetching forecast data: ', error);
 
-            // In test mode, create dummy forecast data with alerts for testing
-            if (isTestMode('alert')) {
-                console.log('TEST MODE (alert): API failed, creating dummy forecast data with alerts');
+            // In test mode, create dummy forecast data for testing
+            if (isTestMode('alert') || isTestMode('wx')) {
+                console.log('TEST MODE: API failed, creating dummy forecast data');
                 forecastDataPrem = {
                     current: { dt: Math.floor(Date.now() / 1000), temp: 32 },
                     daily: [],
@@ -116,10 +127,16 @@ export function fetchPremiumWeatherData(lat, long, silentLoad = false) {
                     minutely: []
                 };
                 generateTestDailyForecast(forecastDataPrem);
-                generateTestWeatherAlerts(forecastDataPrem);
-                processWeatherAlerts(forecastDataPrem);
-                updateWeatherAlertIndicator();
-                updateWeatherAlertsDisplay(); // Make sure to show alerts in weather section
+                generateTestHourlyForecast(forecastDataPrem); // Add test hourly data
+                
+                // Only generate alerts and show them if alert test mode is active
+                if (isTestMode('alert')) {
+                    generateTestWeatherAlerts(forecastDataPrem);
+                    processWeatherAlerts(forecastDataPrem);
+                    updateWeatherAlertIndicator();
+                    updateWeatherAlertsDisplay(); // Make sure to show alerts in weather section
+                }
+                
                 updatePremiumWeatherDisplay(); // Update the display with test data
             }
 
@@ -166,25 +183,58 @@ export async function fetchCityData(lat, long) {
     }
 }
 
+// Generate forecast day elements dynamically
+export function generateForecastDayElements(numDays = 5) {
+    const forecastContainer = document.getElementById('prem-forecast-container');
+    if (!forecastContainer) return;
+
+    // Clear existing forecast days
+    forecastContainer.innerHTML = '';
+
+    // Generate the specified number of forecast day elements
+    for (let i = 0; i < numDays; i++) {
+        const dayElement = document.createElement('div');
+        dayElement.className = 'forecast-day';
+        
+        // Create the inner structure
+        dayElement.innerHTML = `
+            <div class="forecast-date"></div>
+            <img class="forecast-icon" src="assets/placeholder.svg" alt="Loading icon">
+            <div class="forecast-temp">--</div>
+            <div class="forecast-desc"></div>
+            <img class="forecast-alert hidden" src="assets/warn.svg" alt="Warning Icon">
+        `;
+        
+        forecastContainer.appendChild(dayElement);
+    }
+}
+
 // Updates the forecast display with premium data
 export function updatePremiumWeatherDisplay() {
     if (!forecastDataPrem) return;
 
-    // Extract daily summary (first 7 days)
+    // Extract daily summary (limit to 5 days)
     const dailyData = extractPremiumDailyForecast(forecastDataPrem.daily || []);
+    
+    // Generate forecast day elements if they don't exist or if count is wrong
+    const existingDays = document.querySelectorAll('#prem-forecast-container .forecast-day');
+    if (existingDays.length !== 5) {
+        generateForecastDayElements(5);
+    }
+    
     const forecastDays = document.querySelectorAll('#prem-forecast-container .forecast-day');
 
     dailyData.forEach((day, index) => {
         if (index < forecastDays.length) {
             const date = new Date(day.dt * 1000);
             const dayElement = forecastDays[index];
-            const hourlyAvail = index < 2 ? true : false;
+            // All 5 days are now clickable for hourly/3-hourly forecasts
+            const hourlyAvail = index < 5 ? true : false;
 
-            // Update weather condition class
-            // Only use clear for the first two days when hourly stripes are enabled
-            const weatherClass = (settings["show-hourly-stripes"] !== false && index < 2) ? 'clear' : day.weather[0].main.toLowerCase();
+            // Update weather condition class - always use "clear" as baseline for consistent background
+            const baseWeatherClass = 'clear';
             const hourlyClass = hourlyAvail ? 'hourly-avail' : '';
-            dayElement.className = `forecast-day ${hourlyClass} ${weatherClass}`;
+            dayElement.className = `forecast-day ${hourlyClass} ${baseWeatherClass}`;
 
             // Clear any existing hourly segments
             const existingSegments = dayElement.querySelector('.hourly-segments');
@@ -192,9 +242,9 @@ export function updatePremiumWeatherDisplay() {
                 existingSegments.remove();
             }
 
-            // Add hourly segments for the first two days if enabled
-            if (settings["show-hourly-stripes"] !== false && index < HOURLY_FORECAST_DAYS && forecastDataPrem.hourly) {
-                const hourlySegments = createHourlySegments(day, forecastDataPrem.hourly);
+            // Add hourly segments for ALL days if enabled using complete 24-hour data
+            if (settings["show-hourly-stripes"] !== false && index < 5) {
+                const hourlySegments = createHourlySegments(day, forecastDataPrem.hourly || [], index);
                 if (hourlySegments) {
                     dayElement.appendChild(hourlySegments);
                 }
@@ -236,7 +286,7 @@ export function updatePremiumWeatherDisplay() {
                 alertIcon.classList.add('hidden');
             }
 
-            // Attach click handler for precipitation graph?
+            // Attach click handler for hourly/3-hourly popup for all 5 days
             if (hourlyAvail) {
                 dayElement.onclick = () => showPremiumPrecipGraph(index);
             }
@@ -382,7 +432,7 @@ function updateWeatherAlertsDisplay() {
 }
 
 // Helper function to create hourly segments for a forecast day
-function createHourlySegments(dailyForecast, hourlyData) {
+function createHourlySegments(dailyForecast, completeHourlyData, dayIndex) {
     // Calculate start/end of the day in local time
     const selectedDate = new Date(dailyForecast.dt * 1000);
     const dayStart = new Date(selectedDate);
@@ -393,13 +443,13 @@ function createHourlySegments(dailyForecast, hourlyData) {
     const now = new Date();
     const isToday = now.toDateString() === selectedDate.toDateString();
     
-    // Filter hourly data for this specific day
-    const dayHourly = hourlyData.filter(h => {
+    // Extract the complete 24-hour data for this specific day
+    const dayHourlyComplete = completeHourlyData.filter(h => {
         const itemDate = new Date(h.dt * 1000);
         return itemDate >= dayStart && itemDate <= dayEnd;
     });
 
-    if (dayHourly.length === 0) {
+    if (dayHourlyComplete.length === 0) {
         return null; // No hourly data available for this day
     }
 
@@ -411,42 +461,172 @@ function createHourlySegments(dailyForecast, hourlyData) {
     const startHour = isToday ? now.getHours() : 0;
     const hoursToShow = 24 - startHour;
     
-    // Create segments only for remaining hours (or all hours for future days)
+    // Set consistent background - always use "clear" as baseline
+    const baseCondition = 'clear';
+    
+    // Create segments for remaining hours (or all hours for future days)
     for (let h = 0; h < hoursToShow; h++) {
         const hour = startHour + h;
         const segment = document.createElement('div');
         segment.className = 'hourly-segment';
         
         // Find the hourly data for this specific hour
-        const hourData = dayHourly.find(h => {
+        const hourData = dayHourlyComplete.find(h => {
             const itemDate = new Date(h.dt * 1000);
             return itemDate.getHours() === hour;
         });
 
         if (hourData) {
-            // Apply weather condition class based on hourly data - only for non-clear conditions
+            // Apply weather condition class based on hourly data
             const weatherCondition = hourData.weather[0].main.toLowerCase();
-            if (weatherCondition !== 'clear') {
+            
+            // Only show stripe if weather condition is different from clear/baseline
+            if (weatherCondition !== baseCondition && weatherCondition !== 'clear') {
                 segment.classList.add(weatherCondition);
             } else {
-                // For clear conditions, don't add any background - let the main clear background show through
+                // Make transparent to show card background
                 segment.style.background = 'transparent';
             }
         } else {
-            // Fallback to daily forecast weather if no hourly data for this hour - only for non-clear conditions
-            const weatherCondition = dailyForecast.weather[0].main.toLowerCase();
-            if (weatherCondition !== 'clear') {
-                segment.classList.add(weatherCondition);
-            } else {
-                // For clear conditions, don't add any background - let the main clear background show through
-                segment.style.background = 'transparent';
-            }
+            // No hourly data - make transparent to show card background
+            segment.style.background = 'transparent';
         }
 
         segmentsContainer.appendChild(segment);
     }
 
     return segmentsContainer;
+}
+
+// Create complete 24-hour data structure for all 5 days
+function createComplete24HourData(oneCallData, forecastData) {
+    const complete24HourData = [];
+    const nowTimestamp = Math.floor(Date.now() / 1000);
+    
+    // Get all unique days we need to cover (5 days total)
+    const targetDays = [];
+    for (let i = 0; i < 5; i++) {
+        const targetDate = new Date();
+        targetDate.setDate(targetDate.getDate() + i);
+        targetDate.setHours(0, 0, 0, 0);
+        targetDays.push({
+            date: targetDate,
+            timestamp: Math.floor(targetDate.getTime() / 1000)
+        });
+    }
+    
+    // For each day, create complete 24-hour hourly data
+    targetDays.forEach((day, dayIndex) => {
+        const dayStart = day.timestamp;
+        const dayEnd = dayStart + (24 * 3600) - 1;
+        
+        // For each hour of the day
+        for (let hour = 0; hour < 24; hour++) {
+            const hourTimestamp = dayStart + (hour * 3600);
+            
+            // Skip past hours for today
+            if (dayIndex === 0 && hourTimestamp < nowTimestamp) {
+                continue;
+            }
+            
+            let hourlyDataPoint = null;
+            
+            // Days 1-2: Use OneCall hourly data (high resolution)
+            if (dayIndex < 2 && oneCallData.hourly) {
+                hourlyDataPoint = oneCallData.hourly.find(h => 
+                    Math.abs(h.dt - hourTimestamp) < 1800 // Within 30 minutes
+                );
+            }
+            
+            // Days 3-5 or fallback: Use 5-day forecast data (3-hourly, need interpolation)
+            if (!hourlyDataPoint && forecastData && forecastData.list) {
+                // Find closest 3-hourly data point
+                let closestForecastItem = null;
+                let minTimeDiff = Infinity;
+                
+                for (const item of forecastData.list) {
+                    const timeDiff = Math.abs(item.dt - hourTimestamp);
+                    if (timeDiff < minTimeDiff) {
+                        minTimeDiff = timeDiff;
+                        closestForecastItem = item;
+                    }
+                }
+                
+                if (closestForecastItem) {
+                    // Convert 5-day forecast format to hourly format
+                    hourlyDataPoint = {
+                        dt: hourTimestamp,
+                        temp: closestForecastItem.main.temp,
+                        feels_like: closestForecastItem.main.feels_like,
+                        pressure: closestForecastItem.main.pressure,
+                        humidity: closestForecastItem.main.humidity,
+                        dew_point: closestForecastItem.main.temp - ((100 - closestForecastItem.main.humidity) / 5),
+                        uvi: 0,
+                        clouds: closestForecastItem.clouds.all,
+                        visibility: closestForecastItem.visibility || 10000,
+                        wind_speed: closestForecastItem.wind.speed,
+                        wind_deg: closestForecastItem.wind.deg,
+                        wind_gust: closestForecastItem.wind.gust || closestForecastItem.wind.speed,
+                        weather: closestForecastItem.weather,
+                        pop: closestForecastItem.pop || 0
+                    };
+                }
+            }
+            
+            if (hourlyDataPoint) {
+                complete24HourData.push(hourlyDataPoint);
+            }
+        }
+    });
+    
+    console.log(`Created complete 24-hour data: ${complete24HourData.length} hourly points`);
+    return complete24HourData;
+}
+
+// Interpolate hourly segments from 3-hourly data for days 3-5
+function interpolateHourlyFromThreeHourly(threeHourlyData, dailyForecast) {
+    const interpolatedHourlyData = [];
+    const dayStart = new Date(dailyForecast.dt * 1000);
+    dayStart.setHours(0, 0, 0, 0);
+    
+    // Create hourly data points for the entire day
+    for (let hour = 0; hour < 24; hour++) {
+        const hourTimestamp = new Date(dayStart);
+        hourTimestamp.setHours(hour);
+        const hourUnixTime = Math.floor(hourTimestamp.getTime() / 1000);
+        
+        // Find the closest 3-hourly data point
+        let closestData = threeHourlyData[0]; // Default fallback
+        let minTimeDiff = Math.abs(threeHourlyData[0].dt - hourUnixTime);
+        
+        for (const data of threeHourlyData) {
+            const timeDiff = Math.abs(data.dt - hourUnixTime);
+            if (timeDiff < minTimeDiff) {
+                minTimeDiff = timeDiff;
+                closestData = data;
+            }
+        }
+        
+        // Create interpolated hourly data point using the closest 3-hourly data
+        interpolatedHourlyData.push({
+            dt: hourUnixTime,
+            temp: closestData.temp,
+            feels_like: closestData.feels_like,
+            pressure: closestData.pressure,
+            humidity: closestData.humidity,
+            dew_point: closestData.dew_point,
+            uvi: closestData.uvi,
+            clouds: closestData.clouds,
+            visibility: closestData.visibility,
+            wind_speed: closestData.wind_speed,
+            wind_deg: closestData.wind_deg,
+            wind_gust: closestData.wind_gust,
+            weather: closestData.weather,
+            pop: closestData.pop
+        });
+    }
+    
+    return interpolatedHourlyData;
 }
 
 // Function to update precipitation graph with current time-based x-axis
@@ -797,10 +977,130 @@ function updateAQI(lat, lon) {
         });
 }
 
-// Helper: Extract 5 daily summaries from OpenWeather 3.0 API
+// Merge OneCall API data with 5-day forecast API data for extended hourly forecasts
+function mergeForecastData(oneCallData, forecastData) {
+    console.log('Merging OneCall data with 5-day forecast data...');
+    
+    // Start with OneCall data as base (contains current, minutely, and first 2 days of hourly)
+    const mergedData = { ...oneCallData };
+    
+    // Create complete 24-hour data structure for all 5 days
+    const complete24HourData = createComplete24HourData(oneCallData, forecastData);
+    
+    // Replace the hourly data with our complete 24-hour structure
+    mergedData.hourly = complete24HourData;
+    
+    // Update daily forecast to include data from 5-day forecast for days 3-5
+    if (forecastData.list && forecastData.list.length > 0) {
+        const extendedDailyData = generateDailyFromForecast(forecastData.list);
+        
+        // Replace days 3-5 in daily forecast with data from 5-day forecast
+        if (mergedData.daily && mergedData.daily.length >= 2) {
+            // Keep first 2 days from OneCall, then add days 3-5 from 5-day forecast
+            // The 5-day forecast starts from day 1, so we need to skip the first 2 days
+            // and take the next 3 days (which represent days 3-5)
+            const days3to5 = extendedDailyData.slice(2, 5); // Skip first 2 days, take next 3
+            
+            mergedData.daily = [
+                ...mergedData.daily.slice(0, 2), // First 2 days from OneCall (3.0 API)
+                ...days3to5  // Days 3-5 from 5-day forecast (2.5 API)
+            ];
+        }
+    }
+    
+    console.log(`Merged data: ${mergedData.hourly?.length || 0} hourly items, ${mergedData.daily?.length || 0} daily items`);
+    return mergedData;
+}
+
+// Convert 3-hourly forecast data to hourly format
+function convertForecastToHourly(forecastList) {
+    return forecastList.map(item => ({
+        dt: item.dt,
+        temp: item.main.temp,
+        feels_like: item.main.feels_like,
+        pressure: item.main.pressure,
+        humidity: item.main.humidity,
+        dew_point: item.main.temp - ((100 - item.main.humidity) / 5), // Approximation
+        uvi: 0, // Not available in 5-day forecast
+        clouds: item.clouds.all,
+        visibility: item.visibility || 10000,
+        wind_speed: item.wind.speed,
+        wind_deg: item.wind.deg,
+        wind_gust: item.wind.gust || item.wind.speed,
+        weather: item.weather,
+        pop: item.pop || 0 // Probability of precipitation
+    }));
+}
+
+// Generate daily summaries from 3-hourly forecast data
+function generateDailyFromForecast(forecastList) {
+    const dailyData = {};
+    
+    // Group forecast data by day
+    forecastList.forEach(item => {
+        const date = new Date(item.dt * 1000);
+        const dayKey = date.toDateString();
+        
+        if (!dailyData[dayKey]) {
+            dailyData[dayKey] = {
+                dt: item.dt,
+                temps: [],
+                humidity: [],
+                pressure: [],
+                weather: item.weather[0], // Use first weather entry as representative
+                pop: item.pop || 0
+            };
+        }
+        
+        dailyData[dayKey].temps.push(item.main.temp);
+        dailyData[dayKey].humidity.push(item.main.humidity);
+        dailyData[dayKey].pressure.push(item.main.pressure);
+        
+        // Update probability of precipitation to maximum for the day
+        if (item.pop > dailyData[dayKey].pop) {
+            dailyData[dayKey].pop = item.pop;
+        }
+    });
+    
+    // Convert grouped data to daily format
+    return Object.values(dailyData).map(day => ({
+        dt: day.dt,
+        sunrise: day.dt, // Approximation - would need additional API call for exact times
+        sunset: day.dt + 12 * 3600, // Approximation - 12 hours later
+        moonrise: day.dt + 18 * 3600, // Approximation
+        moonset: day.dt + 6 * 3600, // Approximation
+        moon_phase: 0.5, // Approximation - would need additional calculation
+        temp: {
+            day: Math.round(day.temps.reduce((a, b) => a + b, 0) / day.temps.length),
+            min: Math.round(Math.min(...day.temps)),
+            max: Math.round(Math.max(...day.temps)),
+            night: Math.round(day.temps[day.temps.length - 1] || day.temps[0]),
+            eve: Math.round(day.temps[Math.floor(day.temps.length * 0.75)] || day.temps[0]),
+            morn: Math.round(day.temps[0])
+        },
+        feels_like: {
+            day: Math.round(day.temps.reduce((a, b) => a + b, 0) / day.temps.length),
+            night: Math.round(day.temps[day.temps.length - 1] || day.temps[0]),
+            eve: Math.round(day.temps[Math.floor(day.temps.length * 0.75)] || day.temps[0]),
+            morn: Math.round(day.temps[0])
+        },
+        pressure: Math.round(day.pressure.reduce((a, b) => a + b, 0) / day.pressure.length),
+        humidity: Math.round(day.humidity.reduce((a, b) => a + b, 0) / day.humidity.length),
+        dew_point: 0, // Would need calculation
+        wind_speed: 0, // Would need to track and average
+        wind_deg: 0,
+        wind_gust: 0,
+        weather: [day.weather],
+        clouds: 0,
+        pop: day.pop,
+        uvi: 0 // Not available
+    }));
+}
+
+// Helper: Extract 5 daily summaries from merged forecast data
 function extractPremiumDailyForecast(dailyList) {
-    // dailyList is already daily summaries (up to 8 days)
-    return dailyList.slice(0, 7);
+    // Limit to 5 days as requested in the issue
+    return dailyList.slice(0, 5);
 }
 
 // Helper: Format temperature based on user settings
@@ -974,7 +1274,7 @@ function generateTestDailyForecast(forecastData) {
         { main: "Rain", description: "light rain", icon: "09d" }
     ];
     
-    for (let i = 0; i < 7; i++) {
+    for (let i = 0; i < 5; i++) {
         const dayTime = now + (i * daySeconds);
         const weather = weatherTypes[i % weatherTypes.length];
         
@@ -989,6 +1289,53 @@ function generateTestDailyForecast(forecastData) {
     }
     
     console.log('TEST MODE: Generated test daily forecast with various weather conditions');
+    return forecastData;
+}
+
+// Generate test hourly forecast data to simulate both 1-hour and 3-hour data
+function generateTestHourlyForecast(forecastData) {
+    const now = Math.floor(Date.now() / 1000);
+    const hourSeconds = 60 * 60;
+    
+    const weatherTypes = [
+        { main: "Snow", description: "heavy snow", icon: "13d" },
+        { main: "Rain", description: "moderate rain", icon: "10d" },
+        { main: "Clouds", description: "overcast clouds", icon: "04d" },
+        { main: "Thunderstorm", description: "thunderstorm", icon: "11d" },
+        { main: "Clear", description: "clear sky", icon: "01d" }
+    ];
+    
+    // Generate hourly data for 5 days (120 hours)
+    for (let i = 0; i < 120; i++) {
+        const hourTime = now + (i * hourSeconds);
+        const dayIndex = Math.floor(i / 24);
+        const weather = weatherTypes[dayIndex % weatherTypes.length];
+        
+        // Simulate temperature variation throughout the day
+        const baseTemp = 20 + (dayIndex * 5);
+        const hourOfDay = i % 24;
+        const tempVariation = Math.sin((hourOfDay - 6) * Math.PI / 12) * 8; // Warmer during day
+        const temp = Math.round(baseTemp + tempVariation);
+        
+        forecastData.hourly.push({
+            dt: hourTime,
+            temp: temp,
+            feels_like: temp - 2,
+            pressure: 1013,
+            humidity: 65,
+            dew_point: temp - 10,
+            uvi: Math.max(0, Math.sin((hourOfDay - 6) * Math.PI / 12) * 8), // UV during day only
+            clouds: 50 + (dayIndex * 10),
+            visibility: 10000,
+            wind_speed: 5 + Math.random() * 10,
+            wind_deg: Math.floor(Math.random() * 360),
+            wind_gust: 15 + Math.random() * 10,
+            weather: [weather],
+            pop: weather.main === "Rain" ? 0.8 : (weather.main === "Snow" ? 0.9 : 0.2)
+        });
+    }
+    
+    console.log('TEST MODE: Generated test hourly forecast data for 5 days');
     return forecastData;
 }
 
@@ -1014,56 +1361,47 @@ window.showPremiumPrecipGraph = function(dayIndex) {
     const dayEnd = new Date(selectedDate);
     dayEnd.setHours(23, 59, 59, 999);
 
-    // Set popup title with local date
+    // Set popup title with local date - no resolution indicator to make it transparent to user
     const popupDate = premPopup.querySelector('#popup-date');
     if (popupDate) {
-        popupDate.textContent = selectedDate.toLocaleDateString('en-US', {
+        const dateStr = selectedDate.toLocaleDateString('en-US', {
             weekday: 'long',
             month: 'long',
             day: 'numeric'
         });
+        popupDate.textContent = dateStr;
     }
 
     const hourlyContainer = premPopup.querySelector('.hourly-forecast');
     
-    // Simple rule: Only show hourly forecasts for the first two days (index 0 and 1)
-    if (dayIndex > 1) {
-        // Beyond day 2 - show simplified message
+    // Show hourly forecasts for days 1-2, and 3-hourly for days 3-5
+    if (dayIndex > 4) {
+        // Beyond day 5 - should not happen with our 5-day limit
         hourlyContainer.replaceChildren();
         const msgDiv = document.createElement('div');
         msgDiv.style.gridColumn = '1/-1';
         msgDiv.style.textAlign = 'center';
         msgDiv.style.padding = '20px';
         const p = document.createElement('p');
-        p.textContent = 'Detailed hourly forecast is only available for the next 2 days.';
+        p.textContent = 'Forecast is only available for the next 5 days.';
         msgDiv.appendChild(p);
         hourlyContainer.appendChild(msgDiv);
         return;
     }
 
-    // Check if we're beyond the hourly forecast limit (48 hours) - keeping this check as a fallback
-    const now = new Date();
-    const hoursDiff = (dayStart - now) / (1000 * 60 * 60);
-
-    if (hoursDiff >= 48) {
-        // Beyond hourly forecast limit - show simplified message
-        hourlyContainer.replaceChildren();
-        const msgDiv = document.createElement('div');
-        msgDiv.style.gridColumn = '1/-1';
-        msgDiv.style.textAlign = 'center';
-        msgDiv.style.padding = '20px';
-        const p = document.createElement('p');
-        p.textContent = 'Detailed hourly forecast is only available for the next 48 hours.';
-        msgDiv.appendChild(p);
-        hourlyContainer.appendChild(msgDiv);
-        return;
-    }
-
+    // Determine the time resolution based on the day index
+    const isHourlyDay = dayIndex < 2; // Days 1-2 have true hourly resolution
+    
     // Filter hourly data for the selected day using local time comparison
-    const dayHourly = hourly.filter(h => {
+    let dayHourly = hourly.filter(h => {
         const itemDate = new Date(h.dt * 1000);
         return itemDate >= dayStart && itemDate <= dayEnd;
     });
+    
+    // For days 3-5, interpolate hourly data from 3-hourly data to provide consistent hourly experience
+    if (!isHourlyDay && dayHourly.length > 0) {
+        dayHourly = interpolateHourlyFromThreeHourly(dayHourly, daily[dayIndex]);
+    }
 
     // Create a new timeline-based hourly forecast view
     if (hourlyContainer) {
@@ -1147,15 +1485,16 @@ window.showPremiumPrecipGraph = function(dayIndex) {
         });
         timelineContainer.appendChild(iconsDiv);
 
-        // Add temperature indicators (every 3 hours)
+        // Add temperature indicators (every 3 hours for consistency)
         const tempDiv = document.createElement('div');
         tempDiv.className = 'temperature-indicators';
         dayHourly.forEach((item, index) => {
             const itemDate = new Date(item.dt * 1000);
             const hour = itemDate.getHours();
 
-            // Only show temperature every 3 hours
-            if (hour % 3 === 0 || index === 0) {
+            // Show temperature every 3 hours for consistency (hour % 3 === 0 or first item)
+            const showTemp = (hour % 3 === 0 || index === 0);
+            if (showTemp) {
                 // Center the temperature in each rectangle
                 const tempLeft = (index * hourWidth) + (hourWidth / 2);
                 const tempIndicator = document.createElement('div');
@@ -1167,7 +1506,7 @@ window.showPremiumPrecipGraph = function(dayIndex) {
         });
         timelineContainer.appendChild(tempDiv);
 
-        // Add hour labels at the bottom (every 3 hours)
+        // Add hour labels at the bottom (every 3 hours for readability)
         const labelsDiv = document.createElement('div');
         labelsDiv.className = 'hour-labels';
 
@@ -1175,8 +1514,9 @@ window.showPremiumPrecipGraph = function(dayIndex) {
             const itemDate = new Date(item.dt * 1000);
             const hour = itemDate.getHours();
 
-            // Only show labels every 3 hours
-            if (hour % 3 === 0 || index === 0) {
+            // Show labels every 3 hours for consistency and readability
+            const showLabel = (hour % 3 === 0 || index === 0);
+            if (showLabel) {
                 // Position labels to align with the center of their corresponding rectangle
                 const labelLeft = (index * hourWidth) + (hourWidth / 2);
                 const time = formatTime(itemDate, {
