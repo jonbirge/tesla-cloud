@@ -181,7 +181,6 @@ export function updatePremiumWeatherDisplay() {
             const hourlyAvail = index < 2 ? true : false;
 
             // Update weather condition class
-            // Use actual weather for all days to show predominant weather type
             const weatherClass = day.weather[0].main.toLowerCase();
             const hourlyClass = hourlyAvail ? 'hourly-avail' : '';
             dayElement.className = `forecast-day ${hourlyClass} ${weatherClass}`;
