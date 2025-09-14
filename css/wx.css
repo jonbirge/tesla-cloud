@@ -133,7 +133,7 @@ body.dark-mode {
     text-align: center;
     position: relative;
     min-width: 85px;
-    max-width: 140px;
+    max-width: 175px;
     overflow: hidden;
 }
 
@@ -466,7 +466,7 @@ body.dark-mode .notification-icon img {
     .forecast-day {
         padding: 10px;
         min-width: 70px;
-        max-width: 100px;
+        max-width: 125px;
     }
     
     .forecast-date {
