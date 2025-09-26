@@ -893,10 +893,13 @@ function updateSetting(key, value) {
                 if (typeof stockModule.updateStockIndicatorVisibility === 'function') {
                     stockModule.updateStockIndicatorVisibility();
                 }
-                // Only call startStockUpdates, which will handle fetchStockData internally
-                // to avoid duplicate API calls
+                // Start stock updates to ensure timer is running
                 if (typeof stockModule.startStockUpdates === 'function') {
                     stockModule.startStockUpdates();
+                }
+                // Always fetch fresh data immediately when subscriptions change
+                if (typeof stockModule.fetchStockData === 'function') {
+                    stockModule.fetchStockData();
                 }
             });
             break;
