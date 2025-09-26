@@ -1071,7 +1071,16 @@ document.addEventListener('click', function (e) {
     if (e.target.tagName === 'A' && !e.target.closest('.section-buttons')) {
         e.preventDefault();
         const inFrame = e.target.hasAttribute('data-frame');
-        loadExternalUrl(e.target.href, inFrame);
+        let url = e.target.href;
+        
+        // For FAQ links, append dark mode parameter if dark mode is active
+        if (url.includes('faq.html')) {
+            const isDarkMode = document.body.classList.contains('dark-mode');
+            const separator = url.includes('?') ? '&' : '?';
+            url = `${url}${separator}dark=${isDarkMode}`;
+        }
+        
+        loadExternalUrl(url, inFrame);
     }
 });
 
