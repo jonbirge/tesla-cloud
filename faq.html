@@ -48,6 +48,15 @@
     </style>
 </head>
 <body>
+    <script>
+        // Check URL parameter for dark mode
+        const urlParams = new URLSearchParams(window.location.search);
+        const darkMode = urlParams.get('dark') === 'true';
+        
+        if (darkMode) {
+            document.body.classList.add('dark-mode');
+        }
+    </script>
     <h1>teslas.cloud FAQ</h1>
     
     <div class="tip">
