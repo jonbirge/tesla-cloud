@@ -6,7 +6,7 @@ JavaScript-based site with information and links intended for use on an in-car b
 
 ## Demo
 
-The release branch is generally running at <https://teslas.cloud>.
+The main branch is generally running at <https://dev.teslas.cloud>.
 
 ## Contributing
 
