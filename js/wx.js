@@ -411,7 +411,7 @@ function updateWeatherAlertsDisplay() {
             alertDescription.style.cssText = `
                 margin: 0 0 8px 0;
                 line-height: 1.3;
-                color: black;
+                color: var(--button-text);
                 font-style: italic;
             `;
 
