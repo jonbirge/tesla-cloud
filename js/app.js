@@ -3,7 +3,7 @@ import { srcUpdate, testMode, debugMode, isTestMode, updateTimeZone, GEONAMES_US
 import { PositionSimulator } from './location.js';
 import { attemptLogin, leaveSettings, settings, isDriving, setDrivingState, enableLiveNewsUpdates, saveSetting } from './settings.js';
 import { fetchPremiumWeatherData, fetchCityData, SAT_URLS, forecastDataPrem, currentRainAlert, generateForecastDayElements } from './wx.js';
-import { updateNetworkInfo, updatePingChart, startPingTest } from './net.js';
+import { updateNetworkInfo, updatePingChart, startPingTest, getIPBasedLocation } from './net.js';
 import { setupNewsObserver, startNewsTimeUpdates, initializeNewsStorage } from './news.js';
 import { startStockUpdates, stopStockUpdates } from './stock.js';
 
@@ -983,37 +983,95 @@ window.showSection = function (sectionId) {
     // Handle weather section when GPS is not available
     if (sectionId === 'weather') {
         if (gpsPermissionDenied || gpsFailureCount >= MAX_GPS_RETRIES) {
-            console.log('Location not available for weather data.');
-            const forecastContainer = document.getElementById('prem-forecast-container');
-            if (forecastContainer) {
-                forecastContainer.style.display = 'none';
-            }
+            console.log('GPS not available for weather data, attempting IP-based location fallback...');
             
-            // Create or show GPS unavailable message
-            let gpsUnavailableMsg = document.getElementById('weather-gps-unavailable');
-            if (!gpsUnavailableMsg) {
-                gpsUnavailableMsg = document.createElement('div');
-                gpsUnavailableMsg.id = 'weather-gps-unavailable';
-                gpsUnavailableMsg.style.textAlign = 'center';
-                gpsUnavailableMsg.style.padding = '2rem';
-                gpsUnavailableMsg.style.color = 'var(--text-muted)';
-                
-                const p = document.createElement('p');
-                const em = document.createElement('em');
-                em.textContent = 'GPS information not available. Forecast requires location access.';
-                p.appendChild(em);
-                gpsUnavailableMsg.appendChild(p);
-                
-                // Insert after the weather section header
-                const weatherSection = document.getElementById('weather');
-                const firstH2 = weatherSection.querySelector('h2');
-                if (firstH2 && firstH2.nextSibling) {
-                    weatherSection.insertBefore(gpsUnavailableMsg, firstH2.nextSibling);
+            // Try to get IP-based location as fallback
+            getIPBasedLocation().then(ipLocation => {
+                if (ipLocation && ipLocation.latitude && ipLocation.longitude) {
+                    // Successfully got IP-based location, fetch weather data
+                    console.log('Using IP-based location for weather data');
+                    
+                    // Show forecast container
+                    const forecastContainer = document.getElementById('prem-forecast-container');
+                    if (forecastContainer) {
+                        forecastContainer.style.display = '';
+                    }
+                    
+                    // Hide GPS unavailable message if it exists
+                    const gpsUnavailableMsg = document.getElementById('weather-gps-unavailable');
+                    if (gpsUnavailableMsg) {
+                        gpsUnavailableMsg.style.display = 'none';
+                    }
+                    
+                    // Create or update IP location message
+                    let ipLocationMsg = document.getElementById('weather-ip-location');
+                    if (!ipLocationMsg) {
+                        ipLocationMsg = document.createElement('div');
+                        ipLocationMsg.id = 'weather-ip-location';
+                        ipLocationMsg.style.textAlign = 'center';
+                        ipLocationMsg.style.padding = '0.5rem';
+                        ipLocationMsg.style.fontSize = '0.9em';
+                        ipLocationMsg.style.color = 'var(--text-muted)';
+                        
+                        // Insert after the weather section header
+                        const weatherSection = document.getElementById('weather');
+                        const firstH2 = weatherSection.querySelector('h2');
+                        if (firstH2 && firstH2.nextSibling) {
+                            weatherSection.insertBefore(ipLocationMsg, firstH2.nextSibling);
+                        } else {
+                            weatherSection.appendChild(ipLocationMsg);
+                        }
+                    }
+                    const locationStr = ipLocation.city ? `${ipLocation.city}, ${ipLocation.region}` : 'IP-based location';
+                    ipLocationMsg.innerHTML = `<em>Using approximate location: ${locationStr}</em>`;
+                    ipLocationMsg.style.display = 'block';
+                    
+                    // Fetch weather data with IP-based coordinates
+                    fetchPremiumWeatherData(ipLocation.latitude, ipLocation.longitude);
+                    fetchCityData(ipLocation.latitude, ipLocation.longitude);
                 } else {
-                    weatherSection.appendChild(gpsUnavailableMsg);
+                    // IP location lookup failed, show error message
+                    console.log('IP-based location lookup failed');
+                    const forecastContainer = document.getElementById('prem-forecast-container');
+                    if (forecastContainer) {
+                        forecastContainer.style.display = 'none';
+                    }
+                    
+                    // Hide IP location message if it exists
+                    const ipLocationMsg = document.getElementById('weather-ip-location');
+                    if (ipLocationMsg) {
+                        ipLocationMsg.style.display = 'none';
+                    }
+                    
+                    // Create or show GPS unavailable message
+                    let gpsUnavailableMsg = document.getElementById('weather-gps-unavailable');
+                    if (!gpsUnavailableMsg) {
+                        gpsUnavailableMsg = document.createElement('div');
+                        gpsUnavailableMsg.id = 'weather-gps-unavailable';
+                        gpsUnavailableMsg.style.textAlign = 'center';
+                        gpsUnavailableMsg.style.padding = '2rem';
+                        gpsUnavailableMsg.style.color = 'var(--text-muted)';
+                        
+                        const p = document.createElement('p');
+                        const em = document.createElement('em');
+                        em.textContent = 'Location not available. Unable to retrieve weather forecast.';
+                        p.appendChild(em);
+                        gpsUnavailableMsg.appendChild(p);
+                        
+                        // Insert after the weather section header
+                        const weatherSection = document.getElementById('weather');
+                        const firstH2 = weatherSection.querySelector('h2');
+                        if (firstH2 && firstH2.nextSibling) {
+                            weatherSection.insertBefore(gpsUnavailableMsg, firstH2.nextSibling);
+                        } else {
+                            weatherSection.appendChild(gpsUnavailableMsg);
+                        }
+                    }
+                    gpsUnavailableMsg.style.display = 'block';
                 }
-            }
-            gpsUnavailableMsg.style.display = 'block';
+            }).catch(error => {
+                console.error('Error in IP-based location fallback: ', error);
+            });
         } else {
             // GPS is available, show normal forecast container
             const forecastContainer = document.getElementById('prem-forecast-container');
@@ -1025,6 +1083,12 @@ window.showSection = function (sectionId) {
             const gpsUnavailableMsg = document.getElementById('weather-gps-unavailable');
             if (gpsUnavailableMsg) {
                 gpsUnavailableMsg.style.display = 'none';
+            }
+            
+            // Hide IP location message if it exists
+            const ipLocationMsg = document.getElementById('weather-ip-location');
+            if (ipLocationMsg) {
+                ipLocationMsg.style.display = 'none';
             }
         }
     }
