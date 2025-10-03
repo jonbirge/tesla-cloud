@@ -42,6 +42,32 @@ function getUserLocation() {
     }
 }
 
+// Fetches location coordinates based on IP address using ipapi.co
+export async function getIPBasedLocation() {
+    try {
+        console.log('Fetching IP-based location...');
+        const response = await fetch('https://ipapi.co/json/');
+        const ipData = await response.json();
+        
+        if (ipData.latitude && ipData.longitude) {
+            console.log(`IP-based location: ${ipData.city}, ${ipData.region} (${ipData.latitude.toFixed(4)}, ${ipData.longitude.toFixed(4)})`);
+            return {
+                latitude: ipData.latitude,
+                longitude: ipData.longitude,
+                city: ipData.city,
+                region: ipData.region,
+                country: ipData.country_name
+            };
+        } else {
+            console.log('IP location data incomplete');
+            return null;
+        }
+    } catch (error) {
+        console.error('Error fetching IP-based location: ', error);
+        return null;
+    }
+}
+
 // Fetches and displays network information including IP details and reverse DNS
 export function updateNetworkInfo() {
     // Write diagnostic information to the console
