@@ -411,14 +411,14 @@ function updateWeatherAlertsDisplay() {
             alertDescription.style.cssText = `
                 margin: 0 0 8px 0;
                 line-height: 1.3;
-                color: black;
+                color: var(--button-text);
                 font-style: italic;
             `;
 
             const alertTime = document.createElement('div');
             alertTime.style.cssText = `
                 font-size: 12px;
-                color: #999;
+                color: var(--text-color);
             `;
             const endTime = new Date(alert.end * 1000).toLocaleString();
             alertTime.textContent = `Until: ${endTime}`;
