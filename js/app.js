@@ -441,16 +441,19 @@ async function handlePositionUpdate(position) {
     }
 
     // Handle whether or not we're driving
-    if (ENABLE_SPEED_DISABLE && speed > SPEED_DISABLE_THRESHOLD) {
-        if (!isDriving) {
-            startedDriving();
-        }
+    // Always track driving state (used for features like news forwarding)
+    const wasDriving = isDriving;
+    const currentlyDriving = speed > SPEED_DISABLE_THRESHOLD;
+    
+    if (currentlyDriving && !wasDriving) {
+        startedDriving();
         setDrivingState(true);
-    } else {
-        if (isDriving) {
-            stoppedDriving();
-        }
+    } else if (!currentlyDriving && wasDriving) {
+        stoppedDriving();
         setDrivingState(false);
+    } else if (currentlyDriving !== wasDriving) {
+        // Update state even if transition handlers weren't called
+        setDrivingState(currentlyDriving);
     }
 
     // Long distance updates (happens rarely)
