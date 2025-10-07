@@ -83,6 +83,10 @@ $feeds = loadNewsSourcesFromJson();
 ini_set('log_errors', 1);
 ini_set('error_log', '/tmp/rss-php-errors.log');
 
+// Set reasonable execution time limit to allow for slow feeds
+// With 27 feeds @ 1.5s timeout each, worst case is ~40s, so set to 60s to be safe
+set_time_limit(60);
+
 // Custom error handler to capture all types of errors
 set_error_handler(function($errno, $errstr, $errfile, $errline) {
     $message = date('[Y-m-d H:i:s] ') . "Error ($errno): $errstr in $errfile on line $errline\n";
@@ -93,9 +97,11 @@ set_error_handler(function($errno, $errstr, $errfile, $errline) {
 // Register shutdown function to catch fatal errors and return safe JSON
 register_shutdown_function(function() {
     $error = error_get_last();
-    if ($error && in_array($error['type'], [E_ERROR, E_PARSE, E_CORE_ERROR, E_COMPILE_ERROR])) {
+    // Check for any fatal error including timeouts (E_ERROR, E_PARSE, E_CORE_ERROR, E_COMPILE_ERROR, E_USER_ERROR)
+    if ($error && in_array($error['type'], [E_ERROR, E_PARSE, E_CORE_ERROR, E_COMPILE_ERROR, E_USER_ERROR])) {
         $message = date('[Y-m-d H:i:s] ') . "FATAL Error: {$error['message']} in {$error['file']} on line {$error['line']}\n";
         error_log($message);
+        logMessage("FATAL Error caught by shutdown handler: {$error['message']}");
 
         // Ensure the client receives valid JSON even after a fatal error
         if (ob_get_length()) {
@@ -104,8 +110,33 @@ register_shutdown_function(function() {
         if (!headers_sent()) {
             header('Content-Type: application/json');
         }
-        global $allItems, $outputItemsGlobal;
-        $fallbackArray = $outputItemsGlobal ?? $allItems ?? [];
+        global $allItems, $outputItemsGlobal, $requestedFeeds, $maxAgeSeconds, $numStories;
+        
+        // Try to process whatever we have collected so far
+        $fallbackArray = $allItems ?? [];
+        
+        // Apply the same filtering logic as the main code path
+        if (!empty($fallbackArray) && isset($requestedFeeds)) {
+            // Sort by date, newest first
+            usort($fallbackArray, function($a, $b) {
+                return $b['date'] - $a['date'];
+            });
+            
+            // Apply inclusion filters if we have the data
+            $fallbackArray = applyInclusionFilters($fallbackArray, $requestedFeeds);
+            
+            // Filter by age if we have the limit
+            if (isset($maxAgeSeconds)) {
+                $fallbackArray = applyAgeFilter($fallbackArray, $maxAgeSeconds);
+            }
+            
+            // Limit number of stories
+            if (isset($numStories)) {
+                $fallbackArray = array_slice($fallbackArray, 0, $numStories);
+            }
+        }
+        
+        logMessage("Shutdown handler returning " . count($fallbackArray) . " items from partial fetch");
         $fallback = json_encode($fallbackArray);
         echo $fallback === false ? '[]' : $fallback;
     }
