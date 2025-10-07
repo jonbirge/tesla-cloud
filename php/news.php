@@ -167,14 +167,18 @@ if (file_exists($cacheTimestampFile)) {
 
 // Determine which feeds to process
 $requestedFeeds = empty($includedFeeds) ? array_keys($feeds) : $includedFeeds;
+logMessage("Starting to process " . count($requestedFeeds) . " feeds");
 
 // Collect all items
 $allItems = [];
 $outputItemsGlobal = null; // Used for shutdown fallback
 $currentTime = time();
 $updatedTimestamps = false;
+$feedsProcessed = 0;
+$totalFeeds = count($requestedFeeds);
 
 foreach ($requestedFeeds as $source) {
+    $feedsProcessed++;
     if (!isset($feeds[$source])) continue;
     $feedData = $feeds[$source];
     $cacheFile = "{$cacheDir}/rss_cache_{$source}_{$version}.json";
@@ -210,6 +214,11 @@ foreach ($requestedFeeds as $source) {
             logMessage("Failed to fetch {$source} from internet after {$downloadTime}ms - treating as empty feed.");
             // Don't update cache or timestamp when fetch fails due to timeout - leave existing cache intact
         }
+    }
+    
+    // Log progress every 5 feeds to help track execution
+    if ($feedsProcessed % 5 == 0) {
+        logMessage("Progress: Processed {$feedsProcessed}/{$totalFeeds} feeds, collected " . count($allItems) . " items so far");
     }
 }
 
