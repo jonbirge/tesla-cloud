@@ -9,18 +9,17 @@
     box-sizing: border-box;  /* include padding in width calculation */
     display: flex;
     margin: 0px;
+    text-align: left;
 }
 
-/* Make only the NOTE text italic */
 .announcement p em {
     font-style: italic;
     margin: 0px;
 }
 
-/* New cell styles for announcement date + text */
 .announcement p .note-date {
-    min-width: 110px;
     text-align: left;
+    margin-right: 11px;
     color: var(--text-color);
 }
 
