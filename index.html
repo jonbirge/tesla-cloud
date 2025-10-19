@@ -499,6 +499,16 @@
                 </div>
             </div>
 
+            <h2>News Settings</h2>
+            <div class="settings-controls">
+                <div class="settings-toggle-item" data-setting="show-news-count"
+                    onclick="this.querySelector('input').click()">
+                    <label>Show Unread News Count</label>
+                    <input type="checkbox" onchange="toggleSettingFrom(this)" checked>
+                    <span class="settings-toggle-slider"></span>
+                </div>
+            </div>
+
             <h2>News Forwarding</h2>
             <div class="settings-controls">
                 <div class="settings-toggle-item" data-setting="news-forwarding"
