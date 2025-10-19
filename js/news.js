@@ -388,8 +388,8 @@ export async function updateNews(clear = false) {
         if (loadedItems.length > 0) {            
             // Mark each item's read status
             loadedItems.forEach(item => {
-                // Check if this is a new item
-                item.isUnread = !(item.id in cachedSeenNewsIds);
+                // Check if this is a new item (handle null cachedSeenNewsIds)
+                item.isUnread = !cachedSeenNewsIds || !(item.id in cachedSeenNewsIds);
             });
 
             // Remove items that have isUnread flag set to false
@@ -399,8 +399,8 @@ export async function updateNews(clear = false) {
         // ...and update the read status of old displayed items
         if (oldDisplayedItems.length > 0) {
             oldDisplayedItems.forEach(item => {
-                // Check if this is a new item
-                item.isUnread = !(item.id in cachedSeenNewsIds);
+                // Check if this is a new item (handle null cachedSeenNewsIds)
+                item.isUnread = !cachedSeenNewsIds || !(item.id in cachedSeenNewsIds);
             });
         }
 
