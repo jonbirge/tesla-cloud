@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Settings Polling Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+        }
+        .container {
+            border: 1px solid #ccc;
+            padding: 20px;
+            margin: 10px 0;
+            border-radius: 5px;
+        }
+        .device {
+            background-color: #f0f0f0;
+        }
+        button {
+            padding: 10px 20px;
+            margin: 5px;
+            cursor: pointer;
+            border: none;
+            border-radius: 3px;
+            background-color: #007bff;
+            color: white;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        .log {
+            background-color: #000;
+            color: #0f0;
+            padding: 10px;
+            font-family: monospace;
+            font-size: 12px;
+            max-height: 300px;
+            overflow-y: auto;
+            margin-top: 10px;
+        }
+        .status {
+            padding: 5px 10px;
+            border-radius: 3px;
+            display: inline-block;
+            margin: 5px 0;
+        }
+        .status.online {
+            background-color: #28a745;
+            color: white;
+        }
+        .status.offline {
+            background-color: #dc3545;
+            color: white;
+        }
+        input {
+            padding: 8px;
+            margin: 5px;
+            border: 1px solid #ccc;
+            border-radius: 3px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Settings Live Update Test</h1>
+    <p>This page demonstrates live updating of settings across multiple "devices" (browser windows).</p>
+    
+    <div class="container">
+        <h2>Setup</h2>
+        <label>User ID: <input type="text" id="userId" value="testuser_polling" /></label>
+        <button onclick="createUser()">Create User</button>
+        <button onclick="startPolling()">Start Polling</button>
+        <button onclick="stopPolling()">Stop Polling</button>
+        <div id="status" class="status offline">Offline</div>
+    </div>
+    
+    <div class="container device">
+        <h2>Device Simulator</h2>
+        <p>Use these buttons to simulate updating settings from another device:</p>
+        <button onclick="updateSetting('dark-mode', true)">Enable Dark Mode</button>
+        <button onclick="updateSetting('dark-mode', false)">Disable Dark Mode</button>
+        <button onclick="updateSetting('test-setting', Math.random())">Update Test Setting</button>
+        <button onclick="getCurrentSettings()">Get All Settings</button>
+    </div>
+    
+    <div class="container">
+        <h2>Current Settings</h2>
+        <pre id="currentSettings">No settings loaded</pre>
+    </div>
+    
+    <div class="container">
+        <h2>Activity Log</h2>
+        <div class="log" id="log"></div>
+    </div>
+
+    <script>
+        const API_BASE = '/php/settings.php';
+        let userId = 'testuser_polling';
+        let pollingInterval = null;
+        let lastKnownUpdate = null;
+
+        function log(message) {
+            const logDiv = document.getElementById('log');
+            const timestamp = new Date().toLocaleTimeString();
+            logDiv.textContent += `[${timestamp}] ${message}\n`;
+            logDiv.scrollTop = logDiv.scrollHeight;
+        }
+
+        async function createUser() {
+            userId = document.getElementById('userId').value;
+            log(`Creating user: ${userId}`);
+            
+            try {
+                const response = await fetch(`${API_BASE}/${encodeURIComponent(userId)}`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' }
+                });
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    log(`✓ User created successfully`);
+                    await getCurrentSettings();
+                    await updateLastKnownTimestamp();
+                } else if (response.status === 409) {
+                    log(`ℹ User already exists`);
+                    await getCurrentSettings();
+                    await updateLastKnownTimestamp();
+                } else {
+                    log(`✗ Failed to create user: ${response.status}`);
+                }
+            } catch (error) {
+                log(`✗ Error: ${error.message}`);
+            }
+        }
+
+        async function updateLastKnownTimestamp() {
+            try {
+                const response = await fetch(`${API_BASE}/${encodeURIComponent(userId)}/last-updated`);
+                if (response.ok) {
+                    const data = await response.json();
+                    lastKnownUpdate = data['last-updated'];
+                    log(`Updated last known timestamp: ${lastKnownUpdate}`);
+                }
+            } catch (error) {
+                log(`✗ Error getting timestamp: ${error.message}`);
+            }
+        }
+
+        async function checkForUpdates() {
+            try {
+                const response = await fetch(`${API_BASE}/${encodeURIComponent(userId)}/last-updated`);
+                if (response.ok) {
+                    const data = await response.json();
+                    const serverTimestamp = data['last-updated'];
+                    
+                    if (lastKnownUpdate && serverTimestamp !== lastKnownUpdate) {
+                        log(`🔄 SETTINGS UPDATED! Reloading... (${lastKnownUpdate} -> ${serverTimestamp})`);
+                        lastKnownUpdate = serverTimestamp;
+                        await getCurrentSettings();
+                    }
+                }
+            } catch (error) {
+                // Silent fail for polling
+            }
+        }
+
+        function startPolling() {
+            if (pollingInterval) {
+                log('Already polling');
+                return;
+            }
+            
+            log('▶ Started polling every 2 seconds');
+            document.getElementById('status').className = 'status online';
+            document.getElementById('status').textContent = 'Polling Active';
+            
+            pollingInterval = setInterval(checkForUpdates, 2000);
+        }
+
+        function stopPolling() {
+            if (pollingInterval) {
+                clearInterval(pollingInterval);
+                pollingInterval = null;
+                log('⏹ Stopped polling');
+                document.getElementById('status').className = 'status offline';
+                document.getElementById('status').textContent = 'Polling Stopped';
+            }
+        }
+
+        async function updateSetting(key, value) {
+            log(`Updating ${key} = ${value}`);
+            
+            try {
+                const response = await fetch(`${API_BASE}/${encodeURIComponent(userId)}/${encodeURIComponent(key)}`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ value: value })
+                });
+                
+                if (response.ok) {
+                    log(`✓ Setting updated on server`);
+                    await updateLastKnownTimestamp();
+                    await getCurrentSettings();
+                } else {
+                    log(`✗ Failed to update setting: ${response.status}`);
+                }
+            } catch (error) {
+                log(`✗ Error: ${error.message}`);
+            }
+        }
+
+        async function getCurrentSettings() {
+            try {
+                const response = await fetch(`${API_BASE}/${encodeURIComponent(userId)}`);
+                if (response.ok) {
+                    const settings = await response.json();
+                    document.getElementById('currentSettings').textContent = JSON.stringify(settings, null, 2);
+                    log(`✓ Settings loaded`);
+                } else {
+                    log(`✗ Failed to load settings: ${response.status}`);
+                }
+            } catch (error) {
+                log(`✗ Error: ${error.message}`);
+            }
+        }
+
+        // Initialize
+        log('Ready. Create a user and start polling to begin.');
+    </script>
+</body>
+</html>
