@@ -15,6 +15,9 @@ let rssDrop = false;            // Flag to indicate if an RSS feed has been drop
 let unitIsDirty = false;        // Flag to indicate if unit/time settings have changed
 let settings = {};              // Initialize settings object
 let live_news_updates = false;  // Flag to control whether news updates should be triggered immediately
+let lastKnownUpdate = null;     // Timestamp of last known settings update
+let settingsPollingInterval = null; // Interval ID for settings polling
+let isUpdatingSettings = false; // Flag to prevent concurrent updates
 
 // Export settings object so it's accessible to other modules
 export { settings, currentUser, isLoggedIn, hashedUser, isDriving, live_news_updates };
@@ -148,6 +151,11 @@ export async function attemptLogin() {
     console.log('hashedUser:', hashedUser);
     console.log('isLoggedIn:', isLoggedIn);
 
+    // Start polling for settings updates if logged in
+    if (isLoggedIn && hashedUser) {
+        startSettingsPolling(5000); // Poll every 5 seconds
+    }
+
     // Initialize map frame option
     updateMapFrame();
 }
@@ -181,6 +189,8 @@ export async function saveSetting(key, value) {
 
             if (response.ok) {
                 console.log(`Setting "${key}" updated to ${value} (server)`);
+                // Update our local timestamp after successfully saving
+                await updateLastKnownTimestamp();
             } else {
                 console.log(`Failed to update setting "${key}" on server`);
             }
@@ -449,6 +459,9 @@ async function fetchSettings() {
 
             // Initialize toggle states based on settings
             initializeSettings();
+            
+            // Fetch and store the last updated timestamp
+            await updateLastKnownTimestamp();
         } else {
             console.error('Error fetching settings: ', response.statusText);
             // Initialize with defaults if settings fetch failed
@@ -458,6 +471,84 @@ async function fetchSettings() {
         console.error('Error fetching settings: ', error);
         // Initialize with defaults if settings fetch failed
         await setDefaultSettings();
+    }
+}
+
+// Function to get and update the last known update timestamp
+async function updateLastKnownTimestamp() {
+    if (!hashedUser) {
+        return;
+    }
+    
+    try {
+        const response = await fetch(`php/settings.php/${encodeURIComponent(hashedUser)}/last-updated`, {
+            method: 'GET'
+        });
+        
+        if (response.ok) {
+            const data = await response.json();
+            lastKnownUpdate = data['last-updated'];
+            console.log('Last known update timestamp:', lastKnownUpdate);
+        }
+    } catch (error) {
+        console.error('Error fetching last updated timestamp:', error);
+    }
+}
+
+// Function to check if settings have been updated on the server
+async function checkForSettingsUpdates() {
+    if (!hashedUser || !isLoggedIn || isUpdatingSettings) {
+        return;
+    }
+    
+    try {
+        const response = await fetch(`php/settings.php/${encodeURIComponent(hashedUser)}/last-updated`, {
+            method: 'GET'
+        });
+        
+        if (response.ok) {
+            const data = await response.json();
+            const serverTimestamp = data['last-updated'];
+            
+            // Check if server timestamp is newer than our last known timestamp
+            if (lastKnownUpdate && serverTimestamp && serverTimestamp !== lastKnownUpdate) {
+                console.log('Settings updated on server, reloading...', {
+                    old: lastKnownUpdate,
+                    new: serverTimestamp
+                });
+                
+                // Prevent concurrent updates
+                isUpdatingSettings = true;
+                
+                // Reload settings
+                await fetchSettings();
+                
+                isUpdatingSettings = false;
+            }
+        }
+    } catch (error) {
+        console.error('Error checking for settings updates:', error);
+        isUpdatingSettings = false;
+    }
+}
+
+// Function to start polling for settings updates
+export function startSettingsPolling(intervalMs = 5000) {
+    // Stop any existing polling
+    stopSettingsPolling();
+    
+    if (isLoggedIn && hashedUser) {
+        console.log(`Starting settings polling every ${intervalMs}ms`);
+        settingsPollingInterval = setInterval(checkForSettingsUpdates, intervalMs);
+    }
+}
+
+// Function to stop polling for settings updates
+export function stopSettingsPolling() {
+    if (settingsPollingInterval) {
+        console.log('Stopping settings polling');
+        clearInterval(settingsPollingInterval);
+        settingsPollingInterval = null;
     }
 }
 
@@ -1137,6 +1228,7 @@ window.closeLoginModal = function () {
 window.handleLogout = async function () {
     if (currentUser) {
         // Logging out of a named user; revert to auto-generated account
+        stopSettingsPolling(); // Stop polling for the named user
         deleteCookie('userid');
         currentUser = null;
         hashedUser = null;
@@ -1146,6 +1238,7 @@ window.handleLogout = async function () {
             await fetchSettings();
             await initializeNewsStorage();
             updateNews(true);
+            startSettingsPolling(5000); // Restart polling for auto user
         }
     } else {
         // Default user active, show login dialog
@@ -1168,6 +1261,9 @@ window.handleLogin = async function () {
             
             console.log('Login successful, updating news feed...');
             updateNews(true); // Update news feed after login
+            
+            // Start polling for settings updates
+            startSettingsPolling(5000);
         }
     } catch (error) {
         console.error('Error fetching settings: ', error);

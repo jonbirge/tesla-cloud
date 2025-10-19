@@ -263,20 +263,30 @@ switch ($method) {
         }
 
         if ($key) {
-            // Check if there's an exact match for the key
-            $exactValue = getSingleSetting($userId, $key);
-            
-            if ($exactValue !== null) {
-                // Key exists, return just this value
-                echo json_encode([$key => $exactValue]);
-            } else {
-                // No exact match, try to get settings with this prefix
-                $settingsWithPrefix = getSettingsWithPrefix($userId, $key);
-                
-                if (!empty($settingsWithPrefix)) {
-                    echo json_encode($settingsWithPrefix);
+            // Special case: check for "last-updated" meta-key
+            if ($key === 'last-updated') {
+                $lastUpdated = getLastUpdatedTimestamp($userId);
+                if ($lastUpdated !== null) {
+                    echo json_encode(['last-updated' => $lastUpdated]);
                 } else {
                     http_response_code(404);
+                }
+            } else {
+                // Check if there's an exact match for the key
+                $exactValue = getSingleSetting($userId, $key);
+                
+                if ($exactValue !== null) {
+                    // Key exists, return just this value
+                    echo json_encode([$key => $exactValue]);
+                } else {
+                    // No exact match, try to get settings with this prefix
+                    $settingsWithPrefix = getSettingsWithPrefix($userId, $key);
+                    
+                    if (!empty($settingsWithPrefix)) {
+                        echo json_encode($settingsWithPrefix);
+                    } else {
+                        http_response_code(404);
+                    }
                 }
             }
         } else {
@@ -430,6 +440,28 @@ function updateSingleSetting($userId, $key, $value) {
         $errorMsg = "Database error updating setting: " . $e->getMessage();
         logMessage($errorMsg, "ERROR");
         return false;
+    }
+}
+
+// Helper function to get the last updated timestamp for a user's settings
+function getLastUpdatedTimestamp($userId) {
+    global $dbConnection;
+    
+    try {
+        // Get the most recent updated_at timestamp for this user
+        $stmt = $dbConnection->prepare("SELECT MAX(updated_at) as last_updated FROM user_settings WHERE user_id = ?");
+        $stmt->execute([$userId]);
+        
+        $row = $stmt->fetch();
+        if ($row && $row['last_updated'] !== null) {
+            return $row['last_updated'];
+        } else {
+            return null;
+        }
+    } catch (PDOException $e) {
+        $errorMsg = "Database error getting last updated timestamp: " . $e->getMessage();
+        logMessage($errorMsg, "ERROR");
+        throw $e;
     }
 }
 
