@@ -388,8 +388,8 @@ export async function updateNews(clear = false) {
         if (loadedItems.length > 0) {            
             // Mark each item's read status
             loadedItems.forEach(item => {
-                // Check if this is a new item
-                item.isUnread = !(item.id in cachedSeenNewsIds);
+                // Check if this is a new item (handle null cachedSeenNewsIds)
+                item.isUnread = !cachedSeenNewsIds || !(item.id in cachedSeenNewsIds);
             });
 
             // Remove items that have isUnread flag set to false
@@ -399,8 +399,8 @@ export async function updateNews(clear = false) {
         // ...and update the read status of old displayed items
         if (oldDisplayedItems.length > 0) {
             oldDisplayedItems.forEach(item => {
-                // Check if this is a new item
-                item.isUnread = !(item.id in cachedSeenNewsIds);
+                // Check if this is a new item (handle null cachedSeenNewsIds)
+                item.isUnread = !cachedSeenNewsIds || !(item.id in cachedSeenNewsIds);
             });
         }
 
@@ -856,8 +856,11 @@ export function updateNewsNotificationDot() {
     const newsButton = document.getElementById('news-section');
     if (!newsButton) return;
     
-    // Update notification counter based on unread status
-    if (hasUnread) {
+    // Check if the user has enabled showing the news count
+    const showNewsCount = settings['show-news-count'] !== false; // Default to true if not set
+    
+    // Update notification counter based on unread status and user setting
+    if (hasUnread && showNewsCount) {
         // Remove transition class if it's being shown again
         newsButton.classList.remove('notification-transition');
         
@@ -878,7 +881,7 @@ export function updateNewsNotificationDot() {
                 newsButton.classList.remove('has-notification');
                 newsButton.removeAttribute('data-count');
                 newsButton.classList.remove('notification-transition');
-                console.log('News notification counter removed (no unread items)');
+                console.log('News notification counter removed (no unread items or disabled by setting)');
             }, 600); // Should match the CSS transition time + small buffer
         }
     }

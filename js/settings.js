@@ -34,6 +34,8 @@ const defaultSettings = {
     "show-stock-indicator": true,
     "subscribed-stocks": ["TSLA"],
     "subscribed-indexes": ["SPY", "DIA"],
+    // News settings
+    "show-news-count": true,
     // News forwarding
     "news-forwarding": false,
     "news-forward-only": false,
@@ -967,6 +969,15 @@ function updateSetting(key, value) {
                 }
                 if (typeof stockModule.fetchStockData === 'function') {
                     stockModule.fetchStockData();
+                }
+            });
+            break;
+
+        case 'show-news-count':
+            // Update the news notification display immediately when this setting changes
+            import('./news.js').then(newsModule => {
+                if (typeof newsModule.updateNewsNotificationDot === 'function') {
+                    newsModule.updateNewsNotificationDot();
                 }
             });
             break;
