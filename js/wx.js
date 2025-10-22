@@ -1,5 +1,5 @@
 // Import required functions from app.js
-import { formatTime, highlightUpdate, testMode, isTestMode, showNotification, showWeatherAlertModal } from './common.js';
+import { formatTime, highlightUpdate, testMode, isTestMode, showNotification, showWeatherAlertModal, usingIPLocation } from './common.js';
 import { autoDarkMode, settings } from './settings.js';
 
 // Parameters
@@ -88,7 +88,9 @@ export function fetchPremiumWeatherData(lat, long, silentLoad = false) {
                     const stationStr = `TEST WX @ ${weatherUpdateTime}`;
                     highlightUpdate('prem-station-info', stationStr);
                 } else if (city && state) {
-                    const stationStr = `${city}, ${state} @ ${weatherUpdateTime}`;
+                    // Add "(Approximate)" indicator if using IP-based location
+                    const approximateStr = usingIPLocation ? ' (Approximate)' : '';
+                    const stationStr = `${city}, ${state}${approximateStr} @ ${weatherUpdateTime}`;
                     highlightUpdate('prem-station-info', stationStr);
                 } else {
                     const stationStr = `${weatherUpdateTime}`;

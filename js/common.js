@@ -7,13 +7,19 @@ let locationTimeZone = browserTimeZone();
 let testMode = false; // Set to true if test parameter exists
 let debugMode = false; // Set to true if debug parameter exists
 let gpsPermissionDenied = false; // Track if GPS permission was denied
+let usingIPLocation = false; // Track if we're using IP-based location instead of GPS
 
 // Exports
-export { locationTimeZone, testMode, debugMode, GEONAMES_USERNAME, gpsPermissionDenied }
+export { locationTimeZone, testMode, debugMode, GEONAMES_USERNAME, gpsPermissionDenied, usingIPLocation }
 
 // Function to update GPS permission denied status
 export function setGpsPermissionDenied(denied) {
     gpsPermissionDenied = denied;
+}
+
+// Function to set the IP-based location flag
+export function setUsingIPLocation(using) {
+    usingIPLocation = using;
 }
 
 // Set time zone based on location
