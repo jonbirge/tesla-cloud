@@ -1,5 +1,5 @@
 // Imports
-import { srcUpdate, testMode, debugMode, isTestMode, updateTimeZone, GEONAMES_USERNAME, showNotification, gpsPermissionDenied, setGpsPermissionDenied } from './common.js';
+import { srcUpdate, testMode, debugMode, isTestMode, updateTimeZone, GEONAMES_USERNAME, showNotification, gpsPermissionDenied, setGpsPermissionDenied, setUsingIPLocation } from './common.js';
 import { PositionSimulator } from './location.js';
 import { attemptLogin, leaveSettings, settings, isDriving, setDrivingState, enableLiveNewsUpdates, saveSetting } from './settings.js';
 import { fetchPremiumWeatherData, fetchCityData, SAT_URLS, forecastDataPrem, currentRainAlert, generateForecastDayElements } from './wx.js';
@@ -364,6 +364,8 @@ function shouldUpdateLongRangeData() {
 async function handlePositionUpdate(position) {
     // Reset GPS failure count on successful position update
     gpsFailureCount = 0;
+    // Clear IP location flag since we're using GPS
+    setUsingIPLocation(false);
     
     lat = position.coords.latitude;
     long = position.coords.longitude;
@@ -994,6 +996,9 @@ window.showSection = function (sectionId) {
                     // Successfully got IP-based location, fetch weather data
                     console.log('Using IP-based location for weather data');
                     
+                    // Set flag to indicate we're using IP-based location
+                    setUsingIPLocation(true);
+                    
                     // Show forecast container
                     const forecastContainer = document.getElementById('prem-forecast-container');
                     if (forecastContainer) {
@@ -1006,28 +1011,11 @@ window.showSection = function (sectionId) {
                         gpsUnavailableMsg.style.display = 'none';
                     }
                     
-                    // Create or update IP location message
-                    let ipLocationMsg = document.getElementById('weather-ip-location');
-                    if (!ipLocationMsg) {
-                        ipLocationMsg = document.createElement('div');
-                        ipLocationMsg.id = 'weather-ip-location';
-                        ipLocationMsg.style.textAlign = 'center';
-                        ipLocationMsg.style.padding = '0.5rem';
-                        ipLocationMsg.style.fontSize = '0.9em';
-                        ipLocationMsg.style.color = 'var(--text-muted)';
-                        
-                        // Insert after the weather section header
-                        const weatherSection = document.getElementById('weather');
-                        const firstH2 = weatherSection.querySelector('h2');
-                        if (firstH2 && firstH2.nextSibling) {
-                            weatherSection.insertBefore(ipLocationMsg, firstH2.nextSibling);
-                        } else {
-                            weatherSection.appendChild(ipLocationMsg);
-                        }
+                    // Hide the IP location message (no longer needed - will show in station info)
+                    const ipLocationMsg = document.getElementById('weather-ip-location');
+                    if (ipLocationMsg) {
+                        ipLocationMsg.style.display = 'none';
                     }
-                    const locationStr = ipLocation.city ? `${ipLocation.city}, ${ipLocation.region}` : 'IP-based location';
-                    ipLocationMsg.innerHTML = `<em>Using approximate location: ${locationStr}</em>`;
-                    ipLocationMsg.style.display = 'block';
                     
                     // Fetch weather data with IP-based coordinates
                     fetchPremiumWeatherData(ipLocation.latitude, ipLocation.longitude);
