@@ -523,7 +523,13 @@ function updateGPS() {
     
     if (!isTestMode('gps')) {
         if (navigator.geolocation) {
-            navigator.geolocation.getCurrentPosition(handlePositionUpdate, handleGPSError);
+            // Set a reasonable timeout to avoid hanging when GPS is unavailable
+            const options = {
+                timeout: 5000,              // 5 second timeout
+                maximumAge: 30000,          // Accept cached position up to 30 seconds old
+                enableHighAccuracy: true    // Request high accuracy
+            };
+            navigator.geolocation.getCurrentPosition(handlePositionUpdate, handleGPSError, options);
         } else {
             console.log('Geolocation is not supported by this browser.');
             return false;
