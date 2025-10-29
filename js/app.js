@@ -45,6 +45,8 @@ let gpsIntervalId = null;
 let lastGPSUpdate = 0;
 let gpsFailureCount = 0;                            // Count consecutive GPS failures
 let networkInfoUpdated = false;                     // Track if network info has been updated
+let initialLocationReady = false;                   // Track if initial location data is ready
+let pendingWeatherSection = false;                  // Track if weather section is pending location data
 const positionSimulator = new PositionSimulator();  // TODO: only create if needed
 
 // Function to calculate the distance between two coordinates
@@ -302,8 +304,8 @@ async function updateLocationData(lat, long) {
     console.log('Updating location dependent data for (', lat, ', ', long, ')');
     neverUpdatedLocation = false;
 
-    // Fire off API requests for external data
-    fetchCityData(lat, long);
+    // Await city data to ensure location name is ready before weather display
+    await fetchCityData(lat, long);
 
     // Update Wikipedia data iff the Landmarks section is visible
     const locationSection = document.getElementById("landmarks");
@@ -474,6 +476,16 @@ async function handlePositionUpdate(position) {
         lastUpdateLong = long;
         lastUpdate = Date.now();
     }
+    
+    // Mark initial location as ready and trigger any pending weather section display
+    if (!initialLocationReady) {
+        initialLocationReady = true;
+        if (pendingWeatherSection) {
+            console.log('Initial location ready, showing pending weather section');
+            pendingWeatherSection = false;
+            showSection('weather');
+        }
+    }
 }
 
 // Function called when user starts driving
@@ -586,6 +598,16 @@ function handleGPSError(error) {
     if (gpsPermissionDenied || gpsFailureCount >= MAX_GPS_RETRIES) {
         console.log('Stopping GPS updates due to permission denial or max retries exceeded');
         stopGPSUpdates();
+        
+        // Mark initial location as ready (even though GPS failed) and trigger pending weather with IP fallback
+        if (!initialLocationReady) {
+            initialLocationReady = true;
+            if (pendingWeatherSection) {
+                console.log('GPS failed, showing pending weather section with IP fallback');
+                pendingWeatherSection = false;
+                showSection('weather');
+            }
+        }
     }
 }
 
@@ -886,6 +908,22 @@ window.showSection = function (sectionId) {
         return;
     }
 
+    // Defer showing weather section if initial location is not ready yet
+    // This prevents race condition when weather is specified on page load
+    if (sectionId === 'weather' && !initialLocationReady) {
+        console.log('Deferring weather section until location data is ready');
+        pendingWeatherSection = true;
+        // Show a loading state in the weather section
+        const weatherSection = document.getElementById('weather');
+        if (weatherSection) {
+            const forecastContainer = document.getElementById('prem-forecast-container');
+            if (forecastContainer) {
+                forecastContainer.classList.add('loading');
+            }
+        }
+        return;
+    }
+
     // Log the clicked section
     console.log(`Showing section: ${sectionId}`);
 
@@ -991,7 +1029,7 @@ window.showSection = function (sectionId) {
             console.log('GPS not available for weather data, attempting IP-based location fallback...');
             
             // Try to get IP-based location as fallback
-            getIPBasedLocation().then(ipLocation => {
+            getIPBasedLocation().then(async ipLocation => {
                 if (ipLocation && ipLocation.latitude && ipLocation.longitude) {
                     // Successfully got IP-based location, fetch weather data
                     console.log('Using IP-based location for weather data');
@@ -1017,9 +1055,9 @@ window.showSection = function (sectionId) {
                         ipLocationMsg.style.display = 'none';
                     }
                     
-                    // Fetch weather data with IP-based coordinates
+                    // Fetch city data first, then weather data to ensure location name is ready
+                    await fetchCityData(ipLocation.latitude, ipLocation.longitude);
                     fetchPremiumWeatherData(ipLocation.latitude, ipLocation.longitude);
-                    fetchCityData(ipLocation.latitude, ipLocation.longitude);
                 } else {
                     // IP location lookup failed, show error message
                     console.log('IP-based location lookup failed');
