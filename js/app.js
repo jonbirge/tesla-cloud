@@ -523,11 +523,11 @@ function updateGPS() {
     
     if (!isTestMode('gps')) {
         if (navigator.geolocation) {
-            // Set a reasonable timeout to avoid hanging when GPS is unavailable
+            // GPS options to prevent hanging and balance accuracy with performance
             const options = {
-                timeout: 5000,              // 5 second timeout
-                maximumAge: 30000,          // Accept cached position up to 30 seconds old
-                enableHighAccuracy: true    // Request high accuracy
+                timeout: 5000,              // Fail quickly if GPS is unavailable (allows 3 retries in 15s)
+                maximumAge: 30000,          // Use cached position within update interval to reduce battery drain
+                enableHighAccuracy: true    // Prioritize GPS over network location for vehicle navigation
             };
             navigator.geolocation.getCurrentPosition(handlePositionUpdate, handleGPSError, options);
         } else {
