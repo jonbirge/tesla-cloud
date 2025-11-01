@@ -1,0 +1,7 @@
+# Redirect index.html to index.php for cache busting
+DirectoryIndex index.php index.html
+
+# If someone directly accesses index.html, rewrite to index.php
+RewriteEngine On
+RewriteBase /
+RewriteRule ^index\.html$ index.php [L]

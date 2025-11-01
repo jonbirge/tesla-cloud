@@ -1,3 +1,9 @@
+<?php
+// Get git commit hash for cache busting
+require_once __DIR__ . '/php/git_info.php';
+$gitInfo = getGitInfo();
+$cacheVersion = $gitInfo['commit'];
+?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -598,6 +604,9 @@
                 <rect class="network-bar bar-4" x="20" y="4" width="4" height="15"/>
             </svg>
         </div>
+        <div id="js-version-indicator" class="status-indicator version-status" title="JavaScript Version: <?php echo htmlspecialchars($cacheVersion); ?>">
+            <span style="font-size: 12px; opacity: 0.7;">v<?php echo htmlspecialchars($cacheVersion); ?></span>
+        </div>
     </div>
 
     <!-- Load SVG sprite file and inject it into the page -->
@@ -611,7 +620,7 @@
 
     <!-- Load JavaScript -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script src="js/app.js?1020" type="module"></script>
+    <script src="js/app.js?v=<?php echo htmlspecialchars($cacheVersion); ?>" type="module"></script>
 </body>
 
 </html>
