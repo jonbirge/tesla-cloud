@@ -70,12 +70,12 @@ export function fetchPremiumWeatherData(lat, long, silentLoad = false) {
                     generateTestWeatherAlerts(forecastDataPrem);
                     // Process test alerts immediately
                     processWeatherAlerts(forecastDataPrem);
-                } // test mode
+                } else {
+                    // Process weather alerts from API response (only when not in alert test mode)
+                    processWeatherAlerts(oneCallData);
+                }
                 
                 updatePremiumWeatherDisplay();
-
-                // Process weather alerts from API response
-                processWeatherAlerts(oneCallData);
 
                 // Update time and location of weather data, using FormatTime
                 const weatherUpdateTime = formatTime(new Date(oneCallData.current.dt * 1000), {
