@@ -211,7 +211,7 @@ body.dark-mode {
     box-shadow: 0 0 0 4px var(--button-text),
                 0 0 20px rgba(0, 0, 0, 0.3);
     transform: scale(1.05);
-    transition: all 0.2s ease;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
     z-index: 10;
 }
 
