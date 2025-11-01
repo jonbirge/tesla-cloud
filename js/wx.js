@@ -28,12 +28,15 @@ let inCONUS = null;                     // In the continental US (CONUS)
 export { SAT_URLS, forecastDataPrem, lastLat, lastLong, city, state, currentRainAlert, currentWeatherAlerts };
 
 // Fetches premium weather data from OpenWeather API
-export function fetchPremiumWeatherData(lat, long, silentLoad = false) {
-    console.log('Fetching premium weather data...');
+export async function fetchPremiumWeatherData(lat, long, silentLoad = false) {
+	// console.log('fetchPremiumWeatherData()');
 
     // Save so we can call functions later outside GPS update loop, if needed
     lastLat = lat;
     lastLong = long;
+
+    // Update city and state based on new coordinates
+    await fetchCityData(lat, long);
 
     // Show loading state on forecast container when not silent loading
     if (!silentLoad) {
@@ -151,6 +154,8 @@ export function fetchPremiumWeatherData(lat, long, silentLoad = false) {
 
 // Fetch city data based on latitude and longitude
 export async function fetchCityData(lat, long) {
+	// console.log('fetchCityData()');
+
     try {
         const response = await fetch(`php/openwx.php/geo/1.0/reverse?lat=${lat}&lon=${long}&limit=1`);
         const data = await response.json();
@@ -187,6 +192,8 @@ export async function fetchCityData(lat, long) {
 
 // Generate forecast day elements dynamically
 export function generateForecastDayElements(numDays = 5) {
+	// console.log('generateForecastDayElements()');
+
     const forecastContainer = document.getElementById('prem-forecast-container');
     if (!forecastContainer) return;
 
@@ -213,6 +220,8 @@ export function generateForecastDayElements(numDays = 5) {
 
 // Updates the forecast display with premium data
 export function updatePremiumWeatherDisplay() {
+	// console.log('updatePremiumWeatherDisplay()');
+
     if (!forecastDataPrem) return;
 
     // Extract daily summary (limit to 5 days)
@@ -327,6 +336,7 @@ export function updatePremiumWeatherDisplay() {
             }
         }
     }
+    
     // Ensure forecast is visible and remove loading state
     const forecastContainer = document.getElementById('prem-forecast-container');
     if (forecastContainer) forecastContainer.classList.remove('loading');
@@ -340,6 +350,8 @@ export function updatePremiumWeatherDisplay() {
 
 // Update weather alerts display in the weather section
 function updateWeatherAlertsDisplay() {
+	// console.log('updateWeatherAlertsDisplay()');
+
     // Find or create alerts container
     let alertsContainer = document.getElementById('weather-alerts-container');
     if (!alertsContainer) {
@@ -435,6 +447,8 @@ function updateWeatherAlertsDisplay() {
 
 // Helper function to create hourly segments for a forecast day
 function createHourlySegments(dailyForecast, completeHourlyData, dayIndex) {
+	// console.log('createHourlySegments()');
+
     // Calculate start/end of the day in local time
     const selectedDate = new Date(dailyForecast.dt * 1000);
     const dayStart = new Date(selectedDate);
@@ -502,6 +516,8 @@ function createHourlySegments(dailyForecast, completeHourlyData, dayIndex) {
 
 // Create complete 24-hour data structure for all 5 days
 function createComplete24HourData(oneCallData, forecastData) {
+	// console.log('createComplete24HourData()');
+
     const complete24HourData = [];
     const nowTimestamp = Math.floor(Date.now() / 1000);
     
@@ -587,6 +603,8 @@ function createComplete24HourData(oneCallData, forecastData) {
 
 // Interpolate hourly segments from 3-hourly data for days 3-5
 function interpolateHourlyFromThreeHourly(threeHourlyData, dailyForecast) {
+	// console.log('interpolateHourlyFromThreeHourly()');
+
     const interpolatedHourlyData = [];
     const dayStart = new Date(dailyForecast.dt * 1000);
     dayStart.setHours(0, 0, 0, 0);
@@ -633,6 +651,8 @@ function interpolateHourlyFromThreeHourly(threeHourlyData, dailyForecast) {
 
 // Function to update precipitation graph with current time-based x-axis
 function updatePrecipitationGraph() {
+	// console.log('updatePrecipitationGraph()');
+
     if (!forecastDataPrem || !forecastDataPrem.minutely) return;
 
     const minutely = forecastDataPrem.minutely || [];
@@ -750,8 +770,7 @@ function updatePrecipitationGraph() {
 
 // Function to update the axis colors of the rain chart
 export function updateRainChartAxisColors() {
-    // Console log
-    console.log('Updating rain chart axis colors...');
+	// console.log('updateRainChartAxisColors()');
 
     // Get computed values from body element instead of document.documentElement
     const computedStyle = getComputedStyle(document.body);
@@ -772,6 +791,8 @@ export function updateRainChartAxisColors() {
 
 // Function to update chart data with sequential animation
 function updateChartWithAnimation(chart, newLabels, newValues) {
+	// console.log('updateChartWithAnimation()');
+
     // First update the labels if needed
     chart.data.labels = newLabels;
     
@@ -817,6 +838,8 @@ function updateChartWithAnimation(chart, newLabels, newValues) {
 
 // Function to start auto-refresh for precipitation graph
 function startPrecipGraphAutoRefresh() {
+	// console.log('startPrecipGraphAutoRefresh()');
+
     const GRAPH_DELAY = 30; // seconds
     
     console.log('Starting precipitation graph auto-refresh...');
@@ -834,6 +857,8 @@ function startPrecipGraphAutoRefresh() {
 
 // Check for imminent rain (next 10 minutes) and alert user if so
 function checkImminentRain(minutelyData) {
+	// console.log('checkImminentRain()');
+
     if (!minutelyData || minutelyData.length === 0) {
         toggleRainIndicator(false);
         currentRainAlert = false; // Reset alert flag when no data
@@ -910,6 +935,8 @@ function checkImminentRain(minutelyData) {
 
 // Toggle the rain indicator
 function toggleRainIndicator(show, minutesUntilRain = 0) {
+	// console.log('toggleRainIndicator()');
+
     // Get the rain indicator element
     const rainIndicator = document.getElementById('rain-indicator');
     const rainTimingText = document.getElementById('rain-timing-text');
@@ -941,6 +968,8 @@ function toggleRainIndicator(show, minutesUntilRain = 0) {
 
 // Fetches and updates the Air Quality Index (AQI) from openweather.org
 function updateAQI(lat, lon) {
+	// console.log('updateAQI()');
+
     fetch(`php/openwx.php/data/2.5/air_pollution?lat=${lat}&lon=${lon}`)
         .then(response => response.json())
         .then(data => {
@@ -981,7 +1010,7 @@ function updateAQI(lat, lon) {
 
 // Merge OneCall API data with 5-day forecast API data for extended hourly forecasts
 function mergeForecastData(oneCallData, forecastData) {
-    console.log('Merging OneCall data with 5-day forecast data...');
+	// console.log('mergeForecastData()');
     
     // Start with OneCall data as base (contains current, minutely, and first 2 days of hourly)
     const mergedData = { ...oneCallData };
@@ -1016,6 +1045,8 @@ function mergeForecastData(oneCallData, forecastData) {
 
 // Convert 3-hourly forecast data to hourly format
 function convertForecastToHourly(forecastList) {
+	// console.log('convertForecastToHourly()');
+
     return forecastList.map(item => ({
         dt: item.dt,
         temp: item.main.temp,
@@ -1036,6 +1067,8 @@ function convertForecastToHourly(forecastList) {
 
 // Generate daily summaries from 3-hourly forecast data
 function generateDailyFromForecast(forecastList) {
+	// console.log('generateDailyFromForecast()');
+
     const dailyData = {};
     
     // Group forecast data by day
@@ -1101,12 +1134,16 @@ function generateDailyFromForecast(forecastList) {
 
 // Helper: Extract 5 daily summaries from merged forecast data
 function extractPremiumDailyForecast(dailyList) {
+	// console.log('extractPremiumDailyForecast()');
+
     // Limit to 5 days as requested in the issue
     return dailyList.slice(0, 5);
 }
 
 // Helper: Format temperature based on user settings
 function formatTemperature(tempF) {
+	// console.log('formatTemperature()');
+
     if (!settings || settings["imperial-units"]) {
         return Math.round(tempF) + "°";
     } else {
@@ -1117,6 +1154,8 @@ function formatTemperature(tempF) {
 
 // Helper: Format wind speed range
 function formatWindSpeedRange(speedMS, gustMS = null) {
+	// console.log('formatWindSpeedRange()');
+
     const isImperial = !settings || settings["imperial-units"];
     if (gustMS && gustMS > speedMS) {
         if (isImperial) {
@@ -1139,6 +1178,8 @@ function formatWindSpeedRange(speedMS, gustMS = null) {
 
 // Helper: Check for hazards in a premium daily forecast
 function premiumDayHasHazards(day) {
+	// console.log('premiumDayHasHazards()');
+
     const hazardConditions = ['Rain', 'Snow', 'Sleet', 'Hail', 'Thunderstorm', 'Storm', 'Drizzle'];
     return day.weather.some(w =>
         hazardConditions.some(condition =>
@@ -1149,6 +1190,8 @@ function premiumDayHasHazards(day) {
 
 // Helper: Generate CSS styling for the moon phase icon based on phase value
 function getMoonPhaseIcon(phase) {
+	// console.log('getMoonPhaseIcon()');
+
     // Create CSS for the moon icon based on the phase value (0 to 1)
     // 0 = new moon (fully dark), 0.5 = full moon (fully light), 1 = new moon again
     let style = '';
@@ -1174,6 +1217,8 @@ function getMoonPhaseIcon(phase) {
 
 // Helper: Return string description of the closest moon phase
 function getMoonPhaseName(phase) {
+	// console.log('getMoonPhaseName()');
+
     if (phase < 0.05) {
         return 'New';
     } else if (phase < 0.35) {
@@ -1189,6 +1234,8 @@ function getMoonPhaseName(phase) {
 
 // Helper: Generate test minutely precipitation data for testing
 function generateTestMinutelyData(forecastData) {
+	// console.log('generateTestMinutelyData()');
+
     // Create minutely data if it doesn't exist
     if (!forecastData.minutely || forecastData.minutely.length < 60) {
         forecastData.minutely = [];
@@ -1234,6 +1281,8 @@ function generateTestMinutelyData(forecastData) {
 
 // Generate test weather alerts for demo purposes
 function generateTestWeatherAlerts(forecastData) {
+	// console.log('generateTestWeatherAlerts()');
+
     const now = Math.floor(Date.now() / 1000);
     const testAlerts = [
         {
@@ -1263,6 +1312,8 @@ function generateTestWeatherAlerts(forecastData) {
 
 // Generate test daily forecast data with various weather conditions to test backgrounds
 function generateTestDailyForecast(forecastData) {
+	// console.log('generateTestDailyForecast()');
+
     const now = Math.floor(Date.now() / 1000);
     const daySeconds = 24 * 60 * 60;
     
@@ -1296,6 +1347,8 @@ function generateTestDailyForecast(forecastData) {
 
 // Generate test hourly forecast data to simulate both 1-hour and 3-hour data
 function generateTestHourlyForecast(forecastData) {
+	// console.log('generateTestHourlyForecast()');
+
     const now = Math.floor(Date.now() / 1000);
     const hourSeconds = 60 * 60;
     
@@ -1341,8 +1394,9 @@ function generateTestHourlyForecast(forecastData) {
     return forecastData;
 }
 
-// Show forecast window (used to be a graph) for a premium forecast day
 window.showPremiumPrecipGraph = function(dayIndex) {
+	// console.log('showPremiumPrecipGraph()');
+
     if (!forecastDataPrem) return;
 
     const daily = forecastDataPrem.daily || [];
@@ -1564,12 +1618,16 @@ window.showPremiumPrecipGraph = function(dayIndex) {
 
 // Close forecast window
 window.closePremiumPrecipPopup = function() {
+	// console.log('closePremiumPrecipPopup()');
+
     const premPopup = document.querySelector('#weather .forecast-popup');
     if (premPopup) premPopup.classList.remove('show');
 }
 
 // Switches the weather image based on the type provided
 window.switchWeatherImage = function (type) {
+	// console.log('switchWeatherImage()');
+
     const weatherImage = document.getElementById('weather-image');
     weatherImage.style.opacity = '0';
     
@@ -1592,6 +1650,8 @@ window.switchWeatherImage = function (type) {
 
 // Process weather alerts from OpenWeather API response
 function processWeatherAlerts(weatherData) {
+	// console.log('processWeatherAlerts()');
+
     if (!weatherData || !weatherData.alerts) {
         // Clear any existing alerts if no alert data
         currentWeatherAlerts = [];
@@ -1631,6 +1691,8 @@ function processWeatherAlerts(weatherData) {
 
 // Determine if an alert is considered "significant" and should trigger popup
 function isSignificantAlert(alert) {
+	// console.log('isSignificantAlert()');
+
     const significantEvents = [
         'Tornado Warning', 'Tornado Watch',
         'Severe Thunderstorm Warning', 'Severe Thunderstorm Watch',
@@ -1651,6 +1713,8 @@ function isSignificantAlert(alert) {
 
 // Update the red dot weather alert indicator
 function updateWeatherAlertIndicator() {
+	// console.log('updateWeatherAlertIndicator()');
+
     const hasSignificantAlerts = currentWeatherAlerts.some(alert => isSignificantAlert(alert));
     const weatherButton = document.getElementById('wx-section');
     

@@ -364,6 +364,7 @@ function shouldUpdateLongRangeData() {
 async function handlePositionUpdate(position) {
     // Reset GPS failure count on successful position update
     gpsFailureCount = 0;
+
     // Clear IP location flag since we're using GPS
     setUsingIPLocation(false);
     
@@ -1019,7 +1020,6 @@ window.showSection = function (sectionId) {
                     
                     // Fetch weather data with IP-based coordinates
                     fetchPremiumWeatherData(ipLocation.latitude, ipLocation.longitude);
-                    fetchCityData(ipLocation.latitude, ipLocation.longitude);
                 } else {
                     // IP location lookup failed, show error message
                     console.log('IP-based location lookup failed');
@@ -1063,8 +1063,7 @@ window.showSection = function (sectionId) {
             }).catch(error => {
                 console.error('Error in IP-based location fallback: ', error);
             });
-        } else {
-            // GPS is available, show normal forecast container
+        } else {  // GPS is available, show normal forecast container
             const forecastContainer = document.getElementById('prem-forecast-container');
             if (forecastContainer) {
                 forecastContainer.style.display = '';
@@ -1240,14 +1239,14 @@ document.addEventListener('DOMContentLoaded', async function () {
         });
     }
 
-    // Show the initial section from URL parameter
-    const urlParams = new URLSearchParams(window.location.search);
-    const initialSection = urlParams.get('section') || DEFAULT_SECTION;
-    showSection(initialSection);
-
     // Moved in from wx.js...
     var premCloseBtn = document.getElementById('prem-forecast-popup-close');
     if (premCloseBtn) {
         premCloseBtn.onclick = window.closePremiumPrecipPopup;
     }
+
+    // Show the initial section from URL parameter
+    const urlParams = new URLSearchParams(window.location.search);
+    const initialSection = urlParams.get('section') || DEFAULT_SECTION;
+    showSection(initialSection);
 });

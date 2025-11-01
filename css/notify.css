@@ -98,8 +98,8 @@
 }
 
 .notification-message {
-    font-size: 14pt;
-    font-weight: 500;
+    font-size: 16pt;
+    font-weight: 600;
     color: var(--notification-text);
     white-space: nowrap;
     overflow: hidden;

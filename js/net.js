@@ -257,8 +257,7 @@ function initializePingChart() {
 
 // Updates chart colors based on current theme settings
 export function updateNetChartAxisColors() {
-    // Console log
-    console.log('Updating chart axis colors...');
+    // console.log('Updating chart axis colors...');
 
     // Get computed values from body element instead of document.documentElement
     const computedStyle = getComputedStyle(document.body);
