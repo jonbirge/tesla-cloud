@@ -1410,6 +1410,16 @@ window.showPremiumPrecipGraph = function(dayIndex) {
         premPopup.classList.add('show');
     }
 
+    // Highlight the selected day panel
+    const forecastDays = document.querySelectorAll('#prem-forecast-container .forecast-day');
+    forecastDays.forEach((day, index) => {
+        if (index === dayIndex) {
+            day.classList.add('selected');
+        } else {
+            day.classList.remove('selected');
+        }
+    });
+
     // Calculate start/end of the selected day in local time
     const selectedDate = new Date(daily[dayIndex].dt * 1000);
     const dayStart = new Date(selectedDate);
@@ -1622,6 +1632,12 @@ window.closePremiumPrecipPopup = function() {
 
     const premPopup = document.querySelector('#weather .forecast-popup');
     if (premPopup) premPopup.classList.remove('show');
+
+    // Remove selection highlight from all forecast days
+    const forecastDays = document.querySelectorAll('#prem-forecast-container .forecast-day');
+    forecastDays.forEach(day => {
+        day.classList.remove('selected');
+    });
 }
 
 // Switches the weather image based on the type provided
