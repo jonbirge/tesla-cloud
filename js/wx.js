@@ -1404,6 +1404,15 @@ window.showPremiumPrecipGraph = function(dayIndex) {
 
     if (!daily[dayIndex]) return;
 
+    // Remove 'selected' class from all forecast days
+    const allForecastDays = document.querySelectorAll('#prem-forecast-container .forecast-day');
+    allForecastDays.forEach(day => day.classList.remove('selected'));
+
+    // Add 'selected' class to the clicked forecast day
+    if (allForecastDays[dayIndex]) {
+        allForecastDays[dayIndex].classList.add('selected');
+    }
+
     // Show only the premium popup
     const premPopup = document.querySelector('#weather .forecast-popup');
     if (premPopup) {
@@ -1622,6 +1631,10 @@ window.closePremiumPrecipPopup = function() {
 
     const premPopup = document.querySelector('#weather .forecast-popup');
     if (premPopup) premPopup.classList.remove('show');
+
+    // Remove 'selected' class from all forecast days when closing the popup
+    const allForecastDays = document.querySelectorAll('#prem-forecast-container .forecast-day');
+    allForecastDays.forEach(day => day.classList.remove('selected'));
 }
 
 // Switches the weather image based on the type provided
