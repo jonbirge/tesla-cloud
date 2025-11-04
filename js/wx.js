@@ -1404,10 +1404,56 @@ window.showPremiumPrecipGraph = function(dayIndex) {
 
     if (!daily[dayIndex]) return;
 
+    // Highlight the selected forecast day panel
+    const forecastDays = document.querySelectorAll('#prem-forecast-container .forecast-day');
+    let selectedPanel = null;
+    forecastDays.forEach((day, index) => {
+        if (index === dayIndex) {
+            day.classList.add('selected');
+            selectedPanel = day;
+        } else {
+            day.classList.remove('selected');
+        }
+    });
+
     // Show only the premium popup
     const premPopup = document.querySelector('#weather .forecast-popup');
     if (premPopup) {
         premPopup.classList.add('show');
+    }
+
+    // Create and position visual connector between panel and popup
+    if (selectedPanel && premPopup) {
+        // Get or create connector element
+        let connector = document.getElementById('forecast-popup-connector');
+        if (!connector) {
+            connector = document.createElement('div');
+            connector.id = 'forecast-popup-connector';
+            connector.className = 'forecast-popup-connector';
+            document.body.appendChild(connector);
+        }
+
+        // Calculate positions after a small delay to ensure popup is rendered
+        setTimeout(() => {
+            const panelRect = selectedPanel.getBoundingClientRect();
+            const popupRect = premPopup.getBoundingClientRect();
+
+            // Calculate connector position (from center-bottom of panel to center-top of popup)
+            const panelCenterX = panelRect.left + panelRect.width / 2;
+            const panelBottomY = panelRect.bottom;
+            const popupCenterX = popupRect.left + popupRect.width / 2;
+            const popupTopY = popupRect.top;
+
+            // Position connector
+            const connectorLeft = (panelCenterX + popupCenterX) / 2;
+            const connectorTop = Math.min(panelBottomY, popupTopY);
+            const connectorHeight = Math.abs(popupTopY - panelBottomY);
+
+            connector.style.left = `${connectorLeft}px`;
+            connector.style.top = `${connectorTop}px`;
+            connector.style.height = `${connectorHeight}px`;
+            connector.classList.add('show');
+        }, 10);
     }
 
     // Calculate start/end of the selected day in local time
@@ -1622,6 +1668,14 @@ window.closePremiumPrecipPopup = function() {
 
     const premPopup = document.querySelector('#weather .forecast-popup');
     if (premPopup) premPopup.classList.remove('show');
+
+    // Remove highlighting from all forecast day panels
+    const forecastDays = document.querySelectorAll('#prem-forecast-container .forecast-day');
+    forecastDays.forEach(day => day.classList.remove('selected'));
+
+    // Hide visual connector
+    const connector = document.getElementById('forecast-popup-connector');
+    if (connector) connector.classList.remove('show');
 }
 
 // Switches the weather image based on the type provided
