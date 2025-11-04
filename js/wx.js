@@ -1711,21 +1711,23 @@ function isSignificantAlert(alert) {
     );
 }
 
-// Update the red dot weather alert indicator
+// Update the weather alert count indicator
 function updateWeatherAlertIndicator() {
 	// console.log('updateWeatherAlertIndicator()');
 
-    const hasSignificantAlerts = currentWeatherAlerts.some(alert => isSignificantAlert(alert));
+    const alertCount = currentWeatherAlerts.length;
     const weatherButton = document.getElementById('wx-section');
     
     if (!weatherButton) return;
     
     // Show/hide the alert indicator by adding/removing CSS class and data attribute
-    if (hasSignificantAlerts) {
+    if (alertCount > 0) {
         weatherButton.classList.add('has-weather-alert');
-        weatherButton.title = 'Weather Alert Active';
+        weatherButton.setAttribute('data-alert-count', alertCount);
+        weatherButton.title = `${alertCount} Weather Alert${alertCount > 1 ? 's' : ''} Active`;
     } else {
         weatherButton.classList.remove('has-weather-alert');
+        weatherButton.removeAttribute('data-alert-count');
         weatherButton.title = '';
     }
 }

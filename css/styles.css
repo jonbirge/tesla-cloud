@@ -323,22 +323,30 @@ hr {
     opacity: 0;
 }
 
-/* Weather alert dot */
+/* Weather alert count indicator */
 .section-button.has-weather-alert {
     position: relative;
 }
 
 .section-button.has-weather-alert::after {
-    content: '';
+    content: attr(data-alert-count);
     position: absolute;
     top: 50%;
-    right: 16px;
+    right: 10px;
     transform: translateY(-50%);
-    width: 12px;
-    height: 12px;
-    background-color: #ff0000;
-    border-radius: 50%;
+    min-width: 20px;
+    height: 26px;
+    background-color: #8B0000;
+    border-radius: 13px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    color: white;
+    font-size: 12pt;
+    font-weight: 750;
+    padding: 0 9px;
     opacity: 1;
+    transition: opacity 0.5s ease;
 }
 
 /* Link Button Lists */
