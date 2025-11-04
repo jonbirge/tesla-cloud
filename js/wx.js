@@ -1394,6 +1394,12 @@ function generateTestHourlyForecast(forecastData) {
     return forecastData;
 }
 
+// Helper function to clear the 'selected' class from all forecast days
+function clearSelectedForecastDays() {
+    const allForecastDays = document.querySelectorAll('#prem-forecast-container .forecast-day');
+    allForecastDays.forEach(day => day.classList.remove('selected'));
+}
+
 window.showPremiumPrecipGraph = function(dayIndex) {
 	// console.log('showPremiumPrecipGraph()');
 
@@ -1404,11 +1410,9 @@ window.showPremiumPrecipGraph = function(dayIndex) {
 
     if (!daily[dayIndex]) return;
 
-    // Remove 'selected' class from all forecast days
+    // Remove 'selected' class from all forecast days and add to clicked day
+    clearSelectedForecastDays();
     const allForecastDays = document.querySelectorAll('#prem-forecast-container .forecast-day');
-    allForecastDays.forEach(day => day.classList.remove('selected'));
-
-    // Add 'selected' class to the clicked forecast day
     if (allForecastDays[dayIndex]) {
         allForecastDays[dayIndex].classList.add('selected');
     }
@@ -1633,8 +1637,7 @@ window.closePremiumPrecipPopup = function() {
     if (premPopup) premPopup.classList.remove('show');
 
     // Remove 'selected' class from all forecast days when closing the popup
-    const allForecastDays = document.querySelectorAll('#prem-forecast-container .forecast-day');
-    allForecastDays.forEach(day => day.classList.remove('selected'));
+    clearSelectedForecastDays();
 }
 
 // Switches the weather image based on the type provided

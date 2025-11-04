@@ -208,9 +208,11 @@ body.dark-mode {
 
 /* Highlighted/selected forecast day */
 .forecast-day.selected {
-    outline: 4px solid var(--button-text);
+    outline: 4px solid var(--button-text, #333);
     outline-offset: -4px;
-    box-shadow: 0 0 12px rgba(0, 0, 0, 0.3);
+    box-shadow: 0 0 16px rgba(0, 0, 0, 0.5), inset 0 0 0 2px rgba(255, 255, 255, 0.3);
+    transform: scale(1.02);
+    transition: transform 0.2s ease;
 }
 
 #minutely-precip-container {
