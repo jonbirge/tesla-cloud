@@ -1395,9 +1395,11 @@ function generateTestHourlyForecast(forecastData) {
 }
 
 // Helper function to clear the 'selected' class from all forecast days
+// Returns the NodeList of forecast days for reuse
 function clearSelectedForecastDays() {
     const allForecastDays = document.querySelectorAll('#prem-forecast-container .forecast-day');
     allForecastDays.forEach(day => day.classList.remove('selected'));
+    return allForecastDays;
 }
 
 window.showPremiumPrecipGraph = function(dayIndex) {
@@ -1411,8 +1413,7 @@ window.showPremiumPrecipGraph = function(dayIndex) {
     if (!daily[dayIndex]) return;
 
     // Remove 'selected' class from all forecast days and add to clicked day
-    clearSelectedForecastDays();
-    const allForecastDays = document.querySelectorAll('#prem-forecast-container .forecast-day');
+    const allForecastDays = clearSelectedForecastDays();
     if (allForecastDays[dayIndex]) {
         allForecastDays[dayIndex].classList.add('selected');
     }
