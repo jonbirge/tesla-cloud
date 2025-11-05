@@ -988,7 +988,7 @@ window.showSection = function (sectionId) {
 
     // Handle weather section when GPS is not available
     if (sectionId === 'weather') {
-        if (gpsPermissionDenied || gpsFailureCount >= MAX_GPS_RETRIES) {
+        if (gpsPermissionDenied || gpsFailureCount >= MAX_GPS_RETRIES || lat === null || long === null) {
             console.log('GPS not available for weather data, attempting IP-based location fallback...');
             
             // Try to get IP-based location as fallback
