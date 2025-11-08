@@ -245,7 +245,7 @@ body.dark-mode .forecast-day.rain img.forecast-icon {
 }
 
 .forecast-date {
-    font-size: 10pt;
+    font-size: 12pt;
     font-weight: 650;
     /* margin-bottom: 8px; */
     /* text-transform: uppercase; */
@@ -484,7 +484,7 @@ body.dark-mode .notification-icon img {
     }
     
     .forecast-date {
-        font-size: 10pt;
+        font-size: 12pt;
         margin-bottom: 5px;
     }
     
