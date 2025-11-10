@@ -314,7 +314,8 @@ body.dark-mode .forecast-desc {
     position: absolute;
     right: 10px;
     top: 10px;
-    background: rgba(205, 205, 205, 0.75);
+    background: #ff3b30;
+    color: #fff;
     border: none;
     width: 30px;
     height: 30px;
@@ -329,8 +330,8 @@ body.dark-mode .forecast-desc {
 }
 
 .forecast-popup-close:hover {
-    background: rgba(0, 0, 0, 0.2);
-    color: #333;
+    background: #d92a23;
+    color: #fff;
 }
 
 .hourly-forecast {

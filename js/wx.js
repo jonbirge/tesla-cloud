@@ -299,7 +299,10 @@ export function updatePremiumWeatherDisplay() {
 
             // Attach click handler for hourly/3-hourly popup for all 5 days
             if (hourlyAvail) {
-                dayElement.onclick = () => showPremiumPrecipGraph(index);
+                dayElement.onclick = (event) => {
+                    event.stopPropagation();
+                    showPremiumPrecipGraph(index);
+                };
             }
         }
     });
@@ -787,6 +790,39 @@ export function updateRainChartAxisColors() {
         minutelyPrecipChart.options.scales.x.title.color = axisColor;
         minutelyPrecipChart.update();
     }
+}
+
+// Ensure the precipitation chart grows to the width of its container once visible
+export function ensurePrecipitationGraphWidth() {
+	// console.log('ensurePrecipitationGraphWidth()');
+
+    if (!minutelyPrecipChart) {
+        return;
+    }
+
+    const maxAttempts = 5;
+
+    const attemptResize = (attempt = 0) => {
+        if (!minutelyPrecipChart) {
+            return;
+        }
+
+        const container = document.getElementById('minutely-precip-container');
+        if (!container) {
+            return;
+        }
+
+        if (container.offsetWidth === 0) {
+            if (attempt < maxAttempts) {
+                requestAnimationFrame(() => attemptResize(attempt + 1));
+            }
+            return;
+        }
+
+        minutelyPrecipChart.resize();
+    };
+
+    attemptResize();
 }
 
 // Function to update chart data with sequential animation

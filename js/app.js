@@ -2,7 +2,7 @@
 import { srcUpdate, testMode, debugMode, isTestMode, updateTimeZone, GEONAMES_USERNAME, showNotification, gpsPermissionDenied, setGpsPermissionDenied, setUsingIPLocation } from './common.js';
 import { PositionSimulator } from './location.js';
 import { attemptLogin, leaveSettings, settings, isDriving, setDrivingState, enableLiveNewsUpdates, saveSetting } from './settings.js';
-import { fetchPremiumWeatherData, fetchCityData, SAT_URLS, forecastDataPrem, currentRainAlert, generateForecastDayElements } from './wx.js';
+import { fetchPremiumWeatherData, fetchCityData, SAT_URLS, forecastDataPrem, currentRainAlert, generateForecastDayElements, ensurePrecipitationGraphWidth } from './wx.js';
 import { updateNetworkInfo, updatePingChart, startPingTest, getIPBasedLocation } from './net.js';
 import { setupNewsObserver, startNewsTimeUpdates, initializeNewsStorage } from './news.js';
 import { startStockUpdates, stopStockUpdates } from './stock.js';
@@ -1096,6 +1096,9 @@ window.showSection = function (sectionId) {
     const section = document.getElementById(sectionId);
     if (section) {
         section.style.display = 'block';
+        if (sectionId === 'weather') {
+            requestAnimationFrame(ensurePrecipitationGraphWidth);
+        }
     }
 
     // Deactivate all buttons
@@ -1244,6 +1247,21 @@ document.addEventListener('DOMContentLoaded', async function () {
     if (premCloseBtn) {
         premCloseBtn.onclick = window.closePremiumPrecipPopup;
     }
+
+    // Close the premium weather popup when clicking outside of it
+    document.addEventListener('click', (event) => {
+        const premPopup = document.querySelector('#weather .forecast-popup');
+        if (!premPopup || !premPopup.classList.contains('show')) {
+            return;
+        }
+
+        // Keep the popup open when clicking inside it
+        if (premPopup.contains(event.target)) {
+            return;
+        }
+
+        window.closePremiumPrecipPopup();
+    });
 
     // Show the initial section from URL parameter
     const urlParams = new URLSearchParams(window.location.search);
