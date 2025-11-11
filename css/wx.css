@@ -9,6 +9,7 @@
     --sky-storm-bottom: #7b8a9a;
     --sky-snow-top: #f0f5fb;
     --sky-snow-bottom: #d8dfe6;
+    --forecast-popup-top: 50%;
 }
 
 body.dark-mode {
@@ -292,9 +293,9 @@ body.dark-mode .forecast-desc {
 .forecast-popup {
     display: none;
     position: fixed;
-    top: 50%;
+    top: var(--forecast-popup-top, 50%);
     left: 50%;
-    transform: translate(-50%, -50%);
+    transform: translateX(-50%);
     background-color: var(--active-section-bg);
     border-radius: var(--button-radius);
     padding: 20px;

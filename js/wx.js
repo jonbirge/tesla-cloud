@@ -4,6 +4,7 @@ import { autoDarkMode, settings } from './settings.js';
 
 // Parameters
 const HOURLY_FORECAST_DAYS = 2;
+const HOURLY_POPUP_GAP = 64; // px spacing between daily cards and hourly popup
 const SAT_URLS = {
     latest: 'https://cdn.star.nesdis.noaa.gov/GOES19/ABI/CONUS/GEOCOLOR/1250x750.jpg',
     loop: 'https://cdn.star.nesdis.noaa.gov/GOES16/GLM/CONUS/EXTENT3/GOES16-CONUS-EXTENT3-625x375.gif',
@@ -1430,6 +1431,41 @@ function generateTestHourlyForecast(forecastData) {
     return forecastData;
 }
 
+function updateForecastPopupTop(force = false) {
+	// Keep the popup vertically aligned to the daily cards
+    const forecastContainer = document.getElementById('prem-forecast-container');
+    const premPopup = document.querySelector('#weather .forecast-popup');
+    if (!forecastContainer || !premPopup) {
+        return;
+    }
+
+    if (!force && !premPopup.classList.contains('show')) {
+        return;
+    }
+
+    const containerRect = forecastContainer.getBoundingClientRect();
+    const popupTop = Math.max(0, Math.round(containerRect.bottom + HOURLY_POPUP_GAP));
+    premPopup.style.setProperty('--forecast-popup-top', `${popupTop}px`);
+}
+
+function initializeForecastPopupPositioning() {
+    const reposition = () => updateForecastPopupTop();
+
+    window.addEventListener('resize', reposition);
+    window.addEventListener('scroll', reposition, { passive: true });
+
+    const rightFrame = document.getElementById('rightFrame');
+    if (rightFrame) {
+        rightFrame.addEventListener('scroll', reposition, { passive: true });
+    }
+}
+
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initializeForecastPopupPositioning);
+} else {
+    initializeForecastPopupPositioning();
+}
+
 window.showPremiumPrecipGraph = function(dayIndex) {
 	// console.log('showPremiumPrecipGraph()');
 
@@ -1453,6 +1489,7 @@ window.showPremiumPrecipGraph = function(dayIndex) {
     // Show only the premium popup
     const premPopup = document.querySelector('#weather .forecast-popup');
     if (premPopup) {
+        updateForecastPopupTop(true);
         premPopup.classList.add('show');
     }
     const dimOverlay = document.getElementById('forecast-dim-overlay');
@@ -1671,7 +1708,10 @@ window.closePremiumPrecipPopup = function() {
 	// console.log('closePremiumPrecipPopup()');
 
     const premPopup = document.querySelector('#weather .forecast-popup');
-    if (premPopup) premPopup.classList.remove('show');
+    if (premPopup) {
+        premPopup.classList.remove('show');
+        premPopup.style.removeProperty('--forecast-popup-top');
+    }
     const dimOverlay = document.getElementById('forecast-dim-overlay');
     if (dimOverlay) dimOverlay.classList.remove('show');
 
