@@ -1455,6 +1455,10 @@ window.showPremiumPrecipGraph = function(dayIndex) {
     if (premPopup) {
         premPopup.classList.add('show');
     }
+    const dimOverlay = document.getElementById('forecast-dim-overlay');
+    if (dimOverlay) {
+        dimOverlay.classList.add('show');
+    }
 
     // Calculate start/end of the selected day in local time
     const selectedDate = new Date(daily[dayIndex].dt * 1000);
@@ -1668,6 +1672,8 @@ window.closePremiumPrecipPopup = function() {
 
     const premPopup = document.querySelector('#weather .forecast-popup');
     if (premPopup) premPopup.classList.remove('show');
+    const dimOverlay = document.getElementById('forecast-dim-overlay');
+    if (dimOverlay) dimOverlay.classList.remove('show');
 
     // Remove highlighting from all forecast day panels
     const forecastDays = document.querySelectorAll('#prem-forecast-container .forecast-day');

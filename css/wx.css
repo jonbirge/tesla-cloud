@@ -135,6 +135,7 @@ body.dark-mode {
     min-width: 85px;
     max-width: 175px;
     overflow: hidden;
+    z-index: 950;
 }
 
 .hourly-segments {
@@ -213,7 +214,7 @@ body.dark-mode {
     box-shadow: 0 0 20px rgba(0, 119, 255, 0.6);
     transform: scale(1.05);
     transition: all 0.3s ease;
-    z-index: 10;
+    z-index: 1000;
 }
 
 body.dark-mode .forecast-day.selected {
@@ -297,7 +298,7 @@ body.dark-mode .forecast-desc {
     background-color: var(--active-section-bg);
     border-radius: var(--button-radius);
     padding: 20px;
-    z-index: 1000;
+    z-index: 1100;
     max-width: 90%;
     width: 90%;
     max-width: 1200px;
@@ -308,6 +309,21 @@ body.dark-mode .forecast-desc {
 
 .forecast-popup.show {
     display: block;
+}
+
+.forecast-dim-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.55);
+    z-index: 900;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.25s ease-out;
+}
+
+.forecast-dim-overlay.show {
+    opacity: 1;
+    pointer-events: auto;
 }
 
 .forecast-popup-close {

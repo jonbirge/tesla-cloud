@@ -1247,6 +1247,13 @@ document.addEventListener('DOMContentLoaded', async function () {
     if (premCloseBtn) {
         premCloseBtn.onclick = window.closePremiumPrecipPopup;
     }
+    const dimOverlay = document.getElementById('forecast-dim-overlay');
+    if (dimOverlay) {
+        dimOverlay.addEventListener('click', (event) => {
+            event.stopPropagation();
+            window.closePremiumPrecipPopup();
+        });
+    }
 
     // Close the premium weather popup when clicking outside of it
     document.addEventListener('click', (event) => {
