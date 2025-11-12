@@ -142,7 +142,7 @@ hr {
     scrollbar-gutter: stable;
     scrollbar-width: thin;
     position: relative;
-    z-index: -1;
+    z-index: 0;
 }
 
 .right-frame {
@@ -153,6 +153,7 @@ hr {
     box-sizing: border-box;
     scrollbar-width: thin;
     position: relative;
+    z-index: 1;
 }
 
 /* Scroll indicators */
@@ -1017,7 +1018,6 @@ body.dark-mode .option-button:hover:not(.active) {
         overflow: visible;
         -webkit-overflow-scrolling: touch;
         scrollbar-width: none;
-        z-index: auto;
     }
     
     .left-frame::-webkit-scrollbar {
