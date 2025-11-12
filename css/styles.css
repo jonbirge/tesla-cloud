@@ -141,6 +141,8 @@ hr {
     box-sizing: border-box;
     scrollbar-gutter: stable;
     scrollbar-width: thin;
+    position: relative;
+    z-index: 0;
 }
 
 .right-frame {
