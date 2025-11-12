@@ -142,7 +142,7 @@ hr {
     scrollbar-gutter: stable;
     scrollbar-width: thin;
     position: relative;
-    z-index: 0;
+    z-index: -1;
 }
 
 .right-frame {
@@ -1017,6 +1017,7 @@ body.dark-mode .option-button:hover:not(.active) {
         overflow: visible;
         -webkit-overflow-scrolling: touch;
         scrollbar-width: none;
+        z-index: auto;
     }
     
     .left-frame::-webkit-scrollbar {
