@@ -967,7 +967,7 @@ window.shareNews = async function (title, link, source, id) {
         }
     }
 
-    // E-mail address to share with
+    // E-mail address with which to share, aborting if none is set
     if (settings["forwarding-email"] === '') {
         return;
     }
@@ -975,10 +975,10 @@ window.shareNews = async function (title, link, source, id) {
 
     // Compose HTML payload
     const html = `
-        <p>${source}</p>
+        <p>Source: <strong>${source}</strong></p>
         <a href="${link}">${title}</a>
         <br><br>
-        <p>Sent from <a href="https://teslas.cloud">teslas.cloud</a></p>
+        <p>News item forwarded from <a href="https://teslas.cloud">teslas.cloud</a></p>
     `;
 
     // Create the subject line
