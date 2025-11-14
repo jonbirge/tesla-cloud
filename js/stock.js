@@ -82,6 +82,15 @@ function getSubscribedTickers() {
     return [...subscribedStocks, ...subscribedIndexes];
 }
 
+// Helper to pull an index definition by its ETF ticker symbol
+function getIndexEntry(ticker) {
+    if (!ticker || availableIndexes.length === 0) {
+        return null;
+    }
+    const upperTicker = ticker.toUpperCase();
+    return availableIndexes.find(index => (index.TrackingETF || '').toUpperCase() === upperTicker) || null;
+}
+
 // Generate DOM elements for all stock indicators
 function generateStockIndicatorElements() {
     const fragment = document.createDocumentFragment();
@@ -100,7 +109,7 @@ function generateStockIndicatorElements() {
         // Determine display name: use IndexName from indexes.json when ticker is an index,
         // otherwise show the ticker symbol in uppercase.
         let displayName = ticker.toUpperCase();
-        const indexEntry = availableIndexes.find(index => index.TrackingETF === ticker.toUpperCase());
+        const indexEntry = getIndexEntry(ticker);
         if (indexEntry && indexEntry.IndexName) {
             displayName = indexEntry.IndexName;
         }
@@ -138,8 +147,16 @@ function getDisplayData(ticker, cached) {
     }
     
     const { percentChange, price } = cached;
+    const indexData = getIndexEntry(ticker);
+    const adjustedPercentChange = (() => {
+        if (percentChange === null || percentChange === undefined) {
+            return percentChange;
+        }
+        const units = (indexData && indexData.Units ? indexData.Units : '').toString().trim().toUpperCase();
+        return units === 'YLD' ? -percentChange : percentChange;
+    })();
     
-    if (percentChange === null || percentChange === undefined) {
+    if (adjustedPercentChange === null || adjustedPercentChange === undefined) {
         return {
             className: 'neutral',
             arrow: '--',
@@ -149,10 +166,10 @@ function getDisplayData(ticker, cached) {
     
     // Determine class and arrow based on percentage change
     let className, arrow;
-    if (percentChange > 0) {
+    if (adjustedPercentChange > 0) {
         className = 'up';
         arrow = '▲';
-    } else if (percentChange < 0) {
+    } else if (adjustedPercentChange < 0) {
         className = 'down';
         arrow = '▼';
     } else {
@@ -164,15 +181,12 @@ function getDisplayData(ticker, cached) {
     let value;
     if (settings['show-price-alt'] && !showChange) {
         // Check if this ticker is an index by looking it up in availableIndexes
-        const isIndex = availableIndexes.some(index => index.TrackingETF === ticker.toUpperCase());
+        const isIndex = !!indexData;
         
         if (isIndex && price) {
-            // Find the coefficient for this index
-            const indexData = availableIndexes.find(index => index.TrackingETF === ticker.toUpperCase());
+            // Calculate index value: ETF price * coefficient
             if (indexData && indexData.Coefficient) {
-                // Calculate index value: ETF price * coefficient
                 const indexValue = parseFloat(price) * parseFloat(indexData.Coefficient);
-                // Append unit string (trimmed) if Units is non-empty (no extra space)
                 const units = (indexData.Units || '').toString().trim();
                 value = indexValue.toFixed(2) + units;
             } else {
@@ -185,7 +199,7 @@ function getDisplayData(ticker, cached) {
             value = '--';
         }
     } else {
-        value = Math.abs(percentChange).toFixed(2) + '%';
+        value = Math.abs(adjustedPercentChange).toFixed(2) + '%';
     }
     
     return { className, arrow, value };
