@@ -94,8 +94,8 @@ body.dark-mode {
 .forecast-container {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
-    gap: 14px;
-    margin: 1px 0;
+    gap: 9px;
+    /* margin: 1px 0; */
     max-width: 1100px;
 }
 
@@ -129,7 +129,7 @@ body.dark-mode {
 
 .forecast-day {
     border-radius: var(--button-radius);
-    padding: 14px 16px 20px;
+    padding: 11px 0px 11px 0px;
     text-align: center;
     position: relative;
     min-width: 110px;
@@ -253,7 +253,7 @@ body.dark-mode .forecast-day.rain img.forecast-icon {
 .forecast-date {
     font-size: 12pt;
     font-weight: 650;
-    /* margin-bottom: 8px; */
+    margin-bottom: 8px;
     /* text-transform: uppercase; */
     color: var(--button-text);
     text-shadow: 0 0 8px rgba(255, 255, 255, 0.8), 0 0 16px rgba(255, 255, 255, 0.6);
@@ -264,9 +264,9 @@ body.dark-mode .forecast-date {
 }
 
 .forecast-icon {
-    width: 64px;
-    height: 64px;
-    margin: 9px;
+    width: 96px;
+    height: 96px;
+    margin: 1px;
 }
 
 .forecast-temp {
@@ -285,7 +285,7 @@ body.dark-mode .forecast-temp {
     font-family: "Inter", sans-serif;
     font-size: 13pt;
     font-style: italic;
-    font-weight: 500;
+    /* font-weight: 500; */
     color: var(--button-text);
     text-shadow: 0 0 8px rgba(255, 255, 255, 0.8), 0 0 16px rgba(255, 255, 255, 0.6);
 }
