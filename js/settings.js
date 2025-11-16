@@ -560,6 +560,7 @@ async function cleanupOrphanedSubscriptions() {
     }
 
     let settingsChanged = false;
+    const migratedSymbols = [];
 
     // Get valid symbols from JSON files
     const validStockSymbols = availableStocks.map(stock => stock.Symbol);
@@ -568,22 +569,35 @@ async function cleanupOrphanedSubscriptions() {
     // Clean up subscribed stocks
     const subscribedStocks = settings['subscribed-stocks'] || [];
     const cleanedStocks = subscribedStocks.filter(symbol => validStockSymbols.includes(symbol));
-    if (cleanedStocks.length !== subscribedStocks.length) {
-        const removedStocks = subscribedStocks.filter(symbol => !validStockSymbols.includes(symbol));
+    const removedStocks = subscribedStocks.filter(symbol => !validStockSymbols.includes(symbol));
+    if (removedStocks.length > 0) {
         console.log('Removing orphaned stock subscriptions:', removedStocks);
         settings['subscribed-stocks'] = cleanedStocks;
         settingsChanged = true;
+        if (removedStocks.some(symbol => symbol && symbol.toUpperCase() === 'BITC')) {
+            migratedSymbols.push('BITC');
+        }
     }
 
     // Clean up subscribed indexes
     const subscribedIndexes = settings['subscribed-indexes'] || [];
     const cleanedIndexes = subscribedIndexes.filter(symbol => validIndexSymbols.includes(symbol));
-    if (cleanedIndexes.length !== subscribedIndexes.length) {
-        const removedIndexes = subscribedIndexes.filter(symbol => !validIndexSymbols.includes(symbol));
+    const removedIndexes = subscribedIndexes.filter(symbol => !validIndexSymbols.includes(symbol));
+    if (removedIndexes.length > 0) {
         console.log('Removing orphaned index subscriptions:', removedIndexes);
-        settings['subscribed-indexes'] = cleanedIndexes;
         settingsChanged = true;
     }
+
+    let updatedIndexes = cleanedIndexes;
+    migratedSymbols.forEach(symbol => {
+        if (validIndexSymbols.includes(symbol) && !updatedIndexes.includes(symbol)) {
+            console.log(`Migrating ${symbol} subscription from stocks to indexes`);
+            updatedIndexes = [...updatedIndexes, symbol];
+            settingsChanged = true;
+        }
+    });
+
+    settings['subscribed-indexes'] = updatedIndexes;
 
     // Save cleaned settings back to server if changes were made
     if (settingsChanged && isLoggedIn && hashedUser) {
@@ -681,7 +695,7 @@ function generateStockIndexSettings() {
 
     // Generate stock checkboxes
     availableStocks.forEach(stock => {
-        const div = createToggleItem('stock', stock.Symbol, `${stock.StockName} (${stock.Symbol})`, stock.icon);
+        const div = createToggleItem('stock', stock.Symbol, stock.StockName, stock.icon);
         stockContainer.appendChild(div);
     });
 
@@ -699,21 +713,18 @@ function createToggleItem(type, symbol, labelText, iconUrl) {
     });
 
     // Create icon element
+    const iconConfig = resolveToggleIcon(iconUrl);
     const img = document.createElement('img');
-    if (iconUrl && typeof iconUrl === 'string' && iconUrl.trim() !== '') {
-        // Use the provided icon URL (domain for Google favicon service)
-        img.src = `https://www.google.com/s2/favicons?domain=${iconUrl}&sz=24`;
-    } else {
-        // Use default stock icon
-        img.src = 'assets/stock-default.svg';
-    }
+    img.src = iconConfig.src;
+    img.dataset.usesFaviconService = iconConfig.usesFavicon ? 'true' : 'false';
     img.className = 'news-source-favicon'; // Reuse existing CSS class
     img.onerror = function () { 
-        // Fallback to default icon on error
+        this.onerror = null;
         this.src = 'assets/stock-default.svg';
-        // Only hide on error if not on mobile (CSS will handle mobile suppression)
-        if (!window.matchMedia('(max-width: 900px)').matches && this.src.includes('favicons')) {
-            this.style.display = 'none'; 
+        if (this.dataset.usesFaviconService === 'true' && !window.matchMedia('(max-width: 900px)').matches) {
+            this.style.display = 'none';
+        } else {
+            this.style.removeProperty('display');
         }
     };
     itemDiv.appendChild(img);
@@ -734,6 +745,32 @@ function createToggleItem(type, symbol, labelText, iconUrl) {
     itemDiv.appendChild(span);
 
     return itemDiv;
+}
+
+function resolveToggleIcon(iconUrl) {
+    if (!iconUrl || typeof iconUrl !== 'string') {
+        return { src: 'assets/stock-default.svg', usesFavicon: false };
+    }
+
+    const trimmed = iconUrl.trim();
+    if (trimmed === '') {
+        return { src: 'assets/stock-default.svg', usesFavicon: false };
+    }
+
+    const lower = trimmed.toLowerCase();
+    const isLocalAsset = trimmed.startsWith('assets/') || trimmed.startsWith('./assets/') || trimmed.startsWith('/assets/');
+    if (isLocalAsset) {
+        return { src: trimmed, usesFavicon: false };
+    }
+
+    if (lower.startsWith('http://') || lower.startsWith('https://')) {
+        return { src: trimmed, usesFavicon: false };
+    }
+
+    return {
+        src: `https://www.google.com/s2/favicons?domain=${trimmed}&sz=24`,
+        usesFavicon: true
+    };
 }
 
 // Function to handle stock/index subscription toggles

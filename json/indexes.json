@@ -85,5 +85,35 @@
     "Units": "",
     "DateValid": "2025-08-15",
     "icon": "deutsche-boerse.com"
+  },
+
+  {
+    "IndexName": "EAFE",
+    "Description": "MSCI EAFE",
+    "TrackingETF": "EFA",
+    "Coefficient": 1,
+    "Units": "",
+    "DateValid": "2025-08-17",
+    "icon": "ishares.com"
+  },
+
+  {
+    "IndexName": "FXI",
+    "Description": "FTSE China 50",
+    "TrackingETF": "FXI",
+    "Coefficient": 1,
+    "Units": "",
+    "DateValid": "2025-08-17",
+    "icon": "lseg.com"
+  },
+
+  {
+    "IndexName": "BTC",
+    "Description": "Bitcoin",
+    "TrackingETF": "BITC",
+    "Coefficient": 1,
+    "Units": "",
+    "DateValid": "2025-08-17",
+    "icon": "bitcoin.org"
   }
 ]
