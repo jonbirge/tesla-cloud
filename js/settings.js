@@ -875,12 +875,16 @@ function generateNewsSections() {
 function generateNewsSourceSettings() {
     const generalContainer = document.querySelector('#news-general-settings');
     const businessContainer = document.querySelector('#news-business-settings');
+    const technologyContainer = document.querySelector('#news-technology-settings');
+    const defenseContainer = document.querySelector('#news-defense-settings');
     const teslaContainer = document.querySelector('#news-tesla-settings');
     
-    if (!generalContainer || !businessContainer || !teslaContainer) return;
+    if (!generalContainer || !businessContainer || !technologyContainer || !defenseContainer || !teslaContainer) return;
     
     generalContainer.replaceChildren();
     businessContainer.replaceChildren();
+    technologyContainer.replaceChildren();
+    defenseContainer.replaceChildren();
     teslaContainer.replaceChildren();
 
     // Generate news source checkboxes by category
@@ -893,6 +897,12 @@ function generateNewsSourceSettings() {
                 break;
             case 'business':
                 businessContainer.appendChild(div);
+                break;
+            case 'technology':
+                technologyContainer.appendChild(div);
+                break;
+            case 'defense':
+                defenseContainer.appendChild(div);
                 break;
             case 'tesla':
                 teslaContainer.appendChild(div);

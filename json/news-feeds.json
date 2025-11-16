@@ -8,15 +8,27 @@
     },
     {
       "id": "business",
-      "title": "Business & Technology", 
+      "title": "Business", 
       "containerId": "news-business-settings",
       "priority": 2
     },
     {
-      "id": "tesla",
-      "title": "Electric Vehicles",
-      "containerId": "news-tesla-settings",
+      "id": "technology",
+      "title": "Technology",
+      "containerId": "news-technology-settings",
       "priority": 3
+    },
+    {
+      "id": "defense",
+      "title": "Defense",
+      "containerId": "news-defense-settings",
+      "priority": 4
+    },
+    {
+      "id": "tesla",
+      "title": "Automotive",
+      "containerId": "news-tesla-settings",
+      "priority": 5
     }
   ],
   "feeds": [
@@ -91,7 +103,7 @@
     "name": "The Economist",
     "url": "https://www.economist.com/latest/rss.xml",
     "cache": 60,
-    "category": "general",
+    "category": "business",
     "defaultEnabled": false
   },
   {
@@ -132,7 +144,7 @@
     "name": "The Drive",
     "url": "https://www.thedrive.com/feed",
     "cache": 30,
-    "category": "business",
+    "category": "tesla",
     "defaultEnabled": false
   },
   {
@@ -140,7 +152,7 @@
     "name": "TechCrunch",
     "url": "https://techcrunch.com/feed/",
     "cache": 30,
-    "category": "business",
+    "category": "technology",
     "defaultEnabled": false
   },
   {
@@ -148,7 +160,7 @@
     "name": "Car and Driver",
     "url": "https://www.caranddriver.com/rss/all.xml/",
     "cache": 30,
-    "category": "business",
+    "category": "tesla",
     "defaultEnabled": false
   },
   {
@@ -156,7 +168,7 @@
     "name": "The Verge",
     "url": "https://www.theverge.com/rss/index.xml",
     "cache": 30,
-    "category": "business",
+    "category": "technology",
     "defaultEnabled": false
   },
   {
@@ -164,7 +176,7 @@
     "name": "Ars Technica",
     "url": "https://feeds.arstechnica.com/arstechnica/index",
     "cache": 30,
-    "category": "business",
+    "category": "technology",
     "defaultEnabled": false,
     "icon": "https://arstechnica.com"
   },
@@ -173,7 +185,7 @@
     "name": "Engadget",
     "url": "https://www.engadget.com/rss.xml",
     "cache": 30,
-    "category": "business",
+    "category": "technology",
     "defaultEnabled": false
   },
   {
@@ -181,7 +193,7 @@
     "name": "Gizmodo",
     "url": "https://gizmodo.com/rss",
     "cache": 30,
-    "category": "business",
+    "category": "technology",
     "defaultEnabled": false
   },
   {
@@ -189,7 +201,7 @@
     "name": "Wired",
     "url": "https://www.wired.com/feed/rss",
     "cache": 30,
-    "category": "business",
+    "category": "technology",
     "defaultEnabled": false
   },
   {
@@ -217,11 +229,19 @@
     "defaultEnabled": true
   },
   {
+    "id": "electrek",
+    "name": "Electrek",
+    "url": "https://electrek.co/feed/",
+    "cache": 15,
+    "category": "tesla",
+    "defaultEnabled": false
+  },
+  {
     "id": "spacenews",
     "name": "SpaceNews",
     "url": "https://spacenews.com/feed/",
     "cache": 30,
-    "category": "business",
+    "category": "defense",
     "defaultEnabled": false
   },
   {
@@ -229,7 +249,7 @@
     "name": "Defense News",
     "url": "https://www.defensenews.com/arc/outboundfeeds/rss/?outputType=xml",
     "cache": 30,
-    "category": "business",
+    "category": "defense",
     "defaultEnabled": false
   },
   {
@@ -237,9 +257,8 @@
     "name": "Aviation Week",
     "url": "https://aviationweek.com/awn/rss-feed-by-content-source",
     "cache": 30,
-    "category": "business",
+    "category": "defense",
     "defaultEnabled": false
   }
   ]
 }
-
