@@ -3,6 +3,10 @@ const STOCK_API_ENDPOINT = 'php/quote.php?symbol='; // Prefix for internal stock
 const UPDATE_INTERVAL = 2 * 60 * 1000; // 2 minutes in milliseconds
 const CACHE_AGE_LIMIT = 1 * 60 * 1000; // minute in milliseconds
 const DISPLAY_ALTERNATE_INTERVAL = 5 * 1000; // 5 seconds in milliseconds
+const MAX_VISIBLE_TICKERS = 3; // Only show three indicators at once in the UI
+const TICKER_SCROLL_REPEAT = 2; // Duplicate the ticker list so the animation can loop
+const TICKER_SCROLL_SECONDS_PER_SYMBOL = 3; // Seconds of scroll time per subscribed symbol
+const MIN_TICKER_SCROLL_DURATION = 12; // Minimum duration so slow lists do not feel jittery
 
 // Global variables
 let stockUpdateTimer = null;
@@ -12,6 +16,7 @@ let showChange = true; // Flag to show change in stock price
 let availableStocks = []; // List of available stocks from stocks.json
 let availableIndexes = []; // List of available indexes from indexes.json
 let isUpdating = false; // Flag to prevent duplicate update processes
+let pendingTickerWidthFrame = null; // Used to throttle width calculations for the ticker window
 
 // Import settings to check visibility setting
 import { settings } from './settings.js';
@@ -92,48 +97,58 @@ function getIndexEntry(ticker) {
 }
 
 // Generate DOM elements for all stock indicators
-function generateStockIndicatorElements() {
+function generateStockIndicatorElements(tickerList = null, repeatCount = 1) {
     const fragment = document.createDocumentFragment();
-    // Use the new ordered list (indexes first, in JSON order)
-    const subscribedTickers = getSubscribedTickersOrdered();
     const masterEnabled = settings["show-stock-indicator"] !== false;
 
-    if (!masterEnabled || subscribedTickers.length === 0) {
-        return fragment; // Return empty fragment if disabled or no subscriptions
+    if (!masterEnabled) {
+        return fragment;
     }
 
-    subscribedTickers.forEach(ticker => {
-        const cached = stockDataCache[ticker.toUpperCase()];
-        const displayData = getDisplayData(ticker, cached);
+    const subscribedTickers = Array.isArray(tickerList) && tickerList.length > 0
+        ? tickerList
+        : getSubscribedTickersOrdered();
 
-        // Determine display name: use IndexName from indexes.json when ticker is an index,
-        // otherwise show the ticker symbol in uppercase.
-        let displayName = ticker.toUpperCase();
-        const indexEntry = getIndexEntry(ticker);
-        if (indexEntry && indexEntry.IndexName) {
-            displayName = indexEntry.IndexName;
-        }
+    if (subscribedTickers.length === 0) {
+        return fragment;
+    }
 
-        const div = document.createElement('div');
-        div.id = `stock-status-${ticker.toLowerCase()}`;
-        div.className = `status-indicator stock-status ${displayData.className}`;
-
-        div.appendChild(document.createTextNode(displayName));
-
-        const arrowSpan = document.createElement('span');
-        arrowSpan.id = `stock-arrow-${ticker.toLowerCase()}`;
-        arrowSpan.textContent = displayData.arrow;
-        div.appendChild(arrowSpan);
-
-        const valueSpan = document.createElement('span');
-        valueSpan.id = `stock-value-${ticker.toLowerCase()}`;
-        valueSpan.textContent = displayData.value;
-        div.appendChild(valueSpan);
-
-        fragment.appendChild(div);
-    });
+    for (let i = 0; i < repeatCount; i++) {
+        subscribedTickers.forEach(ticker => {
+            fragment.appendChild(createStockIndicatorElement(ticker));
+        });
+    }
 
     return fragment;
+}
+
+function createStockIndicatorElement(ticker) {
+    const cached = stockDataCache[ticker.toUpperCase()];
+    const displayData = getDisplayData(ticker, cached);
+
+    let displayName = ticker.toUpperCase();
+    const indexEntry = getIndexEntry(ticker);
+    if (indexEntry && indexEntry.IndexName) {
+        displayName = indexEntry.IndexName;
+    }
+
+    const div = document.createElement('div');
+    div.id = `stock-status-${ticker.toLowerCase()}`;
+    div.className = `status-indicator stock-status ${displayData.className}`;
+
+    div.appendChild(document.createTextNode(displayName));
+
+    const arrowSpan = document.createElement('span');
+    arrowSpan.id = `stock-arrow-${ticker.toLowerCase()}`;
+    arrowSpan.textContent = displayData.arrow;
+    div.appendChild(arrowSpan);
+
+    const valueSpan = document.createElement('span');
+    valueSpan.id = `stock-value-${ticker.toLowerCase()}`;
+    valueSpan.textContent = displayData.value;
+    div.appendChild(valueSpan);
+
+    return div;
 }
 
 // Get display data for a ticker
@@ -209,10 +224,82 @@ function getDisplayData(ticker, cached) {
 function updateStockIndicatorsContainer() {
     const container = document.getElementById('stock-indicators');
     if (!container) return;
-    
-    container.replaceChildren();
-    const elements = generateStockIndicatorElements();
-    container.appendChild(elements);
+
+    const masterEnabled = settings["show-stock-indicator"] !== false;
+    const orderedTickers = getSubscribedTickersOrdered();
+    const hasTickers = masterEnabled && orderedTickers.length > 0;
+
+    if (!hasTickers) {
+        container.classList.remove('ticker-mode');
+        clearTickerWindowWidth(container);
+        container.replaceChildren();
+        return;
+    }
+
+    const needsTickerMode = orderedTickers.length > MAX_VISIBLE_TICKERS;
+    const repeatCount = needsTickerMode ? TICKER_SCROLL_REPEAT : 1;
+    const track = ensureTickerTrack(container);
+    const elements = generateStockIndicatorElements(orderedTickers, repeatCount);
+
+    container.classList.toggle('ticker-mode', needsTickerMode);
+    track.replaceChildren(elements);
+
+    if (needsTickerMode) {
+        const tickerDurationSeconds = Math.max(
+            orderedTickers.length * TICKER_SCROLL_SECONDS_PER_SYMBOL,
+            MIN_TICKER_SCROLL_DURATION
+        );
+        track.style.setProperty('--ticker-animation-duration', `${tickerDurationSeconds}s`);
+        updateTickerWindowWidth(container, track);
+    } else {
+        track.style.removeProperty('--ticker-animation-duration');
+        clearTickerWindowWidth(container);
+    }
+}
+
+function ensureTickerTrack(container) {
+    let track = container.querySelector('.stock-ticker-track');
+    if (!track) {
+        track = document.createElement('div');
+        track.className = 'stock-ticker-track';
+        container.appendChild(track);
+    }
+    return track;
+}
+
+function updateTickerWindowWidth(container, track) {
+    if (pendingTickerWidthFrame !== null) {
+        cancelAnimationFrame(pendingTickerWidthFrame);
+    }
+
+    pendingTickerWidthFrame = requestAnimationFrame(() => {
+        pendingTickerWidthFrame = null;
+        const visibleChildren = Array.from(track.children).slice(0, MAX_VISIBLE_TICKERS);
+        if (visibleChildren.length === 0) {
+            container.style.removeProperty('--ticker-window-width');
+            return;
+        }
+
+        let totalWidth = 0;
+        visibleChildren.forEach(child => {
+            const styles = window.getComputedStyle(child);
+            const marginLeft = parseFloat(styles.marginLeft) || 0;
+            const marginRight = parseFloat(styles.marginRight) || 0;
+            totalWidth += child.offsetWidth + marginLeft + marginRight;
+        });
+
+        container.style.setProperty('--ticker-window-width', `${Math.ceil(totalWidth)}px`);
+    });
+}
+
+function clearTickerWindowWidth(container) {
+    if (pendingTickerWidthFrame !== null) {
+        cancelAnimationFrame(pendingTickerWidthFrame);
+        pendingTickerWidthFrame = null;
+    }
+    if (container) {
+        container.style.removeProperty('--ticker-window-width');
+    }
 }
 
 // Initialize on load
