@@ -1,7 +1,7 @@
 # Repository Guidelines
 
 ## Project Structure & Module Organization
-`index.html` bootstraps the dashboard and wires the ES modules under `js/`, with `app.js` orchestrating state, `common.js` hosting utilities, and feature modules (`wx.js`, `news.js`, `stock.js`) scoped to their panes. Styles live in `css/`, static media in `assets/`, PHP APIs plus helpers in `php/` (all configured via the JSON `.env`), curated datasets in `json/`, and automation resources plus shell tests in `test/`.
+`index.html` bootstraps the dashboard and wires the ES modules under `js/`, with `app.js` orchestrating state, `common.js` hosting utilities, and feature modules (`wx.js`, `news.js`, `stock.js`) scoped to their panes. Styles live in `css/`, static media in `assets/`, PHP APIs plus helpers in `php/` (all configured via the JSON `.env`), curated datasets in `config/`, and automation resources plus shell tests in `test/`.
 
 ## Build, Test, and Development Commands
 - `php -S localhost:8000 -t .` — serves the SPA and PHP endpoints; use while refining any front-end or API change.

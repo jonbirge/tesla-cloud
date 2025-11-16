@@ -230,7 +230,7 @@ function turnOffDarkMode() {
 // Load default settings from JSON files before applying them
 async function loadDefaultSettings() {
     try {
-        const response = await fetch('json/news-feeds.json');
+        const response = await fetch('config/news-feeds.json');
         const feedData = await response.json();
         
         // Handle both old array format and new object format for backward compatibility
@@ -623,8 +623,8 @@ let availableNewsSections = [];
 async function loadStockAndIndexData() {
     try {
         const [stocksResponse, indexesResponse] = await Promise.all([
-            fetch('json/stocks.json'),
-            fetch('json/indexes.json')
+            fetch('config/stocks.json'),
+            fetch('config/indexes.json')
         ]);
         
         availableStocks = await stocksResponse.json();
@@ -640,7 +640,7 @@ async function loadStockAndIndexData() {
 // Load JSON data for news feeds
 async function loadNewsSourcesData() {
     try {
-    const response = await fetch('json/news-feeds.json');
+    const response = await fetch('config/news-feeds.json');
         const feedData = await response.json();
         
         // Handle both old array format and new object format for backward compatibility

@@ -25,8 +25,8 @@ import { settings } from './settings.js';
 async function loadStockAndIndexData() {
     try {
         const [stocksResponse, indexesResponse] = await Promise.all([
-            fetch('json/stocks.json'),
-            fetch('json/indexes.json')
+            fetch('config/stocks.json'),
+            fetch('config/indexes.json')
         ]);
         
         availableStocks = await stocksResponse.json();
