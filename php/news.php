@@ -1,7 +1,8 @@
 <?php
 
-// Include the git info function
+// Include required files
 require_once __DIR__ . '/git_info.php';
+require_once 'dotenv.php';
 
 // Set the content type and add headers to prevent caching
 header('Cache-Control: no-cache, no-store, must-revalidate');
@@ -11,23 +12,13 @@ header('Content-Type: application/json');
 // Buffer output so we can return well-formed JSON even if a fatal error occurs
 ob_start();
 
-// Get version information directly using the function
-// TODO: Remove this once deployment is containerized
+// Get version information
 $gitInfo = getGitInfo();
 $version = isset($gitInfo['commit']) ? $gitInfo['commit'] : 'unknown';
 
-// Check if reload parameter is set to bypass cache
-$forceReload = isset($_GET['reload']);
-
-// Check if serial fetching is requested
-$useSerialFetch = isset($_GET['serial']);
-
 // Settings
-$cacheDir = '/tmp';
-$cacheTimestampFile = $cacheDir . '/rss_cache_timestamp_' . $version . '.json';
-$logFile = $cacheDir . '/rss_php_' . $version . '.log';
+$logFile = '/tmp/news_php_' . $version . '.log';
 $maxStories = 512;
-$maxSingleSource = 32;
 
 // Get number of stories to return
 $numStories = isset($_GET['n']) ? intval($_GET['n']) : $maxStories;
@@ -36,59 +27,42 @@ $numStories = max(1, min($maxStories, $numStories));
 // Get maximum age in days (default: 2 days)
 $maxAgeDays = isset($_GET['age']) ? floatval($_GET['age']) : 2.0;
 $maxAgeSeconds = $maxAgeDays * 86400; // Convert days to seconds
+$cutoffTimestamp = time() - $maxAgeSeconds;
 
-// Load RSS feeds from JSON file
+// Load news feed configurations to get icons
 function loadNewsSourcesFromJson() {
     $jsonFile = __DIR__ . '/../json/news-feeds.json';
     if (!file_exists($jsonFile)) {
-        logMessage("News feeds JSON file not found: $jsonFile");
         return [];
     }
     
     $jsonContent = file_get_contents($jsonFile);
     if ($jsonContent === false) {
-        logMessage("Failed to read news feeds JSON file: $jsonFile");
         return [];
     }
     
     $sources = json_decode($jsonContent, true);
     if ($sources === null) {
-        logMessage("Failed to parse news feeds JSON file: $jsonFile");
         return [];
     }
     
     // Extract feeds from new structure 
     $feedsData = isset($sources['feeds']) ? $sources['feeds'] : $sources;
     
-    // Convert to the format expected by the rest of the code
+    // Convert to lookup table by ID
     $feeds = [];
     foreach ($feedsData as $source) {
-        $feedData = [
-            'url' => $source['url'],
-            'cache' => $source['cache']
-        ];
-        if (isset($source['icon'])) {
-            $feedData['icon'] = $source['icon'];
-        }
-        $feeds[$source['id']] = $feedData;
+        $feeds[$source['id']] = $source;
     }
     
     return $feeds;
 }
 
-// List of RSS feeds to fetch - loaded from JSON
-$feeds = loadNewsSourcesFromJson();
+$feedConfigs = loadNewsSourcesFromJson();
 
 // Set up error logging
 ini_set('log_errors', 1);
-ini_set('error_log', '/tmp/rss-php-errors.log');
-
-// Custom error handler to capture all types of errors
-set_error_handler(function($errno, $errstr, $errfile, $errline) {
-    $message = date('[Y-m-d H:i:s] ') . "Error ($errno): $errstr in $errfile on line $errline\n";
-    error_log($message);
-    return false; // Let PHP handle the error as well
-});
+ini_set('error_log', '/tmp/news-php-errors.log');
 
 // Register shutdown function to catch fatal errors and return safe JSON
 register_shutdown_function(function() {
@@ -104,10 +78,7 @@ register_shutdown_function(function() {
         if (!headers_sent()) {
             header('Content-Type: application/json');
         }
-        global $allItems, $outputItemsGlobal;
-        $fallbackArray = $outputItemsGlobal ?? $allItems ?? [];
-        $fallback = json_encode($fallbackArray);
-        echo $fallback === false ? '[]' : $fallback;
+        echo '[]';
     }
 });
 
@@ -125,312 +96,115 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 }
 
-// Load timestamp data if it exists
-$feedTimestamps = [];
-if (file_exists($cacheTimestampFile)) {
-    $feedTimestamps = json_decode(file_get_contents($cacheTimestampFile), true);
-    if (!is_array($feedTimestamps)) {
-        $feedTimestamps = [];
-    }
+// Load configuration for database connection
+try {
+    $dotenv = new DotEnv(__DIR__ . '/../.env');
+    $_ENV = $dotenv->getAll();
+} catch (Exception $e) {
+    $_ENV = [];
 }
 
-// Determine which feeds to process
-$requestedFeeds = empty($includedFeeds) ? array_keys($feeds) : $includedFeeds;
-
-// Collect all items
-$allItems = [];
-$outputItemsGlobal = null; // Used for shutdown fallback
-$currentTime = time();
-$updatedTimestamps = false;
-
-foreach ($requestedFeeds as $source) {
-    if (!isset($feeds[$source])) continue;
-    $feedData = $feeds[$source];
-    $cacheFile = "{$cacheDir}/rss_cache_{$source}_{$version}.json";
-    $cacheDurationSeconds = $feedData['cache'] * 60;
-    $lastUpdated = isset($feedTimestamps[$source]) ? $feedTimestamps[$source] : 0;
-    $useCache = false;
-
-    if (!$forceReload && file_exists($cacheFile) && ($currentTime - $lastUpdated) <= $cacheDurationSeconds) {
-        // Use cache
-        $cachedItems = json_decode(file_get_contents($cacheFile), true);
-        if (is_array($cachedItems)) {
-            $allItems = array_merge($allItems, $cachedItems);
-            logMessage("Loaded {$source} from cache.");
-            $useCache = true;
-        }
+// Connect to database
+try {
+    if (isset($_ENV['SQL_HOST'])) {
+        // Use MySQL/MariaDB credentials from .env
+        $host = $_ENV['SQL_HOST'];
+        $username = $_ENV['SQL_USER'];
+        $password = $_ENV['SQL_PASS'];
+        $dbname = $_ENV['SQL_DB_NAME'];
+        $dsn = "mysql:host=$host;dbname=$dbname";
+        $pdo = new PDO($dsn, $username, $password);
+    } else {
+        // Fall back to SQLite database
+        $dbPath = isset($_ENV['SQLITE_PATH']) ? $_ENV['SQLITE_PATH'] : '/tmp/news.db';
+        $dsn = 'sqlite:' . $dbPath;
+        $pdo = new PDO($dsn);
     }
 
-    if (!$useCache) {
-        // Fetch and cache with timing
-        $startTime = microtime(true);
-        $xml = $useSerialFetch ? fetchRSS($feedData['url']) : fetchRSS($feedData['url']); // Only one at a time now
-        $endTime = microtime(true);
-        $downloadTime = round(($endTime - $startTime) * 1000, 2); // Convert to milliseconds
-        
-        if ($xml !== false) {
-            $items = parseRSS($xml, $source);
-            file_put_contents($cacheFile, json_encode($items));
-            $feedTimestamps[$source] = $currentTime;
-            $updatedTimestamps = true;
-            $allItems = array_merge($allItems, $items);
-            logMessage("Fetched {$source} from internet in {$downloadTime}ms and updated cache.");
+    $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+} catch (PDOException $e) {
+    logMessage("Database connection failed: " . $e->getMessage());
+    echo json_encode([]);
+    ob_end_flush();
+    exit;
+}
+
+// Build SQL query based on included feeds
+try {
+    $sql = "SELECT feed_name, url, title, published_date 
+            FROM news_articles 
+            WHERE published_date >= :cutoff";
+    
+    $params = [':cutoff' => $cutoffTimestamp];
+    
+    // Add feed filter if specified
+    if (!empty($includedFeeds)) {
+        $placeholders = [];
+        foreach ($includedFeeds as $index => $feedName) {
+            $placeholder = ":feed$index";
+            $placeholders[] = $placeholder;
+            $params[$placeholder] = $feedName;
+        }
+        $sql .= " AND feed_name IN (" . implode(',', $placeholders) . ")";
+    }
+    
+    $sql .= " ORDER BY published_date DESC LIMIT :limit";
+    $params[':limit'] = $numStories;
+    
+    $stmt = $pdo->prepare($sql);
+    
+    // Bind parameters
+    foreach ($params as $key => $value) {
+        if ($key === ':limit' || $key === ':cutoff') {
+            $stmt->bindValue($key, $value, PDO::PARAM_INT);
         } else {
-            logMessage("Failed to fetch {$source} from internet after {$downloadTime}ms - treating as empty feed.");
-            // Don't update cache or timestamp when fetch fails due to timeout - leave existing cache intact
+            $stmt->bindValue($key, $value, PDO::PARAM_STR);
         }
     }
+    
+    $stmt->execute();
+    $articles = $stmt->fetchAll(PDO::FETCH_ASSOC);
+    
+    logMessage("Retrieved " . count($articles) . " articles from database");
+    
+    // Format articles for frontend
+    $outputItems = [];
+    foreach ($articles as $article) {
+        $feedId = $article['feed_name'];
+        
+        $item = [
+            'title' => $article['title'],
+            'link' => $article['url'],
+            'date' => (int)$article['published_date'],
+            'source' => $feedId
+        ];
+        
+        // Add icon if available in feed config
+        if (isset($feedConfigs[$feedId]['icon'])) {
+            $item['icon'] = $feedConfigs[$feedId]['icon'];
+        }
+        
+        $outputItems[] = $item;
+    }
+    
+    // Return the articles as JSON
+    $jsonOutput = json_encode($outputItems);
+    if ($jsonOutput === false) {
+        error_log('JSON Encode Error: ' . json_last_error_msg());
+        $jsonOutput = '[]';
+    }
+    echo $jsonOutput;
+    
+} catch (PDOException $e) {
+    logMessage("Database query failed: " . $e->getMessage());
+    echo json_encode([]);
 }
 
-// Update timestamps file if needed
-if ($updatedTimestamps) {
-    file_put_contents($cacheTimestampFile, json_encode($feedTimestamps));
-}
-
-// Sort by date, newest first
-usort($allItems, function($a, $b) {
-    return $b['date'] - $a['date'];
-});
-
-// Log the total number of stories
-$totalStories = count($allItems);
-logMessage("Total stories fetched: $totalStories");
-
-// Apply inclusion filters to data
-$outputItems = applyInclusionFilters($allItems, $requestedFeeds);
-
-// Filter items by age
-$outputItems = applyAgeFilter($outputItems, $maxAgeSeconds);
-
-// Limit number of stories if needed
-$outputItems = array_slice($outputItems, 0, $numStories);
-
-// Store for potential shutdown fallback
-$outputItemsGlobal = $outputItems;
-
-// Return filtered cached content with sanity check
-$jsonOutput = json_encode($outputItems);
-if ($jsonOutput === false) {
-    error_log('JSON Encode Error: ' . json_last_error_msg());
-    $jsonOutput = '[]';
-}
-echo $jsonOutput;
 ob_end_flush();
-
 
 // ***** Utility functions *****
 
-function fetchRSS($url) {
-    $startTime = microtime(true);
-    $ch = curl_init();
-    curl_setopt($ch, CURLOPT_URL, $url);
-    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-    curl_setopt($ch, CURLOPT_TIMEOUT, 1.5); // Changed from 10 to 1.5 seconds
-    curl_setopt($ch, CURLOPT_USERAGENT, 'Mozilla/5.0 (compatible; RSS Reader/1.0)');
-    curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
-    $response = curl_exec($ch);
-    $endTime = microtime(true);
-    $curlTime = round(($endTime - $startTime) * 1000, 2); // Convert to milliseconds
-    
-    if (curl_errno($ch)) {
-        error_log("RSS Feed Error after {$curlTime}ms: " . curl_error($ch) . " - URL: " . $url);
-        curl_close($ch);
-        return false;
-    }
-    
-    curl_close($ch);
-    return $response;
-}
-
-function parseRSS($xml, $source) {
-    global $maxSingleSource, $feeds;
-
-    try {
-        $feed = simplexml_load_string($xml);
-        if (!$feed) {
-            error_log("RSS Parse Error: Failed to parse XML feed from source: {$source}");
-            return [];
-        }
-    } catch (Exception $e) {
-        error_log("RSS Parse Exception for source {$source}: " . $e->getMessage());
-        return [];
-    }
-
-    $items = [];
-    
-    // Handle different RSS feed structures
-    $feedItems = null;
-    if (isset($feed->channel) && isset($feed->channel->item)) {
-        $feedItems = $feed->channel->item;  // Standard RSS format
-    } elseif (isset($feed->entry)) {
-        $feedItems = $feed->entry;  // Atom format
-    } elseif (isset($feed->item)) {
-        $feedItems = $feed->item;   // Some non-standard RSS variants
-    }
-    
-    if (!$feedItems) return [];
-    
-    // Get icon if present for this source
-    $icon = isset($feeds[$source]['icon']) ? $feeds[$source]['icon'] : null;
-
-    foreach ($feedItems as $item) {
-        // Try to find the publication date in various formats
-        $pubDate = null;
-        $dateString = null;
-        
-        // Check for different date fields
-        if (isset($item->pubDate)) {
-            $dateString = (string)$item->pubDate;
-        } elseif (isset($item->published)) {
-            $dateString = (string)$item->published;
-        } elseif (isset($item->updated)) {
-            $dateString = (string)$item->updated;
-        } elseif (isset($item->children('dc', true)->date)) {
-            $dateString = (string)$item->children('dc', true)->date;
-        }
-        
-        if ($dateString) {
-            // Try to parse the date
-            $pubDate = strtotime($dateString);
-            
-            // If parsing failed, try to reformat common date patterns
-            if ($pubDate === false) {
-                // Try ISO 8601 format (remove milliseconds if present)
-                if (preg_match('/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}/', $dateString)) {
-                    $cleaned = preg_replace('/\.\d+/', '', $dateString);
-                    $pubDate = strtotime($cleaned);
-                }
-                
-                // Try common RFC formats with missing timezone
-                if ($pubDate === false && preg_match('/^\w+, \d+ \w+ \d+$/', $dateString)) {
-                    $pubDate = strtotime($dateString . " 00:00:00 +0000");
-                }
-                
-                // Last resort: use current time
-                if ($pubDate === false) {
-                    error_log("Failed to parse date: {$dateString} from source: {$source}");
-                    $pubDate = time();
-                }
-            }
-        } else {
-            // If no date is found, use current time (FIX: bad idea)
-            $pubDate = time();
-        }
-        
-        // Find the link (which could be in different formats)
-        $link = "";
-        if (isset($item->link)) {
-            if (is_object($item->link) && isset($item->link['href'])) {
-                $link = (string)$item->link['href']; // Atom format
-            } else {
-                $link = (string)$item->link; // RSS format
-            }
-        }
-
-        // Try alternative fields for link if still empty
-        if (!$link && isset($item->guid)) {
-            $link = (string)$item->guid;
-        }
-        if (!$link && isset($item->id)) {
-            $link = (string)$item->id;
-        }
-
-        // Resolve relative URLs using channel link if available
-        if ($link && strpos($link, 'http') !== 0) {
-            $baseLink = '';
-            if (isset($feed->channel) && isset($feed->channel->link)) {
-                $baseLink = (string)$feed->channel->link;
-            }
-            if ($baseLink) {
-                $link = rtrim($baseLink, '/') . '/' . ltrim($link, '/');
-            }
-        }
-
-        // Validate URL format
-        if ($link && !filter_var($link, FILTER_VALIDATE_URL)) {
-            $link = "";
-        }
-        
-        // Find the title
-        $title = isset($item->title) ? (string)$item->title : "No Title";
-        
-        $newsItem = [
-            'title' => $title,
-            'link' => $link,
-            'date' => $pubDate,
-            'source' => $source
-        ];
-        if ($icon) {
-            $newsItem['icon'] = $icon;
-        }
-        $items[] = $newsItem;
-
-        // Limit number from single source
-        if (count($items) > $maxSingleSource) {
-            logMessage("Limiting number of stories from source: {$source}");
-            break;
-        }
-    }
-    logMessage("Fetched " . count($items) . " stories from source: {$source}");
-    return $items;
-}
-
-// Function to apply exclusion filters to items
-function applyExclusionFilters($items, $excludedFeeds) {
-    if (empty($excludedFeeds)) {
-        return $items;
-    }
-    
-    logMessage("Filtering out excluded feeds: " . implode(', ', $excludedFeeds));
-    $filteredItems = array_filter($items, function($item) use ($excludedFeeds) {
-        return !in_array($item['source'], $excludedFeeds);
-    });
-    
-    // Re-index array after filtering
-    $filteredItems = array_values($filteredItems);
-    logMessage("After filtering: " . count($filteredItems) . " items remain");
-    
-    return $filteredItems;
-}
-
-// Function to apply inclusion filters to items
-function applyInclusionFilters($items, $includedFeeds) {
-    if (empty($includedFeeds)) {
-        // If no feeds are specified, include all feeds
-        return $items;
-    }
-    
-    logMessage("Filtering to only include feeds: " . implode(', ', $includedFeeds));
-    $filteredItems = array_filter($items, function($item) use ($includedFeeds) {
-        return in_array($item['source'], $includedFeeds);
-    });
-    
-    // Re-index array after filtering
-    $filteredItems = array_values($filteredItems);
-    logMessage("After filtering: " . count($filteredItems) . " items remain");
-    
-    return $filteredItems;
-}
-
-// Function to filter items by age
-function applyAgeFilter($items, $maxAgeSeconds) {
-    $currentTime = time();
-    $filteredItems = array_filter($items, function($item) use ($currentTime, $maxAgeSeconds) {
-        // Calculate how old the item is in seconds
-        $ageInSeconds = $currentTime - $item['date'];
-        // Keep items that are newer than the maximum age
-        return ($ageInSeconds <= $maxAgeSeconds);
-    });
-    
-    // Re-index array after filtering
-    $filteredItems = array_values($filteredItems);
-    logMessage("After age filtering: " . count($filteredItems) . " items remain (max age: " . 
-               round($maxAgeSeconds/86400, 2) . " days)");
-    
-    return $filteredItems;
-}
-
-// Function to write timestamped log messages to the end of the log file
+// Function to write timestamped log messages
 function logMessage($message) {
     global $logFile;
     file_put_contents($logFile, date('[Y-m-d H:i:s] ') . $message . "\n", FILE_APPEND);
