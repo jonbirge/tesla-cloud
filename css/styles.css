@@ -431,6 +431,10 @@ body.dark-mode .img-white-transparent {
     will-change: transform;
 }
 
+body.forecast-popup-active .control-container {
+    z-index: 0;
+}
+
 .status-indicator {
     height: 24px;
     margin-right: 11px;

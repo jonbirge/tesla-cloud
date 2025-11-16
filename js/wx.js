@@ -1496,6 +1496,9 @@ window.showPremiumPrecipGraph = function(dayIndex) {
     if (dimOverlay) {
         dimOverlay.classList.add('show');
     }
+    if (document.body) {
+        document.body.classList.add('forecast-popup-active');
+    }
 
     // Calculate start/end of the selected day in local time
     const selectedDate = new Date(daily[dayIndex].dt * 1000);
@@ -1714,6 +1717,9 @@ window.closePremiumPrecipPopup = function() {
     }
     const dimOverlay = document.getElementById('forecast-dim-overlay');
     if (dimOverlay) dimOverlay.classList.remove('show');
+    if (document.body) {
+        document.body.classList.remove('forecast-popup-active');
+    }
 
     // Remove highlighting from all forecast day panels
     const forecastDays = document.querySelectorAll('#prem-forecast-container .forecast-day');
