@@ -8,7 +8,7 @@
     },
     {
       "id": "business",
-      "title": "Business", 
+      "title": "Business",
       "containerId": "news-business-settings",
       "priority": 2
     },
@@ -32,252 +32,282 @@
     }
   ],
   "feeds": [
-  {
-    "id": "wsj",
-    "name": "Wall Street Journal",
-    "url": "https://feeds.content.dowjones.io/public/rss/RSSWorldNews",
-    "cache": 5,
-    "category": "general",
-    "defaultEnabled": false,
-    "icon": "https://wsj.com"
-  },
-  {
-    "id": "nyt",
-    "name": "New York Times",
-    "url": "https://rss.nytimes.com/services/xml/rss/nyt/HomePage.xml",
-    "cache": 5,
-    "category": "general",
-    "defaultEnabled": true
-  },
-  {
-    "id": "wapo",
-    "name": "Washington Post",
-    "url": "https://www.washingtonpost.com/arcio/rss/category/politics/",
-    "cache": 15,
-    "category": "general",
-    "defaultEnabled": false
-  },
-  {
-    "id": "latimes",
-    "name": "Los Angeles Times",
-    "url": "https://www.latimes.com/rss2.0.xml",
-    "cache": 15,
-    "category": "general",
-    "defaultEnabled": false
-  },
-  {
-    "id": "bos",
-    "name": "Boston Globe",
-    "url": "https://www.boston.com/tag/local-news/feed",
-    "cache": 15,
-    "category": "general",
-    "defaultEnabled": false
-  },
-  {
-    "id": "den",
-    "name": "Denver Post",
-    "url": "https://www.denverpost.com/feed/",
-    "cache": 15,
-    "category": "general",
-    "defaultEnabled": false
-  },
-  {
-    "id": "chi",
-    "name": "Chicago Tribune",
-    "url": "https://www.chicagotribune.com/news/feed/",
-    "cache": 15,
-    "category": "general",
-    "defaultEnabled": false
-  },
-  {
-    "id": "bbc",
-    "name": "BBC World News",
-    "url": "http://feeds.bbci.co.uk/news/world/rss.xml",
-    "cache": 15,
-    "category": "general",
-    "defaultEnabled": false,
-    "icon": "https://www.bbc.com"
-  },
-  {
-    "id": "economist",
-    "name": "The Economist",
-    "url": "https://www.economist.com/latest/rss.xml",
-    "cache": 60,
-    "category": "business",
-    "defaultEnabled": false
-  },
-  {
-    "id": "lemonde",
-    "name": "Le Monde",
-    "url": "https://www.lemonde.fr/rss/une.xml",
-    "cache": 30,
-    "category": "general",
-    "defaultEnabled": false
-  },
-  {
-    "id": "newyorker",
-    "name": "New Yorker",
-    "url": "https://www.newyorker.com/feed/news",
-    "cache": 60,
-    "category": "general",
-    "defaultEnabled": false
-  },
-  {
-    "id": "ap",
-    "name": "AP News",
-    "url": "https://news.google.com/rss/search?q=when:24h+allinurl:apnews.com&hl=en-US&gl=US&ceid=US:en",
-    "cache": 15,
-    "category": "general",
-    "defaultEnabled": false,
-    "icon": "https://apnews.com"
-  },
-  {
-    "id": "reuters",
-    "name": "Reuters",
-    "url": "https://news.google.com/rss/search?q=when:24h+allinurl:reuters.com&hl=en-US&gl=US&ceid=US:en",
-    "cache": 15,
-    "category": "general",
-    "defaultEnabled": false,
-    "icon": "https://www.reuters.com"
-  },
-  {
-    "id": "ft",
-    "name": "Financial Times",
-    "url": "https://news.google.com/rss/search?q=when:24h+allinurl:ft.com&hl=en-US&gl=US&ceid=US:en",
-    "cache": 15,
-    "category": "business",
-    "defaultEnabled": false,
-    "icon": "https://www.ft.com"
-  },
-  {
-    "id": "bloomberg",
-    "name": "Bloomberg",
-    "url": "https://feeds.bloomberg.com/news.rss",
-    "cache": 15,
-    "category": "business",
-    "defaultEnabled": false
-  },
-  {
-    "id": "thedrive",
-    "name": "The Drive",
-    "url": "https://www.thedrive.com/feed",
-    "cache": 30,
-    "category": "tesla",
-    "defaultEnabled": false
-  },
-  {
-    "id": "techcrunch",
-    "name": "TechCrunch",
-    "url": "https://techcrunch.com/feed/",
-    "cache": 30,
-    "category": "technology",
-    "defaultEnabled": false
-  },
-  {
-    "id": "caranddriver",
-    "name": "Car and Driver",
-    "url": "https://www.caranddriver.com/rss/all.xml/",
-    "cache": 30,
-    "category": "tesla",
-    "defaultEnabled": false
-  },
-  {
-    "id": "mittechreview",
-    "name": "MIT Tech Review",
-    "url": "https://www.technologyreview.com/feed/",
-    "cache": 30,
-    "category": "technology",
-    "defaultEnabled": false,
-    "icon": "https://www.technologyreview.com"
-  },
-  {
-    "id": "arstechnica",
-    "name": "Ars Technica",
-    "url": "https://feeds.arstechnica.com/arstechnica/index",
-    "cache": 30,
-    "category": "technology",
-    "defaultEnabled": false,
-    "icon": "https://arstechnica.com"
-  },
-  {
-    "id": "engadget",
-    "name": "Engadget",
-    "url": "https://www.engadget.com/rss.xml",
-    "cache": 30,
-    "category": "technology",
-    "defaultEnabled": false
-  },
-  {
-    "id": "gizmodo",
-    "name": "Gizmodo",
-    "url": "https://gizmodo.com/rss",
-    "cache": 30,
-    "category": "technology",
-    "defaultEnabled": false
-  },
-  {
-    "id": "wired",
-    "name": "Wired",
-    "url": "https://www.wired.com/feed/rss",
-    "cache": 30,
-    "category": "technology",
-    "defaultEnabled": false
-  },
-  {
-    "id": "notateslaapp",
-    "name": "Not a Tesla App",
-    "url": "https://www.notateslaapp.com/rss",
-    "cache": 30,
-    "category": "tesla",
-    "defaultEnabled": true
-  },
-  {
-    "id": "teslarati",
-    "name": "Teslarati",
-    "url": "https://www.teslarati.com/feed/",
-    "cache": 30,
-    "category": "tesla",
-    "defaultEnabled": true
-  },
-  {
-    "id": "insideevs",
-    "name": "InsideEVs",
-    "url": "https://insideevs.com/rss/articles/all/",
-    "cache": 30,
-    "category": "tesla",
-    "defaultEnabled": true
-  },
-  {
-    "id": "electrek",
-    "name": "Electrek",
-    "url": "https://electrek.co/feed/",
-    "cache": 15,
-    "category": "tesla",
-    "defaultEnabled": false
-  },
-  {
-    "id": "spacenews",
-    "name": "SpaceNews",
-    "url": "https://spacenews.com/feed/",
-    "cache": 30,
-    "category": "defense",
-    "defaultEnabled": false
-  },
-  {
-    "id": "defensenews",
-    "name": "Defense News",
-    "url": "https://www.defensenews.com/arc/outboundfeeds/rss/?outputType=xml",
-    "cache": 30,
-    "category": "defense",
-    "defaultEnabled": false
-  },
-  {
-    "id": "aviationweek",
-    "name": "Aviation Week",
-    "url": "https://aviationweek.com/awn/rss-feed-by-content-source",
-    "cache": 30,
-    "category": "defense",
-    "defaultEnabled": false
-  }
+    {
+      "id": "wsj",
+      "name": "Wall Street Journal",
+      "url": "https://feeds.content.dowjones.io/public/rss/RSSWorldNews",
+      "cache": 5,
+      "lifetime": 0,
+      "category": "general",
+      "defaultEnabled": false,
+      "icon": "https://wsj.com"
+    },
+    {
+      "id": "nyt",
+      "name": "New York Times",
+      "url": "https://rss.nytimes.com/services/xml/rss/nyt/HomePage.xml",
+      "cache": 5,
+      "lifetime": 0,
+      "category": "general",
+      "defaultEnabled": true
+    },
+    {
+      "id": "wapo",
+      "name": "Washington Post",
+      "url": "https://www.washingtonpost.com/arcio/rss/category/politics/",
+      "cache": 15,
+      "lifetime": 0,
+      "category": "general",
+      "defaultEnabled": false
+    },
+    {
+      "id": "latimes",
+      "name": "Los Angeles Times",
+      "url": "https://www.latimes.com/rss2.0.xml",
+      "cache": 15,
+      "lifetime": 0,
+      "category": "general",
+      "defaultEnabled": false
+    },
+    {
+      "id": "bos",
+      "name": "Boston Globe",
+      "url": "https://www.boston.com/tag/local-news/feed",
+      "cache": 15,
+      "lifetime": 0,
+      "category": "general",
+      "defaultEnabled": false
+    },
+    {
+      "id": "den",
+      "name": "Denver Post",
+      "url": "https://www.denverpost.com/feed/",
+      "cache": 15,
+      "lifetime": 0,
+      "category": "general",
+      "defaultEnabled": false
+    },
+    {
+      "id": "chi",
+      "name": "Chicago Tribune",
+      "url": "https://www.chicagotribune.com/news/feed/",
+      "cache": 15,
+      "lifetime": 0,
+      "category": "general",
+      "defaultEnabled": false
+    },
+    {
+      "id": "bbc",
+      "name": "BBC World News",
+      "url": "http://feeds.bbci.co.uk/news/world/rss.xml",
+      "cache": 15,
+      "lifetime": 0,
+      "category": "general",
+      "defaultEnabled": false,
+      "icon": "https://www.bbc.com"
+    },
+    {
+      "id": "economist",
+      "name": "The Economist",
+      "url": "https://www.economist.com/latest/rss.xml",
+      "cache": 60,
+      "lifetime": 0,
+      "category": "business",
+      "defaultEnabled": false
+    },
+    {
+      "id": "lemonde",
+      "name": "Le Monde",
+      "url": "https://www.lemonde.fr/rss/une.xml",
+      "cache": 30,
+      "lifetime": 0,
+      "category": "general",
+      "defaultEnabled": false
+    },
+    {
+      "id": "newyorker",
+      "name": "New Yorker",
+      "url": "https://www.newyorker.com/feed/news",
+      "cache": 60,
+      "lifetime": 0,
+      "category": "general",
+      "defaultEnabled": false
+    },
+    {
+      "id": "ap",
+      "name": "AP News",
+      "url": "https://news.google.com/rss/search?q=when:24h+allinurl:apnews.com&hl=en-US&gl=US&ceid=US:en",
+      "cache": 15,
+      "lifetime": 0,
+      "category": "general",
+      "defaultEnabled": false,
+      "icon": "https://apnews.com"
+    },
+    {
+      "id": "reuters",
+      "name": "Reuters",
+      "url": "https://news.google.com/rss/search?q=when:24h+allinurl:reuters.com&hl=en-US&gl=US&ceid=US:en",
+      "cache": 15,
+      "lifetime": 0,
+      "category": "general",
+      "defaultEnabled": false,
+      "icon": "https://www.reuters.com"
+    },
+    {
+      "id": "ft",
+      "name": "Financial Times",
+      "url": "https://news.google.com/rss/search?q=when:24h+allinurl:ft.com&hl=en-US&gl=US&ceid=US:en",
+      "cache": 15,
+      "lifetime": 0,
+      "category": "business",
+      "defaultEnabled": false,
+      "icon": "https://www.ft.com"
+    },
+    {
+      "id": "bloomberg",
+      "name": "Bloomberg",
+      "url": "https://feeds.bloomberg.com/news.rss",
+      "cache": 15,
+      "lifetime": 0,
+      "category": "business",
+      "defaultEnabled": false
+    },
+    {
+      "id": "thedrive",
+      "name": "The Drive",
+      "url": "https://www.thedrive.com/feed",
+      "cache": 30,
+      "lifetime": 0,
+      "category": "tesla",
+      "defaultEnabled": false
+    },
+    {
+      "id": "techcrunch",
+      "name": "TechCrunch",
+      "url": "https://techcrunch.com/feed/",
+      "cache": 30,
+      "lifetime": 0,
+      "category": "technology",
+      "defaultEnabled": false
+    },
+    {
+      "id": "caranddriver",
+      "name": "Car and Driver",
+      "url": "https://www.caranddriver.com/rss/all.xml/",
+      "cache": 30,
+      "lifetime": 0,
+      "category": "tesla",
+      "defaultEnabled": false
+    },
+    {
+      "id": "mittechreview",
+      "name": "MIT Tech Review",
+      "url": "https://www.technologyreview.com/feed/",
+      "cache": 30,
+      "lifetime": 0,
+      "category": "technology",
+      "defaultEnabled": false,
+      "icon": "https://www.technologyreview.com"
+    },
+    {
+      "id": "arstechnica",
+      "name": "Ars Technica",
+      "url": "https://feeds.arstechnica.com/arstechnica/index",
+      "cache": 30,
+      "lifetime": 0,
+      "category": "technology",
+      "defaultEnabled": false,
+      "icon": "https://arstechnica.com"
+    },
+    {
+      "id": "engadget",
+      "name": "Engadget",
+      "url": "https://www.engadget.com/rss.xml",
+      "cache": 30,
+      "lifetime": 0,
+      "category": "technology",
+      "defaultEnabled": false
+    },
+    {
+      "id": "gizmodo",
+      "name": "Gizmodo",
+      "url": "https://gizmodo.com/rss",
+      "cache": 30,
+      "lifetime": 0,
+      "category": "technology",
+      "defaultEnabled": false
+    },
+    {
+      "id": "wired",
+      "name": "Wired",
+      "url": "https://www.wired.com/feed/rss",
+      "cache": 30,
+      "lifetime": 0,
+      "category": "technology",
+      "defaultEnabled": false
+    },
+    {
+      "id": "notateslaapp",
+      "name": "Not a Tesla App",
+      "url": "https://www.notateslaapp.com/rss",
+      "cache": 30,
+      "lifetime": 0,
+      "category": "tesla",
+      "defaultEnabled": true
+    },
+    {
+      "id": "teslarati",
+      "name": "Teslarati",
+      "url": "https://www.teslarati.com/feed/",
+      "cache": 30,
+      "lifetime": 0,
+      "category": "tesla",
+      "defaultEnabled": true
+    },
+    {
+      "id": "insideevs",
+      "name": "InsideEVs",
+      "url": "https://insideevs.com/rss/articles/all/",
+      "cache": 30,
+      "lifetime": 0,
+      "category": "tesla",
+      "defaultEnabled": true
+    },
+    {
+      "id": "electrek",
+      "name": "Electrek",
+      "url": "https://electrek.co/feed/",
+      "cache": 15,
+      "lifetime": 0,
+      "category": "tesla",
+      "defaultEnabled": false
+    },
+    {
+      "id": "spacenews",
+      "name": "SpaceNews",
+      "url": "https://spacenews.com/feed/",
+      "cache": 30,
+      "lifetime": 0,
+      "category": "defense",
+      "defaultEnabled": false
+    },
+    {
+      "id": "defensenews",
+      "name": "Defense News",
+      "url": "https://www.defensenews.com/arc/outboundfeeds/rss/?outputType=xml",
+      "cache": 30,
+      "lifetime": 0,
+      "category": "defense",
+      "defaultEnabled": false
+    },
+    {
+      "id": "aviationweek",
+      "name": "Aviation Week",
+      "url": "https://aviationweek.com/awn/rss-feed-by-content-source",
+      "cache": 30,
+      "lifetime": 0,
+      "category": "defense",
+      "defaultEnabled": false
+    }
   ]
 }

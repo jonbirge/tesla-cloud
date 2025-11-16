@@ -11,17 +11,34 @@ import sqlite3
 from datetime import datetime, timedelta
 from pathlib import Path
 
+FORCE_SQLITE = True  # Set to True to force SQLite usage
+
 
 def load_env_file(env_path):
-    """Load environment variables from .env file."""
+    """Load environment variables from .env file (JSON or KEY=VALUE)."""
     env_vars = {}
-    if os.path.exists(env_path):
-        with open(env_path, 'r') as f:
-            for line in f:
-                line = line.strip()
-                if line and not line.startswith('#') and '=' in line:
-                    key, value = line.split('=', 1)
-                    env_vars[key.strip()] = value.strip().strip('"').strip("'")
+    if not os.path.exists(env_path):
+        return env_vars
+    
+    with open(env_path, 'r') as f:
+        content = f.read().strip()
+    
+    if not content:
+        return env_vars
+    
+    try:
+        parsed = json.loads(content)
+        if isinstance(parsed, dict):
+            return {str(key): value for key, value in parsed.items()}
+    except json.JSONDecodeError:
+        pass
+    
+    for line in content.splitlines():
+        line = line.strip()
+        if line and not line.startswith('#') and '=' in line:
+            key, value = line.split('=', 1)
+            env_vars[key.strip()] = value.strip().strip('"').strip("'")
+    
     return env_vars
 
 
@@ -30,8 +47,8 @@ def get_db_connection(env_vars):
     Get database connection based on environment variables.
     Returns SQLite connection by default, MySQL if configured.
     """
-    # Check for MySQL configuration
-    if 'SQL_HOST' in env_vars:
+    # Check for MySQL configuration unless forced to SQLite
+    if not FORCE_SQLITE and env_vars.get('SQL_HOST'):
         # MySQL/MariaDB connection
         try:
             import pymysql
@@ -51,6 +68,8 @@ def get_db_connection(env_vars):
             print(f"ERROR: Failed to connect to MySQL: {e}")
             sys.exit(1)
     else:
+        if FORCE_SQLITE:
+            print("FORCE_SQLITE enabled - using SQLite database")
         # SQLite connection (default)
         db_path = env_vars.get('SQLITE_PATH')
         if not db_path:
@@ -106,7 +125,8 @@ def cleanup_old_articles(connection, db_type, max_age_days=7):
 def cleanup_by_feed_lifetime():
     """
     Clean up articles based on each feed's configured lifetime.
-    If a feed doesn't have a 'lifetime' property, use default of 7 days.
+    Feeds with no lifetime or a lifetime <= 0 are treated as infinite
+    retention and are never pruned automatically.
     """
     # Load environment and get DB connection
     script_dir = Path(__file__).parent
@@ -122,9 +142,33 @@ def cleanup_by_feed_lifetime():
     feed_lifetimes = {}
     for feed in feeds:
         feed_id = feed.get('id')
-        # Use 'lifetime' if present, otherwise default to 7 days
-        lifetime = feed.get('lifetime', 7)
+        if not feed_id:
+            continue
+
+        lifetime_value = feed.get('lifetime')
+        if lifetime_value is None:
+            # A missing lifetime means infinite retention
+            continue
+
+        try:
+            lifetime = float(lifetime_value)
+        except (TypeError, ValueError):
+            print(f"⚠ Invalid lifetime '{lifetime_value}' for feed '{feed_id}', skipping cleanup for this feed")
+            continue
+
+        if lifetime <= 0:
+            # Zero or negative lifetime means keep forever
+            continue
+
+        if lifetime.is_integer():
+            lifetime = int(lifetime)
+
         feed_lifetimes[feed_id] = lifetime
+
+    if not feed_lifetimes:
+        connection.close()
+        print("No feeds have a finite lifetime. Skipping cleanup.")
+        return 0
     
     # Get unique lifetime values to minimize DB queries
     unique_lifetimes = set(feed_lifetimes.values())

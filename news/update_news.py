@@ -9,9 +9,11 @@ import os
 import json
 import sys
 import sqlite3
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
 import importlib.util
+
+FORCE_SQLITE = True  # Set to True to use SQLite regardless of SQL_HOST settings
 
 
 def load_module(module_path):
@@ -23,16 +25,39 @@ def load_module(module_path):
 
 
 def load_env_file(env_path):
-    """Load environment variables from .env file."""
+    """Load environment variables from .env file (JSON or KEY=VALUE)."""
     env_vars = {}
-    if os.path.exists(env_path):
-        with open(env_path, 'r') as f:
-            for line in f:
-                line = line.strip()
-                if line and not line.startswith('#') and '=' in line:
-                    key, value = line.split('=', 1)
-                    env_vars[key.strip()] = value.strip().strip('"').strip("'")
+    if not os.path.exists(env_path):
+        return env_vars
+    
+    with open(env_path, 'r') as f:
+        content = f.read().strip()
+    
+    if not content:
+        return env_vars
+    
+    # Try JSON first
+    try:
+        parsed = json.loads(content)
+        if isinstance(parsed, dict):
+            return {str(key): value for key, value in parsed.items()}
+    except json.JSONDecodeError:
+        pass
+    
+    # Fallback to KEY=VALUE parsing
+    for line in content.splitlines():
+        line = line.strip()
+        if line and not line.startswith('#') and '=' in line:
+            key, value = line.split('=', 1)
+            env_vars[key.strip()] = value.strip().strip('"').strip("'")
+    
     return env_vars
+
+
+def resolve_sqlite_path(env_vars):
+    """Resolve the filesystem path for the SQLite database."""
+    script_dir = Path(__file__).parent
+    return env_vars.get('SQLITE_PATH') or str(script_dir.parent / 'news_articles.db')
 
 
 def get_db_connection(env_vars):
@@ -40,8 +65,8 @@ def get_db_connection(env_vars):
     Get database connection based on environment variables.
     Returns SQLite connection by default, MySQL if configured.
     """
-    # Check for MySQL configuration
-    if 'SQL_HOST' in env_vars:
+    # Check for MySQL configuration unless forced to SQLite
+    if not FORCE_SQLITE and env_vars.get('SQL_HOST'):
         # MySQL/MariaDB connection
         try:
             import pymysql
@@ -61,13 +86,10 @@ def get_db_connection(env_vars):
             print(f"ERROR: Failed to connect to MySQL: {e}")
             sys.exit(1)
     else:
+        if FORCE_SQLITE:
+            print("FORCE_SQLITE enabled - using SQLite database")
         # SQLite connection (default)
-        db_path = env_vars.get('SQLITE_PATH')
-        if not db_path:
-            # Default to news_articles.db in parent directory
-            script_dir = Path(__file__).parent
-            db_path = str(script_dir.parent / 'news_articles.db')
-        
+        db_path = resolve_sqlite_path(env_vars)
         connection = sqlite3.connect(db_path)
         connection.row_factory = sqlite3.Row
         return connection, 'sqlite'
@@ -82,6 +104,74 @@ def load_feed_config():
         config = json.load(f)
     
     return config.get('feeds', [])
+
+
+def get_database_stats(connection, db_type):
+    """Return total article count and oldest publish date."""
+    cursor = connection.cursor()
+    try:
+        if db_type == 'mysql':
+            cursor.execute("""
+                SELECT COUNT(*) AS total, MIN(published_date) AS oldest
+                FROM news_articles
+            """)
+            row = cursor.fetchone()
+            total = row['total'] if row and row['total'] is not None else 0
+            oldest = row['oldest'] if row else None
+        else:
+            cursor.execute("""
+                SELECT COUNT(*), MIN(published_date)
+                FROM news_articles
+            """)
+            row = cursor.fetchone()
+            total = row[0] if row and row[0] is not None else 0
+            oldest = row[1] if row else None
+    except Exception:
+        return {'total': 0, 'oldest': None}
+    
+    return {'total': total, 'oldest': oldest}
+
+
+def compute_age_days(value):
+    """Return age in days (rounded) for a datetime or ISO string."""
+    if not value:
+        return None
+    if isinstance(value, str):
+        try:
+            value = datetime.fromisoformat(value)
+        except ValueError:
+            return None
+    if isinstance(value, datetime) and value.tzinfo is not None:
+        # Normalize to UTC then drop tzinfo for comparison
+        value = value.astimezone(timezone.utc).replace(tzinfo=None)
+    try:
+        delta = datetime.now() - value
+        days = max(int(round(delta.total_seconds() / 86400)), 0)
+        return days
+    except Exception:
+        return None
+
+
+def get_database_size_mb(env_vars, db_type, connection):
+    """Calculate approximate database size in megabytes."""
+    size_bytes = 0
+    if db_type == 'mysql':
+        cursor = connection.cursor()
+        cursor.execute("""
+            SELECT SUM(data_length + index_length) AS size_bytes
+            FROM information_schema.TABLES
+            WHERE table_schema = DATABASE()
+        """)
+        row = cursor.fetchone()
+        if row and row['size_bytes'] is not None:
+            size_bytes = float(row['size_bytes'])
+    else:
+        db_path = resolve_sqlite_path(env_vars)
+        if os.path.exists(db_path):
+            size_bytes = os.path.getsize(db_path)
+    
+    size_mb = size_bytes / (1024 * 1024) if size_bytes else 0
+    return round(size_mb, 2)
 
 
 def check_and_init_database(env_vars):
@@ -202,10 +292,13 @@ def main():
         print(f"ERROR: Failed to load feed config: {e}")
         sys.exit(1)
     
+    before_stats = {'total': 0, 'oldest': None}
+    
     # Step 3: Determine which feeds need updating
     print("\nChecking which feeds need updates...")
     try:
         connection, db_type = get_db_connection(env_vars)
+        before_stats = get_database_stats(connection, db_type)
         feeds_to_update = get_feeds_needing_update(connection, db_type, feeds)
         connection.close()
         
@@ -234,6 +327,7 @@ def main():
     
     # Step 5: Clean up old articles
     print("\nCleaning up old articles...")
+    deleted_count = 0
     try:
         cleanup_mod = load_module(script_dir / 'cleanup_db.py')
         deleted_count = cleanup_mod.cleanup_by_feed_lifetime()
@@ -245,6 +339,31 @@ def main():
     except Exception as e:
         print(f"ERROR: Failed to clean up: {e}")
         # Don't exit, this is not critical
+    
+    print("\nCollecting database statistics...")
+    try:
+        connection, db_type = get_db_connection(env_vars)
+        final_stats = get_database_stats(connection, db_type)
+        db_size_mb = get_database_size_mb(env_vars, db_type, connection)
+        connection.close()
+        
+        total_after = final_stats['total']
+        total_before = before_stats.get('total', 0)
+        added_count = total_after - total_before + deleted_count
+        if added_count < 0:
+            added_count = 0
+        
+        oldest_days = compute_age_days(final_stats['oldest'])
+        oldest_display = f"{oldest_days} day(s) old" if oldest_days is not None else "N/A"
+        
+        print("\nDatabase statistics:")
+        print(f"  Total articles: {total_after:,}")
+        print(f"  Database size: {db_size_mb:.2f} MB")
+        print(f"  Oldest article: {oldest_display}")
+        print(f"  Entries added this run: {added_count:,}")
+        print(f"  Entries removed this run: {deleted_count:,}")
+    except Exception as e:
+        print(f"ERROR: Failed to collect database stats: {e}")
     
     print("\n" + "=" * 60)
     print("Update complete!")
