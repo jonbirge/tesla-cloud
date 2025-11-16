@@ -1,6 +1,9 @@
 *.bak
+.env
+.managed*
 NOTE
 TODO
 test.php
-.env
 news_articles.db
+__pycache__/
+*.pyc
