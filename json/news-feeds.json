@@ -132,6 +132,24 @@
     "icon": "https://apnews.com"
   },
   {
+    "id": "reuters",
+    "name": "Reuters",
+    "url": "https://news.google.com/rss/search?q=when:24h+allinurl:reuters.com&hl=en-US&gl=US&ceid=US:en",
+    "cache": 15,
+    "category": "general",
+    "defaultEnabled": false,
+    "icon": "https://www.reuters.com"
+  },
+  {
+    "id": "ft",
+    "name": "Financial Times",
+    "url": "https://news.google.com/rss/search?q=when:24h+allinurl:ft.com&hl=en-US&gl=US&ceid=US:en",
+    "cache": 15,
+    "category": "business",
+    "defaultEnabled": false,
+    "icon": "https://www.ft.com"
+  },
+  {
     "id": "bloomberg",
     "name": "Bloomberg",
     "url": "https://feeds.bloomberg.com/news.rss",
@@ -164,12 +182,13 @@
     "defaultEnabled": false
   },
   {
-    "id": "theverge",
-    "name": "The Verge",
-    "url": "https://www.theverge.com/rss/index.xml",
+    "id": "mittechreview",
+    "name": "MIT Tech Review",
+    "url": "https://www.technologyreview.com/feed/",
     "cache": 30,
     "category": "technology",
-    "defaultEnabled": false
+    "defaultEnabled": false,
+    "icon": "https://www.technologyreview.com"
   },
   {
     "id": "arstechnica",
