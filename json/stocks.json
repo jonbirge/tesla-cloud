@@ -1,13 +1,8 @@
 [
     {
-        "StockName": "Tesla",
-        "Symbol": "TSLA",
-        "icon": "tesla.com"
-    },
-    {
-        "StockName": "Apple",
-        "Symbol": "AAPL",
-        "icon": "apple.com"
+        "StockName": "Alphabet",
+        "Symbol": "GOOGL",
+        "icon": "google.com"
     },
     {
         "StockName": "Amazon",
@@ -15,29 +10,19 @@
         "icon": "amazon.com"
     },
     {
-        "StockName": "Alphabet",
-        "Symbol": "GOOGL",
-        "icon": "google.com"
-    },
-    {
-        "StockName": "Meta",
-        "Symbol": "META",
-        "icon": "meta.com"
-    },
-    {
-        "StockName": "Microsoft",
-        "Symbol": "MSFT",
-        "icon": "microsoft.com"
-    },
-    {
-        "StockName": "NVIDIA",
-        "Symbol": "NVDA",
-        "icon": "nvidia.com"
+        "StockName": "Apple",
+        "Symbol": "AAPL",
+        "icon": "apple.com"
     },
     {
         "StockName": "Berkshire",
         "Symbol": "BRK.B",
         "icon": "assets/berkshire-globe.svg"
+    },
+    {
+        "StockName": "Caterpillar",
+        "Symbol": "CAT",
+        "icon": "cat.com"
     },
     {
         "StockName": "Exxon Mobil",
@@ -50,13 +35,43 @@
         "icon": "ge.com"
     },
     {
+        "StockName": "JPMorgan Chase",
+        "Symbol": "JPM",
+        "icon": "chase.com"
+    },
+    {
         "StockName": "Johnson & Johnson",
         "Symbol": "JNJ",
         "icon": "jnj.com"
     },
     {
+        "StockName": "Lockheed Martin",
+        "Symbol": "LMT",
+        "icon": "lockheedmartin.com"
+    },
+    {
+        "StockName": "Microsoft",
+        "Symbol": "MSFT",
+        "icon": "microsoft.com"
+    },
+    {
+        "StockName": "NVIDIA",
+        "Symbol": "NVDA",
+        "icon": "nvidia.com"
+    },
+    {
         "StockName": "Procter & Gamble",
         "Symbol": "PG",
         "icon": "pg.com"
+    },
+    {
+        "StockName": "Tesla",
+        "Symbol": "TSLA",
+        "icon": "tesla.com"
+    },
+    {
+        "StockName": "Walmart",
+        "Symbol": "WMT",
+        "icon": "walmart.com"
     }
 ]
