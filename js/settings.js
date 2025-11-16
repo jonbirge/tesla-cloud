@@ -43,7 +43,7 @@ const defaultSettings = {
     "news-forwarding": false,
     "news-forward-only": false,
     "forwarding-email": "",
-    // News feed settings populated dynamically from news-feeds.json
+    // News feed settings populated dynamically from news.json
 };
 
 // Function that sets driving state
@@ -230,7 +230,7 @@ function turnOffDarkMode() {
 // Load default settings from JSON files before applying them
 async function loadDefaultSettings() {
     try {
-        const response = await fetch('config/news-feeds.json');
+        const response = await fetch('config/news.json');
         const feedData = await response.json();
         
         // Handle both old array format and new object format for backward compatibility
@@ -640,7 +640,7 @@ async function loadStockAndIndexData() {
 // Load JSON data for news feeds
 async function loadNewsSourcesData() {
     try {
-    const response = await fetch('config/news-feeds.json');
+    const response = await fetch('config/news.json');
         const feedData = await response.json();
         
         // Handle both old array format and new object format for backward compatibility
