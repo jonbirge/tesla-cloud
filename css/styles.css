@@ -889,6 +889,7 @@ body.dark-mode .network-icon {
     width: 60px;
     height: 32px;
     flex-shrink: 0;
+    left: 5px;
 }
 
 .settings-toggle-slider {
