@@ -570,6 +570,7 @@ body.dark-mode .network-icon {
     display: flex;
     align-items: center;
     justify-content: center;
+    position: relative;
 }
 
 #stock-indicators .stock-ticker-track {
@@ -577,6 +578,8 @@ body.dark-mode .network-icon {
     align-items: center;
     flex-wrap: nowrap;
     gap: 0;
+    position: relative;
+    z-index: 0;
 }
 
 #stock-indicators.ticker-mode {
@@ -587,10 +590,33 @@ body.dark-mode .network-icon {
 
 #stock-indicators.ticker-mode .stock-ticker-track {
     animation: ticker-scroll var(--ticker-animation-duration, 18s) linear infinite;
+    gap: 11px;
 }
 
 #stock-indicators.ticker-mode .stock-status {
     white-space: nowrap;
+    margin: 0;
+}
+
+#stock-indicators.ticker-mode::before,
+#stock-indicators.ticker-mode::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    width: 12px;
+    pointer-events: none;
+    z-index: 1;
+}
+
+#stock-indicators.ticker-mode::before {
+    left: -1px;
+    background: linear-gradient(to right, var(--indicator-container-bg) 0%, transparent 100%);
+}
+
+#stock-indicators.ticker-mode::after {
+    right: -1px;
+    background: linear-gradient(to left, var(--indicator-container-bg) 0%, transparent 100%);
 }
 
 @keyframes ticker-scroll {
