@@ -7,4 +7,5 @@ TODO
 .env
 test.php
 __pycache__/
+.claude
 .managed*
