@@ -13,6 +13,10 @@ from datetime import datetime, timedelta, timezone
 from pathlib import Path
 import importlib.util
 
+from logging_utils import setup_dual_logging
+
+setup_dual_logging()
+
 SCRIPT_PATH = Path(__file__).resolve()
 SCRIPT_DIR = SCRIPT_PATH.parent
 PROJECT_ROOT = SCRIPT_DIR.parent
@@ -60,7 +64,7 @@ def load_env_file(env_path):
 
 def resolve_sqlite_path(env_vars):
     """Resolve the filesystem path for the SQLite database."""
-    return env_vars.get('SQLITE_PATH') or str(PROJECT_ROOT / 'news_articles.db')
+    return env_vars.get('SQLITE_PATH') or str(SCRIPT_DIR / 'news_articles.db')
 
 
 def get_db_connection(env_vars):
