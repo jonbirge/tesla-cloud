@@ -156,14 +156,27 @@ $shouldReturnStats = !$isPostRequest || !$hasRequestBody;
 
 // Check if we're receiving a POST request with included feeds
 $includedFeeds = [];
+$userHash = '';
 if ($isPostRequest && $hasRequestBody) {
     $requestData = json_decode($requestBody, true);
     
     if (json_last_error() !== JSON_ERROR_NONE) {
         logMessage('Invalid JSON in request body: ' . json_last_error_msg());
-    } elseif (isset($requestData['includedFeeds']) && is_array($requestData['includedFeeds'])) {
-        $includedFeeds = $requestData['includedFeeds'];
-        logMessage("Received included feeds: " . implode(', ', $includedFeeds));
+    } else {
+        if (isset($requestData['includedFeeds']) && is_array($requestData['includedFeeds'])) {
+            $includedFeeds = $requestData['includedFeeds'];
+            logMessage("Received included feeds: " . implode(', ', $includedFeeds));
+        }
+        
+        if (isset($requestData['userHash'])) {
+            $candidateHash = sanitizeUserHash($requestData['userHash']);
+            if ($candidateHash !== '') {
+                $userHash = $candidateHash;
+                logMessage("Received hashed user for read filtering");
+            } else {
+                logMessage('Ignoring invalid userHash provided to news endpoint');
+            }
+        }
     }
 }
 
@@ -203,6 +216,22 @@ if ($shouldReturnStats) {
 }
 
 header('Content-Type: application/json');
+
+// Attempt to load read-history information for this user
+$readArticleIds = [];
+$readFilterApplied = false;
+$readFilterHeader = 'skipped';
+if ($userHash !== '') {
+    $readDbConnection = getReadStatusDbConnection($diagnostics);
+    if ($readDbConnection) {
+        $readArticleIds = fetchReadArticleIds($readDbConnection, $userHash, $diagnostics);
+        $readFilterApplied = true;
+        $readFilterHeader = 'applied';
+    } else {
+        addDiagnostic($diagnostics, 'Read database connection unavailable; skipping read filtering');
+    }
+}
+header('X-News-Read-Filter: ' . $readFilterHeader);
 
 // Build query to fetch articles
 $allItems = [];
@@ -261,6 +290,12 @@ try {
     $feedCounts = [];
     foreach ($articles as $article) {
         $feedId = $article['feed_id'];
+        $articleId = generateArticleId($feedId, $article['title'] ?? '');
+        
+        // Skip items already read when server-side filtering is enabled
+        if ($readFilterApplied && isset($readArticleIds[$articleId])) {
+            continue;
+        }
         
         // Check if we've hit the per-feed limit
         if (!isset($feedCounts[$feedId])) {
@@ -277,6 +312,7 @@ try {
         $pubDate = strtotime($article['published_date']);
         
         $newsItem = [
+            'id' => $articleId,
             'title' => $article['title'],
             'link' => $article['url'],
             'date' => $pubDate,
@@ -415,4 +451,203 @@ function generateDatabaseStats($pdo, &$diagnostics) {
     }
     
     return $lines;
+}
+
+/**
+ * Validate and sanitize the user hash provided by the client.
+ */
+function sanitizeUserHash($userHash) {
+    if (!is_string($userHash)) {
+        return '';
+    }
+    
+    $userHash = trim($userHash);
+    if ($userHash === '') {
+        return '';
+    }
+    
+    $length = strlen($userHash);
+    if ($length < 8 || $length > 255) {
+        return '';
+    }
+    
+    if (!preg_match('/^[A-Za-z0-9_-]+$/', $userHash)) {
+        return '';
+    }
+    
+    return $userHash;
+}
+
+/**
+ * Open a connection to the REST key/value database that tracks read articles.
+ */
+function getReadStatusDbConnection(&$diagnostics) {
+    global $_ENV;
+    
+    // Attempt MySQL if configured
+    if (!empty($_ENV['SQL_HOST'])) {
+        $host = $_ENV['SQL_HOST'];
+        $username = $_ENV['SQL_USER'] ?? '';
+        $password = $_ENV['SQL_PASS'] ?? '';
+        $dbname = $_ENV['SQL_DB_NAME'] ?? '';
+        $dsn = "mysql:host=$host;dbname=$dbname;charset=utf8mb4";
+        addDiagnostic($diagnostics, "Attempting read-status MySQL connection to host '{$host}'");
+        
+        try {
+            $pdo = new PDO($dsn, $username, $password);
+            $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+            addDiagnostic($diagnostics, "Connected to read-status MySQL host '{$host}'");
+            return $pdo;
+        } catch (PDOException $e) {
+            logMessage('Read-status MySQL connection failed: ' . $e->getMessage());
+            addDiagnostic($diagnostics, 'Read-status MySQL connection failed: ' . $e->getMessage());
+        }
+    }
+    
+    // Fallback to SQLite path (use dedicated path if provided)
+    $dbPath = $_ENV['RESTDB_SQLITE_PATH'] ?? (sys_get_temp_dir() . '/restdb.sqlite');
+    $dsn = 'sqlite:' . $dbPath;
+    addDiagnostic($diagnostics, "Attempting read-status SQLite connection at {$dbPath}");
+    
+    try {
+        $pdo = new PDO($dsn);
+        $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+        addDiagnostic($diagnostics, "Connected to read-status SQLite database at {$dbPath}");
+        return $pdo;
+    } catch (PDOException $e) {
+        logMessage('Read-status SQLite connection failed: ' . $e->getMessage());
+        addDiagnostic($diagnostics, 'Read-status SQLite connection failed: ' . $e->getMessage());
+        return null;
+    }
+}
+
+/**
+ * Fetch all read article IDs for a given user hash.
+ */
+function fetchReadArticleIds($pdo, $userHash, &$diagnostics) {
+    $ids = [];
+    
+    try {
+        $stmt = $pdo->prepare("
+            SELECT `key`, `value`, `life_time`, `created_at`
+            FROM key_value
+            WHERE (`key` = :user_key OR `key` LIKE :user_prefix)
+        ");
+        $stmt->execute([
+            ':user_key' => $userHash,
+            ':user_prefix' => $userHash . '/%'
+        ]);
+        $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
+    } catch (PDOException $e) {
+        logMessage('Failed to query read-status database: ' . $e->getMessage());
+        addDiagnostic($diagnostics, 'Read-status query failed: ' . $e->getMessage());
+        return $ids;
+    }
+    
+    $now = time();
+    $expiredKeys = [];
+    
+    foreach ($rows as $row) {
+        // Skip directories or malformed records
+        if (!isset($row['value']) || $row['value'] === null) {
+            continue;
+        }
+        
+        // Enforce expiration in the same way as rest_db.php
+        $createdAt = isset($row['created_at']) ? strtotime($row['created_at']) : 0;
+        $lifeTimeDays = isset($row['life_time']) ? (float)$row['life_time'] : 2.0;
+        $expiresAt = ($createdAt > 0 && $lifeTimeDays > 0)
+            ? ($createdAt + (int)($lifeTimeDays * 86400))
+            : 0;
+        
+        if ($expiresAt > 0 && $now > $expiresAt) {
+            $expiredKeys[] = $row['key'];
+            continue;
+        }
+        
+        $segments = explode('/', $row['key']);
+        $articleId = end($segments);
+        if ($articleId === false || $articleId === '' || $articleId === $userHash) {
+            continue;
+        }
+        
+        $ids[$articleId] = true;
+    }
+    
+    if (!empty($expiredKeys)) {
+        try {
+            $placeholders = implode(',', array_fill(0, count($expiredKeys), '?'));
+            $deleteStmt = $pdo->prepare("DELETE FROM key_value WHERE `key` IN ($placeholders)");
+            $deleteStmt->execute($expiredKeys);
+        } catch (PDOException $e) {
+            logMessage('Failed to prune expired read-status keys: ' . $e->getMessage());
+        }
+    }
+    
+    addDiagnostic($diagnostics, 'Loaded ' . count($ids) . ' read IDs for user ' . $userHash);
+    return $ids;
+}
+
+/**
+ * Generate the same article ID that the frontend uses so we can cross-check read status.
+ */
+function generateArticleId($sourceId, $title) {
+    $dataToHash = (string)$sourceId . (string)$title;
+    if ($dataToHash === '') {
+        return '0';
+    }
+    
+    $utf16 = convertToUtf16Be($dataToHash);
+    $length = strlen($utf16);
+    if ($length === 0) {
+        return '0';
+    }
+    
+    $hash = 0;
+    for ($i = 0; $i < $length; $i += 2) {
+        $byte1 = ord($utf16[$i]);
+        $byte2 = ($i + 1 < $length) ? ord($utf16[$i + 1]) : 0;
+        $charCode = ($byte1 << 8) + $byte2;
+        $hash = toSigned32((($hash << 5) - $hash) + $charCode);
+    }
+    
+    $hexHash = strtolower(dechex(abs($hash)));
+    if ($hexHash === '') {
+        $hexHash = '0';
+    }
+    
+    return strlen($hexHash) > 16 ? substr($hexHash, 0, 16) : $hexHash;
+}
+
+/**
+ * Convert an integer to signed 32-bit representation.
+ */
+function toSigned32($value) {
+    $value = $value & 0xFFFFFFFF;
+    if ($value & 0x80000000) {
+        $value -= 0x100000000;
+    }
+    return $value;
+}
+
+/**
+ * Convert a UTF-8 string into UTF-16BE bytes to mirror JavaScript charCodeAt behavior.
+ */
+function convertToUtf16Be($input) {
+    if (function_exists('mb_convert_encoding')) {
+        $converted = @mb_convert_encoding($input, 'UTF-16BE', 'UTF-8');
+        if ($converted !== false) {
+            return $converted;
+        }
+    }
+    
+    if (function_exists('iconv')) {
+        $converted = @iconv('UTF-8', 'UTF-16BE//IGNORE', $input);
+        if ($converted !== false) {
+            return $converted;
+        }
+    }
+    
+    // Last-resort fallback: treat original string as UTF-8 bytes
+    return $input;
 }
