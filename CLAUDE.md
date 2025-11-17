@@ -97,7 +97,7 @@ The news system uses a two-tier architecture:
 5. Frontend updates DOM using vanilla JavaScript and Chart.js for visualizations
 
 ### Configuration System
-- **Feed Config:** `config/news.json` - RSS feeds with `cache` (update frequency), `lifetime` (retention), category
+- **Feed Config:** `config/news.json` - RSS feeds with `refresh` (update frequency in minutes), `lifetime` (retention in days), category
 - **Stock Config:** `config/stocks.json` - Stock symbols and index definitions
 - **Environment:** `.env` - API keys, database credentials (JSON format, not dotenv standard)
 - **Database:** Supports both SQLite (default) and MySQL via `.env` settings

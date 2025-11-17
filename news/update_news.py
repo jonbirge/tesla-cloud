@@ -223,23 +223,23 @@ def check_and_init_database(env_vars):
 
 def get_feeds_needing_update(connection, db_type, feeds):
     """
-    Determine which feeds need to be updated based on their cache time.
-    
+    Determine which feeds need to be updated based on their refresh interval.
+
     Args:
         connection: Database connection
         db_type: 'mysql' or 'sqlite'
         feeds: List of feed configurations
-    
+
     Returns:
         List of feed IDs that need updating
     """
     cursor = connection.cursor()
     current_time = datetime.now()
     feeds_to_update = []
-    
+
     for feed in feeds:
         feed_id = feed.get('id')
-        cache_minutes = feed.get('cache', 30)  # Default to 30 minutes
+        refresh_minutes = feed.get('refresh', 30)  # Default to 30 minutes
         
         # Get last update time for this feed
         if db_type == 'mysql':
@@ -257,16 +257,16 @@ def get_feeds_needing_update(connection, db_type, feeds):
             # Never updated, needs update
             feeds_to_update.append(feed_id)
         else:
-            # Check if cache has expired
+            # Check if refresh interval has elapsed
             if db_type == 'mysql':
                 last_updated = result['last_updated']
             else:
                 last_updated = datetime.fromisoformat(result[0])
-            
+
             time_since_update = current_time - last_updated
-            cache_duration = timedelta(minutes=cache_minutes)
-            
-            if time_since_update >= cache_duration:
+            refresh_duration = timedelta(minutes=refresh_minutes)
+
+            if time_since_update >= refresh_duration:
                 feeds_to_update.append(feed_id)
     
     return feeds_to_update
