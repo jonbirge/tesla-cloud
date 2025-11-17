@@ -84,7 +84,7 @@ try {
     $pdo->exec("CREATE TABLE IF NOT EXISTS key_value (
         `key` VARCHAR(255) NOT NULL PRIMARY KEY,
         `value` TEXT NULL,
-        `life_time` FLOAT DEFAULT 2,
+        `life_time` FLOAT DEFAULT 30,
         `created_at` DATETIME DEFAULT CURRENT_TIMESTAMP,
         `updated_at` DATETIME DEFAULT CURRENT_TIMESTAMP
     )");

@@ -13,6 +13,10 @@ from datetime import datetime, timedelta, timezone
 from pathlib import Path
 import importlib.util
 
+SCRIPT_PATH = Path(__file__).resolve()
+SCRIPT_DIR = SCRIPT_PATH.parent
+PROJECT_ROOT = SCRIPT_DIR.parent
+
 FORCE_SQLITE = True  # Set to True to use SQLite regardless of SQL_HOST settings
 
 
@@ -56,8 +60,7 @@ def load_env_file(env_path):
 
 def resolve_sqlite_path(env_vars):
     """Resolve the filesystem path for the SQLite database."""
-    script_dir = Path(__file__).parent
-    return env_vars.get('SQLITE_PATH') or str(script_dir.parent / 'news_articles.db')
+    return env_vars.get('SQLITE_PATH') or str(PROJECT_ROOT / 'news_articles.db')
 
 
 def get_db_connection(env_vars):
@@ -97,8 +100,7 @@ def get_db_connection(env_vars):
 
 def load_feed_config():
     """Load news feed configuration from JSON file."""
-    script_dir = Path(__file__).parent
-    config_path = script_dir.parent / 'config' / 'news.json'
+    config_path = PROJECT_ROOT / 'config' / 'news.json'
     
     with open(config_path, 'r') as f:
         config = json.load(f)
@@ -204,8 +206,7 @@ def check_and_init_database(env_vars):
         if not tables_exist:
             print("✓ Database tables not found, initializing...")
             # Load and run init_db module
-            script_dir = Path(__file__).parent
-            init_db = load_module(script_dir / 'init_db.py')
+            init_db = load_module(SCRIPT_DIR / 'init_db.py')
             init_db.main()
         else:
             print("✓ Database tables exist")
@@ -267,15 +268,25 @@ def get_feeds_needing_update(connection, db_type, feeds):
     return feeds_to_update
 
 
+def ensure_project_root():
+    """Ensure the process runs from the project root so relative paths resolve."""
+    try:
+        os.chdir(PROJECT_ROOT)
+    except OSError as exc:
+        print(f"ERROR: Unable to change working directory to {PROJECT_ROOT}: {exc}")
+        sys.exit(1)
+
+
 def main():
     """Main update function."""
     print("=" * 60)
     print("News Feed Update - " + datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
     print("=" * 60)
+
+    ensure_project_root()
     
     # Load environment variables
-    script_dir = Path(__file__).parent
-    env_path = script_dir.parent / '.env'
+    env_path = PROJECT_ROOT / '.env'
     env_vars = load_env_file(env_path)
     
     # Step 1: Check/initialize database
@@ -314,7 +325,7 @@ def main():
     if feeds_to_update:
         print("\nFetching feeds...")
         try:
-            fetch_feeds_mod = load_module(script_dir / 'fetch_feeds.py')
+            fetch_feeds_mod = load_module(SCRIPT_DIR / 'fetch_feeds.py')
             success_count = fetch_feeds_mod.fetch_feeds(feeds_to_update)
             
             if success_count > 0:
@@ -329,7 +340,7 @@ def main():
     print("\nCleaning up old articles...")
     deleted_count = 0
     try:
-        cleanup_mod = load_module(script_dir / 'cleanup_db.py')
+        cleanup_mod = load_module(SCRIPT_DIR / 'cleanup_db.py')
         deleted_count = cleanup_mod.cleanup_by_feed_lifetime()
         
         if deleted_count > 0:
