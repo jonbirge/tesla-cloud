@@ -1,5 +1,11 @@
-*.bak
 NOTE
 TODO
-test.php
+*.bak
+*.pyc
+*.log
+*.db
 .env
+test.php
+__pycache__/
+.claude
+.managed*

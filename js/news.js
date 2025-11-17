@@ -264,6 +264,11 @@ async function markNewsSeen(id) {
             if (cachedSeenNewsIds !== null) {
                 cachedSeenNewsIds[id] = timestamp;
             }
+
+            const localItem = displayedItems.find(item => item.id === id);
+            if (localItem) {
+                localItem.isUnread = false;
+            }
         } else {
             console.log(`Something went wrong marking article ${id} as seen...`);
         }
@@ -323,13 +328,18 @@ export async function updateNews(clear = false) {
             abortController.abort();
         }, 5000); // 4 second timeout (was 2 seconds)
 
+        const requestPayload = { includedFeeds };
+        if (isLoggedIn && hashedUser) {
+            requestPayload.userHash = hashedUser;
+        }
+
         // Send the request with included feeds in the body and timeout
         const response = await fetch(BASE_URL, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
             },
-            body: JSON.stringify({ includedFeeds }),
+            body: JSON.stringify(requestPayload),
             signal: abortController.signal
         });
 
@@ -341,6 +351,7 @@ export async function updateNews(clear = false) {
             throw new Error(`Server returned ${response.status} ${response.statusText}`);
         }
 
+        const readFilterApplied = response.headers.get('X-News-Read-Filter') === 'applied';
         let loadedItems = await response.json();
         console.log('...Done! Count: ', loadedItems.length);
         
@@ -350,8 +361,12 @@ export async function updateNews(clear = false) {
 
         // Add a unique ID to each item and sanitize links
         loadedItems.forEach(item => {
-            // Create a unique ID based on title and source
-            item.id = genItemID(item);
+            // Prefer server-provided ID but fall back to generating it locally
+            if (item.id && typeof item.id === 'string') {
+                item.id = item.id.trim();
+            } else {
+                item.id = genItemID(item);
+            }
 
             // Trim and validate link if present
             if (item.link && typeof item.link === 'string') {
@@ -385,19 +400,24 @@ export async function updateNews(clear = false) {
         }
         
         // Track if we have unread items among newly loaded items...
-        if (loadedItems.length > 0) {            
-            // Mark each item's read status
-            loadedItems.forEach(item => {
-                // Check if this is a new item (handle null cachedSeenNewsIds)
-                item.isUnread = !cachedSeenNewsIds || !(item.id in cachedSeenNewsIds);
-            });
+        if (loadedItems.length > 0) {
+            if (readFilterApplied) {
+                loadedItems.forEach(item => {
+                    item.isUnread = true;
+                });
+            } else {
+                // Mark each item's read status with cached data (legacy fallback)
+                loadedItems.forEach(item => {
+                    item.isUnread = !cachedSeenNewsIds || !(item.id in cachedSeenNewsIds);
+                });
 
-            // Remove items that have isUnread flag set to false
-            loadedItems = loadedItems.filter(item => item.isUnread);
+                // Remove items that have isUnread flag set to false
+                loadedItems = loadedItems.filter(item => item.isUnread);
+            }
         }
 
         // ...and update the read status of old displayed items
-        if (oldDisplayedItems.length > 0) {
+        if (!readFilterApplied && oldDisplayedItems.length > 0) {
             oldDisplayedItems.forEach(item => {
                 // Check if this is a new item (handle null cachedSeenNewsIds)
                 item.isUnread = !cachedSeenNewsIds || !(item.id in cachedSeenNewsIds);
