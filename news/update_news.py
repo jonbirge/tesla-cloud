@@ -70,6 +70,32 @@ def compute_age_days(value):
         return None
 
 
+def remove_future_dated_articles(env_vars):
+    """Remove articles whose published date is in the future."""
+    connection, db_type = get_db_connection(env_vars)
+    cursor = connection.cursor()
+    now = datetime.now()
+    now_value = now if db_type == 'mysql' else now.isoformat(sep=' ')
+
+    try:
+        if db_type == 'mysql':
+            cursor.execute("""
+                DELETE FROM news_articles
+                WHERE published_date > %s
+            """, (now_value,))
+        else:
+            cursor.execute("""
+                DELETE FROM news_articles
+                WHERE published_date > ?
+            """, (now_value,))
+
+        removed_count = cursor.rowcount if cursor.rowcount is not None else 0
+        connection.commit()
+        return removed_count
+    finally:
+        connection.close()
+
+
 def get_database_size_mb(env_vars, db_type, connection):
     """Calculate approximate database size in megabytes."""
     size_bytes = 0
@@ -251,6 +277,7 @@ def main():
     # Step 5: Clean up old articles
     print("\nCleaning up old articles...")
     deleted_count = 0
+    future_deleted_count = 0
     try:
         deleted_count = cleanup_db.cleanup_by_feed_lifetime()
 
@@ -261,6 +288,17 @@ def main():
     except Exception as e:
         print(f"ERROR: Failed to clean up: {e}")
         # Don't exit, this is not critical
+
+    # Step 6: Remove future-dated articles
+    print("\nSanity check: removing future-dated articles...")
+    try:
+        future_deleted_count = remove_future_dated_articles(env_vars)
+        if future_deleted_count > 0:
+            print(f"✓ Removed {future_deleted_count} future-dated article(s)")
+        else:
+            print("✓ No future-dated articles found")
+    except Exception as e:
+        print(f"ERROR: Failed to remove future-dated articles: {e}")
     
     print("\nCollecting database statistics...")
     try:
@@ -271,7 +309,8 @@ def main():
         
         total_after = final_stats['total']
         total_before = before_stats.get('total', 0)
-        added_count = total_after - total_before + deleted_count
+        total_removed = deleted_count + future_deleted_count
+        added_count = total_after - total_before + total_removed
         if added_count < 0:
             added_count = 0
         
@@ -283,7 +322,7 @@ def main():
         print(f"  Database size: {db_size_mb:.2f} MB")
         print(f"  Oldest article: {oldest_display}")
         print(f"  Entries added this run: {added_count:,}")
-        print(f"  Entries removed this run: {deleted_count:,}")
+        print(f"  Entries removed this run: {total_removed:,}")
     except Exception as e:
         print(f"ERROR: Failed to collect database stats: {e}")
     
