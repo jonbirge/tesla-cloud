@@ -4,101 +4,17 @@ Fetch news feeds and store articles in the database.
 Reads feed definitions from config/news.json and fetches RSS feeds.
 """
 
-import os
-import json
 import sys
-import sqlite3
 from datetime import datetime
-from pathlib import Path
 from urllib.request import urlopen, Request
 from urllib.error import URLError, HTTPError
 import xml.etree.ElementTree as ET
 from email.utils import parsedate_to_datetime
 
 from logging_utils import setup_dual_logging
+from db_utils import load_env_file, get_db_connection, load_feed_config
 
 setup_dual_logging()
-
-FORCE_SQLITE = True  # Set to True to force SQLite usage
-
-
-def load_env_file(env_path):
-    """Load environment variables from .env file (JSON or KEY=VALUE)."""
-    env_vars = {}
-    if not os.path.exists(env_path):
-        return env_vars
-    
-    with open(env_path, 'r') as f:
-        content = f.read().strip()
-    
-    if not content:
-        return env_vars
-    
-    try:
-        parsed = json.loads(content)
-        if isinstance(parsed, dict):
-            return {str(key): value for key, value in parsed.items()}
-    except json.JSONDecodeError:
-        pass
-    
-    for line in content.splitlines():
-        line = line.strip()
-        if line and not line.startswith('#') and '=' in line:
-            key, value = line.split('=', 1)
-            env_vars[key.strip()] = value.strip().strip('"').strip("'")
-    
-    return env_vars
-
-
-def get_db_connection(env_vars):
-    """
-    Get database connection based on environment variables.
-    Returns SQLite connection by default, MySQL if configured.
-    """
-    # Check for MySQL configuration unless forced to SQLite
-    if not FORCE_SQLITE and env_vars.get('SQL_HOST'):
-        # MySQL/MariaDB connection
-        try:
-            import pymysql
-            connection = pymysql.connect(
-                host=env_vars.get('SQL_HOST'),
-                user=env_vars.get('SQL_USER'),
-                password=env_vars.get('SQL_PASS'),
-                database=env_vars.get('SQL_DB_NAME'),
-                charset='utf8mb4',
-                cursorclass=pymysql.cursors.DictCursor
-            )
-            return connection, 'mysql'
-        except ImportError:
-            print("ERROR: pymysql package required for MySQL connection")
-            sys.exit(1)
-        except Exception as e:
-            print(f"ERROR: Failed to connect to MySQL: {e}")
-            sys.exit(1)
-    else:
-        if FORCE_SQLITE:
-            print("FORCE_SQLITE enabled - using SQLite database")
-        # SQLite connection (default)
-        db_path = env_vars.get('SQLITE_PATH')
-        if not db_path:
-            # Default to news_articles.db alongside the scripts
-            script_dir = Path(__file__).parent
-            db_path = str(script_dir / 'news_articles.db')
-        
-        connection = sqlite3.connect(db_path)
-        connection.row_factory = sqlite3.Row
-        return connection, 'sqlite'
-
-
-def load_feed_config():
-    """Load news feed configuration from JSON file."""
-    script_dir = Path(__file__).parent
-    config_path = script_dir.parent / 'config' / 'news.json'
-    
-    with open(config_path, 'r') as f:
-        config = json.load(f)
-    
-    return config.get('feeds', [])
 
 
 def parse_date(date_string):
@@ -278,15 +194,12 @@ def fetch_feed(connection, db_type, feed):
 def fetch_feeds(feed_ids=None):
     """
     Fetch specified feeds or all feeds if feed_ids is None.
-    
+
     Args:
         feed_ids: List of feed IDs to fetch, or None to fetch all feeds
     """
     # Load environment and get DB connection
-    script_dir = Path(__file__).parent
-    env_path = script_dir.parent / '.env'
-    
-    env_vars = load_env_file(env_path)
+    env_vars = load_env_file()
     connection, db_type = get_db_connection(env_vars)
     
     # Load feed configuration
