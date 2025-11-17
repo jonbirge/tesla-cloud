@@ -6,110 +6,22 @@ Handles initialization, fetching feeds that need updates, and cleanup.
 """
 
 import os
-import json
 import sys
-import sqlite3
 from datetime import datetime, timedelta, timezone
-from pathlib import Path
-import importlib.util
 
 from logging_utils import setup_dual_logging
+from db_utils import (
+    PROJECT_ROOT,
+    load_env_file,
+    get_db_connection,
+    load_feed_config,
+    resolve_sqlite_path
+)
+import init_db
+import fetch_feeds
+import cleanup_db
 
 setup_dual_logging()
-
-SCRIPT_PATH = Path(__file__).resolve()
-SCRIPT_DIR = SCRIPT_PATH.parent
-PROJECT_ROOT = SCRIPT_DIR.parent
-
-FORCE_SQLITE = True  # Set to True to use SQLite regardless of SQL_HOST settings
-
-
-def load_module(module_path):
-    """Dynamically load a Python module from file path."""
-    spec = importlib.util.spec_from_file_location("module", module_path)
-    module = importlib.util.module_from_spec(spec)
-    spec.loader.exec_module(module)
-    return module
-
-
-def load_env_file(env_path):
-    """Load environment variables from .env file (JSON or KEY=VALUE)."""
-    env_vars = {}
-    if not os.path.exists(env_path):
-        return env_vars
-    
-    with open(env_path, 'r') as f:
-        content = f.read().strip()
-    
-    if not content:
-        return env_vars
-    
-    # Try JSON first
-    try:
-        parsed = json.loads(content)
-        if isinstance(parsed, dict):
-            return {str(key): value for key, value in parsed.items()}
-    except json.JSONDecodeError:
-        pass
-    
-    # Fallback to KEY=VALUE parsing
-    for line in content.splitlines():
-        line = line.strip()
-        if line and not line.startswith('#') and '=' in line:
-            key, value = line.split('=', 1)
-            env_vars[key.strip()] = value.strip().strip('"').strip("'")
-    
-    return env_vars
-
-
-def resolve_sqlite_path(env_vars):
-    """Resolve the filesystem path for the SQLite database."""
-    return env_vars.get('SQLITE_PATH') or str(SCRIPT_DIR / 'news_articles.db')
-
-
-def get_db_connection(env_vars):
-    """
-    Get database connection based on environment variables.
-    Returns SQLite connection by default, MySQL if configured.
-    """
-    # Check for MySQL configuration unless forced to SQLite
-    if not FORCE_SQLITE and env_vars.get('SQL_HOST'):
-        # MySQL/MariaDB connection
-        try:
-            import pymysql
-            connection = pymysql.connect(
-                host=env_vars.get('SQL_HOST'),
-                user=env_vars.get('SQL_USER'),
-                password=env_vars.get('SQL_PASS'),
-                database=env_vars.get('SQL_DB_NAME'),
-                charset='utf8mb4',
-                cursorclass=pymysql.cursors.DictCursor
-            )
-            return connection, 'mysql'
-        except ImportError:
-            print("ERROR: pymysql package required for MySQL connection")
-            sys.exit(1)
-        except Exception as e:
-            print(f"ERROR: Failed to connect to MySQL: {e}")
-            sys.exit(1)
-    else:
-        if FORCE_SQLITE:
-            print("FORCE_SQLITE enabled - using SQLite database")
-        # SQLite connection (default)
-        db_path = resolve_sqlite_path(env_vars)
-        connection = sqlite3.connect(db_path)
-        connection.row_factory = sqlite3.Row
-        return connection, 'sqlite'
-
-
-def load_feed_config():
-    """Load news feed configuration from JSON file."""
-    config_path = PROJECT_ROOT / 'config' / 'news.json'
-    
-    with open(config_path, 'r') as f:
-        config = json.load(f)
-    
-    return config.get('feeds', [])
 
 
 def get_database_stats(connection, db_type):
@@ -209,8 +121,6 @@ def check_and_init_database(env_vars):
         
         if not tables_exist:
             print("✓ Database tables not found, initializing...")
-            # Load and run init_db module
-            init_db = load_module(SCRIPT_DIR / 'init_db.py')
             init_db.main()
         else:
             print("✓ Database tables exist")
@@ -288,10 +198,9 @@ def main():
     print("=" * 60)
 
     ensure_project_root()
-    
+
     # Load environment variables
-    env_path = PROJECT_ROOT / '.env'
-    env_vars = load_env_file(env_path)
+    env_vars = load_env_file()
     
     # Step 1: Check/initialize database
     if not check_and_init_database(env_vars):
@@ -329,9 +238,8 @@ def main():
     if feeds_to_update:
         print("\nFetching feeds...")
         try:
-            fetch_feeds_mod = load_module(SCRIPT_DIR / 'fetch_feeds.py')
-            success_count = fetch_feeds_mod.fetch_feeds(feeds_to_update)
-            
+            success_count = fetch_feeds.fetch_feeds(feeds_to_update)
+
             if success_count > 0:
                 print(f"✓ Successfully updated {success_count} feed(s)")
             else:
@@ -344,9 +252,8 @@ def main():
     print("\nCleaning up old articles...")
     deleted_count = 0
     try:
-        cleanup_mod = load_module(SCRIPT_DIR / 'cleanup_db.py')
-        deleted_count = cleanup_mod.cleanup_by_feed_lifetime()
-        
+        deleted_count = cleanup_db.cleanup_by_feed_lifetime()
+
         if deleted_count > 0:
             print(f"✓ Cleaned up {deleted_count} old article(s)")
         else:
