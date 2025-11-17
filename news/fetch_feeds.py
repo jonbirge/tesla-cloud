@@ -15,6 +15,10 @@ from urllib.error import URLError, HTTPError
 import xml.etree.ElementTree as ET
 from email.utils import parsedate_to_datetime
 
+from logging_utils import setup_dual_logging
+
+setup_dual_logging()
+
 FORCE_SQLITE = True  # Set to True to force SQLite usage
 
 
@@ -77,9 +81,9 @@ def get_db_connection(env_vars):
         # SQLite connection (default)
         db_path = env_vars.get('SQLITE_PATH')
         if not db_path:
-            # Default to news_articles.db in parent directory
+            # Default to news_articles.db alongside the scripts
             script_dir = Path(__file__).parent
-            db_path = str(script_dir.parent / 'news_articles.db')
+            db_path = str(script_dir / 'news_articles.db')
         
         connection = sqlite3.connect(db_path)
         connection.row_factory = sqlite3.Row
