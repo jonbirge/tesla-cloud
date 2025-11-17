@@ -132,7 +132,7 @@ function getDbConnection(&$diagnostics = null, $forceSqliteOverride = false) {
     if ($forceSqliteOverride) {
         addDiagnostic($diagnostics, 'FORCE_SQLITE override enabled, using SQLite regardless of SQL_HOST settings');
     }
-    $dbPath = $_ENV['SQLITE_PATH'] ?? __DIR__ . '/../news_articles.db';
+    $dbPath = $_ENV['SQLITE_PATH'] ?? __DIR__ . '/../news/news_articles.db';
     $dsn = 'sqlite:' . $dbPath;
     addDiagnostic($diagnostics, "Attempting SQLite connection at {$dbPath}");
     try {
