@@ -628,7 +628,7 @@ body.dark-mode .network-icon {
         transform: translateX(0);
     }
     100% {
-        transform: translateX(-50%);
+        transform: translateX(var(--ticker-scroll-distance, -50%));
     }
 }
 
