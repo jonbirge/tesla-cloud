@@ -11,6 +11,7 @@
     max-width: 1200px;
     cursor: pointer;
     position: relative;
+    transition: background-color 0.3s ease, opacity 0.4s ease, filter 0.4s ease;
 }
 
 .news-item:hover {
@@ -42,6 +43,11 @@
 /* Transition class for when an item is being marked as seen */
 .news-time.news-seen-transition {
     transition: color 1.5s ease, font-weight 1.5s ease;
+}
+
+.news-item.news-read {
+    opacity: 0.45;
+    filter: grayscale(1);
 }
 
 .news-title {

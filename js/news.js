@@ -562,6 +562,7 @@ export async function markAllNewsAsRead() {
         
         // Update UI for all items
         newsItems.forEach(element => {
+            element.classList.add('news-read');
             const timeElement = element.querySelector('.news-time');
             if (timeElement) {
                 timeElement.classList.add('news-seen-transition');
@@ -654,6 +655,9 @@ function generateElementForItem(item) {
 
     const itemDiv = document.createElement('div');
     itemDiv.className = 'news-item';
+    if (!item.isUnread) {
+        itemDiv.classList.add('news-read');
+    }
     itemDiv.dataset.id = item.id;
     itemDiv.addEventListener('click', () => {
         clickNews(item.title, item.link, item.source, item.id);
@@ -743,6 +747,7 @@ export function setupNewsObserver() {
                     });
                     
                     // Add transition class for smooth fade out
+                    newsItem.classList.add('news-read');
                     timeElement.classList.add('news-seen-transition');
                     
                     // After transition completes, remove the new-time class
@@ -824,7 +829,11 @@ export function cleanupNewsObserver() {
                     await markNewsSeen(id);
                     
                     // Update the UI element if it exists
-                    const timeElement = document.querySelector(`.news-item[data-id="${id}"] .news-time`);
+                    const newsElement = document.querySelector(`.news-item[data-id="${id}"]`);
+                    const timeElement = newsElement ? newsElement.querySelector('.news-time') : null;
+                    if (newsElement) {
+                        newsElement.classList.add('news-read');
+                    }
                     if (timeElement) {
                         timeElement.classList.add('news-seen-transition');
                         timeElement.classList.remove('news-new-time');
@@ -921,6 +930,7 @@ window.clickNews = async function (title, link, source, id) {
         const element = document.querySelector(`.news-item[data-id="${id}"]`);
         if (element) {
             const timeElement = element.querySelector('.news-time');
+            element.classList.add('news-read');
             if (timeElement && timeElement.classList.contains('news-new-time')) {
                 // Add transition class first
                 timeElement.classList.add('news-seen-transition');
@@ -973,6 +983,7 @@ window.shareNews = async function (title, link, source, id) {
         const element = document.querySelector(`.news-item[data-id="${id}"]`);
         if (element) {
             const timeElement = element.querySelector('.news-time');
+            element.classList.add('news-read');
             if (timeElement && timeElement.classList.contains('news-new-time')) {
                 // Add transition class first
                 timeElement.classList.add('news-seen-transition');
