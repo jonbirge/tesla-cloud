@@ -17,7 +17,7 @@ $version = isset($gitInfo['commit']) ? $gitInfo['commit'] : 'unknown';
 
 // Settings
 $logFile = '/tmp/rss_php_' . $version . '.log';
-$maxStories = 512;
+$maxStories = 5000;
 $maxSingleSource = 0;
 $diagnostics = [];
 $forceSqliteOverride = true; // Set to true to skip MySQL and always use SQLite
