@@ -18,7 +18,7 @@ $version = isset($gitInfo['commit']) ? $gitInfo['commit'] : 'unknown';
 // Settings
 $logFile = '/tmp/rss_php_' . $version . '.log';
 $maxStories = 512;
-$maxSingleSource = 32;
+$maxSingleSource = 0;
 $diagnostics = [];
 $forceSqliteOverride = true; // Set to true to skip MySQL and always use SQLite
 
@@ -302,7 +302,7 @@ try {
             $feedCounts[$feedId] = 0;
         }
         
-        if ($feedCounts[$feedId] >= $maxSingleSource) {
+        if ($maxSingleSource > 0 && $feedCounts[$feedId] >= $maxSingleSource) {
             continue;
         }
         
