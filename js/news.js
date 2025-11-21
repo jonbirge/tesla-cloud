@@ -3,7 +3,7 @@ import { settings, isDriving, hashedUser, isLoggedIn } from './settings.js';
 import { formatTime, highlightUpdate, testMode, showNotification } from './common.js';
 
 // Constants
-const BASE_URL = 'php/news.php?n=512';
+const BASE_URL = 'php/news.php?age=1';
 const RESTDB_URL = 'php/rest_db.php';
 const NEWS_REFRESH_INTERVAL = 2.5;  // minutes
 
