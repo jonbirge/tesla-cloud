@@ -125,15 +125,6 @@
       "defaultEnabled": false
     },
     {
-      "id": "newyorker",
-      "name": "New Yorker",
-      "url": "https://www.newyorker.com/feed/news",
-      "refresh": 60,
-      "lifetime": 1095,
-      "category": "general",
-      "defaultEnabled": false
-    },
-    {
       "id": "ap",
       "name": "AP News",
       "url": "https://news.google.com/rss/search?q=when:24h+allinurl:apnews.com&hl=en-US&gl=US&ceid=US:en",
@@ -229,22 +220,14 @@
       "defaultEnabled": false
     },
     {
-      "id": "gizmodo",
-      "name": "Gizmodo",
-      "url": "https://gizmodo.com/rss",
+      "id": "hackernews",
+      "name": "Hacker News",
+      "url": "https://news.ycombinator.com/rss",
       "refresh": 60,
       "lifetime": 1095,
       "category": "technology",
-      "defaultEnabled": false
-    },
-    {
-      "id": "wired",
-      "name": "Wired",
-      "url": "https://www.wired.com/feed/rss",
-      "refresh": 60,
-      "lifetime": 1095,
-      "category": "technology",
-      "defaultEnabled": false
+      "defaultEnabled": false,
+      "icon": "https://news.ycombinator.com"
     },
     {
       "id": "notateslaapp",

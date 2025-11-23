@@ -70,6 +70,39 @@ def compute_age_days(value):
         return None
 
 
+def format_last_updated(value):
+    """Format last_updated values from either SQLite or MySQL for logging."""
+    if not value:
+        return "never"
+    if isinstance(value, str):
+        try:
+            value = datetime.fromisoformat(value)
+        except ValueError:
+            return str(value)
+    if isinstance(value, datetime):
+        if value.tzinfo is not None:
+            value = value.astimezone(timezone.utc).replace(tzinfo=None)
+        return value.strftime("%Y-%m-%d %H:%M:%S")
+    return str(value)
+
+
+def parse_last_updated(value):
+    """Normalize the last_updated value to a datetime when possible."""
+    if isinstance(value, datetime):
+        if value.tzinfo is not None:
+            return value.astimezone(timezone.utc).replace(tzinfo=None)
+        return value
+    if isinstance(value, str):
+        try:
+            parsed = datetime.fromisoformat(value)
+            if parsed.tzinfo is not None:
+                parsed = parsed.astimezone(timezone.utc).replace(tzinfo=None)
+            return parsed
+        except ValueError:
+            return None
+    return None
+
+
 def remove_future_dated_articles(env_vars):
     """Remove articles whose published date is in the future."""
     connection, db_type = get_db_connection(env_vars)
@@ -173,8 +206,11 @@ def get_feeds_needing_update(connection, db_type, feeds):
     current_time = datetime.now()
     feeds_to_update = []
 
+    print("  Feed update disposition:")
+
     for feed in feeds:
         feed_id = feed.get('id')
+        feed_name = feed.get('name', feed_id)
         refresh_minutes = feed.get('refresh', 30)  # Default to 30 minutes
         
         # Get last update time for this feed
@@ -188,22 +224,34 @@ def get_feeds_needing_update(connection, db_type, feeds):
             """, (feed_id,))
         
         result = cursor.fetchone()
+        last_updated_raw = None if result is None else (
+            result['last_updated'] if db_type == 'mysql' else result[0]
+        )
+        last_updated = parse_last_updated(last_updated_raw)
+        last_updated_display = format_last_updated(last_updated_raw)
+        refresh_duration = timedelta(minutes=refresh_minutes)
+        feed_label = f"{feed_name} ({feed_id})"
         
-        if result is None:
+        if last_updated is None:
             # Never updated, needs update
+            print(f"  - {feed_label}: due (last updated {last_updated_display}, interval {refresh_minutes}m)")
             feeds_to_update.append(feed_id)
         else:
             # Check if refresh interval has elapsed
-            if db_type == 'mysql':
-                last_updated = result['last_updated']
-            else:
-                last_updated = datetime.fromisoformat(result[0])
-
             time_since_update = current_time - last_updated
-            refresh_duration = timedelta(minutes=refresh_minutes)
+            minutes_until_refresh = max(
+                int(round((refresh_duration - time_since_update).total_seconds() / 60)),
+                0
+            )
 
             if time_since_update >= refresh_duration:
+                print(f"  - {feed_label}: due (last updated {last_updated_display}, interval {refresh_minutes}m)")
                 feeds_to_update.append(feed_id)
+            else:
+                print(
+                    f"  - {feed_label}: not due (last updated {last_updated_display}, "
+                    f"{minutes_until_refresh}m until refresh)"
+                )
     
     return feeds_to_update
 
