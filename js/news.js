@@ -277,7 +277,7 @@ async function markNewsSeen(id) {
     }
 }
 
-// Updates the news headlines, optionally clearing existing ones
+// Updates the news headlines, rebuilding the list from scratch each time
 export async function updateNews(clear = false) {
     if (updatingNews) {
         console.log('*** Already updating news! Quitting...');
@@ -303,11 +303,14 @@ export async function updateNews(clear = false) {
         // Get the news container element
         const newsContainer = document.getElementById('newsHeadlines');
 
-        // Clear the news container as needed
-        if (clear) {
-            console.log('Clearing news headlines...');
-            newsContainer.replaceChildren();
-            displayedItems = [];
+        // Always clear existing headlines before loading new ones
+        console.log('Clearing news headlines before reload...');
+        newsContainer.replaceChildren();
+        displayedItems = [];
+        pendingReadItems.clear();
+        if (newsObserver) {
+            newsObserver.disconnect();
+            newsObserver = null;
         }
 
         // Show loading spinner if no items are displayed yet or only showing a message
@@ -318,9 +321,6 @@ export async function updateNews(clear = false) {
         }
         
         console.log('Fetching news headlines...');
-        
-        // Copy displayedItems to oldDisplayedItems
-        let oldDisplayedItems = [...displayedItems];
 
         // Create AbortController for timeout handling
         const abortController = new AbortController();
@@ -382,23 +382,6 @@ export async function updateNews(clear = false) {
             }
         });
         
-        // Filter out items where the ID can be found in oldDisplayedItems
-        const nLoaded = loadedItems.length;
-        // Create a Set of oldDisplayedIds for O(1) lookups instead of O(n) with Array.includes()
-        const oldDisplayedIdsSet = new Set(oldDisplayedItems.map(item => item.id));
-        // Filter using the Set for much faster lookups
-        loadedItems = loadedItems.filter(item => !oldDisplayedIdsSet.has(item.id));
-        const nFiltered = loadedItems.length;
-        console.log(`Left with ${nFiltered} out of ${nLoaded} loaded items after filtering existing displayed items`);
-
-        // Clean items from oldDisplayedItems from sources that are not in includedFeeds
-        if (includedFeeds.length > 0) {
-            const includedSources = new Set(includedFeeds);
-            oldDisplayedItems = oldDisplayedItems.filter(item => {
-                return includedSources.has(item.source);
-            });
-        }
-        
         // Track if we have unread items among newly loaded items...
         if (loadedItems.length > 0) {
             if (readFilterApplied) {
@@ -416,22 +399,14 @@ export async function updateNews(clear = false) {
             }
         }
 
-        // ...and update the read status of old displayed items
-        if (!readFilterApplied && oldDisplayedItems.length > 0) {
-            oldDisplayedItems.forEach(item => {
-                // Check if this is a new item (handle null cachedSeenNewsIds)
-                item.isUnread = !cachedSeenNewsIds || !(item.id in cachedSeenNewsIds);
-            });
-        }
-
         // If anything has made it past all the filters, sort by date
         if (loadedItems.length > 0) {
             console.log('We have unread items among newly loaded items!');
             loadedItems.sort((a, b) => b.date - a.date);
         }
 
-        // Create new displayed items array by joining loadedItems and oldDisplayedItems
-        displayedItems = [...loadedItems, ...oldDisplayedItems];
+        // Use only the freshly loaded items for display
+        displayedItems = loadedItems;
 
         // Update the news container with the new items
         if (displayedItems.length > 0) {
