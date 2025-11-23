@@ -21,3 +21,9 @@ Commit subjects match history: short, imperative lines with optional issue suffi
 
 ## Security & Configuration Tips
 Do not commit working credentials—use redacted `.env` entries or the fixtures under `test/test_envs/`. New secrets must flow through `php/dotenv.php`, and JS should degrade cleanly via `isTestMode` when data is absent. Re-read `SECURITY.md` for telemetry-sensitive edits, scrub logs before sharing, and keep any local overrides inside ignored paths such as `config/`.
+
+## News Feed Curation
+- `config/news.json` is intentionally ordered; do not alphabetize feeds. AP (`ap`) and Reuters (`reuters`) should remain last in the General section.
+- Default feed settings: `refresh: 60`, `lifetime: 1095`, `defaultEnabled: false`, and include an `icon` when available; category must match an existing section id.
+- Recently updated sources: added `skynews`, `abcnews`, `dwtop`, `phoronix`; removed `anandtech` (feed retired). Keep replacements similarly wire-style for General and technical/engineering-focused for Technology.
+- El País English feed must use `https://feeds.elpais.com/mrss-s/pages/ep/site/english.elpais.com/portada` (prior `/elpais.com/en/portada` URL returns 404).

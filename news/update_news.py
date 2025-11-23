@@ -234,7 +234,7 @@ def get_feeds_needing_update(connection, db_type, feeds):
         
         if last_updated is None:
             # Never updated, needs update
-            print(f"  - {feed_label}: due (last updated {last_updated_display}, interval {refresh_minutes}m)")
+            print(f"  + {feed_label}: due (last updated {last_updated_display}, interval {refresh_minutes}m)")
             feeds_to_update.append(feed_id)
         else:
             # Check if refresh interval has elapsed
@@ -245,7 +245,7 @@ def get_feeds_needing_update(connection, db_type, feeds):
             )
 
             if time_since_update >= refresh_duration:
-                print(f"  - {feed_label}: due (last updated {last_updated_display}, interval {refresh_minutes}m)")
+                print(f"  + {feed_label}: due (last updated {last_updated_display}, interval {refresh_minutes}m)")
                 feeds_to_update.append(feed_id)
             else:
                 print(

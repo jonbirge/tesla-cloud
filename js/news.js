@@ -17,6 +17,7 @@ let directoryInitialized = false;   // Track if we've successfully initialized t
 let lastDirectoryCheckTime = 0;
 let displayedItems = [];            // Store loaded news items
 let hasUnreadNewsItems = false;     // Track if there are any unread news items
+let suppressNextResumeUpdate = false; // Skip one resume-triggered refresh after opening a link
 let updatingNews = false;
 
 // Export function to ensure user directory exists (used by app.js during startup)
@@ -928,6 +929,8 @@ window.clickNews = async function (title, link, source, id) {
     else {
         // Slight delay to allow the transition to be visible before loading URL
         setTimeout(() => {
+            // Opening in a new tab will blur this page; avoid an immediate refresh on return
+            suppressNextResumeUpdate = true;
             loadExternalUrl(link);
         }, 200);
     }
@@ -1017,7 +1020,12 @@ window.pauseNewsUpdates = function () {
 // Resumes the automatic news updates if paused
 window.resumeNewsUpdates = function () {
     if (!newsUpdateInterval) {
-        updateNews(); // Call immediately
+        // Avoid an immediate refresh if we just opened an article in a new tab
+        if (suppressNextResumeUpdate) {
+            suppressNextResumeUpdate = false;
+        } else {
+            updateNews(); // Call immediately
+        }
         newsUpdateInterval = setInterval(updateNews, 60000 * NEWS_REFRESH_INTERVAL);
         console.log('News updates resumed');
     }

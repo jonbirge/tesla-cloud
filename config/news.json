@@ -117,7 +117,7 @@
     },
     {
       "id": "lemonde",
-      "name": "Le Monde",
+      "name": "Le Monde (French)",
       "url": "https://www.lemonde.fr/rss/une.xml",
       "refresh": 60,
       "lifetime": 1095,
@@ -125,24 +125,63 @@
       "defaultEnabled": false
     },
     {
-      "id": "ap",
-      "name": "AP News",
-      "url": "https://news.google.com/rss/search?q=when:24h+allinurl:apnews.com&hl=en-US&gl=US&ceid=US:en",
+      "id": "lemondeenglish",
+      "name": "Le Monde (English)",
+      "url": "https://www.lemonde.fr/en/rss/une.xml",
       "refresh": 60,
       "lifetime": 1095,
       "category": "general",
       "defaultEnabled": false,
-      "icon": "https://apnews.com"
+      "icon": "https://www.lemonde.fr/en"
     },
     {
-      "id": "reuters",
-      "name": "Reuters",
-      "url": "https://news.google.com/rss/search?q=when:24h+allinurl:reuters.com&hl=en-US&gl=US&ceid=US:en",
+      "id": "elpais",
+      "name": "El País (Spanish)",
+      "url": "https://feeds.elpais.com/mrss-s/pages/ep/site/elpais.com/portada",
+      "refresh": 60,
+      "lifetime": 1095,
+      "category": "general",
+      "defaultEnabled": false
+    },
+    {
+      "id": "elpaisenglish",
+      "name": "El País (English)",
+      "url": "https://feeds.elpais.com/mrss-s/pages/ep/site/english.elpais.com/portada",
       "refresh": 60,
       "lifetime": 1095,
       "category": "general",
       "defaultEnabled": false,
-      "icon": "https://www.reuters.com"
+      "icon": "https://english.elpais.com"
+    },
+    {
+      "id": "skynews",
+      "name": "Sky News World",
+      "url": "https://feeds.skynews.com/feeds/rss/world.xml",
+      "refresh": 60,
+      "lifetime": 1095,
+      "category": "general",
+      "defaultEnabled": false,
+      "icon": "https://news.sky.com"
+    },
+    {
+      "id": "abcnews",
+      "name": "ABC News",
+      "url": "https://abcnews.go.com/abcnews/topstories",
+      "refresh": 60,
+      "lifetime": 1095,
+      "category": "general",
+      "defaultEnabled": false,
+      "icon": "https://abcnews.go.com"
+    },
+    {
+      "id": "dwtop",
+      "name": "DW (English)",
+      "url": "https://rss.dw.com/xml/rss-en-top",
+      "refresh": 60,
+      "lifetime": 1095,
+      "category": "general",
+      "defaultEnabled": false,
+      "icon": "https://www.dw.com"
     },
     {
       "id": "ft",
@@ -220,10 +259,80 @@
       "defaultEnabled": false
     },
     {
+      "id": "verge",
+      "name": "The Verge",
+      "url": "https://www.theverge.com/rss/index.xml",
+      "refresh": 60,
+      "lifetime": 1095,
+      "category": "technology",
+      "defaultEnabled": false,
+      "icon": "https://www.theverge.com"
+    },
+    {
+      "id": "ieeespectrum",
+      "name": "IEEE Spectrum",
+      "url": "https://news.google.com/rss/search?q=site:spectrum.ieee.org&hl=en-US&gl=US&ceid=US:en",
+      "refresh": 3600,
+      "lifetime": 1095,
+      "category": "technology",
+      "defaultEnabled": false,
+      "icon": "https://spectrum.ieee.org"
+    },
+    {
+      "id": "bloombergtech",
+      "name": "Bloomberg Tech",
+      "url": "https://feeds.bloomberg.com/technology/news.rss",
+      "refresh": 60,
+      "lifetime": 1095,
+      "category": "technology",
+      "defaultEnabled": false,
+      "icon": "https://www.bloomberg.com"
+    },
+    {
+      "id": "theregister",
+      "name": "The Register",
+      "url": "https://www.theregister.com/headlines.atom",
+      "refresh": 60,
+      "lifetime": 1095,
+      "category": "technology",
+      "defaultEnabled": false,
+      "icon": "https://www.theregister.com"
+    },
+    {
+      "id": "lwn",
+      "name": "LWN.net",
+      "url": "https://lwn.net/headlines/rss",
+      "refresh": 60,
+      "lifetime": 1095,
+      "category": "technology",
+      "defaultEnabled": false,
+      "icon": "https://lwn.net"
+    },
+    {
+      "id": "infoq",
+      "name": "InfoQ",
+      "url": "https://feed.infoq.com",
+      "refresh": 60,
+      "lifetime": 1095,
+      "category": "technology",
+      "defaultEnabled": false,
+      "icon": "https://www.infoq.com"
+    },
+    {
+      "id": "phoronix",
+      "name": "Phoronix",
+      "url": "https://www.phoronix.com/rss.php",
+      "refresh": 60,
+      "lifetime": 1095,
+      "category": "technology",
+      "defaultEnabled": false,
+      "icon": "https://www.phoronix.com"
+    },
+    {
       "id": "hackernews",
       "name": "Hacker News",
       "url": "https://news.ycombinator.com/rss",
-      "refresh": 60,
+      "refresh": 15,
       "lifetime": 1095,
       "category": "technology",
       "defaultEnabled": false,
@@ -291,6 +400,26 @@
       "lifetime": 1095,
       "category": "defense",
       "defaultEnabled": false
+    },
+    {
+      "id": "ap",
+      "name": "AP News",
+      "url": "https://news.google.com/rss/search?q=when:24h+allinurl:apnews.com&hl=en-US&gl=US&ceid=US:en",
+      "refresh": 60,
+      "lifetime": 1095,
+      "category": "general",
+      "defaultEnabled": false,
+      "icon": "https://apnews.com"
+    },
+    {
+      "id": "reuters",
+      "name": "Reuters",
+      "url": "https://news.google.com/rss/search?q=when:24h+allinurl:reuters.com&hl=en-US&gl=US&ceid=US:en",
+      "refresh": 60,
+      "lifetime": 1095,
+      "category": "general",
+      "defaultEnabled": false,
+      "icon": "https://www.reuters.com"
     }
   ]
 }
