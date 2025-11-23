@@ -38,7 +38,7 @@
                 <svg class="button-icon"><use href="#icon-weather"></use></svg>
                 Weather
             </button>
-            <button id="sat-section" class="section-button hidden" onclick="showSection('satellite')">
+            <button id="sat-section" class="section-button" onclick="showSection('satellite')">
                 <svg class="button-icon"><use href="#icon-satellite"></use></svg>
                 Satellite
             </button>
@@ -443,6 +443,21 @@
                             onclick="toggleOptionSetting(this)">ABRP</button>
                         <button class="option-button" data-value="rainmap"
                             onclick="toggleOptionSetting(this)">RainMap</button>
+                    </div>
+                </div>
+
+                <div class="settings-toggle-item option-switch-container" data-setting="satellite-region">
+                    <label>Satellite Imagery Region</label>
+                    <div class="option-switch" id="satellite-region-switch">
+                        <button class="option-button active" data-value="conus" onclick="toggleOptionSetting(this)">US</button>
+                        <button class="option-button" data-value="canada" onclick="toggleOptionSetting(this)">Canada</button>
+                        <button class="option-button" data-value="mexico" onclick="toggleOptionSetting(this)">Mexico</button>
+                        <button class="option-button" data-value="europe" onclick="toggleOptionSetting(this)">Europe</button>
+                        <button class="option-button" data-value="china" onclick="toggleOptionSetting(this)">China</button>
+                    </div>
+                    <div class="settings-inline-actions">
+                        <button id="satellite-use-location" class="settings-action-button" onclick="useLocationForSatellite()">Use current location</button>
+                        <span class="settings-help-text">Location-based selection disables manual overrides.</span>
                     </div>
                 </div>
 

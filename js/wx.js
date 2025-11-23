@@ -1,15 +1,60 @@
 // Import required functions from app.js
 import { formatTime, highlightUpdate, testMode, isTestMode, showNotification, showWeatherAlertModal, usingIPLocation } from './common.js';
-import { autoDarkMode, settings } from './settings.js';
+import { autoDarkMode, settings, applySettingUI } from './settings.js';
 
 // Parameters
 const HOURLY_FORECAST_DAYS = 2;
 const HOURLY_POPUP_GAP = 64; // px spacing between daily cards and hourly popup
-const SAT_URLS = {
+const WEATHER_SWITCH_TYPES = ['latest', 'loop', 'latest_ir'];
+
+const GOES_CONUS = {
     latest: 'https://cdn.star.nesdis.noaa.gov/GOES19/ABI/CONUS/GEOCOLOR/1250x750.jpg',
     loop: 'https://cdn.star.nesdis.noaa.gov/GOES16/GLM/CONUS/EXTENT3/GOES16-CONUS-EXTENT3-625x375.gif',
     latest_ir: 'https://cdn.star.nesdis.noaa.gov/GOES16/ABI/CONUS/11/1250x750.jpg',
 };
+
+const GOES_AMERICAS = {
+    latest: 'https://cdn.star.nesdis.noaa.gov/GOES19/ABI/FD/GEOCOLOR/1250x750.jpg',
+    loop: 'https://cdn.star.nesdis.noaa.gov/GOES19/ABI/FD/GEOCOLOR/GOES19-FD-625x375.gif',
+    latest_ir: 'https://cdn.star.nesdis.noaa.gov/GOES19/ABI/FD/13/1250x750.jpg',
+};
+
+const GIBS_EUROPE_VISIBLE = 'https://gibs.earthdata.nasa.gov/wms/epsg4326/best/wms.cgi?SERVICE=WMS&REQUEST=GetMap&FORMAT=image/jpeg&VERSION=1.1.1&WIDTH=900&HEIGHT=900&SRS=EPSG:4326&LAYERS=VIIRS_SNPP_CorrectedReflectance_TrueColor&STYLES=&BBOX=-20,30,40,70';
+const GIBS_CHINA_VISIBLE = 'https://gibs.earthdata.nasa.gov/wms/epsg4326/best/wms.cgi?SERVICE=WMS&REQUEST=GetMap&FORMAT=image/jpeg&VERSION=1.1.1&WIDTH=900&HEIGHT=900&SRS=EPSG:4326&LAYERS=VIIRS_SNPP_CorrectedReflectance_TrueColor&STYLES=&BBOX=70,10,150,55';
+
+const EUROPE_COUNTRIES = ['AL', 'AD', 'AT', 'BA', 'BE', 'BG', 'BY', 'CH', 'CY', 'CZ', 'DE', 'DK', 'EE', 'ES', 'FI', 'FO', 'FR', 'GB', 'GI', 'GR', 'HR', 'HU', 'IE', 'IM', 'IS', 'IT', 'JE', 'LI', 'LT', 'LU', 'LV', 'MC', 'MD', 'ME', 'MK', 'MT', 'NL', 'NO', 'PL', 'PT', 'RO', 'RS', 'RU', 'SE', 'SI', 'SK', 'SM', 'TR', 'UA', 'VA'];
+
+const SATELLITE_REGIONS = {
+    conus: {
+        label: 'Continental US',
+        sources: GOES_CONUS,
+        matcher: (location) => location.country === 'US' && location.state !== 'HI' && location.state !== 'AK'
+    },
+    canada: {
+        label: 'Canada',
+        sources: GOES_AMERICAS,
+        matcher: (location) => location.country === 'CA'
+    },
+    mexico: {
+        label: 'Mexico',
+        sources: GOES_AMERICAS,
+        matcher: (location) => location.country === 'MX'
+    },
+    europe: {
+        label: 'Europe',
+        sources: { latest: GIBS_EUROPE_VISIBLE, loop: null, latest_ir: null },
+        matcher: (location) => EUROPE_COUNTRIES.includes(location.country)
+    },
+    china: {
+        label: 'China & East Asia',
+        sources: { latest: GIBS_CHINA_VISIBLE, loop: null, latest_ir: null },
+        matcher: (location) => ['CN', 'HK', 'MO', 'TW'].includes(location.country)
+    }
+};
+
+let SAT_URLS = { ...GOES_CONUS };
+let currentSatelliteRegion = 'conus';
+let currentSatelliteType = 'latest';
 
 // Module variables
 let forecastDataPrem = null;            // Has both current and forecast data
@@ -25,8 +70,109 @@ let state = null;                       // Variable to store the state name
 let country = null;                     // Variable to store the country name
 let inCONUS = null;                     // In the continental US (CONUS)
 
+function normalizeSatelliteSources(regionId) {
+    const region = SATELLITE_REGIONS[regionId] || SATELLITE_REGIONS.conus;
+    return {
+        latest: region.sources.latest ?? null,
+        loop: region.sources.loop ?? null,
+        latest_ir: region.sources.latest_ir ?? null,
+    };
+}
+
+function getAvailableSatelliteType(preferredType = currentSatelliteType) {
+    if (SAT_URLS[preferredType]) {
+        return preferredType;
+    }
+
+    for (const type of WEATHER_SWITCH_TYPES) {
+        if (SAT_URLS[type]) {
+            return type;
+        }
+    }
+
+    return 'latest';
+}
+
+function getSatelliteRegionForLocation() {
+    const location = { country: country || '', state: state || '' };
+
+    for (const [regionId, region] of Object.entries(SATELLITE_REGIONS)) {
+        if (region.matcher(location)) {
+            return regionId;
+        }
+    }
+
+    return 'conus';
+}
+
+function updateSatelliteSwitchAvailability() {
+    const weatherSwitch = document.querySelector('.weather-switch');
+    if (!weatherSwitch) return;
+
+    const buttons = weatherSwitch.getElementsByTagName('button');
+    WEATHER_SWITCH_TYPES.forEach((type, index) => {
+        const button = buttons[index];
+        if (!button) return;
+
+        const available = !!SAT_URLS[type];
+        button.disabled = !available;
+        button.classList.toggle('unavailable', !available);
+    });
+}
+
+function setSatelliteType(type = 'latest') {
+    const nextType = getAvailableSatelliteType(type);
+    currentSatelliteType = nextType;
+
+    updateSatelliteSwitchAvailability();
+
+    const weatherSwitch = document.querySelector('.weather-switch');
+    if (weatherSwitch) {
+        const buttons = weatherSwitch.getElementsByTagName('button');
+        buttons[0].classList.toggle('active', nextType === 'latest');
+        buttons[1].classList.toggle('active', nextType === 'loop');
+        buttons[2].classList.toggle('active', nextType === 'latest_ir');
+
+        const positions = { 'latest': 0, 'loop': 1, 'latest_ir': 2 };
+        weatherSwitch.style.setProperty('--slider-position', positions[nextType]);
+    }
+
+    const weatherImage = document.getElementById('weather-image');
+    if (weatherImage) {
+        weatherImage.src = getCurrentSatelliteUrl(nextType);
+    }
+}
+
+function applySatelliteRegion(regionId) {
+    currentSatelliteRegion = regionId;
+    SAT_URLS = normalizeSatelliteSources(regionId);
+    setSatelliteType(currentSatelliteType);
+}
+
+function ensureSatelliteRegionInSettings(regionId) {
+    if (settings['satellite-region'] !== regionId) {
+        settings['satellite-region'] = regionId;
+        applySettingUI('satellite-region', regionId);
+    }
+}
+
+function getCurrentSatelliteUrl(type = currentSatelliteType) {
+    const resolvedType = getAvailableSatelliteType(type);
+    return SAT_URLS[resolvedType] || '';
+}
+
+export function updateSatelliteRegionFromLocation() {
+    if (!settings['satellite-use-location']) {
+        return;
+    }
+
+    const detectedRegion = getSatelliteRegionForLocation();
+    applySatelliteRegion(detectedRegion);
+    ensureSatelliteRegionInSettings(detectedRegion);
+}
+
 // Export these variables for use in other modules
-export { SAT_URLS, forecastDataPrem, lastLat, lastLong, city, state, currentRainAlert, currentWeatherAlerts };
+export { SAT_URLS, forecastDataPrem, lastLat, lastLong, city, state, country, inCONUS, currentRainAlert, currentWeatherAlerts, getCurrentSatelliteUrl, updateSatelliteRegionFromLocation, applySatelliteRegion };
 
 // Fetches premium weather data from OpenWeather API
 export async function fetchPremiumWeatherData(lat, long, silentLoad = false) {
@@ -172,17 +318,13 @@ export async function fetchCityData(lat, long) {
             highlightUpdate('city', city);
             highlightUpdate('state', state);
 
-            // If we're in CONUS, show the "sat-section" button
+            // Satellite imagery is available globally; reveal the button and align to location
             const satSection = document.getElementById('sat-section');
             if (satSection) {
-                if (inCONUS) {
-                    console.log('Location is in CONUS');
-                    satSection.classList.remove('hidden');
-                } else {
-                    console.log('Location is NOT in CONUS');
-                    satSection.classList.add('hidden');
-                }
+                satSection.classList.remove('hidden');
             }
+
+            updateSatelliteRegionFromLocation();
         } else {
             console.log('No location data available.');
         }
@@ -1699,26 +1841,19 @@ window.closePremiumPrecipPopup = function() {
 
 // Switches the weather image based on the type provided
 window.switchWeatherImage = function (type) {
-	// console.log('switchWeatherImage()');
+        // console.log('switchWeatherImage()');
 
     const weatherImage = document.getElementById('weather-image');
-    weatherImage.style.opacity = '0';
-    
+    if (weatherImage) {
+        weatherImage.style.opacity = '0';
+    }
+
     setTimeout(() => {
-        weatherImage.src = SAT_URLS[type];
-        weatherImage.style.opacity = '1';
+        setSatelliteType(type);
+        if (weatherImage) {
+            weatherImage.style.opacity = '1';
+        }
     }, 300);
-    
-    // Update buttons and slider position
-    const weatherSwitch = document.querySelector('.weather-switch');
-    const buttons = weatherSwitch.getElementsByTagName('button');
-    buttons[0].classList.toggle('active', type === 'latest');
-    buttons[1].classList.toggle('active', type === 'loop');
-    buttons[2].classList.toggle('active', type === 'latest_ir');
-    
-    // Update slider position for three states
-    const positions = { 'latest': 0, 'loop': 1, 'latest_ir': 2 };
-    weatherSwitch.style.setProperty('--slider-position', positions[type]);
 }
 
 // Process weather alerts from OpenWeather API response

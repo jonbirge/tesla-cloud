@@ -1027,6 +1027,46 @@ body.dark-mode .option-button:hover:not(.active) {
     background-color: rgba(255, 255, 255, 0.1);
 }
 
+.option-button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.settings-inline-actions {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-top: 8px;
+}
+
+.settings-action-button {
+    background-color: var(--button-highlight);
+    border: 1px solid var(--card-border);
+    border-radius: var(--button-radius);
+    color: var(--text-color);
+    cursor: pointer;
+    font-weight: 600;
+    padding: 6px 12px;
+    transition: background-color 0.2s ease, color 0.2s ease, border-color 0.2s ease;
+}
+
+.settings-action-button.active {
+    background-color: var(--tesla-blue);
+    color: white;
+    border-color: var(--tesla-blue);
+}
+
+.settings-action-button:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+.settings-help-text {
+    color: var(--text-muted);
+    font-size: 11pt;
+}
+
 /* Mobile Landscape Mode */
 @media only screen and (max-width: 900px) {
     :root {

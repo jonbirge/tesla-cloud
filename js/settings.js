@@ -1,9 +1,8 @@
 // Imports
 import { updateNews, setShareButtonsVisibility, initializeNewsStorage } from './news.js';
 import { updateNetChartAxisColors } from './net.js';
-import { updatePremiumWeatherDisplay } from './wx.js';
 import { startStockUpdates, stopStockUpdates } from './stock.js';
-import { forecastDataPrem, lastLat, lastLong, updateRainChartAxisColors } from './wx.js';
+import { updatePremiumWeatherDisplay, forecastDataPrem, lastLat, lastLong, updateRainChartAxisColors, updateSatelliteRegionFromLocation, applySatelliteRegion } from './wx.js';
 
 // Global variables
 let isDriving = false;          // The vehicle is not parked
@@ -20,7 +19,7 @@ let settingsPollingInterval = null; // Interval ID for settings polling
 let isUpdatingSettings = false; // Flag to prevent concurrent updates
 
 // Export settings object so it's accessible to other modules
-export { settings, currentUser, isLoggedIn, hashedUser, isDriving, live_news_updates };
+export { settings, currentUser, isLoggedIn, hashedUser, isDriving, live_news_updates, applySettingUI };
 
 // Default settings that will be used when no user is logged in
 const defaultSettings = {
@@ -32,6 +31,8 @@ const defaultSettings = {
     "map-choice": 'waze',
     "show-wind-radar": false,
     "show-hourly-stripes": true,
+    "satellite-use-location": true,
+    "satellite-region": 'conus',
     // Stocks
     "show-price-alt": false,
     "show-stock-indicator": true,
@@ -449,6 +450,7 @@ async function fetchSettings() {
         if (response.ok) {
             // Load settings
             settings = await response.json();
+            settings = { ...defaultSettings, ...settings };
             console.log('Settings loaded: ', settings);
 
             // Clean up orphaned stock/index subscriptions
@@ -1059,7 +1061,17 @@ function updateSetting(key, value) {
         case 'map-choice':
             updateMapFrame();
             break;
-            
+        case 'satellite-region':
+            applySatelliteRegion(value);
+            updateSatelliteLocationControl(settings['satellite-use-location']);
+            break;
+        case 'satellite-use-location':
+            updateSatelliteLocationControl(value);
+            if (value) {
+                updateSatelliteRegionFromLocation();
+            }
+            break;
+
         case 'news-forwarding':
             setShareButtonsVisibility();
             setControlEnable('forwarding-email', value);
@@ -1152,6 +1164,10 @@ function updateSetting(key, value) {
     }
 }
 
+export function applySettingUI(key, value) {
+    updateSetting(key, value);
+}
+
 // Function to enable/disable controls based on a setting
 function setControlEnable(key, enabled = true) {
     const settingItems = document.querySelectorAll(`div[data-setting="${key}"]`);
@@ -1185,6 +1201,16 @@ function setControlEnable(key, enabled = true) {
     }
 }
 
+function updateSatelliteLocationControl(useLocation) {
+    setControlEnable('satellite-region', !useLocation);
+
+    const useLocationButton = document.getElementById('satellite-use-location');
+    if (useLocationButton) {
+        useLocationButton.classList.toggle('active', useLocation);
+        useLocationButton.textContent = useLocation ? 'Using current location' : 'Use current location';
+    }
+}
+
 // Initialize all toggle and text states based on 'settings' dictionary
 function initializeSettings() {
     // Load stock/index data and generate settings
@@ -1202,6 +1228,7 @@ function initializeSettings() {
             updateSetting(key, value);
         }
     }
+    updateSatelliteLocationControl(settings['satellite-use-location']);
     autoDarkMode();
 }
 
@@ -1351,21 +1378,29 @@ window.toggleSettingFrom = function(element) {
 // Function for toggling option-based settings (e.g. map-choice)
 window.toggleOptionSetting = function(button) {
     // console.log(`Option setting "${key}" changed to "${value}"`);
-    
+
     const settingItem = button.closest('.option-switch-container');
     if (!settingItem || !settingItem.dataset.setting) return;
 
     const key = settingItem.dataset.setting;
     let value = button.dataset.value;
-    
+
     // Handle special cases for compatibility
     if (key === 'imperial-units') {
         // Convert value to boolean
         value = (value === 'english');
     }
-    
+
+    if (key === 'satellite-region' && settings['satellite-use-location']) {
+        saveSetting('satellite-use-location', false);
+    }
+
     // Store the setting
     saveSetting(key, value);
+}
+
+window.useLocationForSatellite = function() {
+    saveSetting('satellite-use-location', true);
 }
 
 // Function called by the text input UI elements for text-based settings
