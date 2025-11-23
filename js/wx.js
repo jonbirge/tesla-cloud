@@ -361,10 +361,7 @@ function updateWeatherAlertsDisplay() {
     if (!alertsContainer) {
         alertsContainer = document.createElement('div');
         alertsContainer.id = 'weather-alerts-container';
-        alertsContainer.style.cssText = `
-            margin: 16px 0;
-            padding: 0;
-        `;
+        alertsContainer.classList.add('weather-alerts-container');
         
         // Insert after the forecast container
         const forecastContainer = document.getElementById('prem-forecast-container');
@@ -380,64 +377,38 @@ function updateWeatherAlertsDisplay() {
     if (currentWeatherAlerts.length > 0) {
         const alertsTitle = document.createElement('h2');
         alertsTitle.textContent = 'Active Weather Alerts';
-        // Use the same style as other headings like "Extended Forecast"
         alertsContainer.appendChild(alertsTitle);
 
         currentWeatherAlerts.forEach(alert => {
             const alertItem = document.createElement('div');
-            alertItem.style.cssText = `
-                background-color: rgba(255, 0, 0, 0.1);
-                border: 1px solid #ff0000;
-                border-radius: 8px;
-                padding: 12px;
-                margin-bottom: 8px;
-            `;
+            alertItem.classList.add('weather-alert-card');
 
             const alertHeader = document.createElement('div');
-            alertHeader.style.cssText = `
-                display: flex;
-                align-items: center;
-                margin-bottom: 8px;
-            `;
+            alertHeader.classList.add('weather-alert-header');
 
             const alertIcon = document.createElement('span');
             alertIcon.innerHTML = `
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width: 20px; height: 20px; color: #ff0000;">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                   <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>
                   <line x1="12" y1="9" x2="12" y2="13"/>
                   <line x1="12" y1="17" x2="12.01" y2="17"/>
                 </svg>
             `;
-            alertIcon.style.cssText = `
-                display: inline-flex;
-                align-items: center;
-                margin-right: 8px;
-            `;
+            alertIcon.classList.add('weather-alert-icon');
 
             const alertTitle = document.createElement('strong');
             alertTitle.textContent = alert.event || 'Weather Alert';
-            alertTitle.style.cssText = `
-                color: #ff0000;
-                font-size: 16px;
-            `;
+            alertTitle.classList.add('weather-alert-name');
 
             alertHeader.appendChild(alertIcon);
             alertHeader.appendChild(alertTitle);
 
             const alertDescription = document.createElement('p');
             alertDescription.textContent = alert.description || 'Weather alert in effect.';
-            alertDescription.style.cssText = `
-                margin: 0 0 8px 0;
-                line-height: 1.3;
-                color: var(--button-text);
-                font-style: italic;
-            `;
+            alertDescription.classList.add('weather-alert-description');
 
             const alertTime = document.createElement('div');
-            alertTime.style.cssText = `
-                font-size: 12px;
-                color: var(--text-color);
-            `;
+            alertTime.classList.add('weather-alert-time');
             const endTime = new Date(alert.end * 1000).toLocaleString();
             alertTime.textContent = `Until: ${endTime}`;
 
