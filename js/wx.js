@@ -5,10 +5,57 @@ import { autoDarkMode, settings } from './settings.js';
 // Parameters
 const HOURLY_FORECAST_DAYS = 2;
 const HOURLY_POPUP_GAP = 64; // px spacing between daily cards and hourly popup
-const SAT_URLS = {
-    latest: 'https://cdn.star.nesdis.noaa.gov/GOES19/ABI/CONUS/GEOCOLOR/1250x750.jpg',
-    loop: 'https://cdn.star.nesdis.noaa.gov/GOES16/GLM/CONUS/EXTENT3/GOES16-CONUS-EXTENT3-625x375.gif',
-    latest_ir: 'https://cdn.star.nesdis.noaa.gov/GOES16/ABI/CONUS/11/1250x750.jpg',
+const EUROPE_COUNTRIES = new Set([
+    'AL', 'AD', 'AT', 'BA', 'BE', 'BG', 'BY', 'CH', 'CY', 'CZ', 'DE', 'DK', 'EE', 'ES', 'FI',
+    'FR', 'GB', 'GI', 'GR', 'HR', 'HU', 'IE', 'IS', 'IT', 'LI', 'LT', 'LU', 'LV', 'MD', 'ME',
+    'MK', 'MT', 'NL', 'NO', 'PL', 'PT', 'RO', 'RS', 'SE', 'SI', 'SK', 'SM', 'UA'
+]);
+
+const SATELLITE_SOURCES = {
+    conus: {
+        label: 'U.S. (CONUS)',
+        countries: ['US'],
+        urls: {
+            latest: 'https://cdn.star.nesdis.noaa.gov/GOES19/ABI/CONUS/GEOCOLOR/1250x750.jpg',
+            loop: 'https://cdn.star.nesdis.noaa.gov/GOES16/GLM/CONUS/EXTENT3/GOES16-CONUS-EXTENT3-625x375.gif',
+            latest_ir: 'https://cdn.star.nesdis.noaa.gov/GOES16/ABI/CONUS/11/1250x750.jpg',
+        },
+        availability: { latest: true, loop: true, latest_ir: true },
+    },
+    mexico: {
+        label: 'Mexico',
+        countries: ['MX'],
+        urls: {
+            latest: 'https://cdn.star.nesdis.noaa.gov/GOES16/ABI/SECTOR/MEX/GEOCOLOR/1250x750.jpg',
+            latest_ir: 'https://cdn.star.nesdis.noaa.gov/GOES16/ABI/SECTOR/MEX/11/1250x750.jpg',
+        },
+        availability: { latest: true, loop: false, latest_ir: true },
+    },
+    canada: {
+        label: 'Canada',
+        countries: ['CA'],
+        urls: {
+            latest: 'https://cdn.star.nesdis.noaa.gov/GOES16/ABI/SECTOR/NAM/GEOCOLOR/1250x750.jpg',
+            latest_ir: 'https://cdn.star.nesdis.noaa.gov/GOES16/ABI/SECTOR/NAM/11/1250x750.jpg',
+        },
+        availability: { latest: true, loop: false, latest_ir: true },
+    },
+    china: {
+        label: 'China & W. Pacific',
+        countries: ['CN'],
+        urls: {
+            latest: 'https://slider.cira.colostate.edu/data/obs/himawari/full_disk/geocolor/latest.jpg',
+        },
+        availability: { latest: true, loop: false, latest_ir: false },
+    },
+    europe: {
+        label: 'Europe',
+        countries: [],
+        urls: {
+            latest: 'https://slider.cira.colostate.edu/data/obs/meteosat-11/full_disk/geocolor/latest.jpg',
+        },
+        availability: { latest: true, loop: false, latest_ir: false },
+    },
 };
 
 // Module variables
@@ -24,9 +71,113 @@ let city = null;                        // Variable to store the city name
 let state = null;                       // Variable to store the state name
 let country = null;                     // Variable to store the country name
 let inCONUS = null;                     // In the continental US (CONUS)
+let satellitePreference = 'conus';      // Preferred manual satellite source
+let satelliteAutoMode = true;           // Whether to auto-select based on location
+let activeSatelliteKey = 'conus';       // Currently selected source key
+let currentSatelliteType = 'latest';    // Currently displayed imagery type
 
 // Export these variables for use in other modules
-export { SAT_URLS, forecastDataPrem, lastLat, lastLong, city, state, currentRainAlert, currentWeatherAlerts };
+export { SATELLITE_SOURCES, forecastDataPrem, lastLat, lastLong, city, state, currentRainAlert, currentWeatherAlerts };
+
+// Determine which satellite source should be used for a country code
+function findSatelliteSourceForCountry(countryCode) {
+    if (!countryCode) return null;
+
+    if (countryCode === 'US') return 'conus';
+    if (countryCode === 'MX') return 'mexico';
+    if (countryCode === 'CA') return 'canada';
+    if (countryCode === 'CN') return 'china';
+    if (EUROPE_COUNTRIES.has(countryCode)) return 'europe';
+
+    return null;
+}
+
+function getActiveSatelliteSource() {
+    return SATELLITE_SOURCES[activeSatelliteKey] || SATELLITE_SOURCES.conus;
+}
+
+function getFirstAvailableType(sourceKey = activeSatelliteKey) {
+    const source = SATELLITE_SOURCES[sourceKey];
+    if (!source) return 'latest';
+
+    return Object.keys(source.availability).find(type => source.availability[type]) || 'latest';
+}
+
+function getSatelliteUrl(type) {
+    const source = getActiveSatelliteSource();
+    return source.urls[type] || null;
+}
+
+function updateSatelliteControls() {
+    const weatherSwitch = document.querySelector('.weather-switch');
+    if (!weatherSwitch) return;
+
+    const typeOrder = ['latest', 'loop', 'latest_ir'];
+    const source = getActiveSatelliteSource();
+
+    weatherSwitch.style.setProperty('--slider-position', typeOrder.indexOf(currentSatelliteType));
+
+    const buttons = weatherSwitch.querySelectorAll('button');
+    buttons.forEach((btn, idx) => {
+        const type = typeOrder[idx];
+        const available = !!source.availability[type];
+        btn.disabled = !available;
+        btn.classList.toggle('unavailable', !available);
+    });
+}
+
+function setActiveSatelliteSource(sourceKey, resetType = false) {
+    const validatedKey = SATELLITE_SOURCES[sourceKey] ? sourceKey : 'conus';
+    const didChange = validatedKey !== activeSatelliteKey;
+    activeSatelliteKey = validatedKey;
+
+    if (resetType || !getActiveSatelliteSource().availability[currentSatelliteType]) {
+        currentSatelliteType = getFirstAvailableType(validatedKey);
+    }
+
+    updateSatelliteControls();
+
+    const weatherImage = document.getElementById('weather-image');
+    if (weatherImage) {
+        const targetType = didChange ? currentSatelliteType : currentSatelliteType;
+        const newUrl = getSatelliteUrl(targetType);
+        if (newUrl) {
+            weatherImage.src = newUrl;
+        }
+    }
+
+    updateSatelliteHint();
+}
+
+function updateSatelliteHint() {
+    const hint = document.getElementById('satellite-region-hint');
+    const autoButton = document.getElementById('satellite-location-button');
+
+    if (hint) {
+        const source = getActiveSatelliteSource();
+        const locationNote = country ? ` for ${country}` : '';
+        const mode = satelliteAutoMode ? 'auto-selected' : 'manual';
+        hint.textContent = `Showing ${source.label} (${mode}${locationNote})`;
+    }
+
+    if (autoButton) {
+        autoButton.textContent = satelliteAutoMode ? 'Stop using current location' : 'Use current location';
+    }
+}
+
+function applySatelliteSelection() {
+    const locationKey = findSatelliteSourceForCountry(country);
+    const targetKey = (satelliteAutoMode && locationKey) ? locationKey : satellitePreference;
+    setActiveSatelliteSource(targetKey, true);
+}
+
+export function applySatelliteSettings(regionKey, autoMode = satelliteAutoMode) {
+    if (regionKey && SATELLITE_SOURCES[regionKey]) {
+        satellitePreference = regionKey;
+    }
+    satelliteAutoMode = autoMode;
+    applySatelliteSelection();
+}
 
 // Fetches premium weather data from OpenWeather API
 export async function fetchPremiumWeatherData(lat, long, silentLoad = false) {
@@ -172,17 +323,13 @@ export async function fetchCityData(lat, long) {
             highlightUpdate('city', city);
             highlightUpdate('state', state);
 
-            // If we're in CONUS, show the "sat-section" button
+            // Always show the satellite section when location is available
             const satSection = document.getElementById('sat-section');
             if (satSection) {
-                if (inCONUS) {
-                    console.log('Location is in CONUS');
-                    satSection.classList.remove('hidden');
-                } else {
-                    console.log('Location is NOT in CONUS');
-                    satSection.classList.add('hidden');
-                }
+                satSection.classList.remove('hidden');
             }
+
+            applySatelliteSelection();
         } else {
             console.log('No location data available.');
         }
@@ -1722,26 +1869,36 @@ window.closePremiumPrecipPopup = function() {
 
 // Switches the weather image based on the type provided
 window.switchWeatherImage = function (type) {
-	// console.log('switchWeatherImage()');
+        // console.log('switchWeatherImage()');
 
     const weatherImage = document.getElementById('weather-image');
     weatherImage.style.opacity = '0';
-    
+
+    const source = getActiveSatelliteSource();
+    const resolvedType = source.availability[type] ? type : getFirstAvailableType();
+    currentSatelliteType = resolvedType;
+
     setTimeout(() => {
-        weatherImage.src = SAT_URLS[type];
+        const url = getSatelliteUrl(resolvedType);
+        if (url) {
+            weatherImage.src = url;
+        }
         weatherImage.style.opacity = '1';
     }, 300);
-    
+
     // Update buttons and slider position
     const weatherSwitch = document.querySelector('.weather-switch');
+    if (!weatherSwitch) return;
     const buttons = weatherSwitch.getElementsByTagName('button');
-    buttons[0].classList.toggle('active', type === 'latest');
-    buttons[1].classList.toggle('active', type === 'loop');
-    buttons[2].classList.toggle('active', type === 'latest_ir');
-    
+    buttons[0].classList.toggle('active', resolvedType === 'latest');
+    buttons[1].classList.toggle('active', resolvedType === 'loop');
+    buttons[2].classList.toggle('active', resolvedType === 'latest_ir');
+
     // Update slider position for three states
     const positions = { 'latest': 0, 'loop': 1, 'latest_ir': 2 };
-    weatherSwitch.style.setProperty('--slider-position', positions[type]);
+    weatherSwitch.style.setProperty('--slider-position', positions[resolvedType]);
+
+    updateSatelliteControls();
 }
 
 // Process weather alerts from OpenWeather API response

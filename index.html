@@ -446,6 +446,21 @@
                     </div>
                 </div>
 
+                <div class="settings-toggle-item option-switch-container" data-setting="satellite-region">
+                    <label>Satellite Region</label>
+                    <div class="option-switch satellite-region-switch">
+                        <button class="option-button active" data-value="conus" onclick="toggleOptionSetting(this)">U.S.</button>
+                        <button class="option-button" data-value="mexico" onclick="toggleOptionSetting(this)">Mexico</button>
+                        <button class="option-button" data-value="canada" onclick="toggleOptionSetting(this)">Canada</button>
+                        <button class="option-button" data-value="china" onclick="toggleOptionSetting(this)">China</button>
+                        <button class="option-button" data-value="europe" onclick="toggleOptionSetting(this)">Europe</button>
+                    </div>
+                    <div class="settings-inline-actions">
+                        <button id="satellite-location-button" class="ghost-button" onclick="useLocationForSatellite()">Use current location</button>
+                        <span id="satellite-region-hint" class="settings-hint"></span>
+                    </div>
+                </div>
+
                 <div class="settings-toggle-item" data-setting="show-price-alt"
                     onclick="this.querySelector('input').click()">
                     <label>Stock Price and % Change</label>

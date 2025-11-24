@@ -1,9 +1,8 @@
 // Imports
 import { updateNews, setShareButtonsVisibility, initializeNewsStorage } from './news.js';
 import { updateNetChartAxisColors } from './net.js';
-import { updatePremiumWeatherDisplay } from './wx.js';
+import { updatePremiumWeatherDisplay, forecastDataPrem, lastLat, lastLong, updateRainChartAxisColors, applySatelliteSettings } from './wx.js';
 import { startStockUpdates, stopStockUpdates } from './stock.js';
-import { forecastDataPrem, lastLat, lastLong, updateRainChartAxisColors } from './wx.js';
 
 // Global variables
 let isDriving = false;          // The vehicle is not parked
@@ -30,6 +29,8 @@ const defaultSettings = {
     "24-hour-time": false,
     "imperial-units": true,
     "map-choice": 'waze',
+    "satellite-region": 'conus',
+    "satellite-auto": true,
     "show-wind-radar": false,
     "show-hourly-stripes": true,
     // Stocks
@@ -1012,7 +1013,14 @@ function updateSetting(key, value) {
         case 'map-choice':
             updateMapFrame();
             break;
-            
+        case 'satellite-region':
+            applySatelliteSettings(value, settings['satellite-auto']);
+            break;
+        case 'satellite-auto':
+            setControlEnable('satellite-region', !value);
+            applySatelliteSettings(settings['satellite-region'], value);
+            break;
+
         case 'news-forwarding':
             setShareButtonsVisibility();
             setControlEnable('forwarding-email', value);
@@ -1310,13 +1318,18 @@ window.toggleOptionSetting = function(button) {
 
     const key = settingItem.dataset.setting;
     let value = button.dataset.value;
-    
+
     // Handle special cases for compatibility
     if (key === 'imperial-units') {
         // Convert value to boolean
         value = (value === 'english');
     }
-    
+
+    if (key === 'satellite-region') {
+        // Manual selection disables auto mode
+        saveSetting('satellite-auto', false);
+    }
+
     // Store the setting
     saveSetting(key, value);
 }
@@ -1330,3 +1343,9 @@ window.updateSettingFrom = function(element) {
         saveSetting(key, value);
     }
 }
+
+// Use current location for satellite imagery and disable manual selector
+window.useLocationForSatellite = function() {
+    const enableAuto = !settings['satellite-auto'];
+    saveSetting('satellite-auto', enableAuto);
+};
