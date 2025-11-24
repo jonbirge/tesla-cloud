@@ -29,20 +29,22 @@ const SATELLITE_SOURCES = {
         availability: { latest: true, loop: true, latest_ir: true },
     },
     europe: {
-        label: 'Europe (Full Disk)',
-        countries: [],
+        label: 'Europe',
+        countries: Array.from(EUROPE_COUNTRIES),
         urls: {
-            latest: 'https://cdn.star.nesdis.noaa.gov/GOES16/ABI/FD/GEOCOLOR/latest.jpg',
+            latest: 'https://eumetview.eumetsat.int/static-images/latestImages/EUMETSAT_MSGIODC_RGBNatColour_Europe.jpg',
+            latest_ir: 'https://eumetview.eumetsat.int/static-images/latestImages/EUMETSAT_MSGIODC_IR108_Europe.jpg',
         },
-        availability: { latest: true, loop: false, latest_ir: false },
+        availability: { latest: true, loop: false, latest_ir: true },
     },
     asia: {
         label: 'Asia-Pacific',
         countries: Array.from(ASIA_COUNTRIES),
         urls: {
-            latest: 'https://cdn.star.nesdis.noaa.gov/himawari/FD/GEOCOLOR/latest.jpg',
+            latest: 'https://eumetview.eumetsat.int/static-images/latestImages/EUMETSAT_MSGIODC_RGBNatColour_NorthernAsia.jpg',
+            latest_ir: 'https://eumetview.eumetsat.int/static-images/latestImages/EUMETSAT_MSGIODC_IR108_NorthernAsia.jpg',
         },
-        availability: { latest: true, loop: false, latest_ir: false },
+        availability: { latest: true, loop: false, latest_ir: true },
     },
 };
 

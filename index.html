@@ -446,22 +446,6 @@
                     </div>
                 </div>
 
-                <div class="settings-toggle-item" data-setting="satellite-auto"
-                    onclick="this.querySelector('input').click()">
-                    <label>Use Current Location for Satellite</label>
-                    <input type="checkbox" onchange="toggleSettingFrom(this)" checked>
-                    <span class="settings-toggle-slider"></span>
-                </div>
-
-                <div class="settings-toggle-item option-switch-container" data-setting="satellite-region">
-                    <label>Satellite Region</label>
-                    <div class="option-switch satellite-region-switch">
-                        <button class="option-button active" data-value="conus" onclick="toggleOptionSetting(this)">U.S.</button>
-                        <button class="option-button" data-value="europe" onclick="toggleOptionSetting(this)">Europe</button>
-                        <button class="option-button" data-value="asia" onclick="toggleOptionSetting(this)">Asia</button>
-                    </div>
-                </div>
-
                 <div class="settings-toggle-item" data-setting="show-price-alt"
                     onclick="this.querySelector('input').click()">
                     <label>Stock Price and % Change</label>
@@ -481,6 +465,25 @@
                     <label>Hourly Forecast Stripes</label>
                     <input type="checkbox" onchange="toggleSettingFrom(this)" checked>
                     <span class="settings-toggle-slider"></span>
+                </div>
+            </div>
+
+            <h2>Satellite Settings</h2>
+            <div class="settings-controls">
+                <div class="settings-toggle-item" data-setting="satellite-auto"
+                    onclick="this.querySelector('input').click()">
+                    <label>Use Current Location for Satellite</label>
+                    <input type="checkbox" onchange="toggleSettingFrom(this)" checked>
+                    <span class="settings-toggle-slider"></span>
+                </div>
+
+                <div class="settings-toggle-item option-switch-container" data-setting="satellite-region">
+                    <label>Satellite Region</label>
+                    <div class="option-switch satellite-region-switch">
+                        <button class="option-button active" data-value="conus" onclick="toggleOptionSetting(this)">U.S.</button>
+                        <button class="option-button" data-value="europe" onclick="toggleOptionSetting(this)">Europe</button>
+                        <button class="option-button" data-value="asia" onclick="toggleOptionSetting(this)">Asia</button>
+                    </div>
                 </div>
             </div>
 
