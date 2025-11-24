@@ -446,6 +446,13 @@
                     </div>
                 </div>
 
+                <div class="settings-toggle-item" data-setting="satellite-auto"
+                    onclick="this.querySelector('input').click()">
+                    <label>Use Current Location for Satellite</label>
+                    <input type="checkbox" onchange="toggleSettingFrom(this)" checked>
+                    <span class="settings-toggle-slider"></span>
+                </div>
+
                 <div class="settings-toggle-item option-switch-container" data-setting="satellite-region">
                     <label>Satellite Region</label>
                     <div class="option-switch satellite-region-switch">
@@ -456,7 +463,6 @@
                         <button class="option-button" data-value="europe" onclick="toggleOptionSetting(this)">Europe</button>
                     </div>
                     <div class="settings-inline-actions">
-                        <button id="satellite-location-button" class="ghost-button" onclick="useLocationForSatellite()">Use current location</button>
                         <span id="satellite-region-hint" class="settings-hint"></span>
                     </div>
                 </div>

@@ -16,9 +16,9 @@ const SATELLITE_SOURCES = {
         label: 'U.S. (CONUS)',
         countries: ['US'],
         urls: {
-            latest: 'https://cdn.star.nesdis.noaa.gov/GOES19/ABI/CONUS/GEOCOLOR/1250x750.jpg',
-            loop: 'https://cdn.star.nesdis.noaa.gov/GOES16/GLM/CONUS/EXTENT3/GOES16-CONUS-EXTENT3-625x375.gif',
-            latest_ir: 'https://cdn.star.nesdis.noaa.gov/GOES16/ABI/CONUS/11/1250x750.jpg',
+            latest: 'https://cdn.star.nesdis.noaa.gov/GOES16/ABI/CONUS/GEOCOLOR/1250x750.jpg',
+            loop: 'https://cdn.star.nesdis.noaa.gov/GOES16/ABI/CONUS/GEOCOLOR/625x375.gif',
+            latest_ir: 'https://cdn.star.nesdis.noaa.gov/GOES16/ABI/CONUS/13/1250x750.jpg',
         },
         availability: { latest: true, loop: true, latest_ir: true },
     },
@@ -27,34 +27,38 @@ const SATELLITE_SOURCES = {
         countries: ['MX'],
         urls: {
             latest: 'https://cdn.star.nesdis.noaa.gov/GOES16/ABI/SECTOR/MEX/GEOCOLOR/1250x750.jpg',
-            latest_ir: 'https://cdn.star.nesdis.noaa.gov/GOES16/ABI/SECTOR/MEX/11/1250x750.jpg',
+            loop: 'https://cdn.star.nesdis.noaa.gov/GOES16/ABI/SECTOR/MEX/GEOCOLOR/GOES16-MEX-GEOCOLOR-625x375.gif',
+            latest_ir: 'https://cdn.star.nesdis.noaa.gov/GOES16/ABI/SECTOR/MEX/13/1250x750.jpg',
         },
-        availability: { latest: true, loop: false, latest_ir: true },
+        availability: { latest: true, loop: true, latest_ir: true },
     },
     canada: {
         label: 'Canada',
         countries: ['CA'],
         urls: {
-            latest: 'https://cdn.star.nesdis.noaa.gov/GOES16/ABI/SECTOR/NAM/GEOCOLOR/1250x750.jpg',
-            latest_ir: 'https://cdn.star.nesdis.noaa.gov/GOES16/ABI/SECTOR/NAM/11/1250x750.jpg',
+            latest: 'https://cdn.star.nesdis.noaa.gov/GOES18/ABI/NHEM/GEOCOLOR/1250x750.jpg',
+            loop: 'https://cdn.star.nesdis.noaa.gov/GOES18/ABI/NHEM/GEOCOLOR/GOES18-NHEM-625x375.gif',
+            latest_ir: 'https://cdn.star.nesdis.noaa.gov/GOES18/ABI/NHEM/13/1250x750.jpg',
         },
-        availability: { latest: true, loop: false, latest_ir: true },
+        availability: { latest: true, loop: true, latest_ir: true },
     },
     china: {
         label: 'China & W. Pacific',
         countries: ['CN'],
         urls: {
             latest: 'https://slider.cira.colostate.edu/data/obs/himawari/full_disk/geocolor/latest.jpg',
+            latest_ir: 'https://slider.cira.colostate.edu/data/obs/himawari/full_disk/band13/latest.jpg',
         },
-        availability: { latest: true, loop: false, latest_ir: false },
+        availability: { latest: true, loop: false, latest_ir: true },
     },
     europe: {
         label: 'Europe',
         countries: [],
         urls: {
             latest: 'https://slider.cira.colostate.edu/data/obs/meteosat-11/full_disk/geocolor/latest.jpg',
+            latest_ir: 'https://slider.cira.colostate.edu/data/obs/meteosat-11/full_disk/band13/latest.jpg',
         },
-        availability: { latest: true, loop: false, latest_ir: false },
+        availability: { latest: true, loop: false, latest_ir: true },
     },
 };
 
@@ -151,17 +155,12 @@ function setActiveSatelliteSource(sourceKey, resetType = false) {
 
 function updateSatelliteHint() {
     const hint = document.getElementById('satellite-region-hint');
-    const autoButton = document.getElementById('satellite-location-button');
 
     if (hint) {
         const source = getActiveSatelliteSource();
         const locationNote = country ? ` for ${country}` : '';
         const mode = satelliteAutoMode ? 'auto-selected' : 'manual';
         hint.textContent = `Showing ${source.label} (${mode}${locationNote})`;
-    }
-
-    if (autoButton) {
-        autoButton.textContent = satelliteAutoMode ? 'Stop using current location' : 'Use current location';
     }
 }
 

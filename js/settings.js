@@ -1344,8 +1344,3 @@ window.updateSettingFrom = function(element) {
     }
 }
 
-// Use current location for satellite imagery and disable manual selector
-window.useLocationForSatellite = function() {
-    const enableAuto = !settings['satellite-auto'];
-    saveSetting('satellite-auto', enableAuto);
-};
