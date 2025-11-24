@@ -468,6 +468,32 @@
                 </div>
             </div>
 
+            <h2>Satellite Settings</h2>
+            <div class="settings-controls">
+                <div class="settings-toggle-item" data-setting="satellite-use-location"
+                    onclick="this.querySelector('input').click()">
+                    <label>Use Current Location</label>
+                    <input type="checkbox" onchange="toggleSatelliteLocationMode(this.checked)" checked>
+                    <span class="settings-toggle-slider"></span>
+                </div>
+
+                <div class="settings-toggle-item option-switch-container satellite-region-selector disabled" data-setting="satellite-region">
+                    <label>Region</label>
+                    <div class="option-switch region-switch">
+                        <button class="option-button active" data-value="conus"
+                            onclick="setSatelliteRegion('conus')">USA</button>
+                        <button class="option-button" data-value="mexico"
+                            onclick="setSatelliteRegion('mexico')">Mexico</button>
+                        <button class="option-button" data-value="canada"
+                            onclick="setSatelliteRegion('canada')">Canada</button>
+                        <button class="option-button" data-value="europe"
+                            onclick="setSatelliteRegion('europe')">Europe</button>
+                        <button class="option-button" data-value="china"
+                            onclick="setSatelliteRegion('china')">China</button>
+                    </div>
+                </div>
+            </div>
+
             <h2>News Settings</h2>
             <div class="settings-controls">
                 <div class="settings-toggle-item" data-setting="show-news-count"

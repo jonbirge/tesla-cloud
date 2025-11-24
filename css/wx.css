@@ -63,6 +63,28 @@ body.dark-mode {
     color: var(--button-text);
 }
 
+.weather-switch button.disabled,
+.weather-switch button:disabled {
+    opacity: 0.3;
+    cursor: not-allowed;
+    pointer-events: none;
+}
+
+/* Satellite region selector */
+.satellite-region-selector .region-switch {
+    flex-wrap: wrap;
+}
+
+.satellite-region-selector .option-button {
+    min-width: 80px;
+}
+
+/* Disable region selector when using location mode */
+.satellite-region-selector.disabled {
+    opacity: 0.5;
+    pointer-events: none;
+}
+
 .weather-switch::after {
     content: '';
     position: absolute;

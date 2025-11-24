@@ -6,9 +6,31 @@ import { autoDarkMode, settings } from './settings.js';
 const HOURLY_FORECAST_DAYS = 2;
 const HOURLY_POPUP_GAP = 64; // px spacing between daily cards and hourly popup
 const SAT_URLS = {
-    latest: 'https://cdn.star.nesdis.noaa.gov/GOES19/ABI/CONUS/GEOCOLOR/1250x750.jpg',
-    loop: 'https://cdn.star.nesdis.noaa.gov/GOES16/GLM/CONUS/EXTENT3/GOES16-CONUS-EXTENT3-625x375.gif',
-    latest_ir: 'https://cdn.star.nesdis.noaa.gov/GOES16/ABI/CONUS/11/1250x750.jpg',
+    conus: {
+        latest: 'https://cdn.star.nesdis.noaa.gov/GOES19/ABI/CONUS/GEOCOLOR/1250x750.jpg',
+        loop: 'https://cdn.star.nesdis.noaa.gov/GOES16/GLM/CONUS/EXTENT3/GOES16-CONUS-EXTENT3-625x375.gif',
+        latest_ir: 'https://cdn.star.nesdis.noaa.gov/GOES16/ABI/CONUS/11/1250x750.jpg',
+    },
+    mexico: {
+        latest: 'https://cdn.star.nesdis.noaa.gov/GOES19/ABI/SECTOR/mex/GEOCOLOR/1250x750.jpg',
+        loop: null, // GLM not available for Mexico sector
+        latest_ir: 'https://cdn.star.nesdis.noaa.gov/GOES19/ABI/SECTOR/mex/11/1250x750.jpg',
+    },
+    canada: {
+        latest: 'https://cdn.star.nesdis.noaa.gov/GOES19/ABI/SECTOR/can/GEOCOLOR/1250x750.jpg',
+        loop: null, // GLM not available for Canada sector
+        latest_ir: 'https://cdn.star.nesdis.noaa.gov/GOES19/ABI/SECTOR/can/11/1250x750.jpg',
+    },
+    europe: {
+        latest: 'https://eumetview.eumetsat.int/static-images/latestImages/EUMETSAT_MSG_RGBNatColourEnhncd_WesternEurope.jpg',
+        loop: null, // Loop not available for EUMETSAT
+        latest_ir: 'https://eumetview.eumetsat.int/static-images/latestImages/EUMETSAT_MSG_IR108_WesternEurope.jpg',
+    },
+    china: {
+        latest: 'https://img.nsmc.org.cn/CLOUDIMAGE/FY4B/MTCC/FY4B_DISK_MTCC_GCLR.JPG',
+        loop: null, // Loop not available for FY-4
+        latest_ir: 'https://img.nsmc.org.cn/CLOUDIMAGE/FY4B/MTCC/FY4B_DISK_MTCC_IR1.JPG',
+    },
 };
 
 // Module variables
@@ -24,9 +46,11 @@ let city = null;                        // Variable to store the city name
 let state = null;                       // Variable to store the state name
 let country = null;                     // Variable to store the country name
 let inCONUS = null;                     // In the continental US (CONUS)
+let currentSatRegion = 'conus';         // Current satellite region selection
+let useLocationForSatRegion = true;     // Whether to auto-select region based on location
 
 // Export these variables for use in other modules
-export { SAT_URLS, forecastDataPrem, lastLat, lastLong, city, state, currentRainAlert, currentWeatherAlerts };
+export { SAT_URLS, forecastDataPrem, lastLat, lastLong, city, state, currentRainAlert, currentWeatherAlerts, currentSatRegion, useLocationForSatRegion };
 
 // Fetches premium weather data from OpenWeather API
 export async function fetchPremiumWeatherData(lat, long, silentLoad = false) {
@@ -172,16 +196,17 @@ export async function fetchCityData(lat, long) {
             highlightUpdate('city', city);
             highlightUpdate('state', state);
 
-            // If we're in CONUS, show the "sat-section" button
+            // Determine satellite region based on location
+            if (useLocationForSatRegion) {
+                currentSatRegion = determineRegionFromLocation(country, state, lat, long);
+                console.log('Auto-selected satellite region:', currentSatRegion);
+                updateSatelliteRegionDisplay();
+            }
+
+            // Always show the satellite section button now that we have multi-region support
             const satSection = document.getElementById('sat-section');
             if (satSection) {
-                if (inCONUS) {
-                    console.log('Location is in CONUS');
-                    satSection.classList.remove('hidden');
-                } else {
-                    console.log('Location is NOT in CONUS');
-                    satSection.classList.add('hidden');
-                }
+                satSection.classList.remove('hidden');
             }
         } else {
             console.log('No location data available.');
@@ -1697,28 +1722,185 @@ window.closePremiumPrecipPopup = function() {
     forecastDays.forEach(day => day.classList.remove('selected'));
 }
 
+// Determine satellite region from location data
+function determineRegionFromLocation(country, state, lat, long) {
+    // Check for CONUS (Continental US, excluding Hawaii and Alaska)
+    if (country === 'US' && state !== 'HI' && state !== 'AK') {
+        return 'conus';
+    }
+
+    // Check for Mexico
+    if (country === 'MX' || country === 'Mexico') {
+        return 'mexico';
+    }
+
+    // Check for Canada
+    if (country === 'CA' || country === 'Canada') {
+        return 'canada';
+    }
+
+    // Check for European countries
+    const europeanCountries = [
+        'GB', 'FR', 'DE', 'IT', 'ES', 'PT', 'NL', 'BE', 'AT', 'CH', 'SE', 'NO', 'DK', 'FI',
+        'PL', 'CZ', 'HU', 'RO', 'BG', 'GR', 'IE', 'HR', 'SK', 'SI', 'LT', 'LV', 'EE',
+        'United Kingdom', 'France', 'Germany', 'Italy', 'Spain', 'Portugal', 'Netherlands',
+        'Belgium', 'Austria', 'Switzerland', 'Sweden', 'Norway', 'Denmark', 'Finland'
+    ];
+    if (europeanCountries.includes(country)) {
+        return 'europe';
+    }
+
+    // Check for China
+    if (country === 'CN' || country === 'China') {
+        return 'china';
+    }
+
+    // Default to CONUS if unknown
+    return 'conus';
+}
+
+// Update satellite region display in settings
+function updateSatelliteRegionDisplay() {
+    const regionButtons = document.querySelectorAll('[data-setting="satellite-region"] .option-button');
+    regionButtons.forEach(button => {
+        button.classList.toggle('active', button.dataset.value === currentSatRegion);
+    });
+    updateSatelliteButtonAvailability();
+}
+
+// Update satellite button availability based on current region
+function updateSatelliteButtonAvailability() {
+    const regionUrls = SAT_URLS[currentSatRegion];
+    if (!regionUrls) return;
+
+    const weatherSwitch = document.querySelector('.weather-switch');
+    if (!weatherSwitch) return;
+
+    const buttons = weatherSwitch.getElementsByTagName('button');
+
+    // Visible button (buttons[0])
+    if (buttons[0]) {
+        if (regionUrls.latest) {
+            buttons[0].classList.remove('disabled');
+            buttons[0].disabled = false;
+        } else {
+            buttons[0].classList.add('disabled');
+            buttons[0].disabled = true;
+        }
+    }
+
+    // Loop button (buttons[1])
+    if (buttons[1]) {
+        if (regionUrls.loop) {
+            buttons[1].classList.remove('disabled');
+            buttons[1].disabled = false;
+        } else {
+            buttons[1].classList.add('disabled');
+            buttons[1].disabled = true;
+        }
+    }
+
+    // IR button (buttons[2])
+    if (buttons[2]) {
+        if (regionUrls.latest_ir) {
+            buttons[2].classList.remove('disabled');
+            buttons[2].disabled = false;
+        } else {
+            buttons[2].classList.add('disabled');
+            buttons[2].disabled = true;
+        }
+    }
+}
+
+// Handle satellite region change from settings
+window.setSatelliteRegion = function(region) {
+    currentSatRegion = region;
+    useLocationForSatRegion = false; // Manual selection overrides location-based
+    updateSatelliteRegionDisplay();
+
+    // Update the location toggle
+    const locationToggle = document.querySelector('[data-setting="satellite-use-location"] input');
+    if (locationToggle) {
+        locationToggle.checked = false;
+    }
+
+    // Switch to visible image for new region if available, otherwise try IR, then loop
+    const regionUrls = SAT_URLS[currentSatRegion];
+    if (regionUrls.latest) {
+        window.switchWeatherImage('latest');
+    } else if (regionUrls.latest_ir) {
+        window.switchWeatherImage('latest_ir');
+    } else if (regionUrls.loop) {
+        window.switchWeatherImage('loop');
+    }
+}
+
+// Toggle use of current location for satellite region
+window.toggleSatelliteLocationMode = function(useLocation) {
+    useLocationForSatRegion = useLocation;
+
+    // Enable/disable the region selector
+    const regionSelector = document.querySelector('.satellite-region-selector');
+    if (regionSelector) {
+        if (useLocation) {
+            regionSelector.classList.add('disabled');
+        } else {
+            regionSelector.classList.remove('disabled');
+        }
+    }
+
+    if (useLocation) {
+        // Re-determine region from current location
+        if (country) {
+            currentSatRegion = determineRegionFromLocation(country, state, lastLat, lastLong);
+            updateSatelliteRegionDisplay();
+
+            // Switch to appropriate image for new region
+            const regionUrls = SAT_URLS[currentSatRegion];
+            if (regionUrls.latest) {
+                window.switchWeatherImage('latest');
+            } else if (regionUrls.latest_ir) {
+                window.switchWeatherImage('latest_ir');
+            } else if (regionUrls.loop) {
+                window.switchWeatherImage('loop');
+            }
+        }
+    }
+}
+
 // Switches the weather image based on the type provided
 window.switchWeatherImage = function (type) {
 	// console.log('switchWeatherImage()');
 
     const weatherImage = document.getElementById('weather-image');
+    const regionUrls = SAT_URLS[currentSatRegion];
+
+    // Check if the image type is available for this region
+    if (!regionUrls || !regionUrls[type]) {
+        console.warn(`Image type ${type} not available for region ${currentSatRegion}`);
+        return;
+    }
+
     weatherImage.style.opacity = '0';
-    
+
     setTimeout(() => {
-        weatherImage.src = SAT_URLS[type];
+        weatherImage.src = regionUrls[type];
         weatherImage.style.opacity = '1';
     }, 300);
-    
+
     // Update buttons and slider position
     const weatherSwitch = document.querySelector('.weather-switch');
     const buttons = weatherSwitch.getElementsByTagName('button');
     buttons[0].classList.toggle('active', type === 'latest');
     buttons[1].classList.toggle('active', type === 'loop');
     buttons[2].classList.toggle('active', type === 'latest_ir');
-    
+
     // Update slider position for three states
     const positions = { 'latest': 0, 'loop': 1, 'latest_ir': 2 };
     weatherSwitch.style.setProperty('--slider-position', positions[type]);
+
+    // Update button disabled state based on availability
+    updateSatelliteButtonAvailability();
 }
 
 // Process weather alerts from OpenWeather API response
