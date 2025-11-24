@@ -1100,6 +1100,16 @@ function updateSetting(key, value) {
             });
             break;
 
+        case 'satellite-use-location':
+        case 'satellite-region':
+            // Initialize satellite settings when they change
+            import('./wx.js').then(wxModule => {
+                if (typeof wxModule.initializeSatelliteSettings === 'function') {
+                    wxModule.initializeSatelliteSettings();
+                }
+            });
+            break;
+
         case 'show-price-alt':
             import('./stock.js').then(stockModule => {
                 if (typeof stockModule.setShowChange === 'function') {

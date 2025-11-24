@@ -1,6 +1,6 @@
 // Import required functions from app.js
 import { formatTime, highlightUpdate, testMode, isTestMode, showNotification, showWeatherAlertModal, usingIPLocation } from './common.js';
-import { autoDarkMode, settings } from './settings.js';
+import { autoDarkMode, settings, saveSetting } from './settings.js';
 
 // Parameters
 const HOURLY_FORECAST_DAYS = 2;
@@ -19,7 +19,7 @@ const SAT_URLS = {
     asia: {
         latest: 'https://rammb.cira.colostate.edu/ramsdis/online/images/latest/himawari-8/full_disk_ahi_natural_color.jpg',
         loop: null, // Loop not available for Himawari
-        latest_ir: 'https://rammb.cira.colostate.edu/ramsdis/online/images/latest/himawari-8/full_disk_ahi_band_13.jpg',
+        latest_ir: 'https://rammb.cira.colostate.edu/ramsdis/online/images/latest/himawari-8/full_disk_ahi_band_14.jpg',
     },
 };
 
@@ -204,6 +204,36 @@ export async function fetchCityData(lat, long) {
     } catch (error) {
         console.error('Error fetching location data: ', error);
     }
+}
+
+// Initialize satellite settings from saved preferences
+export function initializeSatelliteSettings() {
+    // Load saved settings or use defaults
+    if (settings['satellite-use-location'] !== undefined) {
+        useLocationForSatRegion = settings['satellite-use-location'];
+    }
+    if (settings['satellite-region']) {
+        currentSatRegion = settings['satellite-region'];
+    }
+
+    // Update UI to match loaded settings
+    const locationToggle = document.querySelector('[data-setting="satellite-use-location"] input');
+    if (locationToggle) {
+        locationToggle.checked = useLocationForSatRegion;
+    }
+
+    // Update region selector state
+    const regionSelector = document.querySelector('.satellite-region-selector');
+    if (regionSelector) {
+        if (useLocationForSatRegion) {
+            regionSelector.classList.add('disabled');
+        } else {
+            regionSelector.classList.remove('disabled');
+        }
+    }
+
+    updateSatelliteRegionDisplay();
+    updateSatelliteButtonAvailability();
 }
 
 // Generate forecast day elements dynamically
@@ -1807,6 +1837,10 @@ window.setSatelliteRegion = function(region) {
     useLocationForSatRegion = false; // Manual selection overrides location-based
     updateSatelliteRegionDisplay();
 
+    // Save settings
+    saveSetting('satellite-region', region);
+    saveSetting('satellite-use-location', false);
+
     // Update the location toggle
     const locationToggle = document.querySelector('[data-setting="satellite-use-location"] input');
     if (locationToggle) {
@@ -1828,6 +1862,9 @@ window.setSatelliteRegion = function(region) {
 window.toggleSatelliteLocationMode = function(useLocation) {
     useLocationForSatRegion = useLocation;
 
+    // Save setting
+    saveSetting('satellite-use-location', useLocation);
+
     // Enable/disable the region selector
     const regionSelector = document.querySelector('.satellite-region-selector');
     if (regionSelector) {
@@ -1842,6 +1879,7 @@ window.toggleSatelliteLocationMode = function(useLocation) {
         // Re-determine region from current location
         if (country) {
             currentSatRegion = determineRegionFromLocation(country, state, lastLat, lastLong);
+            saveSetting('satellite-region', currentSatRegion);
             updateSatelliteRegionDisplay();
 
             // Switch to appropriate image for new region
