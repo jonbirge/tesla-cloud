@@ -11,6 +11,12 @@ const EUROPE_COUNTRIES = new Set([
     'MK', 'MT', 'NL', 'NO', 'PL', 'PT', 'RO', 'RS', 'SE', 'SI', 'SK', 'SM', 'UA'
 ]);
 
+const ASIA_COUNTRIES = new Set([
+    'CN', 'JP', 'KR', 'KP', 'TW', 'HK', 'MO', 'VN', 'LA', 'TH', 'MM', 'KH', 'MY', 'SG', 'PH',
+    'BN', 'ID', 'TL', 'MN', 'KZ', 'UZ', 'KG', 'TJ', 'TM', 'AF', 'PK', 'IN', 'BD', 'NP', 'BT',
+    'LK'
+]);
+
 const SATELLITE_SOURCES = {
     conus: {
         label: 'U.S. (CONUS)',
@@ -22,43 +28,21 @@ const SATELLITE_SOURCES = {
         },
         availability: { latest: true, loop: true, latest_ir: true },
     },
-    mexico: {
-        label: 'Mexico',
-        countries: ['MX'],
-        urls: {
-            latest: 'https://cdn.star.nesdis.noaa.gov/GOES16/ABI/SECTOR/MEX/GEOCOLOR/1250x750.jpg',
-            loop: 'https://cdn.star.nesdis.noaa.gov/GOES16/ABI/SECTOR/MEX/GEOCOLOR/GOES16-MEX-GEOCOLOR-625x375.gif',
-            latest_ir: 'https://cdn.star.nesdis.noaa.gov/GOES16/ABI/SECTOR/MEX/13/1250x750.jpg',
-        },
-        availability: { latest: true, loop: true, latest_ir: true },
-    },
-    canada: {
-        label: 'Canada',
-        countries: ['CA'],
-        urls: {
-            latest: 'https://cdn.star.nesdis.noaa.gov/GOES18/ABI/NHEM/GEOCOLOR/1250x750.jpg',
-            loop: 'https://cdn.star.nesdis.noaa.gov/GOES18/ABI/NHEM/GEOCOLOR/GOES18-NHEM-625x375.gif',
-            latest_ir: 'https://cdn.star.nesdis.noaa.gov/GOES18/ABI/NHEM/13/1250x750.jpg',
-        },
-        availability: { latest: true, loop: true, latest_ir: true },
-    },
-    china: {
-        label: 'China & W. Pacific',
-        countries: ['CN'],
-        urls: {
-            latest: 'https://slider.cira.colostate.edu/data/obs/himawari/full_disk/geocolor/latest.jpg',
-            latest_ir: 'https://slider.cira.colostate.edu/data/obs/himawari/full_disk/band13/latest.jpg',
-        },
-        availability: { latest: true, loop: false, latest_ir: true },
-    },
     europe: {
-        label: 'Europe',
+        label: 'Europe (Full Disk)',
         countries: [],
         urls: {
-            latest: 'https://slider.cira.colostate.edu/data/obs/meteosat-11/full_disk/geocolor/latest.jpg',
-            latest_ir: 'https://slider.cira.colostate.edu/data/obs/meteosat-11/full_disk/band13/latest.jpg',
+            latest: 'https://cdn.star.nesdis.noaa.gov/GOES16/ABI/FD/GEOCOLOR/latest.jpg',
         },
-        availability: { latest: true, loop: false, latest_ir: true },
+        availability: { latest: true, loop: false, latest_ir: false },
+    },
+    asia: {
+        label: 'Asia-Pacific',
+        countries: Array.from(ASIA_COUNTRIES),
+        urls: {
+            latest: 'https://cdn.star.nesdis.noaa.gov/himawari/FD/GEOCOLOR/latest.jpg',
+        },
+        availability: { latest: true, loop: false, latest_ir: false },
     },
 };
 
@@ -87,13 +71,11 @@ export { SATELLITE_SOURCES, forecastDataPrem, lastLat, lastLong, city, state, cu
 function findSatelliteSourceForCountry(countryCode) {
     if (!countryCode) return null;
 
-    if (countryCode === 'US') return 'conus';
-    if (countryCode === 'MX') return 'mexico';
-    if (countryCode === 'CA') return 'canada';
-    if (countryCode === 'CN') return 'china';
+    if (countryCode === 'US' || countryCode === 'CA' || countryCode === 'MX') return 'conus';
+    if (ASIA_COUNTRIES.has(countryCode)) return 'asia';
     if (EUROPE_COUNTRIES.has(countryCode)) return 'europe';
 
-    return null;
+    return 'asia';
 }
 
 function getActiveSatelliteSource() {
