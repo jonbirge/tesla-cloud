@@ -1,7 +1,7 @@
 // Imports
 import { updateNews, setShareButtonsVisibility, initializeNewsStorage } from './news.js';
 import { updateNetChartAxisColors } from './net.js';
-import { updatePremiumWeatherDisplay } from './wx.js';
+import { updatePremiumWeatherDisplay, updateSatelliteFromSettings } from './wx.js';
 import { startStockUpdates, stopStockUpdates } from './stock.js';
 import { forecastDataPrem, lastLat, lastLong, updateRainChartAxisColors } from './wx.js';
 
@@ -30,6 +30,8 @@ const defaultSettings = {
     "24-hour-time": false,
     "imperial-units": true,
     "map-choice": 'waze',
+    "satellite-region": 'conus',
+    "satellite-use-location": true,
     "show-wind-radar": false,
     "show-hourly-stripes": true,
     // Stocks
@@ -933,6 +935,25 @@ function updateNewsSourceUI() {
     });
 }
 
+function updateSatelliteSettingUI() {
+    const useLocation = settings['satellite-use-location'] ?? true;
+    const regionItem = document.querySelector('[data-setting="satellite-region"]');
+    const locationButton = document.getElementById('satellite-location-button');
+
+    if (regionItem) {
+        const buttons = regionItem.querySelectorAll('.option-button');
+        buttons.forEach(btn => {
+            btn.disabled = useLocation;
+            btn.classList.toggle('disabled', useLocation);
+        });
+        regionItem.style.opacity = useLocation ? '0.6' : '1';
+    }
+
+    if (locationButton) {
+        locationButton.textContent = useLocation ? 'Disable location override' : 'Use current location';
+    }
+}
+
 // Update UI state based on a specific setting
 function updateSetting(key, value) {
     const settingItems = document.querySelectorAll(`.settings-toggle-item[data-setting="${key}"]`);
@@ -1012,7 +1033,13 @@ function updateSetting(key, value) {
         case 'map-choice':
             updateMapFrame();
             break;
-            
+
+        case 'satellite-region':
+        case 'satellite-use-location':
+            updateSatelliteSettingUI();
+            updateSatelliteFromSettings();
+            break;
+
         case 'news-forwarding':
             setShareButtonsVisibility();
             setControlEnable('forwarding-email', value);
@@ -1310,16 +1337,26 @@ window.toggleOptionSetting = function(button) {
 
     const key = settingItem.dataset.setting;
     let value = button.dataset.value;
-    
+
     // Handle special cases for compatibility
     if (key === 'imperial-units') {
         // Convert value to boolean
         value = (value === 'english');
     }
-    
+
+    if (key === 'satellite-region') {
+        saveSetting('satellite-use-location', false);
+    }
+
     // Store the setting
     saveSetting(key, value);
 }
+
+// Toggle location-based satellite selection, disabling the manual slider when active
+window.enableSatelliteLocationMode = function() {
+    const useLocation = !(settings['satellite-use-location'] ?? true);
+    saveSetting('satellite-use-location', useLocation);
+};
 
 // Function called by the text input UI elements for text-based settings
 window.updateSettingFrom = function(element) {

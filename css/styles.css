@@ -806,6 +806,33 @@ body.dark-mode .network-icon {
     transition: background-color 0.3s, color 0.3s;
 }
 
+.settings-toggle-item.option-switch-container {
+    flex-direction: column;
+}
+
+.settings-helper-row {
+    width: 100%;
+    display: flex;
+    justify-content: flex-end;
+    gap: 12px;
+    margin-top: 8px;
+}
+
+.settings-inline-button {
+    padding: 10px 16px;
+    border-radius: var(--button-radius);
+    border: none;
+    background-color: var(--button-bg);
+    color: var(--text-color);
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.settings-inline-button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
 .settings-toggle-item label {
     flex-grow: 1;
     cursor: inherit;

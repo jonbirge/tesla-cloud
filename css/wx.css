@@ -63,6 +63,11 @@ body.dark-mode {
     color: var(--button-text);
 }
 
+.weather-switch button.disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+}
+
 .weather-switch::after {
     content: '';
     position: absolute;
