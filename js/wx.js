@@ -6,30 +6,20 @@ import { autoDarkMode, settings } from './settings.js';
 const HOURLY_FORECAST_DAYS = 2;
 const HOURLY_POPUP_GAP = 64; // px spacing between daily cards and hourly popup
 const SAT_URLS = {
-    conus: {
+    us: {
         latest: 'https://cdn.star.nesdis.noaa.gov/GOES19/ABI/CONUS/GEOCOLOR/1250x750.jpg',
         loop: 'https://cdn.star.nesdis.noaa.gov/GOES16/GLM/CONUS/EXTENT3/GOES16-CONUS-EXTENT3-625x375.gif',
         latest_ir: 'https://cdn.star.nesdis.noaa.gov/GOES16/ABI/CONUS/11/1250x750.jpg',
-    },
-    mexico: {
-        latest: 'https://cdn.star.nesdis.noaa.gov/GOES19/ABI/SECTOR/mex/GEOCOLOR/1250x750.jpg',
-        loop: null, // GLM not available for Mexico sector
-        latest_ir: 'https://cdn.star.nesdis.noaa.gov/GOES19/ABI/SECTOR/mex/11/1250x750.jpg',
-    },
-    canada: {
-        latest: 'https://cdn.star.nesdis.noaa.gov/GOES19/ABI/SECTOR/can/GEOCOLOR/1250x750.jpg',
-        loop: null, // GLM not available for Canada sector
-        latest_ir: 'https://cdn.star.nesdis.noaa.gov/GOES19/ABI/SECTOR/can/11/1250x750.jpg',
     },
     europe: {
         latest: 'https://eumetview.eumetsat.int/static-images/latestImages/EUMETSAT_MSG_RGBNatColourEnhncd_WesternEurope.jpg',
         loop: null, // Loop not available for EUMETSAT
         latest_ir: 'https://eumetview.eumetsat.int/static-images/latestImages/EUMETSAT_MSG_IR108_WesternEurope.jpg',
     },
-    china: {
-        latest: 'https://img.nsmc.org.cn/CLOUDIMAGE/FY4B/MTCC/FY4B_DISK_MTCC_GCLR.JPG',
-        loop: null, // Loop not available for FY-4
-        latest_ir: 'https://img.nsmc.org.cn/CLOUDIMAGE/FY4B/MTCC/FY4B_DISK_MTCC_IR1.JPG',
+    asia: {
+        latest: 'https://rammb.cira.colostate.edu/ramsdis/online/images/latest/himawari-8/full_disk_ahi_natural_color.jpg',
+        loop: null, // Loop not available for Himawari
+        latest_ir: 'https://rammb.cira.colostate.edu/ramsdis/online/images/latest/himawari-8/full_disk_ahi_band_13.jpg',
     },
 };
 
@@ -46,7 +36,7 @@ let city = null;                        // Variable to store the city name
 let state = null;                       // Variable to store the state name
 let country = null;                     // Variable to store the country name
 let inCONUS = null;                     // In the continental US (CONUS)
-let currentSatRegion = 'conus';         // Current satellite region selection
+let currentSatRegion = 'us';            // Current satellite region selection
 let useLocationForSatRegion = true;     // Whether to auto-select region based on location
 
 // Export these variables for use in other modules
@@ -1724,39 +1714,38 @@ window.closePremiumPrecipPopup = function() {
 
 // Determine satellite region from location data
 function determineRegionFromLocation(country, state, lat, long) {
-    // Check for CONUS (Continental US, excluding Hawaii and Alaska)
-    if (country === 'US' && state !== 'HI' && state !== 'AK') {
-        return 'conus';
-    }
-
-    // Check for Mexico
-    if (country === 'MX' || country === 'Mexico') {
-        return 'mexico';
-    }
-
-    // Check for Canada
-    if (country === 'CA' || country === 'Canada') {
-        return 'canada';
+    // Check for Americas (US, Canada, Mexico, Central & South America)
+    if (country === 'US' || country === 'CA' || country === 'Canada' ||
+        country === 'MX' || country === 'Mexico') {
+        return 'us';
     }
 
     // Check for European countries
     const europeanCountries = [
         'GB', 'FR', 'DE', 'IT', 'ES', 'PT', 'NL', 'BE', 'AT', 'CH', 'SE', 'NO', 'DK', 'FI',
-        'PL', 'CZ', 'HU', 'RO', 'BG', 'GR', 'IE', 'HR', 'SK', 'SI', 'LT', 'LV', 'EE',
+        'PL', 'CZ', 'HU', 'RO', 'BG', 'GR', 'IE', 'HR', 'SK', 'SI', 'LT', 'LV', 'EE', 'IS',
         'United Kingdom', 'France', 'Germany', 'Italy', 'Spain', 'Portugal', 'Netherlands',
-        'Belgium', 'Austria', 'Switzerland', 'Sweden', 'Norway', 'Denmark', 'Finland'
+        'Belgium', 'Austria', 'Switzerland', 'Sweden', 'Norway', 'Denmark', 'Finland', 'Iceland'
     ];
     if (europeanCountries.includes(country)) {
         return 'europe';
     }
 
-    // Check for China
-    if (country === 'CN' || country === 'China') {
-        return 'china';
+    // Check for Asia-Pacific countries (China, Japan, Korea, India, Australia, etc.)
+    const asianCountries = [
+        'CN', 'China', 'JP', 'Japan', 'KR', 'Korea', 'South Korea', 'IN', 'India',
+        'AU', 'Australia', 'NZ', 'New Zealand', 'TH', 'Thailand', 'VN', 'Vietnam',
+        'PH', 'Philippines', 'ID', 'Indonesia', 'MY', 'Malaysia', 'SG', 'Singapore',
+        'TW', 'Taiwan', 'HK', 'Hong Kong', 'MO', 'Macau', 'KH', 'Cambodia', 'LA', 'Laos',
+        'MM', 'Myanmar', 'BD', 'Bangladesh', 'PK', 'Pakistan', 'LK', 'Sri Lanka',
+        'NP', 'Nepal', 'MN', 'Mongolia'
+    ];
+    if (asianCountries.includes(country)) {
+        return 'asia';
     }
 
-    // Default to CONUS if unknown
-    return 'conus';
+    // Default to US if unknown (GOES has good coverage of Americas)
+    return 'us';
 }
 
 // Update satellite region display in settings
