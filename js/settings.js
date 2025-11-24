@@ -1,7 +1,7 @@
 // Imports
 import { updateNews, setShareButtonsVisibility, initializeNewsStorage } from './news.js';
 import { updateNetChartAxisColors } from './net.js';
-import { updatePremiumWeatherDisplay } from './wx.js';
+import { updatePremiumWeatherDisplay, setSatelliteRegion, setSatelliteAutoMode, applyAutoSatelliteRegion } from './wx.js';
 import { startStockUpdates, stopStockUpdates } from './stock.js';
 import { forecastDataPrem, lastLat, lastLong, updateRainChartAxisColors } from './wx.js';
 
@@ -30,6 +30,8 @@ const defaultSettings = {
     "24-hour-time": false,
     "imperial-units": true,
     "map-choice": 'waze',
+    "satellite-region": 'conus',
+    "satellite-auto-location": true,
     "show-wind-radar": false,
     "show-hourly-stripes": true,
     // Stocks
@@ -1026,6 +1028,18 @@ function updateSetting(key, value) {
         case 'show-hourly-stripes':
             updatePremiumWeatherDisplay();
             break;
+        case 'satellite-region':
+            setSatelliteAutoMode(false);
+            setSatelliteRegion(value);
+            setControlEnable('satellite-region', true);
+            break;
+        case 'satellite-auto-location':
+            setSatelliteAutoMode(value);
+            setControlEnable('satellite-region', !value);
+            if (value) {
+                applyAutoSatelliteRegion();
+            }
+            break;
         case 'show-stock-indicator':
             // Special handling for the master switch
             // If it's being enabled, start updates
@@ -1316,7 +1330,11 @@ window.toggleOptionSetting = function(button) {
         // Convert value to boolean
         value = (value === 'english');
     }
-    
+
+    if (key === 'satellite-region') {
+        saveSetting('satellite-auto-location', false);
+    }
+
     // Store the setting
     saveSetting(key, value);
 }
@@ -1330,3 +1348,13 @@ window.updateSettingFrom = function(element) {
         saveSetting(key, value);
     }
 }
+
+// Satellite location shortcut
+document.addEventListener('DOMContentLoaded', () => {
+    const useLocationButton = document.getElementById('satellite-use-location');
+    if (useLocationButton) {
+        useLocationButton.addEventListener('click', () => {
+            saveSetting('satellite-auto-location', true);
+        });
+    }
+});

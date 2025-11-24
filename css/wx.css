@@ -59,6 +59,11 @@ body.dark-mode {
     transition: color 0.3s ease;
 }
 
+.weather-switch button.disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+}
+
 .weather-switch button.active {
     color: var(--button-text);
 }
