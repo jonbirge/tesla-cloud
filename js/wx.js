@@ -17,9 +17,9 @@ const SAT_URLS = {
         latest_ir: 'https://eumetview.eumetsat.int/static-images/latestImages/EUMETSAT_MSG_IR108_WesternEurope.jpg',
     },
     asia: {
-        latest: 'https://rammb.cira.colostate.edu/ramsdis/online/images/latest/himawari-8/full_disk_ahi_natural_color.jpg',
-        loop: null, // Loop not available for Himawari
-        latest_ir: 'https://rammb.cira.colostate.edu/ramsdis/online/images/latest/himawari-8/full_disk_ahi_band_14.jpg',
+        latest: 'https://eumetview.eumetsat.int/static-images/latestImages/EUMETSAT_MSGIODC_RGBNatColourEnhncd_SouthernAsia.jpg',
+        loop: null, // Loop not available for EUMETSAT
+        latest_ir: 'https://eumetview.eumetsat.int/static-images/latestImages/EUMETSAT_MSGIODC_IR108_SouthernAsia.jpg',
     },
 };
 
