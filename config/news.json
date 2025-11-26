@@ -341,7 +341,7 @@
     {
       "id": "macrumors",
       "name": "MacRumors",
-      "url": "http://feeds.macrumors.com/MacRumors-Front",
+      "url": "https://feeds.macrumors.com/MacRumors-Front",
       "refresh": 60,
       "lifetime": 1095,
       "category": "technology",
