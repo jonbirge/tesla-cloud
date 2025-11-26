@@ -468,6 +468,23 @@
                 </div>
             </div>
 
+            <h2>Satellite Settings</h2>
+            <div class="settings-controls">
+                <div class="settings-toggle-item" data-setting="satellite-use-location"
+                    onclick="this.querySelector('input').click()">
+                    <label>Use Current Location</label>
+                    <input type="checkbox" onchange="toggleSatelliteLocationMode(this.checked)" checked>
+                    <span class="settings-toggle-slider"></span>
+                </div>
+
+                <div class="settings-toggle-item option-switch-container satellite-region-selector disabled" data-setting="sat-region">
+                    <label>Region</label>
+                    <div class="option-switch region-switch">
+                        <!-- Buttons will be injected dynamically based on available SAT_URLS entries -->
+                    </div>
+                </div>
+            </div>
+
             <h2>News Settings</h2>
             <div class="settings-controls">
                 <div class="settings-toggle-item" data-setting="show-news-count"

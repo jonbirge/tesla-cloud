@@ -63,6 +63,36 @@ body.dark-mode {
     color: var(--button-text);
 }
 
+.weather-switch button.disabled,
+.weather-switch button:disabled {
+    opacity: 0.3;
+    cursor: not-allowed;
+    pointer-events: none;
+}
+
+/* Satellite region selector */
+.satellite-region-selector .region-switch {
+    display: grid;
+    grid-template-columns: repeat(var(--region-columns, 3), minmax(0, 1fr));
+    gap: 3px;
+    width: 100%;
+    max-width: 360px;
+    margin: 0 auto;
+}
+
+.satellite-region-selector .option-button {
+    min-width: 64px;
+    width: 100%;
+    text-transform: uppercase;
+    font-size: 12pt;
+}
+
+/* Disable region selector when using location mode */
+.satellite-region-selector.disabled {
+    opacity: 0.5;
+    pointer-events: none;
+}
+
 .weather-switch::after {
     content: '';
     position: absolute;

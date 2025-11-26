@@ -32,6 +32,7 @@ const defaultSettings = {
     "map-choice": 'waze',
     "show-wind-radar": false,
     "show-hourly-stripes": true,
+    "sat-region": 'us',
     // Stocks
     "show-price-alt": false,
     "show-stock-indicator": true,
@@ -1096,6 +1097,16 @@ function updateSetting(key, value) {
                 }
                 if (typeof stockModule.fetchStockData === 'function') {
                     stockModule.fetchStockData();
+                }
+            });
+            break;
+
+        case 'satellite-use-location':
+        case 'sat-region':
+            // Initialize satellite settings when they change
+            import('./wx.js').then(wxModule => {
+                if (typeof wxModule.initializeSatelliteSettings === 'function') {
+                    wxModule.initializeSatelliteSettings();
                 }
             });
             break;

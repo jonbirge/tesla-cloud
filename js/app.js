@@ -2,7 +2,7 @@
 import { srcUpdate, testMode, debugMode, isTestMode, updateTimeZone, GEONAMES_USERNAME, showNotification, gpsPermissionDenied, setGpsPermissionDenied, setUsingIPLocation } from './common.js';
 import { PositionSimulator } from './location.js';
 import { attemptLogin, leaveSettings, settings, isDriving, setDrivingState, enableLiveNewsUpdates, saveSetting } from './settings.js';
-import { fetchPremiumWeatherData, fetchCityData, SAT_URLS, forecastDataPrem, currentRainAlert, generateForecastDayElements, ensurePrecipitationGraphWidth } from './wx.js';
+import { fetchPremiumWeatherData, fetchCityData, SAT_URLS, forecastDataPrem, currentRainAlert, generateForecastDayElements, ensurePrecipitationGraphWidth, currentSatRegion } from './wx.js';
 import { updateNetworkInfo, updatePingChart, startPingTest, getIPBasedLocation } from './net.js';
 import { setupNewsObserver, startNewsTimeUpdates, initializeNewsStorage } from './news.js';
 import { startStockUpdates, stopStockUpdates } from './stock.js';
@@ -950,7 +950,15 @@ window.showSection = function (sectionId) {
     if (sectionId === 'satellite') {
         // Load weather image when satellite section is shown
         const weatherImage = document.getElementById('weather-image');
-        weatherImage.src = SAT_URLS.latest;
+        const regionUrls = SAT_URLS[currentSatRegion];
+        // Load the first available image type for the region
+        if (regionUrls.latest) {
+            weatherImage.src = regionUrls.latest;
+        } else if (regionUrls.latest_ir) {
+            weatherImage.src = regionUrls.latest_ir;
+        } else if (regionUrls.loop) {
+            weatherImage.src = regionUrls.loop;
+        }
     } else {
         // Remove weather img src to force reload when switching back
         const weatherImage = document.getElementById('weather-image');
