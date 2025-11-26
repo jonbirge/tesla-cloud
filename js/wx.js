@@ -11,15 +11,15 @@ const SAT_URLS = {
         loop: 'https://cdn.star.nesdis.noaa.gov/GOES19/GLM/CONUS/EXTENT3/GOES19-CONUS-EXTENT3-625x375.gif',
         latest_ir: 'https://cdn.star.nesdis.noaa.gov/GOES19/ABI/CONUS/15/1250x750.jpg',
     },
+    can: {
+        latest: 'https://cdn.star.nesdis.noaa.gov/GOES19/ABI/SECTOR/CAN/GEOCOLOR/1125x560.jpg',
+        loop: 'https://cdn.star.nesdis.noaa.gov/GOES19/GLM/SECTOR/can/EXTENT3/GOES19-CAN-EXTENT3-1125x560.gif',
+        latest_ir: 'https://cdn.star.nesdis.noaa.gov/GOES19/ABI/SECTOR/CAN/15/1125x560.jpg',
+    },
     sa: {
         latest: 'https://cdn.star.nesdis.noaa.gov/GOES19/ABI/SECTOR/NSA/GEOCOLOR/1800x1080.jpg',
         loop: 'https://cdn.star.nesdis.noaa.gov/GOES19/ABI/SECTOR/nsa/Sandwich/GOES19-NSA-Sandwich-900x540.gif', // GLM not available for this sector
         latest_ir: 'https://cdn.star.nesdis.noaa.gov/GOES19/ABI/SECTOR/nsa/Sandwich/1800x1080.jpg',
-    },
-    can: {
-        latest: 'https://cdn.star.nesdis.noaa.gov/GOES19/ABI/SECTOR/CAN/GEOCOLOR/1125x560.jpg',
-        loop: null,
-        latest_ir: 'https://cdn.star.nesdis.noaa.gov/GOES19/ABI/SECTOR/CAN/Sandwich/1800x1080.jpg',
     },
     eur: {
         latest: 'https://eumetview.eumetsat.int/static-images/latestImages/EUMETSAT_MSG_RGBNatColourEnhncd_WesternEurope.jpg',
@@ -36,6 +36,16 @@ const SAT_URLS = {
         loop: null, // Loop not available for EUMETSAT
         latest_ir: 'https://eumetview.eumetsat.int/static-images/latestImages/EUMETSAT_MSGIODC_IR108_NorthernAsia.jpg',
     },
+    west: {
+        latest: 'https://cdn.star.nesdis.noaa.gov/GOES19/ABI/FD/GEOCOLOR/1808x1808.jpg',
+        loop: null,
+        latest_ir: 'https://cdn.star.nesdis.noaa.gov/GOES19/GLM/FD/EXTENT3/1808x1808.jpg',
+    },
+    east: {
+        latest: 'https://cdn.star.nesdis.noaa.gov/GOES18/ABI/FD/GEOCOLOR/1808x1808.jpg',
+        loop: null,
+        latest_ir: 'https://cdn.star.nesdis.noaa.gov/GOES18/GLM/FD/EXTENT3/1808x1808.jpg',
+    }
 };
 
 // Module variables
@@ -223,12 +233,14 @@ export async function fetchCityData(lat, long) {
 
 // Initialize satellite settings from saved preferences
 export function initializeSatelliteSettings() {
+    renderSatelliteRegionOptions();
+
     // Load saved settings or use defaults
     if (settings['satellite-use-location'] !== undefined) {
         useLocationForSatRegion = settings['satellite-use-location'];
     }
-    if (settings['satellite-region']) {
-        currentSatRegion = settings['satellite-region'];
+    if (settings['sat-region']) {
+        currentSatRegion = settings['sat-region'];
     }
 
     // Update UI to match loaded settings
@@ -249,6 +261,27 @@ export function initializeSatelliteSettings() {
 
     updateSatelliteRegionDisplay();
     updateSatelliteButtonAvailability();
+}
+
+function renderSatelliteRegionOptions() {
+    const regionSwitch = document.querySelector('.satellite-region-selector .region-switch');
+    if (!regionSwitch) {
+        return;
+    }
+
+    const regionKeys = Object.keys(SAT_URLS);
+    const columns = Math.max(1, Math.ceil(regionKeys.length / 2));
+    regionSwitch.style.setProperty('--region-columns', columns);
+    regionSwitch.replaceChildren();
+    regionKeys.forEach(regionKey => {
+        const button = document.createElement('button');
+        button.type = 'button';
+        button.className = 'option-button';
+        button.dataset.value = regionKey;
+        button.textContent = regionKey.toUpperCase();
+        button.addEventListener('click', () => setSatelliteRegion(regionKey));
+        regionSwitch.appendChild(button);
+    });
 }
 
 // Generate forecast day elements dynamically
@@ -1792,7 +1825,7 @@ function determineRegionFromLocation(country, state, lat, long) {
         'MN', 'Mongolia', 'TW', 'Taiwan'
     ];
     if (northeastAsianCountries.includes(country)) {
-        return 'neasia';
+        return 'nea';
     }
 
     // Check for Southeast Asia and South Asia (India, Southeast Asia, Australia, etc.)
@@ -1804,7 +1837,7 @@ function determineRegionFromLocation(country, state, lat, long) {
         'NP', 'Nepal', 'BT', 'Bhutan', 'MV', 'Maldives', 'AF', 'Afghanistan'
     ];
     if (southeastAsianCountries.includes(country)) {
-        return 'seasia';
+        return 'sea';
     }
 
     // Default to US if unknown (GOES has good coverage of Americas)
@@ -1813,7 +1846,7 @@ function determineRegionFromLocation(country, state, lat, long) {
 
 // Update satellite region display in settings
 function updateSatelliteRegionDisplay() {
-    const regionButtons = document.querySelectorAll('[data-setting="satellite-region"] .option-button');
+    const regionButtons = document.querySelectorAll('[data-setting="sat-region"] .option-button');
     regionButtons.forEach(button => {
         button.classList.toggle('active', button.dataset.value === currentSatRegion);
     });
@@ -1871,7 +1904,7 @@ window.setSatelliteRegion = function(region) {
     updateSatelliteRegionDisplay();
 
     // Save settings
-    saveSetting('satellite-region', region);
+    saveSetting('sat-region', region);
     saveSetting('satellite-use-location', false);
 
     // Update the location toggle
@@ -1912,7 +1945,7 @@ window.toggleSatelliteLocationMode = function(useLocation) {
         // Re-determine region from current location
         if (country) {
             currentSatRegion = determineRegionFromLocation(country, state, lastLat, lastLong);
-            saveSetting('satellite-region', currentSatRegion);
+            saveSetting('sat-region', currentSatRegion);
             updateSatelliteRegionDisplay();
 
             // Switch to appropriate image for new region

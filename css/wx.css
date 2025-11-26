@@ -72,11 +72,16 @@ body.dark-mode {
 
 /* Satellite region selector */
 .satellite-region-selector .region-switch {
-    flex-wrap: wrap;
+    display: grid;
+    grid-template-columns: repeat(var(--region-columns, 3), minmax(0, 1fr));
+    gap: 6px;
+    width: 100%;
 }
 
 .satellite-region-selector .option-button {
-    min-width: 80px;
+    min-width: 70px;
+    width: 100%;
+    text-transform: uppercase;
 }
 
 /* Disable region selector when using location mode */

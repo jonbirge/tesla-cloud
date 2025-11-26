@@ -477,19 +477,10 @@
                     <span class="settings-toggle-slider"></span>
                 </div>
 
-                <div class="settings-toggle-item option-switch-container satellite-region-selector disabled" data-setting="satellite-region">
+                <div class="settings-toggle-item option-switch-container satellite-region-selector disabled" data-setting="sat-region">
                     <label>Region</label>
                     <div class="option-switch region-switch">
-                        <button class="option-button active" data-value="us"
-                            onclick="setSatelliteRegion('us')">US</button>
-                        <button class="option-button" data-value="eur"
-                            onclick="setSatelliteRegion('eur')">EUR</button>
-                        <button class="option-button" data-value="seasia"
-                            onclick="setSatelliteRegion('seasia')">SEASIA</button>
-                        <button class="option-button" data-value="sa"
-                            onclick="setSatelliteRegion('sa')">SA</button>
-                        <button class="option-button" data-value="neasia"
-                            onclick="setSatelliteRegion('neasia')">NEASIA</button>
+                        <!-- Buttons will be injected dynamically based on available SAT_URLS entries -->
                     </div>
                 </div>
             </div>
