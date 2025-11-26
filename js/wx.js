@@ -3,30 +3,35 @@ import { formatTime, highlightUpdate, testMode, isTestMode, showNotification, sh
 import { autoDarkMode, settings, saveSetting } from './settings.js';
 
 // Parameters
-const HOURLY_FORECAST_DAYS = 2;
+// const HOURLY_FORECAST_DAYS = 2;
 const HOURLY_POPUP_GAP = 64; // px spacing between daily cards and hourly popup
 const SAT_URLS = {
     us: {
         latest: 'https://cdn.star.nesdis.noaa.gov/GOES19/ABI/CONUS/GEOCOLOR/1250x750.jpg',
-        loop: 'https://cdn.star.nesdis.noaa.gov/GOES16/GLM/CONUS/EXTENT3/GOES16-CONUS-EXTENT3-625x375.gif',
-        latest_ir: 'https://cdn.star.nesdis.noaa.gov/GOES16/ABI/CONUS/11/1250x750.jpg',
+        loop: 'https://cdn.star.nesdis.noaa.gov/GOES19/GLM/CONUS/EXTENT3/GOES19-CONUS-EXTENT3-625x375.gif',
+        latest_ir: 'https://cdn.star.nesdis.noaa.gov/GOES19/ABI/CONUS/15/1250x750.jpg',
+    },
+    sa: {
+        latest: 'https://cdn.star.nesdis.noaa.gov/GOES19/ABI/SECTOR/NSA/GEOCOLOR/1800x1080.jpg',
+        loop: 'https://cdn.star.nesdis.noaa.gov/GOES19/ABI/SECTOR/nsa/Sandwich/GOES19-NSA-Sandwich-900x540.gif', // GLM not available for this sector
+        latest_ir: 'https://cdn.star.nesdis.noaa.gov/GOES19/ABI/SECTOR/nsa/Sandwich/1800x1080.jpg',
+    },
+    can: {
+        latest: 'https://cdn.star.nesdis.noaa.gov/GOES19/ABI/SECTOR/CAN/GEOCOLOR/1125x560.jpg',
+        loop: null,
+        latest_ir: 'https://cdn.star.nesdis.noaa.gov/GOES19/ABI/SECTOR/CAN/Sandwich/1800x1080.jpg',
     },
     eur: {
         latest: 'https://eumetview.eumetsat.int/static-images/latestImages/EUMETSAT_MSG_RGBNatColourEnhncd_WesternEurope.jpg',
         loop: null, // Loop not available for EUMETSAT
         latest_ir: 'https://eumetview.eumetsat.int/static-images/latestImages/EUMETSAT_MSG_IR108_WesternEurope.jpg',
     },
-    seasia: {
+    sea: {
         latest: 'https://eumetview.eumetsat.int/static-images/latestImages/EUMETSAT_MSGIODC_RGBNatColourEnhncd_SouthernAsia.jpg',
         loop: null, // Loop not available for EUMETSAT
         latest_ir: 'https://eumetview.eumetsat.int/static-images/latestImages/EUMETSAT_MSGIODC_IR108_SouthernAsia.jpg',
     },
-    sa: {
-        latest: 'https://cdn.star.nesdis.noaa.gov/GOES19/ABI/SECTOR/nsa/GEOCOLOR/1250x750.jpg',
-        loop: null, // GLM not available for this sector
-        latest_ir: 'https://cdn.star.nesdis.noaa.gov/GOES19/ABI/SECTOR/nsa/11/1250x750.jpg',
-    },
-    neasia: {
+    nea: {
         latest: 'https://eumetview.eumetsat.int/static-images/latestImages/EUMETSAT_MSGIODC_RGBNatColourEnhncd_NorthernAsia.jpg',
         loop: null, // Loop not available for EUMETSAT
         latest_ir: 'https://eumetview.eumetsat.int/static-images/latestImages/EUMETSAT_MSGIODC_IR108_NorthernAsia.jpg',
