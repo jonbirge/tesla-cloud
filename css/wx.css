@@ -74,16 +74,17 @@ body.dark-mode {
 .satellite-region-selector .region-switch {
     display: grid;
     grid-template-columns: repeat(var(--region-columns, 3), minmax(0, 1fr));
-    gap: 6px;
+    gap: 3px;
     width: 100%;
     max-width: 360px;
     margin: 0 auto;
 }
 
 .satellite-region-selector .option-button {
-    min-width: 70px;
+    min-width: 64px;
     width: 100%;
     text-transform: uppercase;
+    font-size: 12pt;
 }
 
 /* Disable region selector when using location mode */
