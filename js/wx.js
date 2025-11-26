@@ -11,15 +11,25 @@ const SAT_URLS = {
         loop: 'https://cdn.star.nesdis.noaa.gov/GOES16/GLM/CONUS/EXTENT3/GOES16-CONUS-EXTENT3-625x375.gif',
         latest_ir: 'https://cdn.star.nesdis.noaa.gov/GOES16/ABI/CONUS/11/1250x750.jpg',
     },
-    europe: {
+    eur: {
         latest: 'https://eumetview.eumetsat.int/static-images/latestImages/EUMETSAT_MSG_RGBNatColourEnhncd_WesternEurope.jpg',
         loop: null, // Loop not available for EUMETSAT
         latest_ir: 'https://eumetview.eumetsat.int/static-images/latestImages/EUMETSAT_MSG_IR108_WesternEurope.jpg',
     },
-    asia: {
+    seasia: {
         latest: 'https://eumetview.eumetsat.int/static-images/latestImages/EUMETSAT_MSGIODC_RGBNatColourEnhncd_SouthernAsia.jpg',
         loop: null, // Loop not available for EUMETSAT
         latest_ir: 'https://eumetview.eumetsat.int/static-images/latestImages/EUMETSAT_MSGIODC_IR108_SouthernAsia.jpg',
+    },
+    sa: {
+        latest: 'https://cdn.star.nesdis.noaa.gov/GOES19/ABI/SECTOR/nsa/GEOCOLOR/1250x750.jpg',
+        loop: null, // GLM not available for this sector
+        latest_ir: 'https://cdn.star.nesdis.noaa.gov/GOES19/ABI/SECTOR/nsa/11/1250x750.jpg',
+    },
+    neasia: {
+        latest: 'https://eumetview.eumetsat.int/static-images/latestImages/EUMETSAT_MSGIODC_RGBNatColourEnhncd_NorthernAsia.jpg',
+        loop: null, // Loop not available for EUMETSAT
+        latest_ir: 'https://eumetview.eumetsat.int/static-images/latestImages/EUMETSAT_MSGIODC_IR108_NorthernAsia.jpg',
     },
 };
 
@@ -1744,10 +1754,20 @@ window.closePremiumPrecipPopup = function() {
 
 // Determine satellite region from location data
 function determineRegionFromLocation(country, state, lat, long) {
-    // Check for Americas (US, Canada, Mexico, Central & South America)
+    // Check for North America (US, Canada, Mexico)
     if (country === 'US' || country === 'CA' || country === 'Canada' ||
         country === 'MX' || country === 'Mexico') {
         return 'us';
+    }
+
+    // Check for South America
+    const southAmericanCountries = [
+        'BR', 'Brazil', 'AR', 'Argentina', 'CL', 'Chile', 'CO', 'Colombia', 'PE', 'Peru',
+        'VE', 'Venezuela', 'EC', 'Ecuador', 'BO', 'Bolivia', 'PY', 'Paraguay', 'UY', 'Uruguay',
+        'GY', 'Guyana', 'SR', 'Suriname', 'GF', 'French Guiana'
+    ];
+    if (southAmericanCountries.includes(country)) {
+        return 'sa';
     }
 
     // Check for European countries
@@ -1758,20 +1778,28 @@ function determineRegionFromLocation(country, state, lat, long) {
         'Belgium', 'Austria', 'Switzerland', 'Sweden', 'Norway', 'Denmark', 'Finland', 'Iceland'
     ];
     if (europeanCountries.includes(country)) {
-        return 'europe';
+        return 'eur';
     }
 
-    // Check for Asia-Pacific countries (China, Japan, Korea, India, Australia, etc.)
-    const asianCountries = [
-        'CN', 'China', 'JP', 'Japan', 'KR', 'Korea', 'South Korea', 'IN', 'India',
-        'AU', 'Australia', 'NZ', 'New Zealand', 'TH', 'Thailand', 'VN', 'Vietnam',
-        'PH', 'Philippines', 'ID', 'Indonesia', 'MY', 'Malaysia', 'SG', 'Singapore',
-        'TW', 'Taiwan', 'HK', 'Hong Kong', 'MO', 'Macau', 'KH', 'Cambodia', 'LA', 'Laos',
-        'MM', 'Myanmar', 'BD', 'Bangladesh', 'PK', 'Pakistan', 'LK', 'Sri Lanka',
-        'NP', 'Nepal', 'MN', 'Mongolia'
+    // Check for Northeast Asia (China, Japan, Korea, Mongolia)
+    const northeastAsianCountries = [
+        'CN', 'China', 'JP', 'Japan', 'KR', 'Korea', 'South Korea', 'KP', 'North Korea',
+        'MN', 'Mongolia', 'TW', 'Taiwan'
     ];
-    if (asianCountries.includes(country)) {
-        return 'asia';
+    if (northeastAsianCountries.includes(country)) {
+        return 'neasia';
+    }
+
+    // Check for Southeast Asia and South Asia (India, Southeast Asia, Australia, etc.)
+    const southeastAsianCountries = [
+        'IN', 'India', 'AU', 'Australia', 'NZ', 'New Zealand', 'TH', 'Thailand', 'VN', 'Vietnam',
+        'PH', 'Philippines', 'ID', 'Indonesia', 'MY', 'Malaysia', 'SG', 'Singapore',
+        'HK', 'Hong Kong', 'MO', 'Macau', 'KH', 'Cambodia', 'LA', 'Laos',
+        'MM', 'Myanmar', 'BD', 'Bangladesh', 'PK', 'Pakistan', 'LK', 'Sri Lanka',
+        'NP', 'Nepal', 'BT', 'Bhutan', 'MV', 'Maldives', 'AF', 'Afghanistan'
+    ];
+    if (southeastAsianCountries.includes(country)) {
+        return 'seasia';
     }
 
     // Default to US if unknown (GOES has good coverage of Americas)
