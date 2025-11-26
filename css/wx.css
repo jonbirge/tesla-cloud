@@ -76,6 +76,8 @@ body.dark-mode {
     grid-template-columns: repeat(var(--region-columns, 3), minmax(0, 1fr));
     gap: 6px;
     width: 100%;
+    max-width: 360px;
+    margin: 0 auto;
 }
 
 .satellite-region-selector .option-button {

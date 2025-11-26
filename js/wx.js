@@ -38,12 +38,12 @@ const SAT_URLS = {
     },
     west: {
         latest: 'https://cdn.star.nesdis.noaa.gov/GOES19/ABI/FD/GEOCOLOR/1808x1808.jpg',
-        loop: null,
+        loop: null, // GLM loop not available for full-disk
         latest_ir: 'https://cdn.star.nesdis.noaa.gov/GOES19/GLM/FD/EXTENT3/1808x1808.jpg',
     },
     east: {
         latest: 'https://cdn.star.nesdis.noaa.gov/GOES18/ABI/FD/GEOCOLOR/1808x1808.jpg',
-        loop: null,
+        loop: null, // GLM loop not available for full-disk
         latest_ir: 'https://cdn.star.nesdis.noaa.gov/GOES18/GLM/FD/EXTENT3/1808x1808.jpg',
     }
 };
