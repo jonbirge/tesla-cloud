@@ -101,6 +101,8 @@ def print_stats(stats):
     print("-" * 85)
 
     total_articles = 0
+    global_newest = None
+    global_oldest = None
 
     for stat in stats:
         feed_id = stat['feed_id']
@@ -117,8 +119,21 @@ def print_stats(stats):
         print(f"{feed_id:<30} {count:<12} {newest_str:<12} {oldest_str:<12}")
         total_articles += count
 
+        # Track global newest (smallest age in hours)
+        if newest_hours is not None:
+            if global_newest is None or newest_hours < global_newest:
+                global_newest = newest_hours
+
+        # Track global oldest (largest age in hours)
+        if oldest_hours is not None:
+            if global_oldest is None or oldest_hours > global_oldest:
+                global_oldest = oldest_hours
+
+    global_newest_str = format_age(global_newest)
+    global_oldest_str = format_age(global_oldest)
+
     print("-" * 85)
-    print(f"{'TOTAL':<30} {total_articles:<12}")
+    print(f"{'TOTAL':<30} {total_articles:<12} {global_newest_str:<12} {global_oldest_str:<12}")
     print("=" * 85)
 
 
