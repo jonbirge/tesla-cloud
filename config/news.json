@@ -339,6 +339,46 @@
       "icon": "https://news.ycombinator.com"
     },
     {
+      "id": "macrumors",
+      "name": "MacRumors",
+      "url": "https://feeds.macrumors.com/MacRumors-Front",
+      "refresh": 60,
+      "lifetime": 1095,
+      "category": "technology",
+      "defaultEnabled": false,
+      "icon": "https://www.macrumors.com"
+    },
+    {
+      "id": "androidpolice",
+      "name": "Android Police",
+      "url": "https://news.google.com/rss/search?q=site:androidpolice.com&hl=en-US&gl=US&ceid=US:en",
+      "refresh": 60,
+      "lifetime": 1095,
+      "category": "technology",
+      "defaultEnabled": false,
+      "icon": "https://www.androidpolice.com"
+    },
+    {
+      "id": "androidauthority",
+      "name": "Android Authority",
+      "url": "https://www.androidauthority.com/feed/",
+      "refresh": 60,
+      "lifetime": 1095,
+      "category": "technology",
+      "defaultEnabled": false,
+      "icon": "https://www.androidauthority.com"
+    },
+    {
+      "id": "pcmag",
+      "name": "PC Magazine",
+      "url": "https://news.google.com/rss/search?q=site:pcmag.com&hl=en-US&gl=US&ceid=US:en",
+      "refresh": 60,
+      "lifetime": 1095,
+      "category": "technology",
+      "defaultEnabled": false,
+      "icon": "https://www.pcmag.com"
+    },
+    {
       "id": "notateslaapp",
       "name": "Not a Tesla App",
       "url": "https://www.notateslaapp.com/rss",
