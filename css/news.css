@@ -143,18 +143,18 @@ body.dark-mode .share-icon img {
 
     /* News sources grid */
     .news-source-grid {
-        grid-template-columns: repeat(auto-fill, 220px);
+        grid-template-columns: repeat(auto-fill, 165px);
     }
 
     .news-toggle-item {
-        font-size: 9pt;
-        padding: 6px 8px 6px 32px;
+        font-size: 8pt;
+        padding: 5px 6px 5px 28px;
         margin-top: 5px;
     }
 
     .news-source-favicon {
-        width: 18px;
-        height: 18px;
-        left: 8px;
+        width: 16px;
+        height: 16px;
+        left: 6px;
     }
 }
