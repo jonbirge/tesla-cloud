@@ -352,10 +352,9 @@ export async function updateNews(clear = false) {
             throw new Error(`Server returned ${response.status} ${response.statusText}`);
         }
 
-        const readFilterApplied = response.headers.get('X-News-Read-Filter') === 'applied';
         let loadedItems = await response.json();
         console.log('...Done! Count: ', loadedItems.length);
-        
+
         // Hide the spinner when data arrives
         document.getElementById('news-loading').style.display = 'none';
         newsContainer.style.display = 'block';
@@ -382,22 +381,12 @@ export async function updateNews(clear = false) {
                 item.link = '';
             }
         });
-        
-        // Track if we have unread items among newly loaded items...
-        if (loadedItems.length > 0) {
-            if (readFilterApplied) {
-                loadedItems.forEach(item => {
-                    item.isUnread = true;
-                });
-            } else {
-                // Mark each item's read status with cached data (legacy fallback)
-                loadedItems.forEach(item => {
-                    item.isUnread = !cachedSeenNewsIds || !(item.id in cachedSeenNewsIds);
-                });
 
-                // Remove items that have isUnread flag set to false
-                loadedItems = loadedItems.filter(item => item.isUnread);
-            }
+        // All items from server are unread (server filters read items for logged-in users)
+        if (loadedItems.length > 0) {
+            loadedItems.forEach(item => {
+                item.isUnread = true;
+            });
         }
 
         // If anything has made it past all the filters, sort by date
