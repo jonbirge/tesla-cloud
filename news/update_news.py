@@ -230,7 +230,7 @@ def get_feeds_needing_update(connection, db_type, feeds):
         last_updated = parse_last_updated(last_updated_raw)
         last_updated_display = format_last_updated(last_updated_raw)
         refresh_duration = timedelta(minutes=refresh_minutes)
-        feed_label = f"{feed_name} ({feed_id})"
+        feed_label = f"{feed_id}"
         
         if last_updated is None:
             # Never updated, needs update

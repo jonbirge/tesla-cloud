@@ -168,7 +168,7 @@ def fetch_feed(connection, db_type, feed):
     feed_name = feed.get('name', feed_id)
     feed_url = feed.get('url')
     
-    print(f"  Fetching {feed_name} ({feed_id})...")
+    print(f"  Fetching {feed_id}...")
     
     # Fetch the RSS feed
     xml_data = fetch_rss_feed(feed_url)
