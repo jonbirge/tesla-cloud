@@ -138,7 +138,7 @@ body.dark-mode .share-icon img {
 
     .share-icon {
         transform: scale(75%) translateY(-65%);
-        right: -3px;
+        right: 5px;
     }
 
     /* News sources grid */
