@@ -11,10 +11,7 @@ from urllib.error import URLError, HTTPError
 import xml.etree.ElementTree as ET
 from email.utils import parsedate_to_datetime
 
-from logging_utils import setup_dual_logging
 from db_utils import load_env_file, get_db_connection, load_feed_config
-
-setup_dual_logging()
 
 
 def parse_date(date_string):

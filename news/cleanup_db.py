@@ -7,10 +7,7 @@ Removes articles older than the configured lifetime.
 import sys
 from datetime import datetime, timedelta
 
-from logging_utils import setup_dual_logging
 from db_utils import load_env_file, get_db_connection, load_feed_config
-
-setup_dual_logging()
 
 
 def cleanup_old_articles(connection, db_type, max_age_days=7):

@@ -4,10 +4,7 @@ Initialize the news database with required tables.
 Creates tables for storing news articles and feed update timestamps.
 """
 
-from logging_utils import setup_dual_logging
 from db_utils import load_env_file, get_db_connection
-
-setup_dual_logging()
 
 
 def init_database(connection, db_type):

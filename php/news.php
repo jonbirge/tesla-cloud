@@ -20,7 +20,7 @@ $logFile = '/tmp/rss_php_' . $version . '.log';
 $maxStories = 5000;
 $maxSingleSource = 0;
 $diagnostics = [];
-$forceSqliteOverride = true; // Set to true to skip MySQL and always use SQLite
+$forceSqliteOverride = false; // Set to true to skip MySQL and always use SQLite
 
 // Get number of stories to return
 $numStories = isset($_GET['n']) ? intval($_GET['n']) : $maxStories;

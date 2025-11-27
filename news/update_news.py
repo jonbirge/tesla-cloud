@@ -9,7 +9,6 @@ import os
 import sys
 from datetime import datetime, timedelta, timezone
 
-from logging_utils import setup_dual_logging
 from db_utils import (
     PROJECT_ROOT,
     load_env_file,
@@ -20,8 +19,6 @@ from db_utils import (
 import init_db
 import fetch_feeds
 import cleanup_db
-
-setup_dual_logging()
 
 
 def get_database_stats(connection, db_type):
