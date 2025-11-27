@@ -13,7 +13,7 @@ from pathlib import Path
 # Configuration constants
 SCRIPT_DIR = Path(__file__).resolve().parent
 PROJECT_ROOT = SCRIPT_DIR.parent
-FORCE_SQLITE = True  # Set to True to force SQLite usage
+FORCE_SQLITE = False  # Set to True to force SQLite usage
 
 
 def load_env_file(env_path=None):
@@ -66,7 +66,7 @@ def get_db_connection(env_vars):
         try:
             import pymysql
             connection = pymysql.connect(
-                host=env_vars.get('SQL_HOST'),
+                host='localhost',
                 user=env_vars.get('SQL_USER'),
                 password=env_vars.get('SQL_PASS'),
                 database=env_vars.get('SQL_DB_NAME'),
