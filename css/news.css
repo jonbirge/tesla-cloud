@@ -143,7 +143,7 @@ body.dark-mode .share-icon img {
 
     /* News sources grid */
     .news-source-grid {
-        grid-template-columns: repeat(auto-fill, 165px);
+        grid-template-columns: repeat(auto-fill, 190px);
     }
 
     .news-toggle-item {
