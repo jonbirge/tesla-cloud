@@ -636,6 +636,17 @@ body.dark-mode .notification-icon img {
         font-size: 11pt;
     }
 
+    /* Satellite region selector mobile adjustments */
+    .satellite-region-selector .region-switch {
+        max-width: 100%;
+    }
+
+    .satellite-region-selector .option-button {
+        font-size: 8pt;
+        min-width: 40px;
+        padding: 5px 6px;
+    }
+
     #prem-forecast-container .forecast-day:nth-of-type(7) {
         display: none;
     }
