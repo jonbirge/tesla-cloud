@@ -1,11 +1,11 @@
 NOTE
 TODO
+.env
 *.bak
 *.pyc
 *.log
 *.db
-.env
-test.php
-__pycache__/
+CLAUDE.md
 .claude
 .managed*
+__pycache__/

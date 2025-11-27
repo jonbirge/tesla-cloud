@@ -141,7 +141,8 @@
       "refresh": 60,
       "lifetime": 1095,
       "category": "general",
-      "defaultEnabled": false
+      "defaultEnabled": false,
+      "icon": "https://www.elpais.com"
     },
     {
       "id": "elpaisenglish",
@@ -430,6 +431,26 @@
       "lifetime": 1095,
       "category": "defense",
       "defaultEnabled": false
+    },
+    {
+      "id": "sfchronicle",
+      "name": "SF Chronicle",
+      "url": "https://news.google.com/rss/search?q=when:24h+allinurl:sfchronicle.com&hl=en-US&gl=US&ceid=US:en",
+      "refresh": 60,
+      "lifetime": 1095,
+      "category": "general",
+      "defaultEnabled": false,
+      "icon": "https://www.sfchronicle.com"
+    },
+    {
+      "id": "mercurynews",
+      "name": "San Jose Mercury",
+      "url": "https://news.google.com/rss/search?q=when:24h+allinurl:mercurynews.com&hl=en-US&gl=US&ceid=US:en",
+      "refresh": 60,
+      "lifetime": 1095,
+      "category": "general",
+      "defaultEnabled": false,
+      "icon": "https://www.mercurynews.com"
     },
     {
       "id": "ap",
