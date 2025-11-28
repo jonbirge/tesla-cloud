@@ -1080,6 +1080,7 @@ body.dark-mode .option-button:hover:not(.active) {
         cursor: pointer;
         text-align: center;
         margin-top: 3px;
+        margin-bottom: 6px;
         transition: background-color 0.3s;
     }
     
@@ -1115,6 +1116,7 @@ body.dark-mode .option-button:hover:not(.active) {
         top: 0;
         z-index: 100;
         background-color: var(--bg-color);
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
     }
     
     .left-frame::-webkit-scrollbar {
