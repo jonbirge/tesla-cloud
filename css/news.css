@@ -123,11 +123,11 @@ body.dark-mode .share-icon img {
     }
 
     .news-source {
-        font-size: 9pt;
+        font-size: 10pt;
     }
 
     .news-time {
-        font-size: 9pt;
+        font-size: 10pt;
     }
 
     .news-favicon {
@@ -137,7 +137,8 @@ body.dark-mode .share-icon img {
     }
 
     .news-title {
-        font-size: 11pt;
+        font-size: 12pt;
+        font-weight: 600;
         margin-right: 40px;
     }
 

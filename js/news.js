@@ -687,9 +687,9 @@ export function setupNewsObserver() {
             const newsItem = entry.target;
             const id = newsItem.getAttribute('data-id');
             const timeElement = newsItem.querySelector('.news-time');
-            
+
             if (!id || !timeElement) return;
-            
+
             // If the item is visible (intersecting)
             if (entry.isIntersecting) {
                 // Only track unread items
@@ -698,12 +698,18 @@ export function setupNewsObserver() {
                     pendingReadItems.add(id);
                     // console.log(`News item now visible, added to pending: ${id} (Total pending: ${pendingReadItems.size})`);
                 }
-            } 
+            }
             // Item is no longer visible
             else {
-                // If it was in our pending set, now mark it as read
-                if (pendingReadItems.has(id) && timeElement.classList.contains('news-new-time')) {
-                    // console.log(`News item scrolled out of view, marking as read: ${id}`);
+                // Determine if the item scrolled off the top or bottom of viewport
+                // If rootBounds is available, use it; otherwise fall back to checking if top < 0
+                const scrolledOffTop = entry.rootBounds
+                    ? entry.boundingClientRect.top < entry.rootBounds.top
+                    : entry.boundingClientRect.top < 0;
+
+                // Only mark as read if it scrolled off the TOP (not the bottom)
+                if (scrolledOffTop && pendingReadItems.has(id) && timeElement.classList.contains('news-new-time')) {
+                    // console.log(`News item scrolled off top, marking as read: ${id}`);
                     // Mark as seen in ${RESTDB_URL}
                     markNewsSeen(id).then(() => {
                         // Remove from pending set
@@ -711,19 +717,24 @@ export function setupNewsObserver() {
                     }).catch(error => {
                         console.error('Error marking news as read:', error);
                     });
-                    
+
                     // Add transition class for smooth fade out
                     newsItem.classList.add('news-read');
                     timeElement.classList.add('news-seen-transition');
-                    
+
                     // After transition completes, remove the new-time class
                     setTimeout(() => {
                         timeElement.classList.remove('news-new-time');
                         timeElement.classList.remove('news-seen-transition');
-                        
+
                         // Update notification dot after marking item as read
                         updateNewsNotificationDot();
                     }, 1500); // Match this to the CSS transition time
+                }
+                // If scrolled off the bottom, just remove from pending (don't mark as read)
+                else if (!scrolledOffTop && pendingReadItems.has(id)) {
+                    pendingReadItems.delete(id);
+                    // console.log(`News item scrolled off bottom, removed from pending without marking as read: ${id}`);
                 }
             }
         });
