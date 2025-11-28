@@ -142,12 +142,12 @@ body.dark-mode .share-icon img {
     }
 
     /* News sources grid */
-    .news-source-grid {
-        grid-template-columns: repeat(auto-fill, 190px);
+   .news-source-grid {
+        grid-template-columns: repeat(auto-fill, 200px);
     }
 
     .news-toggle-item {
-        font-size: 8pt;
+        font-size: 9pt;
         padding: 5px 6px 5px 28px;
         margin-top: 5px;
     }
