@@ -45,6 +45,8 @@ let gpsIntervalId = null;
 let lastGPSUpdate = 0;
 let gpsFailureCount = 0;                            // Count consecutive GPS failures
 let networkInfoUpdated = false;                     // Track if network info has been updated
+let previousAlt = null;                             // Previous altitude for vertical rate calculation
+let previousAltTime = null;                         // Timestamp of previous altitude measurement
 const positionSimulator = new PositionSimulator();  // TODO: only create if needed
 
 // Function to calculate the distance between two coordinates
@@ -438,6 +440,57 @@ async function handlePositionUpdate(position) {
             }
         } else {
             document.getElementById('altitude').innerText = '--';
+        }
+
+        // Update speed display
+        if (speed !== null && speed !== undefined) {
+            if (!settings || settings["imperial-units"]) {
+                document.getElementById('speed').innerText = Math.round(speed);
+                document.getElementById('speed-unit').innerText = 'MPH';
+            } else {
+                // Convert mph to kph (1 mph ≈ 1.60934 kph)
+                document.getElementById('speed').innerText = Math.round(speed * 1.60934);
+                document.getElementById('speed-unit').innerText = 'KPH';
+            }
+        } else {
+            document.getElementById('speed').innerText = '--';
+        }
+
+        // Calculate and update vertical rate
+        if (alt !== null && previousAlt !== null && previousAltTime !== null) {
+            const now = Date.now();
+            const timeDiffSeconds = (now - previousAltTime) / 1000;
+
+            // Only calculate if enough time has passed (at least 2 seconds)
+            if (timeDiffSeconds >= 2) {
+                const altDiffMeters = alt - previousAlt;
+                const verticalRateMs = altDiffMeters / timeDiffSeconds; // m/s
+
+                if (!settings || settings["imperial-units"]) {
+                    // Convert m/s to ft/min (1 m/s ≈ 196.85 ft/min)
+                    const verticalRateFtMin = verticalRateMs * 196.85;
+                    document.getElementById('vertical-rate').innerText = Math.abs(Math.round(verticalRateFtMin));
+                    document.getElementById('vertical-rate-arrow').textContent = (verticalRateFtMin > 0 ? '▲' : '▼');
+                    document.getElementById('vertical-rate-label').innerText = "VERT RATE (FT/MIN)";
+                } else {
+                    document.getElementById('vertical-rate').innerText = Math.abs(verticalRateMs.toFixed(1));
+                    document.getElementById('vertical-rate-arrow').textContent = (verticalRateMs > 0 ? '▲' : '▼');
+                    document.getElementById('vertical-rate-label').innerText = "VERT RATE (M/S)";
+                }
+
+                // Update previous altitude and time
+                previousAlt = alt;
+                previousAltTime = now;
+            }
+        } else if (alt !== null) {
+            // Initialize previous altitude and time
+            previousAlt = alt;
+            previousAltTime = Date.now();
+            document.getElementById('vertical-rate').innerText = '--';
+            document.getElementById('vertical-rate-arrow').textContent = '';
+        } else {
+            document.getElementById('vertical-rate').innerText = '--';
+            document.getElementById('vertical-rate-arrow').textContent = '';
         }
 
         document.getElementById('accuracy').innerText = acc ? Math.round(acc) + ' m' : '--';
