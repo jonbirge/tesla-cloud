@@ -84,7 +84,7 @@ body.dark-mode .share-icon img {
     filter: brightness(0) invert(0.8) grayscale(1);
 }
 
-/* News Source Grid (moved from styles.css) */
+/* News Source Grid (moved from styles.css (and should go back (eventually))) */
 .news-source-grid {
     grid-template-columns: repeat(auto-fill, 310px);
     gap: 0px 10px;
@@ -113,37 +113,42 @@ body.dark-mode .share-icon img {
 
 /* Mobile adjustments for news-related elements */
 @media only screen and (max-width: 900px) {
+    .news-headlines {
+        margin: 14px 0;
+    }
+    
     .news-item {
-        padding: 8px 8px 8px 50px;
+        padding: 5px 5px 8px 48px;
+        margin-bottom: 7px;
     }
 
     .news-source {
-        font-size: 11pt;
+        font-size: 9pt;
     }
 
     .news-time {
-        font-size: 11pt;
+        font-size: 9pt;
     }
 
     .news-favicon {
-        width: 28px;
-        height: 28px;
+        width: 24px;
+        height: 24px;
         left: 11px;
     }
 
     .news-title {
-        font-size: 12pt;
+        font-size: 11pt;
         margin-right: 40px;
     }
 
     .share-icon {
         transform: scale(75%) translateY(-65%);
-        right: 5px;
+        right: 0px;
     }
 
     /* News sources grid */
-   .news-source-grid {
-        grid-template-columns: repeat(auto-fill, 200px);
+    .news-source-grid {
+        grid-template-columns: repeat(auto-fill, 210px);
     }
 
     .news-toggle-item {
