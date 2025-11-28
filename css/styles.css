@@ -1027,6 +1027,29 @@ body.dark-mode .option-button:hover:not(.active) {
     background-color: rgba(255, 255, 255, 0.1);
 }
 
+/* Satellite region selector */
+.satellite-region-selector .region-switch {
+    display: grid;
+    grid-template-columns: repeat(var(--region-columns, 3), minmax(0, 1fr));
+    gap: 3px;
+    width: 100%;
+    max-width: 360px;
+    margin: 0 auto;
+}
+
+.satellite-region-selector .option-button {
+    min-width: 64px;
+    width: 100%;
+    text-transform: uppercase;
+    font-size: 12pt;
+}
+
+/* Disable region selector when using location mode */
+.satellite-region-selector.disabled {
+    opacity: 0.5;
+    pointer-events: none;
+}
+
 /* Mobile Landscape Mode */
 @media only screen and (max-width: 900px) {
     :root {
@@ -1133,7 +1156,7 @@ body.dark-mode .option-button:hover:not(.active) {
     .button-icon {
         width: 16px;
         height: 16px;
-        margin-right: 8px;
+        margin-right: 7px;
     }
     
     /* Right frame takes remaining space */
@@ -1208,8 +1231,6 @@ body.dark-mode .option-button:hover:not(.active) {
         font-size: 12pt;
     }
     
-    /* News-related mobile adjustments moved to css/news.css */
-    
     /* Settings adjustments */
     .settings-controls {
         grid-template-columns: repeat(auto-fill, 300px);
@@ -1217,7 +1238,7 @@ body.dark-mode .option-button:hover:not(.active) {
     
     .settings-toggle-item {
         padding: 8px 10px;
-        font-size: 11pt;
+        font-size: 10pt;
     }
     
     .settings-toggle-item span.settings-toggle-slider {
@@ -1242,7 +1263,7 @@ body.dark-mode .option-button:hover:not(.active) {
         width: 200px;
         height: 16px;
         padding: 6px 12px;
-        font-size: 12pt; 
+        font-size: 10pt; 
     }
     
     /* Option Switch adjustments for mobile */
@@ -1257,15 +1278,26 @@ body.dark-mode .option-button:hover:not(.active) {
 
     /* Settings section headers */
     h2 {
-        font-size: 13pt;
+        font-size: 12pt;
         margin-top: 18px;
         margin-bottom: 3px;
     }
 
     h3 {
-        font-size: 12pt;
+        font-size: 11pt;
         margin-top: 7px;
         margin-bottom: 7px;
+    }
+
+    /* Satellite region selector mobile adjustments */
+    .satellite-region-selector .region-switch {
+        max-width: 80%;
+    }
+
+    .satellite-region-selector .option-button {
+        font-size: 8pt;
+        min-width: 26px;
+        padding: 4px 2px;
     }
 
     /* Fix external site iframe positioning in mobile mode */

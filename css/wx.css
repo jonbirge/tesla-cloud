@@ -70,29 +70,6 @@ body.dark-mode {
     pointer-events: none;
 }
 
-/* Satellite region selector */
-.satellite-region-selector .region-switch {
-    display: grid;
-    grid-template-columns: repeat(var(--region-columns, 3), minmax(0, 1fr));
-    gap: 3px;
-    width: 100%;
-    max-width: 360px;
-    margin: 0 auto;
-}
-
-.satellite-region-selector .option-button {
-    min-width: 64px;
-    width: 100%;
-    text-transform: uppercase;
-    font-size: 12pt;
-}
-
-/* Disable region selector when using location mode */
-.satellite-region-selector.disabled {
-    opacity: 0.5;
-    pointer-events: none;
-}
-
 .weather-switch::after {
     content: '';
     position: absolute;
@@ -634,17 +611,6 @@ body.dark-mode .notification-icon img {
     .weather-switch button {
         padding: 8px 12px;
         font-size: 11pt;
-    }
-
-    /* Satellite region selector mobile adjustments */
-    .satellite-region-selector .region-switch {
-        max-width: 100%;
-    }
-
-    .satellite-region-selector .option-button {
-        font-size: 7pt;
-        min-width: 32px;
-        padding: 4px 4px;
     }
 
     #prem-forecast-container .forecast-day:nth-of-type(7) {
