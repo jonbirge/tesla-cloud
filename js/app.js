@@ -4,7 +4,7 @@ import { PositionSimulator } from './location.js';
 import { attemptLogin, leaveSettings, settings, isDriving, setDrivingState, enableLiveNewsUpdates, saveSetting } from './settings.js';
 import { fetchPremiumWeatherData, fetchCityData, SAT_URLS, forecastDataPrem, currentRainAlert, generateForecastDayElements, ensurePrecipitationGraphWidth, currentSatRegion } from './wx.js';
 import { updateNetworkInfo, updatePingChart, startPingTest, getIPBasedLocation } from './net.js';
-import { setupNewsObserver, startNewsTimeUpdates, initializeNewsStorage } from './news.js';
+import { setupNewsObserver, cleanupNewsObserver, startNewsTimeUpdates, stopNewsTimeUpdates, initializeNewsStorage } from './news.js';
 import { startStockUpdates, stopStockUpdates } from './stock.js';
 
 // Exports
@@ -962,6 +962,12 @@ window.showSection = function (sectionId) {
     // If we're leaving settings, handle any rss feed changes
     if (currentSection === 'settings') {
         leaveSettings();
+    }
+
+    // If we're leaving news section, clean up observer and mark visible items as read
+    if (currentSection === 'news' && sectionId !== 'news') {
+        cleanupNewsObserver();
+        stopNewsTimeUpdates();
     }
 
     // If switching to news section, set up observer and start time updates

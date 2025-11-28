@@ -31,6 +31,7 @@ const defaultSettings = {
     "imperial-units": true,
     "map-choice": 'waze',
     "show-wind-radar": false,
+    "show-speed-indicators": true,
     "show-hourly-stripes": true,
     "sat-region": 'us',
     // Stocks
@@ -252,10 +253,11 @@ async function loadDefaultSettings() {
 async function setDefaultSettings() {
     // Load defaults from JSON first
     await loadDefaultSettings();
-    
+
     settings = { ...defaultSettings };
     initializeSettings();
     updateRadarVisibility();
+    updateSpeedIndicatorVisibility();
     console.log('Settings initialized to defaults');
 }
 
@@ -270,6 +272,21 @@ function updateRadarVisibility() {
     const radar = document.getElementById('radar-container');
     if (radar) {
         radar.style.display = (settings["show-wind-radar"] === false) ? 'none' : '';
+    }
+}
+
+// Helper function to show/hide speed indicators based on setting
+function updateSpeedIndicatorVisibility() {
+    const speedBox = document.querySelector('.stat-box:has(#speed)');
+    const verticalRateBox = document.querySelector('.stat-box:has(#vertical-rate)');
+
+    const shouldShow = settings["show-speed-indicators"] !== false;
+
+    if (speedBox) {
+        speedBox.style.display = shouldShow ? '' : 'none';
+    }
+    if (verticalRateBox) {
+        verticalRateBox.style.display = shouldShow ? '' : 'none';
     }
 }
 
@@ -1069,6 +1086,10 @@ function updateSetting(key, value) {
             
         case 'show-wind-radar':
             updateRadarVisibility();
+            break;
+
+        case 'show-speed-indicators':
+            updateSpeedIndicatorVisibility();
             break;
 
         case 'show-hourly-stripes':
