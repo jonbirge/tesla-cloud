@@ -3,7 +3,7 @@ const STOCK_API_ENDPOINT = 'php/quote.php?symbol='; // Prefix for internal stock
 const UPDATE_INTERVAL = 2 * 60 * 1000; // 2 minutes in milliseconds
 const CACHE_AGE_LIMIT = 1 * 60 * 1000; // minute in milliseconds
 const DISPLAY_ALTERNATE_INTERVAL = 5 * 1000; // 5 seconds in milliseconds
-const MAX_VISIBLE_TICKERS = 3; // Only show three indicators at once in the UI
+const MAX_VISIBLE_TICKERS = 5; // Only show five indicators at once in the UI
 const TICKER_SCROLL_REPEAT = 3; // Duplicate the ticker list so the animation can loop smoothly
 const TICKER_SCROLL_SECONDS_PER_SYMBOL = 3; // Seconds of scroll time per subscribed symbol
 const MIN_TICKER_SCROLL_DURATION = 12; // Minimum duration so slow lists do not feel jittery
