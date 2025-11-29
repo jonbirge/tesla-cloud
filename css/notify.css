@@ -13,7 +13,6 @@
 }
 
 .announcement p em {
-    font-style: italic;
     margin: 0px;
 }
 
@@ -23,15 +22,9 @@
     color: var(--text-color);
 }
 
-.notification-icon {
-    margin-right: 12px;
-}
-
 @media only screen and (max-width: 900px) {
     .announcement p .note-date {
         min-width: 90px;
-        text-align: left;
-        color: var(--text-color);
     }
 }
 

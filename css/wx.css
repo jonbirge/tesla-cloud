@@ -102,7 +102,6 @@ body.dark-mode {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
     gap: 9px;
-    /* margin: 1px 0; */
     max-width: 1100px;
 }
 
@@ -161,10 +160,6 @@ body.dark-mode {
     flex: 1;
     height: 100%;
     opacity: 0.75;
-}
-
-.hourly-segment:first-child {
-    margin-left: 0;
 }
 
 /* Ensure forecast content is above the hourly segments */
@@ -326,7 +321,6 @@ body.dark-mode .weather-alert-name {
     font-size: 12pt;
     font-weight: 650;
     margin-bottom: 8px;
-    /* text-transform: uppercase; */
     color: var(--button-text);
     text-shadow: 0 0 8px rgba(255, 255, 255, 0.8), 0 0 16px rgba(255, 255, 255, 0.6);
 }
@@ -344,7 +338,6 @@ body.dark-mode .forecast-date {
 .forecast-temp {
     font-size: 14pt;
     font-weight: 750;
-    /* margin: 8px 0; */
     color: var(--button-text);
     text-shadow: 0 0 8px rgba(255, 255, 255, 0.8), 0 0 16px rgba(255, 255, 255, 0.6);
 }
@@ -357,7 +350,6 @@ body.dark-mode .forecast-temp {
     font-family: "Inter", sans-serif;
     font-size: 13pt;
     font-style: italic;
-    /* font-weight: 500; */
     color: var(--button-text);
     text-shadow: 0 0 8px rgba(255, 255, 255, 0.8), 0 0 16px rgba(255, 255, 255, 0.6);
 }

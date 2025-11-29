@@ -14,9 +14,6 @@
     transition: background-color 0.3s ease, opacity 0.4s ease, filter 0.4s ease;
 }
 
-.news-item:hover {
-    background-color: var(--button-bg);
-}
 
 .news-item:last-child {
     margin-bottom: 0;

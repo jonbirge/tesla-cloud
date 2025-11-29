@@ -665,7 +665,6 @@ body.dark-mode .network-icon {
 }
 
 .data-item:last-child {
-    margin-right: 0;
     margin-bottom: 0;
 }
 
@@ -687,7 +686,7 @@ body.dark-mode .network-icon {
     display: grid;
     grid-template-columns: repeat(2, 1fr);
     grid-template-rows: repeat(2, auto);
-    gap: 10px 0 0 0;
+    gap: 10px 0;
     width: 400px;
 }
 
@@ -725,7 +724,6 @@ body.dark-mode .network-icon {
     font-weight: 500;
     margin-top: 0px;
     display: block;
-    clear: both;
 }
 
 /* Dashboard Display */
