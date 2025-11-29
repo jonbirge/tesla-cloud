@@ -370,6 +370,16 @@
       "icon": "https://www.pcmag.com"
     },
     {
+      "id": "9to5google",
+      "name": "9to5Google",
+      "url": "https://9to5google.com/feed/",
+      "refresh": 720,
+      "lifetime": 1095,
+      "category": "technology",
+      "defaultEnabled": false,
+      "icon": "https://9to5google.com"
+    },
+    {
       "id": "notateslaapp",
       "name": "Not a Tesla App",
       "url": "https://www.notateslaapp.com/rss",
