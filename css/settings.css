@@ -1,0 +1,217 @@
+
+/* Settings Section Styles */
+.settings-controls {
+    margin-top: -9px;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, 470px);
+    gap: 0px 11px;
+}
+
+.settings-toggle-item {
+    display: flex;
+    align-items: center;
+    background-color: var(--button-bg);
+    border-radius: var(--button-radius);
+    padding-left: 15px;
+    padding-right: 15px;
+    padding-top: 12px;
+    padding-bottom: 12px;
+    margin-top: 9px;
+    max-width: 480px;
+    font-weight: 550;
+    cursor: pointer;
+    transition: background-color 0.3s, color 0.3s;
+}
+
+.settings-toggle-item label {
+    flex-grow: 1;
+    cursor: inherit;
+}
+
+.settings-toggle-item input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+    position: absolute;
+}
+
+.settings-toggle-item span.settings-toggle-slider {
+    position: relative;
+    display: inline-block;
+    width: 60px;
+    height: 32px;
+    flex-shrink: 0;
+    left: 5px;
+}
+
+.settings-toggle-slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: #aaa;
+    transition: .4s;
+    border-radius: 30px;
+}
+
+.settings-toggle-slider:before {
+    position: absolute;
+    content: "";
+    height: 26px;
+    width: 26px;
+    left: 4px;
+    bottom: 3px;
+    background-color: white;
+    transition: .4s;
+    border-radius: 50%;
+}
+
+.settings-description {
+    margin-top: 2pt;
+    font-size: 12.5pt;
+    font-style: italic;
+    margin-left: 11pt;
+    text-align: right;
+}
+
+input:checked + .settings-toggle-slider {
+    background-color: var(--tesla-blue);
+}
+
+input:focus + .settings-toggle-slider {
+    box-shadow: 0 0 1px var(--tesla-blue);
+}
+
+input:checked + .settings-toggle-slider:before {
+    transform: translateX(26px);
+}
+
+/* Settings Text Item */
+.settings-text-item {
+    cursor: initial;
+}
+
+.settings-text-item input[type="text"] {
+    opacity: 100%;
+    width: 320px;
+    height: 19px;
+    position: relative;
+    padding: 8px 14px;
+    border-width: 0px;
+    border-radius: 9px;
+    background: var(--bg-color);
+    color: var(--button-text);
+    font-size: 14pt;
+    font-weight: 500;
+    text-align: right;
+}
+
+body.dark-mode .settings-text-item input[type="text"]:disabled {
+    background: #333333;
+    color: #555555;
+}
+
+.settings-text-item input[type="text"]:focus {
+    outline: var(--tesla-blue) solid 2px;
+}
+
+#in-map-toggle {
+    position: absolute;
+    margin: 0;
+    padding: 7px;
+    z-index: 10;
+    background-color: transparent;
+    opacity: 0.8;
+}
+
+#in-map-toggle .option-switch {
+    background-color: var(--button-bg);
+}
+
+#in-map-toggle .option-button {
+    font-size: 12pt;
+    font-weight: 700;
+}
+
+/* News Source Grid */
+.news-source-grid {
+    grid-template-columns: repeat(auto-fill, 310px);
+    gap: 0px 10px;
+    width: auto;
+}
+
+.news-toggle-item {
+    padding: 9px 15px 9px 45px;
+    margin-top: 7px;
+    border-radius: 9px;
+    width: auto;
+    font-size: 15pt;
+    position: relative;
+}
+
+.news-source-favicon {
+    position: absolute;
+    left: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 24px;
+    height: 24px;
+    border-radius: 4px;
+    opacity: 0.8;
+}
+
+@media only screen and (max-width: 900px) {
+    /* Settings adjustments */
+    .settings-controls {
+        grid-template-columns: repeat(auto-fill, 300px);
+    }
+    
+    .settings-toggle-item {
+        padding: 8px 10px;
+        font-size: 11pt;
+    }
+    
+    .settings-toggle-item span.settings-toggle-slider {
+        width: 42px;
+        height: 22px;
+        left: 0px;
+    }
+
+    .settings-toggle-slider:before {
+        height: 16px;
+        width: 16px;
+        left: 3px;
+        bottom: 3px;
+    }
+
+    input:checked + .settings-toggle-slider:before {
+        transform: translateX(20px);
+    }
+    
+    /* Text input fields in settings */
+    .settings-text-item input[type="text"] {
+        width: 200px;
+        height: 16px;
+        padding: 6px 12px;
+        font-size: 10pt; 
+    }
+
+    /* News sources grid */
+    .news-source-grid {
+        grid-template-columns: repeat(auto-fill, 200px);
+    }
+
+    .news-toggle-item {
+        font-size: 10pt;
+        padding: 5px 6px 5px 28px;
+        margin-top: 5px;
+    }
+
+    .news-source-favicon {
+        width: 16px;
+        height: 16px;
+        left: 6px;
+    }
+}
