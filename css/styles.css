@@ -632,7 +632,7 @@ body.dark-mode .network-icon {
     }
 }
 
-/* Data Display */
+/* Simple Text Data Display */
 .data-info, .data-info-column {
     row-gap: 18px;
     width: auto;
@@ -674,7 +674,7 @@ body.dark-mode .network-icon {
     margin-bottom: 4px;
 }
 
-/* Stats  */
+/* Stats */
 .nav-container {
     display: flex;
     gap: 50px;
@@ -690,39 +690,52 @@ body.dark-mode .network-icon {
     width: 400px;
 }
 
+/* When extra detail (speed and vert rate) is on, use 3x2 layout */
+.nav-stats.extra-detail {
+    grid-template-columns: repeat(3, 1fr);
+    width: 600px;
+}
+
 .stat-box {
     display: flex;
     flex-direction: column;
-    align-items: left;
+    /* align-items: left; */
     min-width: 200px;
-    height: 125px;
+    height: 120px;
 }
 
 .value-container {
     display: flex;
-    align-items: center;
+    align-items:baseline;
 }
 
 .stat-value {
     color: var(--button-text);
-    font-size: 52pt;
-    font-weight: 500;
+    font-size: 48pt;
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+}
+
+.stat-arrow {
+    color: var(--button-text);
+    font-size: 48pt;
+    font-weight: 600;
     font-variant-numeric: tabular-nums;
 }
 
 .stat-unit {
-    color: var(--text-color);
-    font-size: 24pt;
-    font-weight: 600;
-    font-family: sans-serif;
-    margin-left: 5px;
+    /* color: var(--text-color); */
+    font-size: 17pt;
+    font-weight: 700;
+    /* font-family: sans-serif; */
+    margin-left: 3px;
 }
 
 .stat-label {
     color: var(--text-color);
     font-size: 13pt;
     font-weight: 500;
-    margin-top: 0px;
+    margin-top: -3px;
     display: block;
 }
 
@@ -1039,6 +1052,11 @@ body.dark-mode .option-button:hover:not(.active) {
     }
 
     .nav-stats {
+        width: 100%;
+    }
+
+    /* Ensure extra-detail layout also takes full width on mobile */
+    .nav-stats.extra-detail {
         width: 100%;
     }
 
