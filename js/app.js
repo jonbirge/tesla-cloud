@@ -1233,6 +1233,14 @@ document.addEventListener('DOMContentLoaded', async function () {
     // Log that the DOM is fully loaded
     console.log('DOM fully loaded and parsed...');
 
+    // Update page title and heading with current domain
+    const domain = window.location.hostname;
+    document.title = domain;
+    const h1 = document.querySelector('.section-buttons h1');
+    if (h1) {
+        h1.textContent = domain;
+    }
+
     // Attempt login from URL parameter or cookie
     await attemptLogin();
     
