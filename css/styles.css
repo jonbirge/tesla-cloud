@@ -690,6 +690,12 @@ body.dark-mode .network-icon {
     width: 400px;
 }
 
+/* When extra detail (speed and vert rate) is on, use 3x2 layout */
+.nav-stats.extra-detail {
+    grid-template-columns: repeat(3, 1fr);
+    width: 600px;
+}
+
 .stat-box {
     display: flex;
     flex-direction: column;
@@ -1046,6 +1052,11 @@ body.dark-mode .option-button:hover:not(.active) {
     }
 
     .nav-stats {
+        width: 100%;
+    }
+
+    /* Ensure extra-detail layout also takes full width on mobile */
+    .nav-stats.extra-detail {
         width: 100%;
     }
 
