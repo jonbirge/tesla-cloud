@@ -279,6 +279,7 @@ function updateRadarVisibility() {
 function updateSpeedIndicatorVisibility() {
     const speedBox = document.querySelector('.stat-box:has(#speed)');
     const verticalRateBox = document.querySelector('.stat-box:has(#vertical-rate)');
+    const navStats = document.querySelector('.nav-stats');
 
     const shouldShow = settings["show-speed-indicators"] !== false;
 
@@ -287,6 +288,10 @@ function updateSpeedIndicatorVisibility() {
     }
     if (verticalRateBox) {
         verticalRateBox.style.display = shouldShow ? '' : 'none';
+    }
+    // Toggle 3x2 layout when extra detail is enabled
+    if (navStats) {
+        navStats.classList.toggle('extra-detail', shouldShow);
     }
 }
 
