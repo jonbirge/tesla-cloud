@@ -257,45 +257,46 @@ function updateWindage(vehicleSpeed, vehicleHeading, windSpeed, windDirection) {
     if (headWind !== null) {
         if (!settings || settings["imperial-units"]) {
             document.getElementById('headwind').innerText = Math.abs(Math.round(headWind));
+            document.getElementById('headwind-unit').innerText = 'MPH';
         } else {
             // Convert mph to m/s (1 mph ≈ 0.44704 m/s)
             document.getElementById('headwind').innerText = Math.abs(Math.round(headWind * 0.44704));
+            document.getElementById('headwind-unit').innerText = 'M/S';
         }
         document.getElementById('headwind-arrow').textContent = (headWind > 0 ? '▼' : '▲'); // down/up filled triangles
-        // Change the label to TAILWIND when headWind is negative and use appropriate units
-        if (!settings || settings["imperial-units"]) {
-            document.getElementById('headwind-label').innerText = (headWind < 0) ? "TAILWIND (MPH)" : "HEADWIND (MPH)";
-        } else {
-            document.getElementById('headwind-label').innerText = (headWind < 0) ? "TAILWIND (M/S)" : "HEADWIND (M/S)";
-        }
+        // Change the label to TAILWIND when headWind is negative
+        document.getElementById('headwind-label').innerText = (headWind < 0) ? "TAILWIND" : "HEADWIND";
     } else {
         document.getElementById('headwind').innerText = '--';
         document.getElementById('headwind-arrow').textContent = '';
-        // Set label with appropriate units
+        document.getElementById('headwind-label').innerText = "HEADWIND";
+        // Set unit with appropriate units
         if (!settings || settings["imperial-units"]) {
-            document.getElementById('headwind-label').innerText = "HEADWIND (MPH)";
+            document.getElementById('headwind-unit').innerText = 'MPH';
         } else {
-            document.getElementById('headwind-label').innerText = "HEADWIND (M/S)";
+            document.getElementById('headwind-unit').innerText = 'M/S';
         }
     }
 
     if (crossWind !== null) {
         if (!settings || settings["imperial-units"]) {
             document.getElementById('crosswind').innerText = Math.abs(Math.round(crossWind));
+            document.getElementById('crosswind-unit').innerText = 'MPH';
         } else {
             // Convert mph to m/s
             document.getElementById('crosswind').innerText = Math.abs(Math.round(crossWind * 0.44704));
+            document.getElementById('crosswind-unit').innerText = 'M/S';
         }
         document.getElementById('crosswind-arrow').textContent = (crossWind >= 0 ? '▶' : '◀'); // right/left triangles
     } else {
         document.getElementById('crosswind').innerText = '--';
         document.getElementById('crosswind-arrow').textContent = '';
     }
-    // Set label with appropriate units
+    // Set crosswind unit with appropriate units
     if (!settings || settings["imperial-units"]) {
-        document.getElementById('crosswind-label').innerText = "CROSSWIND (MPH)";
+        document.getElementById('crosswind-unit').innerText = 'MPH';
     } else {
-        document.getElementById('crosswind-label').innerText = "CROSSWIND (M/S)";
+        document.getElementById('crosswind-unit').innerText = 'M/S';
     }
 }
 
@@ -471,11 +472,11 @@ async function handlePositionUpdate(position) {
                     const verticalRateFtMin = verticalRateMs * 196.85;
                     document.getElementById('vertical-rate').innerText = Math.abs(Math.round(verticalRateFtMin));
                     document.getElementById('vertical-rate-arrow').textContent = (verticalRateFtMin > 0 ? '▲' : '▼');
-                    document.getElementById('vertical-rate-label').innerText = "VERT RATE (FT/MIN)";
+                    document.getElementById('vertical-rate-unit').innerText = 'FT/MIN';
                 } else {
                     document.getElementById('vertical-rate').innerText = Math.abs(verticalRateMs.toFixed(1));
                     document.getElementById('vertical-rate-arrow').textContent = (verticalRateMs > 0 ? '▲' : '▼');
-                    document.getElementById('vertical-rate-label').innerText = "VERT RATE (M/S)";
+                    document.getElementById('vertical-rate-unit').innerText = 'M/S';
                 }
 
                 // Update previous altitude and time

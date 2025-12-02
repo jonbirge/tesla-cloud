@@ -706,7 +706,7 @@ body.dark-mode .network-icon {
 
 .value-container {
     display: flex;
-    align-items:baseline;
+    align-items: baseline;
 }
 
 .stat-value {
@@ -718,9 +718,10 @@ body.dark-mode .network-icon {
 
 .stat-arrow {
     color: var(--button-text);
-    font-size: 48pt;
+    font-size: 36pt;
     font-weight: 600;
-    font-variant-numeric: tabular-nums;
+    line-height: 1;
+    margin-right: 4px;
 }
 
 .stat-unit {
@@ -1089,6 +1090,10 @@ body.dark-mode .option-button:hover:not(.active) {
     
     .stat-unit {
         font-size: 18pt;
+    }
+    
+    .stat-arrow {
+        font-size: 28pt;
     }
     
     .stat-label {
