@@ -721,7 +721,13 @@ body.dark-mode .network-icon {
     font-size: 36pt;
     font-weight: 600;
     line-height: 1;
-    margin-right: 4px;
+}
+
+.stat-arrow-unit {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-left: 4px;
 }
 
 .stat-unit {
