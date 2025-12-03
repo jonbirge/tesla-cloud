@@ -723,9 +723,16 @@ body.dark-mode .network-icon {
 }
 
 .stat-arrow-unit {
+    display: inline-flex;
     flex-direction: column;
     align-items: center;
+    align-self: flex-end;
     margin-left: 3px;
+    margin-bottom: 5px;
+}
+
+.stat-arrow-unit .stat-unit {
+    margin-left: 0;
 }
 
 .stat-unit {
