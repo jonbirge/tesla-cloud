@@ -29,6 +29,12 @@
       "title": "Automotive",
       "containerId": "news-tesla-settings",
       "priority": 5
+    },
+    {
+      "id": "consumption",
+      "title": "Conspicuous Consumption",
+      "containerId": "news-consumption-settings",
+      "priority": 6
     }
   ],
   "feeds": [
@@ -300,16 +306,6 @@
       "icon": "https://www.theregister.com"
     },
     {
-      "id": "infoq",
-      "name": "InfoQ",
-      "url": "https://feed.infoq.com",
-      "refresh": 720,
-      "lifetime": 1095,
-      "category": "technology",
-      "defaultEnabled": false,
-      "icon": "https://www.infoq.com"
-    },
-    {
       "id": "phoronix",
       "name": "Phoronix",
       "url": "https://www.phoronix.com/rss.php",
@@ -368,6 +364,36 @@
       "category": "technology",
       "defaultEnabled": false,
       "icon": "https://www.pcmag.com"
+    },
+    {
+      "id": "gearpatrol",
+      "name": "Gear Patrol",
+      "url": "https://news.google.com/rss/search?q=site:gearpatrol.com&hl=en-US&gl=US&ceid=US:en",
+      "refresh": 360,
+      "lifetime": 1095,
+      "category": "consumption",
+      "defaultEnabled": false,
+      "icon": "https://www.gearpatrol.com"
+    },
+    {
+      "id": "monochrome",
+      "name": "Monochrome",
+      "url": "https://monochrome-watches.com/feed/",
+      "refresh": 360,
+      "lifetime": 1095,
+      "category": "consumption",
+      "defaultEnabled": false,
+      "icon": "https://monochrome-watches.com"
+    },
+    {
+      "id": "esquire",
+      "name": "Esquire",
+      "url": "https://news.google.com/rss/search?q=site:esquire.com&hl=en-US&gl=US&ceid=US:en",
+      "refresh": 360,
+      "lifetime": 1095,
+      "category": "consumption",
+      "defaultEnabled": false,
+      "icon": "https://www.esquire.com"
     },
     {
       "id": "9to5google",

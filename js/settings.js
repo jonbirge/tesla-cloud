@@ -896,43 +896,42 @@ function generateNewsSections() {
 
 // Function to generate news source settings dynamically
 function generateNewsSourceSettings() {
-    const generalContainer = document.querySelector('#news-general-settings');
-    const businessContainer = document.querySelector('#news-business-settings');
-    const technologyContainer = document.querySelector('#news-technology-settings');
-    const defenseContainer = document.querySelector('#news-defense-settings');
-    const teslaContainer = document.querySelector('#news-tesla-settings');
-    
-    if (!generalContainer || !businessContainer || !technologyContainer || !defenseContainer || !teslaContainer) return;
-    
-    generalContainer.replaceChildren();
-    businessContainer.replaceChildren();
-    technologyContainer.replaceChildren();
-    defenseContainer.replaceChildren();
-    teslaContainer.replaceChildren();
+    const sectionContainers = {};
+    const sectionsToUse = availableNewsSections.length ? availableNewsSections : [
+        { id: 'general', containerId: 'news-general-settings' },
+        { id: 'business', containerId: 'news-business-settings' },
+        { id: 'technology', containerId: 'news-technology-settings' },
+        { id: 'defense', containerId: 'news-defense-settings' },
+        { id: 'tesla', containerId: 'news-tesla-settings' }
+    ];
+
+    // Build a map of section id -> DOM container for easy lookup and clearing
+    sectionsToUse.forEach(section => {
+        if (!section.containerId) {
+            return;
+        }
+        const container = document.querySelector(`#${section.containerId}`);
+        if (container) {
+            container.replaceChildren();
+            sectionContainers[section.id] = container;
+        }
+    });
+
+    if (!Object.keys(sectionContainers).length) {
+        return;
+    }
+
+    // Fallback to general container if available for unknown categories
+    const defaultContainer = sectionContainers.general || Object.values(sectionContainers)[0];
 
     // Generate news source checkboxes by category
     availableNewsSources.forEach(source => {
-        const div = createNewsToggleItem(source);
-        
-        switch (source.category) {
-            case 'general':
-                generalContainer.appendChild(div);
-                break;
-            case 'business':
-                businessContainer.appendChild(div);
-                break;
-            case 'technology':
-                technologyContainer.appendChild(div);
-                break;
-            case 'defense':
-                defenseContainer.appendChild(div);
-                break;
-            case 'tesla':
-                teslaContainer.appendChild(div);
-                break;
-            default:
-                generalContainer.appendChild(div);
+        const container = sectionContainers[source.category] || defaultContainer;
+        if (!container) {
+            return;
         }
+        const div = createNewsToggleItem(source);
+        container.appendChild(div);
     });
 
     // Update UI based on current settings
