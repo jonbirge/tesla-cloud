@@ -719,16 +719,15 @@ body.dark-mode .network-icon {
     color: var(--button-text);
     font-size: 18pt;
     font-weight: 800;
-    line-height: 1;
+    line-height: 1.2;
 }
 
 .stat-arrow-unit {
     display: inline-flex;
     flex-direction: column;
-    align-items: center;
     align-self: flex-end;
     margin-left: 3px;
-    margin-bottom: 5px;
+    margin-bottom: 9px;
 }
 
 .stat-arrow-unit .stat-unit {
