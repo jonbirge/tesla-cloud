@@ -674,7 +674,7 @@ body.dark-mode .network-icon {
     margin-bottom: 4px;
 }
 
-/* Stats */
+/* Dashboard Nav Stats */
 .nav-container {
     display: flex;
     gap: 50px;
@@ -690,7 +690,7 @@ body.dark-mode .network-icon {
     width: 400px;
 }
 
-/* When extra detail (speed and vert rate) is on, use 3x2 layout */
+/* When extra detail is on, use 3x2 layout */
 .nav-stats.extra-detail {
     grid-template-columns: repeat(3, 1fr);
     width: 600px;
@@ -699,7 +699,6 @@ body.dark-mode .network-icon {
 .stat-box {
     display: flex;
     flex-direction: column;
-    /* align-items: left; */
     min-width: 200px;
     height: 120px;
 }
@@ -718,23 +717,20 @@ body.dark-mode .network-icon {
 
 .stat-arrow {
     color: var(--button-text);
-    font-size: 36pt;
-    font-weight: 600;
+    font-size: 18pt;
+    font-weight: 800;
     line-height: 1;
 }
 
 .stat-arrow-unit {
-    display: flex;
     flex-direction: column;
     align-items: center;
-    margin-left: 4px;
+    margin-left: 3px;
 }
 
 .stat-unit {
-    /* color: var(--text-color); */
     font-size: 17pt;
     font-weight: 700;
-    /* font-family: sans-serif; */
     margin-left: 3px;
 }
 
