@@ -32,6 +32,7 @@
             border-radius: var(--button-radius);
             padding: 1rem;
             margin: 1rem 0;
+            color: var(--button-text);
         }
         code {
             background-color: var(--info-bg);
@@ -67,7 +68,7 @@
             <li>Create a user ID to sync settings across devices and ensure settings aren't lost</li>
             <ul>
                 <li>Without specifying an ID, your settings may not survive software upgrades to the car</li>
-                <li>Your user ID can be anything memorable like your phone number or email address - it's encrypted before storage</li>
+                <li>Your user ID can be anything memorable like your phone number or email address</li>
                 <li>The user ID you pick is encrypted before being sent to our servers</li>
             </ul>
             <li>Dashboard lets you monitor road conditions while still navigating using the car's system</li>
@@ -79,36 +80,44 @@
     
     <div class="question">Q: What is teslas.cloud?</div>
     <div class="answer">
-        teslas.cloud is a comprehensive web application designed specifically for Tesla's in-car browser. It provides news, weather, navigation, and other essential features optimized for vehicle use. This is an educational father-son project and is not affiliated with Tesla, Inc.
+        teslas.cloud is a web app designed specifically for use with an in-car browser, such as that in a Tesla. It provides news, weather, navigation, and other features optimized for vehicle use. This is an educational father-son project and is not affiliated with Tesla, Inc. We make no promises that this app will always work, or that it will be maintained forever.
     </div>
 
-    <div class="question">Q: Why is it "teslas" and not "tesla"?</div>
+    <div class="question">Q: Why is it "teslas.cloud" and not "tesla.cloud"?</div>
     <div class="answer">
         Because some guy in China is squatting on the "tesla.cloud" domain.
     </div>
 
     <div class="question">Q: Is teslas.cloud free to use?</div>
     <div class="answer">
-        Yes, teslas.cloud is completely free to use. It's maintained as an educational project to benefit the Tesla community.
+        Yes, teslas.cloud is completely free to use. We made it for fun, and it doesn't cost much to maintain so we're giving it to the community. We don't plan to charge for anything, but we can't guarantee we'll be able to keep all of the features intact. In particular, the weather and news services depend on third-party APIs that may become costly if usage grows too large.
     </div>
     
     <h2>Dashboard Section</h2>
     
     <div class="question">Q: What information does the Dashboard provide?</div>
     <div class="answer">
-        The Dashboard is your navigation hub featuring:
+        A few bits of data not otherwise available from the car's built-in interface:
         <ul>
             <li><strong>Relative Wind Indicator (Optional):</strong> A circular radar display showing wind direction relative to your vehicle's heading</li>
-            <li><strong>GPS Coordinates:</strong> Current latitude and longitude with precision indicators</li>
             <li><strong>Altitude Display:</strong> Elevation above sea level</li>
             <li><strong>Vehicle Heading:</strong> Compass direction in degrees</li>
-            <li><strong>Embedded TeslaWaze:</strong> Full navigation interface with real-time traffic</li>
+            <li><strong>Headwind/Tailwind</strong> Wind speed in your direction of travel</li>
+            <li><strong>Crosswind</strong> Wind speed perpendicular to your direction of travel</li>
+            <li><strong>Speed (Optional)</strong> GPS-derived speed of the car. Should be exactly what is shown in your dashboard, but can be a good sanity check that your speedometer is properly calibrated. Some car companies fudge the speedometer a little bit to avoid liability.</li>
+            <li><strong>Vertical rate (Optional)</strong> The speed at which you're climbing or descending. Ok, this is just for fun. We have no idea how this could ever be truly useful in a car.</li>
+            <li><strong>Embedded TeslaWaze:</strong> Real-time traffic and road hazards</li>
         </ul>
+    </div>
+
+    <div class="question">Q: Why would I care about headwind and crosswind in my car?</div>
+    <div class="answer">
+        Knowing wind conditions can help you understand their impact on your vehicle's range and handling. Headwinds can reduce efficiency, while crosswinds may affect stability as well as range. For example, if you've got a significant headwind, you probably won't get the range you're initially being told by the car, because the car doesn't take forecast winds into account, only observed average efficiency.
     </div>
 
     <div class="question">Q: What is TeslaWaze and how do I use it?</div>
     <div class="answer">
-        TeslaWaze is a service developed by some brilliant unknown engineer that allows you to view traffic conditions and speed traps. It's a nice complement to your Tesla's built-in navigation. It was NOT developed by us, and we're just embedding it in the app.
+        TeslaWaze is a service developed by some brilliant unknown engineer that taps into Waze and allows information about traffic and speedtraps to be displayed within a browser. It's a nice complement to your Tesla's built-in navigation. It was NOT developed by us, and we're just embedding it in the app.
     </div>
 
     <div class="question">Q: Why does the GPS data show "--" or seem inaccurate?</div>
@@ -130,12 +139,17 @@
 
     <div class="question">Q: Can I customize which news sources appear?</div>
     <div class="answer">
-        Yes! After logging in, you can customize your news feeds in the Settings section. You can enable or disable specific news sources, set update frequencies, and even configure email forwarding for news articles.
+        After logging in, you can customize your news feeds in the Settings section. You can enable or disable specific news sources, set update frequencies, and even configure email forwarding for news articles.
     </div>
 
     <div class="question">Q: How does news sharing work?</div>
     <div class="answer">
         When logged in, you can forward interesting articles to yourself for later reading via email. Click the share button on any article, and it will be sent to your configured email address. This feature requires you to have email forwarding enabled in your user settings.
+    </div>
+
+    <div class=""question">Q: Why are some articles grey?</div>
+    <div class="answer">
+        Articles are greyed out to indicate they've been read, and will be removed the next time news is updated. Articles are marked as read when you click on them to view the full content, forward them, or scroll past them in the feed.
     </div>
     
     <h2>Weather Section</h2>
@@ -152,16 +166,16 @@
         </ul>
     </div>
 
-    <h2>Landmarks Section</h2>
+    <h2>Nearby Section</h2>
     
-    <div class="question">Q: What is this section do?</div>
+    <div class="question">Q: What does this section do?</div>
     <div class="answer">
         The Landmarks section provides nearby points of interest from Wikipedia. You can leave it open while you drive and it will continuously update as you move.
     </div>
     
     <h2>Network Section</h2>
     
-    <div class="question">Q: What graph in the Network section monitor?</div>
+    <div class="question">Q: What does the graph monitor?</div>
     <div class="answer">
         The Network section provides real-time car network diagnostics by measuring latency to our server. It's a complement to the cell signal display in the car that is actually measuring the network performance, not just signal strength. 
     </div>
@@ -175,17 +189,17 @@
             <li><strong>Orange:</strong> Poor connection affecting some features</li>
             <li><strong>Gray:</strong> No connection or unable to test</li>
         </ul>
-        The bar indicator in the top-right corner gives you an at-a-glance view of your current connection quality.
+        The bar indicator in the top-right corner gives you an at-a-glance view of your actual connection quality, not just the signal strength of the cell connection.
     </div>
 
     <div class="question">Q: What is the network "exit" location?</div>
     <div class="answer">
-        When your car connects to the internet, it does so through a cellular connection. Most car companies, like Tesla, actually route you through a network tunnel (VPN) that they control. As such, you may actually be accessing the internet from quite a distance from your actual location when all is said and done. This shows you where you actually "appear to be" on the internet. 
+        When your car connects to the internet, it does so through a cellular connection. Most car companies, like Tesla, actually route you through a network tunnel (VPN) that they control. As such, you may be accessing the internet from a server that is quite a distance from your actual location when all is said and done. This shows you where you actually "appear to be" on the internet. For example, we live in Boston but our car is often connecting to the internet through a server in California, which means that when connecting to the teslas.cloud server (which is in New York), we're going across the country twice.
     </div>
 
     <div class="question">Q: Great. Why do i care?</div>
     <div class="answer">
-        First, it will introduce latency if the server that is handling your network traffic is far away. Second, some services (like streaming video) may be blocked if they notice a difference between your GPS position and your network location.
+        First, it will introduce latency if the server that is handling your network traffic is far away (as discussed above). Second, some services (like streaming video) may be blocked if they notice a difference between your GPS position and your network location.
     </div>
     
     <h2>Travel Section</h2>
@@ -240,12 +254,11 @@
     
     <div class="question">Q: Do I need to create an account to use teslas.cloud?</div>
     <div class="answer">
-        No account is required for basic functionality. All settings are saved locally in your browser by default. However, creating a user ID provides several benefits:
+        No account is required for basic functionality. However, creating a user ID provides several benefits:
         <ul>
             <li>Sync settings across multiple devices and browsers</li>
-            <li>Access to premium features like news sharing</li>
-            <li>Persistent configuration even after browser resets</li>
-            <li>Enhanced customization options</li>
+            <li>Access to news sharing</li>
+            <li>Persistent configuration even after browser resets after a software upgrade</li>
         </ul>
     </div>
     
@@ -259,18 +272,6 @@
             <li>Use the same ID on other devices to access your settings</li>
         </ol>
         Your user ID can be anything memorable like your phone number or email address - it's encrypted before storage.
-    </div>
-
-    <div class="question">Q: What settings can I customize?</div>
-    <div class="answer">
-        You can customize numerous aspects of teslas.cloud:
-        <ul>
-            <li><strong>Display:</strong> Dark/light mode, text size, layout preferences</li>
-            <li><strong>News:</strong> Source selection, update frequency, email forwarding</li>
-            <li><strong>Weather:</strong> Units (metric/imperial), alert preferences</li>
-            <li><strong>Navigation:</strong> Default map service, route preferences</li>
-            <li><strong>Privacy:</strong> Data sharing preferences, analytics opt-out</li>
-        </ul>
     </div>
 
     <div class="question">Q: What information is stored on your servers?</div>
