@@ -969,10 +969,12 @@ window.showSection = function (sectionId) {
     if (currentSection === 'news' && sectionId !== 'news') {
         cleanupNewsObserver();
         stopNewsTimeUpdates();
+        resumeNewsUpdates(); // Resume auto-refresh when leaving news section
     }
 
     // If switching to news section, set up observer and start time updates
     if (sectionId === 'news') {
+        pauseNewsUpdates(); // Suppress auto-refresh while viewing news section
         // Set up the observer for visible news items and start time updates
         setTimeout(() => {
             setupNewsObserver();
@@ -1223,7 +1225,10 @@ document.addEventListener('visibilitychange', () => {
         stopStockUpdates();
     } else {
         startGPSUpdates();
-        resumeNewsUpdates();
+        // Only resume news updates if not currently viewing the news section
+        if (currentSection !== 'news') {
+            resumeNewsUpdates();
+        }
         resumePingTest();
         startStockUpdates();
     }
