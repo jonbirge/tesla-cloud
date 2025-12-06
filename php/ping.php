@@ -16,11 +16,19 @@ if ($requestMethod === 'HEAD') {
     exit;
 }
 
-// For GET requests, just return the current server time
+// For GET requests, return server time and client IP as JSON
 if ($requestMethod === 'GET') {
-    // Return the current server time as a human readable string
-    header('Content-Type: text/plain');
-    echo date('Y-m-d H:i:s');
+    // Get client IP address
+    $clientIP = $_SERVER['REMOTE_ADDR'];
+    if (isset($_SERVER['HTTP_X_FORWARDED_FOR']) && filter_var($_SERVER['HTTP_X_FORWARDED_FOR'], FILTER_VALIDATE_IP)) {
+        $clientIP = $_SERVER['HTTP_X_FORWARDED_FOR'];
+    }
+    
+    header('Content-Type: application/json');
+    echo json_encode([
+        'time' => date('Y-m-d H:i:s'),
+        'ip' => $clientIP
+    ]);
     exit;
 }
 

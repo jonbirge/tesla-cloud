@@ -8,6 +8,7 @@ const PING_WAIT = 10*1000; // 10 seconds
 let pingInterval = null;
 let pingChart = null;
 let pingData = [];
+let lastKnownIP = null; // Track last known IP address for change detection
 let userLocation = {
     latitude: null,
     longitude: null,
@@ -308,29 +309,34 @@ async function pingTestServer() {
         formData.append('altitude', userLocation.altitude);
     }
 
-    // Send a low-overhead HEAD request to the server
+    // Send a GET request to the server to measure latency and get IP address
     const startTime = performance.now();
     try {
         const response = await fetch('php/ping.php', {
-            method: 'HEAD'
+            method: 'GET',
+            cache: 'no-store'
         });
         
         if (!response.ok) {
             throw new Error('Network response was not ok');
         }
         
-        await response.text();
+        const data = await response.json();
         const pingTime = performance.now() - startTime; // ms
+        
+        // Check for IP address change
+        if (data.ip) {
+            if (lastKnownIP !== null && lastKnownIP !== data.ip) {
+                console.log(`IP address changed from ${lastKnownIP} to ${data.ip}`);
+                debugLog(`IP address changed: ${lastKnownIP} -> ${data.ip}`);
+                // Update network info when IP changes
+                updateNetworkInfo();
+            }
+            lastKnownIP = data.ip;
+        }
         
         // Debug log: ping success
         debugLog(`Network ping successful: ${pingTime.toFixed(1)}ms (${locationInfo})`);
-        
-        // Discard the first ping
-        // if (!pingTestServer.firstPingDiscarded) {
-        //     pingTestServer.firstPingDiscarded = true;
-        //     console.log('First ping discarded: ', Math.round(pingTime));
-        //     return;
-        // }
 
         updateNetworkStatus(pingTime);
 
@@ -347,11 +353,13 @@ async function pingTestServer() {
     } catch (error) {
         // Debug log: ping failure
         debugLog(`Network ping failed: ${error.message} (${locationInfo})`);
-        console.log('Ping HEAD failed: ', error);
+        console.log('Ping GET failed: ', error);
     }
 
     // Add last ping time to form data as a string
-    formData.append('ping', pingData.at(-1).toFixed(1));
+    if (pingData.length > 0) {
+        formData.append('ping', pingData.at(-1).toFixed(1));
+    }
     try {
         // Debug log: POST attempt
         debugLog(`Network ping POST data attempt (${locationInfo})`);
