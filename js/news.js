@@ -5,7 +5,7 @@ import { formatTime, highlightUpdate, testMode, showNotification } from './commo
 // Constants
 const BASE_URL = 'php/news.php?age=1';
 const RESTDB_URL = 'php/rest_db.php';
-const NEWS_REFRESH_INTERVAL = 2.5;  // minutes
+const NEWS_REFRESH_INTERVAL = 5;  // minutes
 
 // Variables
 let newsUpdateInterval = null;
