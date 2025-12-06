@@ -105,16 +105,26 @@ if (!$data || empty($data)) {
     exit;
 }
 
-// Extract the relevant data from Polygon response
+// Extract the relevant data from Finnhub response
 $currentPrice = floatval($data['c']);   // (Current or closing price)
 $percentChange = floatval($data['dp']); // (Percentage change)
 $time = intval($data['t']);             // (Timestamp)
+$openPrice = isset($data['o']) ? floatval($data['o']) : null;  // (Open price)
+$highPrice = isset($data['h']) ? floatval($data['h']) : null;  // (High price)
+$lowPrice = isset($data['l']) ? floatval($data['l']) : null;   // (Low price)
+$previousClose = isset($data['pc']) ? floatval($data['pc']) : null; // (Previous close)
+$change = isset($data['d']) ? floatval($data['d']) : null;     // (Change absolute)
 
 $output = [
     'symbol' => $ticker,
     'quoteTime'=> $time,
     'price' => $currentPrice,
     'percentChange' => $percentChange,
+    'open' => $openPrice,
+    'high' => $highPrice,
+    'low' => $lowPrice,
+    'previousClose' => $previousClose,
+    'change' => $change,
     'cache' => false
 ];
 

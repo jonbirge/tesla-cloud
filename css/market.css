@@ -1,0 +1,247 @@
+/* Stock Market Section Styles */
+
+/* Market Grid Container */
+.market-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    gap: 16px;
+    margin-top: 12px;
+}
+
+/* Market Card */
+.market-card {
+    background-color: var(--button-bg);
+    border-radius: var(--button-radius);
+    padding: 18px;
+    transition: background-color 0.3s;
+}
+
+.market-card:hover {
+    background-color: var(--active-section-bg);
+}
+
+/* Card Header */
+.market-card-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 14px;
+}
+
+.market-card-icon {
+    width: 32px;
+    height: 32px;
+    border-radius: 6px;
+    object-fit: contain;
+}
+
+.market-card-title {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+}
+
+.market-card-name {
+    font-size: 15pt;
+    font-weight: 600;
+    color: var(--button-text);
+    line-height: 1.2;
+}
+
+.market-card-symbol {
+    font-size: 11pt;
+    color: var(--text-color);
+    font-weight: 500;
+}
+
+/* Price Display */
+.market-card-price {
+    display: flex;
+    align-items: baseline;
+    gap: 12px;
+    margin-bottom: 14px;
+}
+
+.market-price-value {
+    font-size: 28pt;
+    font-weight: 700;
+    color: var(--button-text);
+    font-variant-numeric: tabular-nums;
+}
+
+.market-price-change {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 14pt;
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+}
+
+.market-price-change.up {
+    color: var(--stock-up);
+}
+
+.market-price-change.down {
+    color: var(--stock-down);
+}
+
+.market-price-change.neutral {
+    color: var(--stock-neutral);
+}
+
+.market-change-arrow {
+    font-size: 12pt;
+}
+
+.market-change-percent {
+    font-size: 11pt;
+    opacity: 0.8;
+}
+
+/* Stats Grid */
+.market-card-stats {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 8px 16px;
+    padding-top: 12px;
+    border-top: 1px solid var(--separator-color);
+}
+
+.market-stat {
+    display: flex;
+    flex-direction: column;
+}
+
+.market-stat-label {
+    font-size: 9pt;
+    color: var(--text-color);
+    text-transform: uppercase;
+    font-weight: 500;
+    letter-spacing: 0.5px;
+}
+
+.market-stat-value {
+    font-size: 13pt;
+    font-weight: 600;
+    color: var(--button-text);
+    font-variant-numeric: tabular-nums;
+}
+
+/* High/Low Range Bar */
+.market-range-container {
+    margin-top: 10px;
+    padding-top: 10px;
+}
+
+.market-range-labels {
+    display: flex;
+    justify-content: space-between;
+    font-size: 9pt;
+    color: var(--text-color);
+    margin-bottom: 4px;
+}
+
+.market-range-bar {
+    position: relative;
+    height: 6px;
+    background: linear-gradient(to right, var(--stock-down), var(--stock-neutral), var(--stock-up));
+    border-radius: 3px;
+    overflow: visible;
+}
+
+.market-range-marker {
+    position: absolute;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    width: 12px;
+    height: 12px;
+    background-color: var(--button-text);
+    border: 2px solid var(--active-section-bg);
+    border-radius: 50%;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+}
+
+.market-range-values {
+    display: flex;
+    justify-content: space-between;
+    font-size: 11pt;
+    font-weight: 600;
+    color: var(--button-text);
+    margin-top: 6px;
+    font-variant-numeric: tabular-nums;
+}
+
+/* Loading State */
+.market-loading {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 200px;
+}
+
+/* Empty State */
+.market-empty {
+    text-align: center;
+    padding: 40px 20px;
+    color: var(--text-color);
+}
+
+.market-empty p {
+    text-align: center;
+    margin: 0;
+}
+
+/* Quote Time */
+.market-quote-time {
+    font-size: 9pt;
+    color: var(--text-color);
+    text-align: right;
+    margin-top: 8px;
+}
+
+/* Section Separator */
+.market-section-divider {
+    margin: 24px 0 16px 0;
+}
+
+/* Mobile Adjustments */
+@media only screen and (max-width: 900px) {
+    .market-grid {
+        grid-template-columns: 1fr;
+        gap: 12px;
+    }
+
+    .market-card {
+        padding: 14px;
+    }
+
+    .market-card-icon {
+        width: 28px;
+        height: 28px;
+    }
+
+    .market-card-name {
+        font-size: 13pt;
+    }
+
+    .market-card-symbol {
+        font-size: 10pt;
+    }
+
+    .market-price-value {
+        font-size: 22pt;
+    }
+
+    .market-price-change {
+        font-size: 12pt;
+    }
+
+    .market-stat-label {
+        font-size: 8pt;
+    }
+
+    .market-stat-value {
+        font-size: 11pt;
+    }
+}

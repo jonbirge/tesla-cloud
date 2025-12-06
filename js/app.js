@@ -6,6 +6,7 @@ import { fetchPremiumWeatherData, fetchCityData, SAT_URLS, forecastDataPrem, cur
 import { updateNetworkInfo, updatePingChart, startPingTest, getIPBasedLocation } from './net.js';
 import { setupNewsObserver, cleanupNewsObserver, startNewsTimeUpdates, stopNewsTimeUpdates, initializeNewsStorage } from './news.js';
 import { startStockUpdates, stopStockUpdates } from './stock.js';
+import { initMarketSection, stopMarketUpdates } from './market.js';
 
 // Exports
 // (none - app.js is the main module)
@@ -972,6 +973,11 @@ window.showSection = function (sectionId) {
         resumeNewsUpdates(); // Resume auto-refresh when leaving news section
     }
 
+    // If we're leaving market section, stop updates
+    if (currentSection === 'market' && sectionId !== 'market') {
+        stopMarketUpdates();
+    }
+
     // If switching to news section, set up observer and start time updates
     if (sectionId === 'news') {
         pauseNewsUpdates(); // Suppress auto-refresh while viewing news section
@@ -980,6 +986,11 @@ window.showSection = function (sectionId) {
             setupNewsObserver();
             startNewsTimeUpdates();
         }, 100);
+    }
+
+    // If switching to market section, initialize market updates
+    if (sectionId === 'market') {
+        initMarketSection();
     }
 
     // If switching to about section, clear the notification dot and mark note as seen
