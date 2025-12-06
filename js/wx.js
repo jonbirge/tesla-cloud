@@ -937,12 +937,16 @@ function updateChartWithAnimation(chart, newLabels, newValues) {
     updateNextValue();
 }
 
+// Constants for precipitation graph refresh intervals
+const GRAPH_DELAY_RAIN = 30; // seconds - when precipitation is present
+const GRAPH_DELAY_NO_RAIN = 300; // seconds - when no precipitation
+
+// Track the current interval delay to detect when it should change
+let currentPrecipGraphDelay = null;
+
 // Function to start auto-refresh for precipitation graph
 function startPrecipGraphAutoRefresh() {
 	// console.log('startPrecipGraphAutoRefresh()');
-
-    const GRAPH_DELAY_RAIN = 30; // seconds - when precipitation is present
-    const GRAPH_DELAY_NO_RAIN = 300; // seconds - when no precipitation
     
     console.log('Starting precipitation graph auto-refresh...');
     
@@ -951,25 +955,25 @@ function startPrecipGraphAutoRefresh() {
     
     // Determine if there's precipitation in the current forecast
     const hasPrecip = hasPrecipitationInForecast();
-    const delay = hasPrecip ? GRAPH_DELAY_RAIN : GRAPH_DELAY_NO_RAIN;
+    currentPrecipGraphDelay = hasPrecip ? GRAPH_DELAY_RAIN : GRAPH_DELAY_NO_RAIN;
     
-    console.log(`Precipitation graph refresh interval set to ${delay} seconds (precipitation ${hasPrecip ? 'detected' : 'not detected'})`);
+    console.log(`Precipitation graph refresh interval set to ${currentPrecipGraphDelay} seconds (precipitation ${hasPrecip ? 'detected' : 'not detected'})`);
     
     // Set up interval with appropriate delay based on precipitation status
     precipGraphUpdateInterval = setInterval(() => {
         console.log('Running precipitation graph refresh check...');
         updatePrecipitationGraph();
         
-        // Re-evaluate and restart with new interval if precipitation status changed
+        // Check if precipitation status changed and interval should be adjusted
         const currentHasPrecip = hasPrecipitationInForecast();
+        const expectedDelay = currentHasPrecip ? GRAPH_DELAY_RAIN : GRAPH_DELAY_NO_RAIN;
         
         // Restart interval if the delay should change
-        if ((currentHasPrecip && delay === GRAPH_DELAY_NO_RAIN) || 
-            (!currentHasPrecip && delay === GRAPH_DELAY_RAIN)) {
+        if (expectedDelay !== currentPrecipGraphDelay) {
             console.log('Precipitation status changed, adjusting refresh interval...');
             startPrecipGraphAutoRefresh(); // Restart with new interval
         }
-    }, delay * 1000);
+    }, currentPrecipGraphDelay * 1000);
 }
 
 // Helper function to check if there's precipitation in the current minutely forecast
