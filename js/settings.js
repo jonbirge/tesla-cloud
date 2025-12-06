@@ -5,6 +5,10 @@ import { updatePremiumWeatherDisplay } from './wx.js';
 import { startStockUpdates, stopStockUpdates } from './stock.js';
 import { forecastDataPrem, lastLat, lastLong, updateRainChartAxisColors } from './wx.js';
 
+// Night mode offset in minutes - enter dark mode this many minutes before sunset
+// and exit dark mode this many minutes after sunrise to match Tesla's car behavior
+const NIGHT_MODE_OFFSET_MINUTES = 8;
+
 // Global variables
 let isDriving = false;          // The vehicle is not parked
 let isLoggedIn = false;         // User is logged in
@@ -101,7 +105,12 @@ export function autoDarkMode(lat, long) {
         const sunriseTime = sunriseSec * 1000;
         const sunsetTime = sunsetSec * 1000;
 
-        const shouldBeDark = (now >= sunsetTime || now < sunriseTime);
+        // Apply offset: enter dark mode before sunset, exit after sunrise
+        const offsetMs = NIGHT_MODE_OFFSET_MINUTES * 60 * 1000;
+        const adjustedSunsetTime = sunsetTime - offsetMs;  // Enter dark mode early
+        const adjustedSunriseTime = sunriseTime + offsetMs; // Exit dark mode late
+
+        const shouldBeDark = (now >= adjustedSunsetTime || now < adjustedSunriseTime);
 
         // Only update if different to avoid redundant work
         if (shouldBeDark !== !!settings['dark-mode']) {
