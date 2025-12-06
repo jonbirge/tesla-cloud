@@ -941,19 +941,51 @@ function updateChartWithAnimation(chart, newLabels, newValues) {
 function startPrecipGraphAutoRefresh() {
 	// console.log('startPrecipGraphAutoRefresh()');
 
-    const GRAPH_DELAY = 30; // seconds
+    const GRAPH_DELAY_RAIN = 30; // seconds - when precipitation is present
+    const GRAPH_DELAY_NO_RAIN = 300; // seconds - when no precipitation
     
     console.log('Starting precipitation graph auto-refresh...');
     
     // Clear any existing interval first
     clearInterval(precipGraphUpdateInterval);
     
-    // Set up interval to update every 30 seconds
+    // Determine if there's precipitation in the current forecast
+    const hasPrecip = hasPrecipitationInForecast();
+    const delay = hasPrecip ? GRAPH_DELAY_RAIN : GRAPH_DELAY_NO_RAIN;
+    
+    console.log(`Precipitation graph refresh interval set to ${delay} seconds (precipitation ${hasPrecip ? 'detected' : 'not detected'})`);
+    
+    // Set up interval with appropriate delay based on precipitation status
     precipGraphUpdateInterval = setInterval(() => {
-        // Log refresh state
         console.log('Running precipitation graph refresh check...');
         updatePrecipitationGraph();
-    }, GRAPH_DELAY*1000); // Update every n seconds
+        
+        // Re-evaluate and restart with new interval if precipitation status changed
+        const currentHasPrecip = hasPrecipitationInForecast();
+        
+        // Restart interval if the delay should change
+        if ((currentHasPrecip && delay === GRAPH_DELAY_NO_RAIN) || 
+            (!currentHasPrecip && delay === GRAPH_DELAY_RAIN)) {
+            console.log('Precipitation status changed, adjusting refresh interval...');
+            startPrecipGraphAutoRefresh(); // Restart with new interval
+        }
+    }, delay * 1000);
+}
+
+// Helper function to check if there's precipitation in the current minutely forecast
+function hasPrecipitationInForecast() {
+    if (!forecastDataPrem || !forecastDataPrem.minutely || forecastDataPrem.minutely.length === 0) {
+        return false;
+    }
+    
+    const currentTime = new Date();
+    const precipThreshold = 0.1; // mm/hr - same threshold used in checkImminentRain
+    
+    // Check if any minutely data in the future has precipitation above threshold
+    return forecastDataPrem.minutely.some(m => {
+        const minuteTime = new Date(m.dt * 1000);
+        return minuteTime >= currentTime && (m.precipitation || 0) > precipThreshold;
+    });
 }
 
 // Check for imminent rain (next 10 minutes) and alert user if so
