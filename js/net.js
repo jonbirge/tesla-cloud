@@ -311,6 +311,7 @@ async function pingTestServer() {
 
     // Send a GET request to the server to measure latency and get IP address
     const startTime = performance.now();
+    let currentPingTime = null; // Track the current ping result
     try {
         const response = await fetch('php/ping.php', {
             method: 'GET',
@@ -322,7 +323,7 @@ async function pingTestServer() {
         }
         
         const data = await response.json();
-        const pingTime = performance.now() - startTime; // ms
+        currentPingTime = performance.now() - startTime; // ms
         
         // Check for IP address change
         if (data.ip) {
@@ -336,11 +337,11 @@ async function pingTestServer() {
         }
         
         // Debug log: ping success
-        debugLog(`Network ping successful: ${pingTime.toFixed(1)}ms (${locationInfo})`);
+        debugLog(`Network ping successful: ${currentPingTime.toFixed(1)}ms (${locationInfo})`);
 
-        updateNetworkStatus(pingTime);
+        updateNetworkStatus(currentPingTime);
 
-        pingData.push(pingTime);
+        pingData.push(currentPingTime);
         if (pingData.length > 100) {
             pingData.shift(); // Keep last n pings
         }
@@ -356,30 +357,30 @@ async function pingTestServer() {
         console.log('Ping GET failed: ', error);
     }
 
-    // Add last ping time to form data as a string
-    if (pingData.length > 0) {
-        formData.append('ping', pingData.at(-1).toFixed(1));
-    }
-    try {
-        // Debug log: POST attempt
-        debugLog(`Network ping POST data attempt (${locationInfo})`);
-        
-        const response = await fetch('php/ping.php', {
-            method: 'POST',
-            body: formData,
-            cache: 'no-store'
-        });
+    // Only POST if we have a valid ping time from this request
+    if (currentPingTime !== null) {
+        formData.append('ping', currentPingTime.toFixed(1));
+        try {
+            // Debug log: POST attempt
+            debugLog(`Network ping POST data attempt (${locationInfo})`);
+            
+            const response = await fetch('php/ping.php', {
+                method: 'POST',
+                body: formData,
+                cache: 'no-store'
+            });
 
-        if (!response.ok) {
-            throw new Error('Network response was not ok');
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
+            }
+            
+            // Debug log: POST success
+            debugLog(`Network ping POST data successful (${locationInfo})`);
+        } catch (error) {
+            // Debug log: POST failure
+            debugLog(`Network ping POST data failed: ${error.message} (${locationInfo})`);
+            console.log('Ping POST failed: ', error);
         }
-        
-        // Debug log: POST success
-        debugLog(`Network ping POST data successful (${locationInfo})`);
-    } catch (error) {
-        // Debug log: POST failure
-        debugLog(`Network ping POST data failed: ${error.message} (${locationInfo})`);
-        console.log('Ping POST failed: ', error);
     }
 }
 

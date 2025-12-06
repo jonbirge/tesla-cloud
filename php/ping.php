@@ -18,10 +18,16 @@ if ($requestMethod === 'HEAD') {
 
 // For GET requests, return server time and client IP as JSON
 if ($requestMethod === 'GET') {
-    // Get client IP address
+    // Get client IP address - handle X-Forwarded-For with multiple IPs
     $clientIP = $_SERVER['REMOTE_ADDR'];
-    if (isset($_SERVER['HTTP_X_FORWARDED_FOR']) && filter_var($_SERVER['HTTP_X_FORWARDED_FOR'], FILTER_VALIDATE_IP)) {
-        $clientIP = $_SERVER['HTTP_X_FORWARDED_FOR'];
+    if (isset($_SERVER['HTTP_X_FORWARDED_FOR'])) {
+        // X-Forwarded-For can contain multiple IPs (client, proxy1, proxy2, ...)
+        // The first IP is typically the original client
+        $forwardedIPs = explode(',', $_SERVER['HTTP_X_FORWARDED_FOR']);
+        $firstIP = trim($forwardedIPs[0]);
+        if (filter_var($firstIP, FILTER_VALIDATE_IP)) {
+            $clientIP = $firstIP;
+        }
     }
     
     header('Content-Type: application/json');
@@ -47,10 +53,16 @@ $dbUser = $_ENV['SQL_USER'] ?? null;
 $dbPass = $_ENV['SQL_PASS'] ?? null;
 $dbPort = $_ENV['SQL_PORT'] ?? '3306';
 
-// Get client IP address
+// Get client IP address - handle X-Forwarded-For with multiple IPs
 $clientIP = $_SERVER['REMOTE_ADDR'];
-if (isset($_SERVER['HTTP_X_FORWARDED_FOR']) && filter_var($_SERVER['HTTP_X_FORWARDED_FOR'], FILTER_VALIDATE_IP)) {
-    $clientIP = $_SERVER['HTTP_X_FORWARDED_FOR'];
+if (isset($_SERVER['HTTP_X_FORWARDED_FOR'])) {
+    // X-Forwarded-For can contain multiple IPs (client, proxy1, proxy2, ...)
+    // The first IP is typically the original client
+    $forwardedIPs = explode(',', $_SERVER['HTTP_X_FORWARDED_FOR']);
+    $firstIP = trim($forwardedIPs[0]);
+    if (filter_var($firstIP, FILTER_VALIDATE_IP)) {
+        $clientIP = $firstIP;
+    }
 }
 
 // Establish database connection
