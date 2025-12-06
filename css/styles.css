@@ -677,7 +677,7 @@ body.dark-mode .network-icon {
 /* Dashboard Nav Stats */
 .nav-container {
     display: flex;
-    gap: 50px;
+    gap: 15px;
     margin: 30px 0px -25px 0px;
     align-items: flex-start;
 }
@@ -687,13 +687,13 @@ body.dark-mode .network-icon {
     grid-template-columns: repeat(2, 1fr);
     grid-template-rows: repeat(2, auto);
     gap: 10px 0;
-    width: 400px;
+    width: 420px;
 }
 
 /* When extra detail is on, use 3x2 layout */
 .nav-stats.extra-detail {
     grid-template-columns: repeat(3, 1fr);
-    width: 600px;
+    width: 720px;
 }
 
 .stat-box {
