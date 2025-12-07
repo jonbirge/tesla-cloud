@@ -495,20 +495,6 @@
                             onclick="toggleOptionSetting(this)">RainMap</button>
                     </div>
                 </div>
-
-                <div class="settings-toggle-item" data-setting="show-stock-indicator"
-                    onclick="this.querySelector('input').click()">
-                    <label>Stock Ticker</label>
-                    <input type="checkbox" onchange="toggleSettingFrom(this)" checked>
-                    <span class="settings-toggle-slider"></span>
-                </div>
-
-                <div class="settings-toggle-item" data-setting="show-price-alt"
-                    onclick="this.querySelector('input').click()">
-                    <label>Stock Price and % Change</label>
-                    <input type="checkbox" onchange="toggleSettingFrom(this)">
-                    <span class="settings-toggle-slider"></span>
-                </div>
             
                 <div class="settings-toggle-item" data-setting="show-wind-radar"
                     onclick="this.querySelector('input').click()">
@@ -575,6 +561,20 @@
                 <div class="settings-toggle-item settings-text-item" data-setting="forwarding-email">
                     <label>Email</label>
                     <input type="text" placeholder="Enter e-mail address" onchange="updateSettingFrom(this)">
+                </div>
+
+                <div class="settings-toggle-item" data-setting="show-stock-indicator"
+                    onclick="this.querySelector('input').click()">
+                    <label>Live Stock Ticker</label>
+                    <input type="checkbox" onchange="toggleSettingFrom(this)" checked>
+                    <span class="settings-toggle-slider"></span>
+                </div>
+
+                <div class="settings-toggle-item" data-setting="show-price-alt"
+                    onclick="this.querySelector('input').click()">
+                    <label>Ticker Shows Price and Change</label>
+                    <input type="checkbox" onchange="toggleSettingFrom(this)">
+                    <span class="settings-toggle-slider"></span>
                 </div>
             </div>
             
