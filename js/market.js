@@ -3,6 +3,15 @@
 
 import { settings } from './settings.js';
 
+// Utility to escape HTML special characters to prevent XSS
+function escapeHTML(str) {
+    return String(str)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#39;");
+}
 // Configuration
 const STOCK_API_ENDPOINT = 'php/quote.php?symbol=';
 const MARKET_UPDATE_INTERVAL = 60 * 1000; // 1 minute
@@ -234,10 +243,10 @@ function createMarketCard(symbol, data, isIndex = false) {
     // Build card HTML
     card.innerHTML = `
         <div class="market-card-header">
-            <img class="market-card-icon" src="${iconUrl}" alt="${displaySymbol}" onerror="this.src='assets/stock-default.svg'">
+            <img class="market-card-icon" src="${escapeHTML(iconUrl)}" alt="${escapeHTML(displaySymbol)}" onerror="this.src='assets/stock-default.svg'">
             <div class="market-card-title">
-                <span class="market-card-name">${displayName}</span>
-                <span class="market-card-symbol">${displaySymbol}</span>
+                <span class="market-card-name">${escapeHTML(displayName)}</span>
+                <span class="market-card-symbol">${escapeHTML(displaySymbol)}</span>
             </div>
         </div>
         <div class="market-card-price">
