@@ -64,6 +64,13 @@
         if (darkMode) {
             document.body.classList.add('dark-mode');
         }
+
+        // Remove leading "Q:" from question headings (case-insensitive)
+        document.addEventListener('DOMContentLoaded', () => {
+            document.querySelectorAll('.question').forEach(el => {
+                el.textContent = el.textContent.replace(/^\s*Q:\s*/i, '');
+            });
+        });
     </script>
     <h1>teslas.cloud FAQ</h1>
     
@@ -85,24 +92,24 @@
 
     <h2>Getting Started</h2>
     
-    <div class="question">Q: What is teslas.cloud?</div>
+    <div class="question">What is teslas.cloud?</div>
     <div class="answer">
         teslas.cloud is a web app designed specifically for use with an in-car browser, such as that in a Tesla. It provides news, weather, navigation, and other features optimized for vehicle use. This is an educational father-son project and is not affiliated with Tesla, Inc. We make no promises that this app will always work, or that it will be maintained forever.
     </div>
 
-    <div class="question">Q: Why is it "teslas.cloud" and not "tesla.cloud"?</div>
+    <div class="question">Why is it "teslas.cloud" and not "tesla.cloud"?</div>
     <div class="answer">
         Because some guy in China is squatting on the "tesla.cloud" domain.
     </div>
 
-    <div class="question">Q: Is teslas.cloud free to use?</div>
+    <div class="question">Is teslas.cloud free to use?</div>
     <div class="answer">
         Yes, teslas.cloud is completely free to use. We made it for fun, and it doesn't cost much to maintain so we're giving it to the community. We don't plan to charge for anything, but we can't guarantee we'll be able to keep all of the features intact. In particular, the weather and news services depend on third-party APIs that may become costly if usage grows too large.
     </div>
     
     <h2>Dashboard Section</h2>
     
-    <div class="question">Q: What information does the Dashboard provide?</div>
+    <div class="question">What information does the Dashboard provide?</div>
     <div class="answer">
         A few bits of data not otherwise available from the car's built-in interface:
         <ul>
@@ -117,17 +124,17 @@
         </ul>
     </div>
 
-    <div class="question">Q: Why would I care about headwind and crosswind in my car?</div>
+    <div class="question">Why would I care about headwind and crosswind in my car?</div>
     <div class="answer">
         Knowing wind conditions can help you understand their impact on your vehicle's range and handling. Headwinds can reduce efficiency, while crosswinds may affect stability as well as range. For example, if you've got a significant headwind, you probably won't get the range you're initially being told by the car, because the car doesn't take forecast winds into account, only observed average efficiency.
     </div>
 
-    <div class="question">Q: What is TeslaWaze and how do I use it?</div>
+    <div class="question">What is TeslaWaze and how do I use it?</div>
     <div class="answer">
         TeslaWaze is a service developed by some brilliant unknown engineer that taps into Waze and allows information about traffic and speedtraps to be displayed within a browser. It's a nice complement to your Tesla's built-in navigation. It was NOT developed by us, and we're just embedding it in the app.
     </div>
 
-    <div class="question">Q: Why does the GPS data show "--" or seem inaccurate?</div>
+    <div class="question">Why does the GPS data show "--" or seem inaccurate?</div>
     <div class="answer">
         GPS data depends on location services being enabled in your Tesla's browser and having a clear view of satellites. If you see "--", try:
         <ul>
@@ -139,55 +146,71 @@
     
     <h2>News Section</h2>
     
-    <div class="question">Q: How does the News section work?</div>
+    <div class="question">How does the News section work?</div>
     <div class="answer">
         The News section aggregates headlines from multiple sources. You can click on the headlines (if you're not moving) to read the full articles. You can also forward articles to your email (see below).
     </div>
 
-    <div class="question">Q: Can I customize which news sources appear?</div>
+    <div class="question">Can I customize which news sources appear?</div>
     <div class="answer">
         After logging in, you can customize your news feeds in the Settings section. You can enable or disable specific news sources, set update frequencies, and even configure email forwarding for news articles.
     </div>
 
-    <div class="question">Q: How does news sharing work?</div>
+    <div class="question">How does news sharing work?</div>
     <div class="answer">
         When logged in, you can forward interesting articles to yourself for later reading via email. Click the share button on any article, and it will be sent to your configured email address. This feature requires you to have email forwarding enabled in your user settings.
     </div>
 
-    <div class=""question">Q: Why are some articles grey?</div>
+    <div class="question">Why are some articles grey?</div>
     <div class="answer">
         Articles are greyed out to indicate they've been read, and will be removed the next time news is updated. Articles are marked as read when you click on them to view the full content, forward them, or scroll past them in the feed.
     </div>
     
     <h2>Weather Section</h2>
     
-    <div class="question">Q: What weather information is available?</div>
+    <div class="question">What weather information is available?</div>
     <div class="answer">
         The Weather section provides:
         <ul>
             <li><strong>Current Conditions:</strong> Temperature, humidity, wind speed and direction</li>
             <li><strong>Extended Forecast:</strong> 7-day outlook with highs and lows</li>
-            <li><strong>Precipitation Radar:</strong> Real-time rain and snow radar imagery</li>
+            <li><strong>Precipitation Predictions:</strong> When rain or snow is predicted in your area within the next hour, a graph will appear showing the amount expected per minute over the next hour.</li>
             <li><strong>Weather Alerts:</strong> Severe weather warnings for your area</li>
-            <li><strong>Historical Data:</strong> Recent weather trends and patterns</li>
         </ul>
+    </div>
+
+    <h2>Satellite Section</h2>
+
+    <div class="question">What does the Satellite section show?</div>
+    <div class="answer">
+        The Satellite section provides a live satellite map for the continent in which you're located. With some satellite providers we are able to also show an animation of the satelite imagery over the past few hours, which can be useful for tracking large weather systems.
+    </div>
+
+    <div class="question">Why isn't it showing the right location for me?</div>
+    <div class="answer">
+        We try to show the right satellite imagery based on your GPS location, but sometimes the mapping between GPS coordinates and satellite source isn't perfect. As you might image, this is a hard one for us to adequately test! If you're seeing the wrong area, you can set it manually in Settings by turning off the automatic location and selecting one of the regions.
+    </div>
+
+    <div class="question">Why don't you have Australia, southern South America, or Africa?</div>
+    <div class="answer">
+        Laziness on our part. It takes a bit of work to track down free satellite imagery sources for each region. If somebody is using this from any of those places and they reach out over e-mail (see Support below) and we'll add it.
     </div>
 
     <h2>Nearby Section</h2>
     
-    <div class="question">Q: What does this section do?</div>
+    <div class="question">What does this section do?</div>
     <div class="answer">
-        The Landmarks section provides nearby points of interest from Wikipedia. You can leave it open while you drive and it will continuously update as you move.
+        The Landmarks section provides nearby points of interest from Wikipedia. You can leave it open while you drive and it will continuously update as you move. Is it useful? We're not sure, it's an experiment.
     </div>
     
     <h2>Network Section</h2>
     
-    <div class="question">Q: What does the graph monitor?</div>
+    <div class="question">What does the graph monitor?</div>
     <div class="answer">
         The Network section provides real-time car network diagnostics by measuring latency to our server. It's a complement to the cell signal display in the car that is actually measuring the network performance, not just signal strength. 
     </div>
 
-    <div class="question">Q: How do I interpret the network status indicator at the top of the window?</div>
+    <div class="question">How do I interpret the network status indicator at the top of the window?</div>
     <div class="answer">
         Network status is shown with color-coded indicators:
         <ul>
@@ -199,77 +222,46 @@
         The bar indicator in the top-right corner gives you an at-a-glance view of your actual connection quality, not just the signal strength of the cell connection.
     </div>
 
-    <div class="question">Q: What is the network "exit" location?</div>
+    <div class="question">What is the network "exit" location?</div>
     <div class="answer">
         When your car connects to the internet, it does so through a cellular connection. Most car companies, like Tesla, actually route you through a network tunnel (VPN) that they control. As such, you may be accessing the internet from a server that is quite a distance from your actual location when all is said and done. This shows you where you actually "appear to be" on the internet. For example, we live in Boston but our car is often connecting to the internet through a server in California, which means that when connecting to the teslas.cloud server (which is in New York), we're going across the country twice.
     </div>
 
-    <div class="question">Q: Great. Why do i care?</div>
+    <div class="question">Great. Why do i care?</div>
     <div class="answer">
-        First, it will introduce latency if the server that is handling your network traffic is far away (as discussed above). Second, some services (like streaming video) may be blocked if they notice a difference between your GPS position and your network location.
+        First, no matter how good the cell network is where you are, you can know to expect lags if the server that is handling your network traffic is far away (as discussed above). Second, some services (like streaming video) may be blocked if they notice a difference between your browser's reported GPS position and your network location. Third, it can let you know if your WiFi connection is working or if the car is falling back to using the on-board cell modem.
     </div>
-    
-    <h2>Travel Section</h2>
-    
-    <div class="question">Q: What travel resources are available?</div>
-    <div class="answer">
-        The Travel section has links to various tools and resources for planning trips in your Tesla:
-        <ul>
-            <li><strong>Route Planning:</strong> Links to mapping services optimized for electric vehicles</li>
-            <li><strong>Charging Networks:</strong> Access to various charging network apps and websites</li>
-            <li><strong>Trip Calculators:</strong> Range and charging time estimators</li>
-            <li><strong>Destination Guides:</strong> EV-friendly hotels, restaurants, and attractions</li>
-            <li><strong>Emergency Resources:</strong> Roadside assistance and towing services</li>
-        </ul>
-    </div>
-    
-    <h2>Media Section</h2>
-    
-    <div class="question">Q: What entertainment options are in the Media section?</div>
-    <div class="answer">
-        The Media section provides access to various entertainment platforms:
-        <ul>
-            <li><strong>Streaming Services:</strong> Links to popular video and music platforms</li>
-            <li><strong>Podcasts:</strong> Curated Tesla and tech-focused podcast collections</li>
-            <li><strong>YouTube:</strong> Direct access to YouTube with optimized interface</li>
-            <li><strong>Gaming:</strong> Browser-based games suitable for vehicle use</li>
-            <li><strong>Educational Content:</strong> Learning resources and documentaries</li>
-        </ul>
-        <em>Note: Media features are disabled while driving for safety.</em>
-    </div>
-    
+
     <h2>Reference Section</h2>
     
-    <div class="question">Q: What tools are in the Reference section?</div>
+    <div class="question">What tools are in the Reference section?</div>
     <div class="answer">
-        The Reference section offers productivity and informational tools:
+        Like many of the other sections, this is just a set of links to external website that we thought might be useful while you're parked at a charger, or for your passenger to use while you're driving. The Reference section offers productivity and informational tools, including:
         <ul>
             <li><strong>AI Assistants:</strong> Access to ChatGPT and other AI tools</li>
             <li><strong>Password Manager:</strong> Secure access to your password vault</li>
             <li><strong>Learning Resources:</strong> Educational websites and courses</li>
-            <li><strong>Technical References:</strong> Documentation and troubleshooting guides</li>
-            <li><strong>Finance Tools:</strong> Investment tracking and financial calculators</li>
         </ul>
     </div>
 
-    <div class="question">Q: Is it safe to access password managers through teslas.cloud?</div>
+    <div class="question">Is it safe to access password managers through teslas.cloud?</div>
     <div class="answer">
         teslas.cloud provides links to password manager websites but doesn't store or access your credentials. When you click these links, you're taken directly to the official sites where you log in normally. Always verify you're on the correct website before entering sensitive information.
     </div>
     
-    <h2>Settings & Account Management</h2>
+    <h2>Settings</h2>
     
-    <div class="question">Q: Do I need to create an account to use teslas.cloud?</div>
+    <div class="question">Do I need to create an account to use teslas.cloud?</div>
     <div class="answer">
-        No account is required for basic functionality. However, creating a user ID provides several benefits:
+        No account is required for basic functionality. However, creating a user ID provides a couple useful things:
         <ul>
             <li>Sync settings across multiple devices and browsers</li>
-            <li>Access to news sharing</li>
             <li>Persistent configuration even after browser resets after a software upgrade</li>
+            <li>Allows for changing settings from your phone (just login to the same site) which is easier than using the in-car browser for some people</li>
         </ul>
     </div>
     
-    <div class="question">Q: How do I create a user ID and sync settings?</div>
+    <div class="question">How do I create a user ID and sync settings?</div>
     <div class="answer">
         To create a user ID:
         <ol>
@@ -281,7 +273,7 @@
         Your user ID can be anything memorable like your phone number or email address - it's encrypted before storage.
     </div>
 
-    <div class="question">Q: What information is stored on your servers?</div>
+    <div class="question">What information is stored on your servers?</div>
     <div class="answer">
         We follow a privacy-first approach and store minimal data, none of which can be associated with you personally unless you choose to use an e-mail address that reveals your identity. The only data stored on our servers is:
         <ul>
@@ -292,9 +284,9 @@
         </ul>
     </div>
     
-    <h2>Troubleshooting & Technical Issues</h2>
+    <h2>Troubleshooting</h2>
     
-    <div class="question">Q: The GPS/location features aren't working. What should I do?</div>
+    <div class="question">The GPS/location features aren't working. What should I do?</div>
     <div class="answer">
         GPS issues are usually related to browser permissions:
         <ol>
@@ -306,7 +298,7 @@
         </ol>
     </div>
     
-    <div class="question">Q: Some external links don't work or load slowly.</div>
+    <div class="question">Some external links don't work or load slowly.</div>
     <div class="answer">
         Tesla's browser has some limitations with external content:
         <ul>
@@ -318,7 +310,7 @@
         Try refreshing the page or accessing the site at a different time if you experience issues.
     </div>
     
-    <div class="question">Q: The app seems slow or unresponsive.</div>
+    <div class="question">The app seems slow or unresponsive.</div>
     <div class="answer">
         Performance issues can usually be resolved by:
         <ol>
@@ -331,7 +323,7 @@
         teslas.cloud is designed to be lightweight, but external content may sometimes affect performance.
     </div>
 
-    <div class="question">Q: Why do stock prices and some data show "--"?</div>
+    <div class="question">Why do stock prices and some data show "--"?</div>
     <div class="answer">
         Data showing as "--" typically indicates:
         <ul>
@@ -342,24 +334,11 @@
         </ul>
         This is normal behavior and doesn't affect core teslas.cloud functionality.
     </div>
-
-    <div class="question">Q: How do I report bugs or suggest improvements?</div>
-    <div class="answer">
-        We welcome feedback! You can:
-        <ul>
-            <li>Email us at <code>feedback@teslas.cloud</code></li>
-            <li>Include specific details about the issue (what you were doing, error messages, etc.)</li>
-            <li>Mention your Tesla model and software version if relevant</li>
-            <li>Suggest new features or improvements</li>
-        </ul>
-        Please be patient with responses as this is a volunteer-maintained project.
-    </div>
     
     <h2>Privacy & Security</h2>
     
-    <div class="question">Q: How is my data protected?</div>
+    <div class="question">How is my data protected?</div>
     <div class="answer">
-        teslas.cloud prioritizes your privacy:
         <ul>
             <li><strong>No tracking:</strong> We don't use analytics or tracking scripts</li>
             <li><strong>Minimal data collection:</strong> Only essential settings are stored</li>
@@ -369,32 +348,37 @@
         </ul>
     </div>
 
-    <div class="question">Q: Can I delete my account and data?</div>
+    <div class="question">Can I delete my account and data?</div>
     <div class="answer">
-        Not yet. Given that there's nothing interesting in the settings data (which is all we store) we haven't implemented this feature yet. If you want to delete your user ID and associated settings, please contact us at <code>feedback@teslas.cloud</code> and we'll take care of it.
+        Not in an automated way yet. Given that there's nothing interesting in the settings data (which is all we store) we haven't implemented this feature yet. If you want to delete your user ID and associated settings, please contact us at <code>feedback@teslas.cloud</code> and we'll take care of it.
     </div>
 
-    <h2>Support</h2>
+    <h2>General Support</h2>
     
-    <div class="question">Q: How can I get help or contact support?</div>
+    <div class="question">How can I get help or contact support?</div>
     <div class="answer">
         For support:
         <ul>
             <li><strong>Email:</strong> <code>feedback@teslas.cloud</code> for technical issues.</li>
             <li><strong>FAQ:</strong> Check this page for common questions; it will be updated often.</li>
-            <li><strong>Updates:</strong> Follow announcements in the About section</li>
+            <li><strong>Updates:</strong> Follow announcements at the top of the About section.</li>
         </ul>
-        Response times vary as this is a volunteer project.
+        Please be patient with responses as this is a volunteer-maintained project.
     </div>
 
-    <div class="question">Q: Can I contribute to teslas.cloud development?</div>
+    <div class="question">How do I report bugs or suggest improvements?</div>
     <div class="answer">
-        Sure! Contact us at <code>feedback@teslas.cloud</code> if you'd like to contribute.
+        We welcome feedback! You can:
+        <ul>
+            <li>Email us at <code>feedback@teslas.cloud</code></li>
+            <li>Include specific details about the issue (what you were doing, error messages, etc.)</li>
+            <li>Mention your Tesla model and software version if relevant</li>
+        </ul>
     </div>
 
-    <div class="question">Q: Is there a mobile version?</div>
+    <div class="question">Is there a mobile version?</div>
     <div class="answer">
-        teslas.cloud is a web application that works in any browser, including mobile devices.
+        teslas.cloud is a web application that works in any browser, including mobile devices. We've actually done a bit of work to make it look good on a mobile browser, and if you log in with the same user ID, your settings will sync across devices. In fact, you may find it easier to change settings on your phone or tablet and have them automatically appear in the car; they will generally show up within a few seconds of you changing them on your other device.
     </div>
 </body>
 </html>
