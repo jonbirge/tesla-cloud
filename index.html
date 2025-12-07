@@ -496,6 +496,13 @@
                     </div>
                 </div>
 
+                <div class="settings-toggle-item" data-setting="show-stock-indicator"
+                    onclick="this.querySelector('input').click()">
+                    <label>Stock Ticker</label>
+                    <input type="checkbox" onchange="toggleSettingFrom(this)" checked>
+                    <span class="settings-toggle-slider"></span>
+                </div>
+
                 <div class="settings-toggle-item" data-setting="show-price-alt"
                     onclick="this.querySelector('input').click()">
                     <label>Stock Price and % Change</label>
