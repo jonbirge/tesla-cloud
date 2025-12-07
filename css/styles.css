@@ -249,10 +249,10 @@ hr {
     font-weight: 600;
     background-color: var(--bg-color);
     font-size: 19pt;
-    padding: 16px 20px;
+    padding: 13px 20px;
     border: none;
     cursor: pointer;
-    margin-bottom: 3px;
+    margin-bottom: 2px;
     display: flex;
     align-items: center;
     transition: background-color 0.3s, color 0.3s;

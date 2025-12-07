@@ -14,6 +14,7 @@
     <link rel="stylesheet" href="css/wx.css">
     <link rel="stylesheet" href="css/timeline.css">
     <link rel="stylesheet" href="css/settings.css">
+    <link rel="stylesheet" href="css/market.css">
 </head>
 
 <body>
@@ -34,6 +35,10 @@
             <button id="news-section" class="section-button" onclick="showSection('news')">
                 <svg class="button-icon"><use href="#icon-news"></use></svg>
                 News
+            </button>
+            <button id="market-section" class="section-button" onclick="showSection('market')">
+                <svg class="button-icon"><use href="#icon-market"></use></svg>
+                Market
             </button>
             <button id="wx-section" class="section-button" onclick="showSection('weather')">
                 <svg class="button-icon"><use href="#icon-weather"></use></svg>
@@ -183,6 +188,27 @@
             </div>
             <div id="newsHeadlines" class="news-headlines">
                 <!-- News headlines will be dynamically inserted here -->
+            </div>
+        </div>
+
+        <div id="market" class="section">
+            <div id="market-loading" class="content-loading">
+                <div class="spinner"></div>
+            </div>
+            <div id="market-empty" class="market-empty" style="display: none;">
+                <p><em>No stocks or indexes selected. Add some in the Settings section.</em></p>
+            </div>
+            <div id="market-indexes-section">
+                <h2>Indexes</h2>
+                <div id="market-indexes-grid" class="market-grid">
+                    <!-- Index cards will be dynamically inserted here -->
+                </div>
+            </div>
+            <div id="market-stocks-section">
+                <h2>Stocks</h2>
+                <div id="market-stocks-grid" class="market-grid">
+                    <!-- Stock cards will be dynamically inserted here -->
+                </div>
             </div>
         </div>
 
@@ -469,13 +495,6 @@
                             onclick="toggleOptionSetting(this)">RainMap</button>
                     </div>
                 </div>
-
-                <div class="settings-toggle-item" data-setting="show-price-alt"
-                    onclick="this.querySelector('input').click()">
-                    <label>Stock Price and % Change</label>
-                    <input type="checkbox" onchange="toggleSettingFrom(this)">
-                    <span class="settings-toggle-slider"></span>
-                </div>
             
                 <div class="settings-toggle-item" data-setting="show-wind-radar"
                     onclick="this.querySelector('input').click()">
@@ -542,6 +561,20 @@
                 <div class="settings-toggle-item settings-text-item" data-setting="forwarding-email">
                     <label>Email</label>
                     <input type="text" placeholder="Enter e-mail address" onchange="updateSettingFrom(this)">
+                </div>
+
+                <div class="settings-toggle-item" data-setting="show-stock-indicator"
+                    onclick="this.querySelector('input').click()">
+                    <label>Live Stock Ticker</label>
+                    <input type="checkbox" onchange="toggleSettingFrom(this)" checked>
+                    <span class="settings-toggle-slider"></span>
+                </div>
+
+                <div class="settings-toggle-item" data-setting="show-price-alt"
+                    onclick="this.querySelector('input').click()">
+                    <label>Ticker Shows Price and Change</label>
+                    <input type="checkbox" onchange="toggleSettingFrom(this)">
+                    <span class="settings-toggle-slider"></span>
                 </div>
             </div>
             

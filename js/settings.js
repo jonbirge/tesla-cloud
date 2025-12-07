@@ -1133,6 +1133,8 @@ function updateSetting(key, value) {
                     stockModule.fetchStockData();
                 }
             });
+            // Enable/disable the "Stock Price and % Change" setting based on this toggle
+            setControlEnable('show-price-alt', value);
             break;
 
         case 'satellite-use-location':
