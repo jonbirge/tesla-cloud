@@ -65,6 +65,19 @@ function calculateDistance(lat1, lon1, lat2, lon2) {
     return R * c; // returns distance in meters
 }
 
+// Helper function to show error message for landmarks
+function showLandmarksError(message) {
+    document.getElementById('landmarks-loading').style.display = 'none';
+    const items = document.getElementById('landmark-items');
+    items.style.display = 'block';
+    items.replaceChildren();
+    const p = document.createElement('p');
+    const em = document.createElement('em');
+    em.textContent = message;
+    p.appendChild(em);
+    items.appendChild(p);
+}
+
 // Function to fetch nearby Wikipedia data based on coordinates
 async function fetchLandmarkData(lat, long) {
     console.log('Fetching Wikipedia data...');
@@ -1054,16 +1067,28 @@ window.showSection = function (sectionId) {
         if (lat !== null && long !== null) {
             fetchLandmarkData(lat, long);
         } else {
-            console.log('Location not available for Wikipedia data.');
-            document.getElementById('landmarks-loading').style.display = 'none';
-            const items = document.getElementById('landmark-items');
-            items.style.display = 'block';
-            items.replaceChildren();
-            const p = document.createElement('p');
-            const em = document.createElement('em');
-            em.textContent = 'Location data not available. Please enable GPS.';
-            p.appendChild(em);
-            items.appendChild(p);
+            console.log('GPS not available for landmarks data, attempting IP-based location fallback...');
+            
+            // Try to get IP-based location as fallback
+            getIPBasedLocation().then(ipLocation => {
+                if (ipLocation && ipLocation.latitude && ipLocation.longitude) {
+                    // Successfully got IP-based location, fetch landmark data
+                    console.log('Using IP-based location for landmarks data');
+                    
+                    // Set flag to indicate we're using IP-based location
+                    setUsingIPLocation(true);
+                    
+                    // Fetch landmark data with IP-based coordinates
+                    fetchLandmarkData(ipLocation.latitude, ipLocation.longitude);
+                } else {
+                    // IP location lookup failed, show error message
+                    console.log('IP-based location lookup failed for landmarks');
+                    showLandmarksError('Location not available. Unable to retrieve nearby landmarks.');
+                }
+            }).catch(error => {
+                console.error('Error in IP-based location fallback for landmarks: ', error);
+                showLandmarksError('Error loading landmark data.');
+            });
         }
     }
 
