@@ -65,6 +65,19 @@ function calculateDistance(lat1, lon1, lat2, lon2) {
     return R * c; // returns distance in meters
 }
 
+// Helper function to show error message for landmarks
+function showLandmarksError(message) {
+    document.getElementById('landmarks-loading').style.display = 'none';
+    const items = document.getElementById('landmark-items');
+    items.style.display = 'block';
+    items.replaceChildren();
+    const p = document.createElement('p');
+    const em = document.createElement('em');
+    em.textContent = message;
+    p.appendChild(em);
+    items.appendChild(p);
+}
+
 // Function to fetch nearby Wikipedia data based on coordinates
 async function fetchLandmarkData(lat, long) {
     console.log('Fetching Wikipedia data...');
@@ -1070,27 +1083,11 @@ window.showSection = function (sectionId) {
                 } else {
                     // IP location lookup failed, show error message
                     console.log('IP-based location lookup failed for landmarks');
-                    document.getElementById('landmarks-loading').style.display = 'none';
-                    const items = document.getElementById('landmark-items');
-                    items.style.display = 'block';
-                    items.replaceChildren();
-                    const p = document.createElement('p');
-                    const em = document.createElement('em');
-                    em.textContent = 'Location not available. Unable to retrieve nearby landmarks.';
-                    p.appendChild(em);
-                    items.appendChild(p);
+                    showLandmarksError('Location not available. Unable to retrieve nearby landmarks.');
                 }
             }).catch(error => {
                 console.error('Error in IP-based location fallback for landmarks: ', error);
-                document.getElementById('landmarks-loading').style.display = 'none';
-                const items = document.getElementById('landmark-items');
-                items.style.display = 'block';
-                items.replaceChildren();
-                const p = document.createElement('p');
-                const em = document.createElement('em');
-                em.textContent = 'Error loading landmark data.';
-                p.appendChild(em);
-                items.appendChild(p);
+                showLandmarksError('Error loading landmark data.');
             });
         }
     }
