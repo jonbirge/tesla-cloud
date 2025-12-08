@@ -100,7 +100,7 @@ function resolveIconUrl(iconUrl) {
         return trimmed;
     }
 
-    return `https://www.google.com/s2/favicons?domain=${trimmed}&sz=128`;
+    return `https://www.google.com/s2/favicons?domain=${trimmed}&sz=64`;
 }
 
 // Fetch detailed quote data for a symbol

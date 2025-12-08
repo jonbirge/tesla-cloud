@@ -6,7 +6,7 @@
     "Coefficient": 10.0239338555,
     "Units": "",
     "DateValid": "2025-08-15",
-    "icon": "https://www.google.com/s2/favicons?domain=standardandpoors.com&sz=128"
+    "icon": "https://www.google.com/s2/favicons?domain=standardandpoors.com&sz=64"
   },
 
   {
@@ -16,7 +16,7 @@
     "Coefficient": 99.9846951260,
     "Units": "",
     "DateValid": "2025-08-15",
-    "icon": "https://www.google.com/s2/favicons?domain=dowjones.com&sz=128"
+    "icon": "https://www.google.com/s2/favicons?domain=dowjones.com&sz=64"
   },
 
   {
@@ -26,7 +26,7 @@
     "Coefficient": 41.0968664425,
     "Units": "",
     "DateValid": "2025-08-15",
-    "icon": "https://www.google.com/s2/favicons?domain=nasdaq.com&sz=128"
+    "icon": "https://www.google.com/s2/favicons?domain=nasdaq.com&sz=64"
   },
 
   {
@@ -36,7 +36,7 @@
     "Coefficient": 11.8286368440,
     "Units": "",
     "DateValid": "2025-08-15",
-    "icon": "https://www.google.com/s2/favicons?domain=lseg.com&sz=128"
+    "icon": "https://www.google.com/s2/favicons?domain=lseg.com&sz=64"
   },
 
   {
@@ -46,7 +46,7 @@
     "Coefficient": 0.0993102941,
     "Units": "YLD",
     "DateValid": "2025-08-15",
-    "icon": "https://logo.clearbit.com/treasury.gov"
+    "icon": "https://logo.clearbit.com/treasury.gov?size=64"
   },
 
   {
@@ -56,7 +56,7 @@
     "Coefficient": 0.0774393392,
     "Units": "YLD",
     "DateValid": "2025-08-15",
-    "icon": "https://logo.clearbit.com/treasury.gov"
+    "icon": "https://logo.clearbit.com/treasury.gov?size=64"
   },
 
   {
@@ -84,7 +84,7 @@
     "Coefficient": 538.3723498233,
     "Units": "",
     "DateValid": "2025-08-15",
-    "icon": "https://www.google.com/s2/favicons?domain=deutsche-boerse.com&sz=128"
+    "icon": "https://www.google.com/s2/favicons?domain=deutsche-boerse.com&sz=64"
   },
 
   {
@@ -94,7 +94,7 @@
     "Coefficient": 1,
     "Units": "",
     "DateValid": "2025-08-17",
-    "icon": "https://www.google.com/s2/favicons?domain=ishares.com&sz=128"
+    "icon": "https://www.google.com/s2/favicons?domain=ishares.com&sz=64"
   },
 
   {
@@ -104,7 +104,7 @@
     "Coefficient": 1,
     "Units": "",
     "DateValid": "2025-08-17",
-    "icon": "https://www.google.com/s2/favicons?domain=lseg.com&sz=128"
+    "icon": "https://www.google.com/s2/favicons?domain=lseg.com&sz=64"
   },
 
   {
@@ -114,6 +114,6 @@
     "Coefficient": 1,
     "Units": "",
     "DateValid": "2025-08-17",
-    "icon": "https://www.google.com/s2/favicons?domain=bitcoin.org&sz=128"
+    "icon": "https://www.google.com/s2/favicons?domain=bitcoin.org&sz=64"
   }
 ]

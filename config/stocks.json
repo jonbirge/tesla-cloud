@@ -2,17 +2,17 @@
     {
         "StockName": "Alphabet",
         "Symbol": "GOOGL",
-        "icon": "https://www.google.com/s2/favicons?domain=google.com&sz=128"
+        "icon": "https://www.google.com/s2/favicons?domain=google.com&sz=64"
     },
     {
         "StockName": "Amazon",
         "Symbol": "AMZN",
-        "icon": "https://www.google.com/s2/favicons?domain=amazon.com&sz=128"
+        "icon": "https://www.google.com/s2/favicons?domain=amazon.com&sz=64"
     },
     {
         "StockName": "Apple",
         "Symbol": "AAPL",
-        "icon": "https://www.google.com/s2/favicons?domain=apple.com&sz=128"
+        "icon": "https://www.google.com/s2/favicons?domain=apple.com&sz=64"
     },
     {
         "StockName": "Berkshire",
@@ -22,56 +22,56 @@
     {
         "StockName": "Caterpillar",
         "Symbol": "CAT",
-        "icon": "https://www.google.com/s2/favicons?domain=cat.com&sz=128"
+        "icon": "https://www.google.com/s2/favicons?domain=cat.com&sz=64"
     },
     {
         "StockName": "Exxon Mobil",
         "Symbol": "XOM",
-        "icon": "https://logo.clearbit.com/exxonmobil.com"
+        "icon": "https://logo.clearbit.com/exxonmobil.com?size=64"
     },
     {
         "StockName": "General Electric",
         "Symbol": "GE",
-        "icon": "https://www.google.com/s2/favicons?domain=ge.com&sz=128"
+        "icon": "https://www.google.com/s2/favicons?domain=ge.com&sz=64"
     },
     {
         "StockName": "JPMorgan Chase",
         "Symbol": "JPM",
-        "icon": "https://www.google.com/s2/favicons?domain=chase.com&sz=128"
+        "icon": "https://www.google.com/s2/favicons?domain=chase.com&sz=64"
     },
     {
         "StockName": "Johnson & Johnson",
         "Symbol": "JNJ",
-        "icon": "https://www.google.com/s2/favicons?domain=jnj.com&sz=128"
+        "icon": "https://www.google.com/s2/favicons?domain=jnj.com&sz=64"
     },
     {
         "StockName": "Lockheed Martin",
         "Symbol": "LMT",
-        "icon": "https://www.google.com/s2/favicons?domain=lockheedmartin.com&sz=128"
+        "icon": "https://logo.clearbit.com/lockheedmartin.com?size=64"
     },
     {
         "StockName": "Microsoft",
         "Symbol": "MSFT",
-        "icon": "https://www.google.com/s2/favicons?domain=microsoft.com&sz=128"
+        "icon": "https://www.google.com/s2/favicons?domain=microsoft.com&sz=64"
     },
     {
         "StockName": "NVIDIA",
         "Symbol": "NVDA",
-        "icon": "https://www.google.com/s2/favicons?domain=nvidia.com&sz=128"
+        "icon": "https://www.google.com/s2/favicons?domain=nvidia.com&sz=64"
     },
     {
         "StockName": "Procter & Gamble",
         "Symbol": "PG",
-        "icon": "https://www.google.com/s2/favicons?domain=pg.com&sz=128"
+        "icon": "https://www.google.com/s2/favicons?domain=pg.com&sz=64"
     },
     {
         "StockName": "Tesla",
         "Symbol": "TSLA",
-        "icon": "https://www.google.com/s2/favicons?domain=tesla.com&sz=128"
+        "icon": "https://www.google.com/s2/favicons?domain=tesla.com&sz=64"
     },
     {
         "StockName": "Walmart",
         "Symbol": "WMT",
-        "icon": "https://www.google.com/s2/favicons?domain=walmart.com&sz=128"
+        "icon": "https://www.google.com/s2/favicons?domain=walmart.com&sz=64"
     }
 ]
