@@ -829,8 +829,9 @@ function updateMobileSectionVisibility() {
         }
     });
     
-    // If current section is hidden on mobile, switch to news section
+    // If current section is hidden on mobile, switch to a visible section
     if (isMobile && currentSection && mobileSections.includes(currentSection)) {
+        // Use 'news' as the fallback since it's always visible on mobile
         showSection('news');
     }
 }
