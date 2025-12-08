@@ -811,6 +811,31 @@ function updateScrollIndicators() {
     bottomFade.style.opacity = canScrollDown ? '1' : '0';
 }
 
+// Function to handle mobile-specific section visibility
+function updateMobileSectionVisibility() {
+    const isMobile = window.matchMedia("only screen and (max-width: 900px)").matches;
+    
+    // Sections to hide on mobile: Dashboard (navigation), Travel, Media, Reference
+    const mobileSections = ['navigation', 'travel', 'media', 'reference'];
+    
+    mobileSections.forEach(sectionId => {
+        const button = document.querySelector(`.section-button[onclick="showSection('${sectionId}')"]`);
+        if (button) {
+            if (isMobile) {
+                button.style.display = 'none';
+            } else {
+                button.style.display = '';
+            }
+        }
+    });
+    
+    // If current section is hidden on mobile, switch to a visible section
+    if (isMobile && currentSection && mobileSections.includes(currentSection)) {
+        // Use 'news' as the fallback since it's always visible on mobile
+        showSection('news');
+    }
+}
+
 // Function to handle scroll events on the right frame
 function handleScrollScale() {
     const rightFrame = document.getElementById('rightFrame');
@@ -1344,7 +1369,13 @@ document.addEventListener('DOMContentLoaded', async function () {
     handleScrollScale();
 
     // Update scroll indicators when window is resized
-    window.addEventListener('resize', updateScrollIndicators);
+    window.addEventListener('resize', () => {
+        updateScrollIndicators();
+        updateMobileSectionVisibility();
+    });
+
+    // Update mobile section visibility on page load
+    updateMobileSectionVisibility();
 
     // Scroll-to-top button
     const scrollTopBtn = document.getElementById('scroll-to-top');
