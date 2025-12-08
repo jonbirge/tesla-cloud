@@ -144,7 +144,7 @@ function formatPrice(price, isIndex = false, indexInfo = null) {
     if (isIndex && indexInfo && indexInfo.Coefficient) {
         const indexValue = parseFloat(price) * parseFloat(indexInfo.Coefficient);
         const units = (indexInfo.Units || '').toString().trim();
-        return indexValue.toFixed(2) + units;
+        return Math.round(indexValue).toString() + units;
     }
     
     return '$' + parseFloat(price).toFixed(2);

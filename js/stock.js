@@ -203,7 +203,7 @@ function getDisplayData(ticker, cached) {
             if (indexData && indexData.Coefficient) {
                 const indexValue = parseFloat(price) * parseFloat(indexData.Coefficient);
                 const units = (indexData.Units || '').toString().trim();
-                value = indexValue.toFixed(2) + units;
+                value = Math.round(indexValue).toString() + units;
             } else {
                 value = '--';
             }
