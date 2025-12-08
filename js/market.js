@@ -177,6 +177,14 @@ function formatAbsoluteChange(change) {
     return sign + value.toFixed(2);
 }
 
+// Format dollar amount helper
+function formatDollarAmount(value) {
+    if (value === null || value === undefined) {
+        return '--';
+    }
+    return '$' + parseFloat(value).toFixed(2);
+}
+
 // Calculate range position (0-100%)
 function calculateRangePosition(current, low, high) {
     if (current === null || low === null || high === null) {
@@ -232,16 +240,14 @@ function createMarketCard(symbol, data, isIndex = false) {
     const priceDisplay = formatPrice(data?.price, isIndex, indexInfo);
     const changeInfo = formatPercentChange(data?.percentChange, isYield);
     const absChange = formatAbsoluteChange(data?.change);
-    const openPrice = data && data.open != null ? '$' + parseFloat(data.open).toFixed(2) : '--';
+    const openPrice = formatDollarAmount(data?.open);
     
     // Use 52-week high/low if available, otherwise fall back to daily
     const has52WeekData = data && data.week52High != null && data.week52Low != null;
-    const highPrice = has52WeekData ? '$' + parseFloat(data.week52High).toFixed(2) : 
-                      (data && data.high != null ? '$' + parseFloat(data.high).toFixed(2) : '--');
-    const lowPrice = has52WeekData ? '$' + parseFloat(data.week52Low).toFixed(2) : 
-                     (data && data.low != null ? '$' + parseFloat(data.low).toFixed(2) : '--');
+    const highPrice = formatDollarAmount(has52WeekData ? data.week52High : data?.high);
+    const lowPrice = formatDollarAmount(has52WeekData ? data.week52Low : data?.low);
     const rangeLabel = has52WeekData ? '52-Week' : 'Day';
-    const prevClose = data && data.previousClose != null ? '$' + parseFloat(data.previousClose).toFixed(2) : '--';
+    const prevClose = formatDollarAmount(data?.previousClose);
     
     // Calculate range position - use appropriate high/low values
     const rangeLow = has52WeekData ? data.week52Low : data?.low;

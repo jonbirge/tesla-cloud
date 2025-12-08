@@ -9,7 +9,12 @@ header('Pragma: no-cache');
 header('Expires: 0');
 
 // Cache configuration
-$cacheLifetimeMinutes = 1; // Default cache lifetime in minutes
+$cacheLifetimeMinutes = 1; // Default cache lifetime for quote data in minutes
+$metricsLifetimeMinutes = 60; // Longer cache for 52-week data (1 hour) as it changes infrequently
+
+// API field name constants
+define('FIELD_52WEEK_HIGH', '52WeekHigh');
+define('FIELD_52WEEK_LOW', '52WeekLow');
 
 // Load the .env file (default path is './.env')
 $dotenv = new DotEnv(__DIR__ . '/../.env');
@@ -115,18 +120,45 @@ $lowPrice = isset($data['l']) ? floatval($data['l']) : null;   // (Low price)
 $previousClose = isset($data['pc']) ? floatval($data['pc']) : null; // (Previous close)
 $change = isset($data['d']) ? floatval($data['d']) : null;     // (Change absolute)
 
-// Try to fetch 52-week high/low from basic financials endpoint
+// Try to fetch 52-week high/low from basic financials endpoint with separate caching
 $week52High = null;
 $week52Low = null;
 
-$metricsUrl = "https://finnhub.io/api/v1/stock/metric?symbol={$ticker}&metric=all&token={$api_key}";
-$metricsResponse = @file_get_contents($metricsUrl, false, $context);
+// Check metrics cache first
+$metricsCacheFile = "/tmp/stock_metrics_{$ticker}.json";
+if (file_exists($metricsCacheFile)) {
+    $metricsContent = file_get_contents($metricsCacheFile);
+    $metricsCached = json_decode($metricsContent, true);
+    
+    if (json_last_error() === JSON_ERROR_NONE && isset($metricsCached['timestamp'])) {
+        $metricsCacheAge = time() - $metricsCached['timestamp'];
+        if ($metricsCacheAge < ($metricsLifetimeMinutes * 60)) {
+            // Use cached metrics data
+            $week52High = $metricsCached['week52High'];
+            $week52Low = $metricsCached['week52Low'];
+        }
+    }
+}
 
-if ($metricsResponse !== false) {
-    $metricsData = json_decode($metricsResponse, true);
-    if ($metricsData && isset($metricsData['metric'])) {
-        $week52High = isset($metricsData['metric']['52WeekHigh']) ? floatval($metricsData['metric']['52WeekHigh']) : null;
-        $week52Low = isset($metricsData['metric']['52WeekLow']) ? floatval($metricsData['metric']['52WeekLow']) : null;
+// Fetch metrics data if not cached or expired
+if ($week52High === null && $week52Low === null) {
+    $metricsUrl = "https://finnhub.io/api/v1/stock/metric?symbol={$ticker}&metric=all&token={$api_key}";
+    $metricsResponse = @file_get_contents($metricsUrl, false, $context);
+    
+    if ($metricsResponse !== false) {
+        $metricsData = json_decode($metricsResponse, true);
+        if ($metricsData && isset($metricsData['metric'])) {
+            $week52High = isset($metricsData['metric'][FIELD_52WEEK_HIGH]) ? floatval($metricsData['metric'][FIELD_52WEEK_HIGH]) : null;
+            $week52Low = isset($metricsData['metric'][FIELD_52WEEK_LOW]) ? floatval($metricsData['metric'][FIELD_52WEEK_LOW]) : null;
+            
+            // Cache the metrics data
+            $metricsCacheData = [
+                'timestamp' => time(),
+                'week52High' => $week52High,
+                'week52Low' => $week52Low
+            ];
+            file_put_contents($metricsCacheFile, json_encode($metricsCacheData));
+        }
     }
 }
 
