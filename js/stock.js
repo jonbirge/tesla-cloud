@@ -21,6 +21,26 @@ let pendingTickerWidthFrame = null; // Used to throttle width calculations for t
 // Import settings to check visibility setting
 import { settings } from './settings.js';
 
+// Helper function to format numeric values with smart decimal handling
+// If the integer part has more than 3 digits, truncate decimals; otherwise keep 2 decimals
+function formatNumericValue(value) {
+    if (value === null || value === undefined || isNaN(value)) {
+        return '--';
+    }
+    
+    const numValue = parseFloat(value);
+    const integerPart = Math.floor(Math.abs(numValue));
+    const digitCount = integerPart.toString().length;
+    
+    // If more than 3 digits before decimal, show as integer
+    if (digitCount > 3) {
+        return Math.round(numValue).toString();
+    }
+    
+    // Otherwise show with 2 decimal places
+    return numValue.toFixed(2);
+}
+
 // Load stock and index data
 async function loadStockAndIndexData() {
     try {
@@ -203,13 +223,13 @@ function getDisplayData(ticker, cached) {
             if (indexData && indexData.Coefficient) {
                 const indexValue = parseFloat(price) * parseFloat(indexData.Coefficient);
                 const units = (indexData.Units || '').toString().trim();
-                value = indexValue.toFixed(2) + units;
+                value = formatNumericValue(indexValue) + units;
             } else {
                 value = '--';
             }
         } else if (price) {
             // Regular stock - show with dollar sign
-            value = `$${parseFloat(price).toFixed(2)}`;
+            value = `$${formatNumericValue(parseFloat(price))}`;
         } else {
             value = '--';
         }

@@ -12,6 +12,27 @@ function escapeHTML(str) {
         .replace(/"/g, "&quot;")
         .replace(/'/g, "&#39;");
 }
+
+// Helper function to format numeric values with smart decimal handling
+// If the integer part has more than 3 digits, truncate decimals; otherwise keep 2 decimals
+function formatNumericValue(value) {
+    if (value === null || value === undefined || isNaN(value)) {
+        return '--';
+    }
+    
+    const numValue = parseFloat(value);
+    const integerPart = Math.floor(Math.abs(numValue));
+    const digitCount = integerPart.toString().length;
+    
+    // If more than 3 digits before decimal, show as integer
+    if (digitCount > 3) {
+        return Math.round(numValue).toString();
+    }
+    
+    // Otherwise show with 2 decimal places
+    return numValue.toFixed(2);
+}
+
 // Configuration
 const STOCK_API_ENDPOINT = 'php/quote.php?symbol=';
 const MARKET_UPDATE_INTERVAL = 60 * 1000; // 1 minute
@@ -144,10 +165,10 @@ function formatPrice(price, isIndex = false, indexInfo = null) {
     if (isIndex && indexInfo && indexInfo.Coefficient) {
         const indexValue = parseFloat(price) * parseFloat(indexInfo.Coefficient);
         const units = (indexInfo.Units || '').toString().trim();
-        return indexValue.toFixed(2) + units;
+        return formatNumericValue(indexValue) + units;
     }
     
-    return '$' + parseFloat(price).toFixed(2);
+    return '$' + formatNumericValue(parseFloat(price));
 }
 
 // Format percent change
@@ -232,10 +253,10 @@ function createMarketCard(symbol, data, isIndex = false) {
     const priceDisplay = formatPrice(data?.price, isIndex, indexInfo);
     const changeInfo = formatPercentChange(data?.percentChange, isYield);
     const absChange = formatAbsoluteChange(data?.change);
-    const openPrice = data && data.open != null ? '$' + parseFloat(data.open).toFixed(2) : '--';
-    const highPrice = data && data.high != null ? '$' + parseFloat(data.high).toFixed(2) : '--';
-    const lowPrice = data && data.low != null ? '$' + parseFloat(data.low).toFixed(2) : '--';
-    const prevClose = data && data.previousClose != null ? '$' + parseFloat(data.previousClose).toFixed(2) : '--';
+    const openPrice = data && data.open != null ? '$' + formatNumericValue(parseFloat(data.open)) : '--';
+    const highPrice = data && data.high != null ? '$' + formatNumericValue(parseFloat(data.high)) : '--';
+    const lowPrice = data && data.low != null ? '$' + formatNumericValue(parseFloat(data.low)) : '--';
+    const prevClose = data && data.previousClose != null ? '$' + formatNumericValue(parseFloat(data.previousClose)) : '--';
     
     // Calculate range position
     const rangePosition = calculateRangePosition(data?.price, data?.low, data?.high);
