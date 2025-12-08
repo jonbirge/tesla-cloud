@@ -2,17 +2,17 @@
     {
         "StockName": "Alphabet",
         "Symbol": "GOOGL",
-        "icon": "google.com"
+        "icon": "https://www.google.com/s2/favicons?domain=google.com&sz=128"
     },
     {
         "StockName": "Amazon",
         "Symbol": "AMZN",
-        "icon": "amazon.com"
+        "icon": "https://www.google.com/s2/favicons?domain=amazon.com&sz=128"
     },
     {
         "StockName": "Apple",
         "Symbol": "AAPL",
-        "icon": "apple.com"
+        "icon": "https://www.google.com/s2/favicons?domain=apple.com&sz=128"
     },
     {
         "StockName": "Berkshire",
@@ -22,56 +22,56 @@
     {
         "StockName": "Caterpillar",
         "Symbol": "CAT",
-        "icon": "cat.com"
+        "icon": "https://www.google.com/s2/favicons?domain=cat.com&sz=128"
     },
     {
         "StockName": "Exxon Mobil",
         "Symbol": "XOM",
-        "icon": "exxonmobil.com"
+        "icon": "https://www.google.com/s2/favicons?domain=exxonmobil.com&sz=128"
     },
     {
         "StockName": "General Electric",
         "Symbol": "GE",
-        "icon": "ge.com"
+        "icon": "https://www.google.com/s2/favicons?domain=ge.com&sz=128"
     },
     {
         "StockName": "JPMorgan Chase",
         "Symbol": "JPM",
-        "icon": "chase.com"
+        "icon": "https://www.google.com/s2/favicons?domain=chase.com&sz=128"
     },
     {
         "StockName": "Johnson & Johnson",
         "Symbol": "JNJ",
-        "icon": "jnj.com"
+        "icon": "https://www.google.com/s2/favicons?domain=jnj.com&sz=128"
     },
     {
         "StockName": "Lockheed Martin",
         "Symbol": "LMT",
-        "icon": "lockheedmartin.com"
+        "icon": "https://www.google.com/s2/favicons?domain=lockheedmartin.com&sz=128"
     },
     {
         "StockName": "Microsoft",
         "Symbol": "MSFT",
-        "icon": "microsoft.com"
+        "icon": "https://www.google.com/s2/favicons?domain=microsoft.com&sz=128"
     },
     {
         "StockName": "NVIDIA",
         "Symbol": "NVDA",
-        "icon": "nvidia.com"
+        "icon": "https://www.google.com/s2/favicons?domain=nvidia.com&sz=128"
     },
     {
         "StockName": "Procter & Gamble",
         "Symbol": "PG",
-        "icon": "pg.com"
+        "icon": "https://www.google.com/s2/favicons?domain=pg.com&sz=128"
     },
     {
         "StockName": "Tesla",
         "Symbol": "TSLA",
-        "icon": "tesla.com"
+        "icon": "https://www.google.com/s2/favicons?domain=tesla.com&sz=128"
     },
     {
         "StockName": "Walmart",
         "Symbol": "WMT",
-        "icon": "walmart.com"
+        "icon": "https://www.google.com/s2/favicons?domain=walmart.com&sz=128"
     }
 ]
