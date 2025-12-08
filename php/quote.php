@@ -43,7 +43,8 @@ if (!preg_match('/^[A-Za-z0-9\.\-\_]+$/', $ticker)) {
 }
 
 // Check cache before making API request
-$cacheFile = "/tmp/stock_cache_{$ticker}.json";
+$cacheDir = sys_get_temp_dir();
+$cacheFile = $cacheDir . "/stock_cache_{$ticker}.json";
 $useCache = false;
 
 if (file_exists($cacheFile)) {
@@ -125,7 +126,7 @@ $week52High = null;
 $week52Low = null;
 
 // Check metrics cache first
-$metricsCacheFile = "/tmp/stock_metrics_{$ticker}.json";
+$metricsCacheFile = $cacheDir . "/stock_metrics_{$ticker}.json";
 if (file_exists($metricsCacheFile)) {
     $metricsContent = file_get_contents($metricsCacheFile);
     $metricsCached = json_decode($metricsContent, true);
@@ -140,8 +141,8 @@ if (file_exists($metricsCacheFile)) {
     }
 }
 
-// Fetch metrics data if not cached or expired
-if ($week52High === null && $week52Low === null) {
+// Fetch metrics data if not cached or expired (fetch if either value is missing)
+if ($week52High === null || $week52Low === null) {
     $metricsUrl = "https://finnhub.io/api/v1/stock/metric?symbol={$ticker}&metric=all&token={$api_key}";
     $metricsResponse = @file_get_contents($metricsUrl, false, $context);
     
@@ -157,7 +158,7 @@ if ($week52High === null && $week52Low === null) {
                 'week52High' => $week52High,
                 'week52Low' => $week52Low
             ];
-            file_put_contents($metricsCacheFile, json_encode($metricsCacheData));
+            @file_put_contents($metricsCacheFile, json_encode($metricsCacheData));
         }
     }
 }
@@ -182,7 +183,7 @@ $cacheData = [
     'timestamp' => time(),
     'data' => $output
 ];
-file_put_contents($cacheFile, json_encode($cacheData));
+@file_put_contents($cacheFile, json_encode($cacheData));
 
 // Return the JSON response
 echo json_encode($output);

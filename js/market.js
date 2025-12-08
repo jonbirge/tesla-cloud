@@ -16,6 +16,15 @@ function escapeHTML(str) {
 const STOCK_API_ENDPOINT = 'php/quote.php?symbol=';
 const MARKET_UPDATE_INTERVAL = 60 * 1000; // 1 minute
 
+// Google Favicon API configuration
+const FAVICON_API_BASE = 'https://t0.gstatic.com/faviconV2';
+const FAVICON_API_PARAMS = {
+    client: 'SOCIAL',
+    type: 'FAVICON',
+    fallback_opts: 'TYPE,SIZE,URL',
+    size: 64
+};
+
 // Module state
 let marketUpdateTimer = null;
 let availableStocks = [];
@@ -100,7 +109,7 @@ function resolveIconUrl(iconUrl) {
         return trimmed;
     }
 
-    return `https://t0.gstatic.com/faviconV2?client=SOCIAL&type=FAVICON&fallback_opts=TYPE,SIZE,URL&url=https://${trimmed}&size=64`;
+    return `${FAVICON_API_BASE}?client=${FAVICON_API_PARAMS.client}&type=${FAVICON_API_PARAMS.type}&fallback_opts=${FAVICON_API_PARAMS.fallback_opts}&url=https://${trimmed}&size=${FAVICON_API_PARAMS.size}`;
 }
 
 // Fetch detailed quote data for a symbol
