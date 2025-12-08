@@ -252,7 +252,7 @@ function createMarketCard(symbol, data, isIndex = false) {
     const openPrice = formatDollarAmount(data?.open);
     
     // Use 52-week high/low if available, otherwise fall back to daily
-    const has52WeekData = data && data.week52High != null && data.week52Low != null;
+    const has52WeekData = data && data.week52High !== null && data.week52Low !== null;
     const highPrice = formatDollarAmount(has52WeekData ? data.week52High : data?.high);
     const lowPrice = formatDollarAmount(has52WeekData ? data.week52Low : data?.low);
     const rangeLabel = has52WeekData ? '52-Week' : 'Day';

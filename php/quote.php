@@ -141,8 +141,8 @@ if (file_exists($metricsCacheFile)) {
     }
 }
 
-// Fetch metrics data if not cached or expired (fetch if either value is missing)
-if ($week52High === null || $week52Low === null) {
+// Fetch metrics data if not cached or expired
+if ($week52High === null && $week52Low === null) {
     $metricsUrl = "https://finnhub.io/api/v1/stock/metric?symbol={$ticker}&metric=all&token={$api_key}";
     $metricsResponse = @file_get_contents($metricsUrl, false, $context);
     
