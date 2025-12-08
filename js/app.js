@@ -1053,7 +1053,7 @@ window.showSection = function (sectionId) {
     if (sectionId === 'landmarks') {
         if (lat !== null && long !== null) {
             fetchLandmarkData(lat, long);
-        } else if (gpsPermissionDenied || gpsFailureCount >= MAX_GPS_RETRIES) {
+        } else {
             console.log('GPS not available for landmarks data, attempting IP-based location fallback...');
             
             // Try to get IP-based location as fallback
@@ -1092,17 +1092,6 @@ window.showSection = function (sectionId) {
                 p.appendChild(em);
                 items.appendChild(p);
             });
-        } else {
-            console.log('Location not available for Wikipedia data.');
-            document.getElementById('landmarks-loading').style.display = 'none';
-            const items = document.getElementById('landmark-items');
-            items.style.display = 'block';
-            items.replaceChildren();
-            const p = document.createElement('p');
-            const em = document.createElement('em');
-            em.textContent = 'Location data not available. Please enable GPS.';
-            p.appendChild(em);
-            items.appendChild(p);
         }
     }
 
