@@ -290,6 +290,7 @@ hr {
     height: 24px;
     margin-right: 14px;
     stroke: currentColor;
+    fill: none;
 }
 
 .section-button.active,
