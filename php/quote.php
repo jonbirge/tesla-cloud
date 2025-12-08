@@ -115,6 +115,21 @@ $lowPrice = isset($data['l']) ? floatval($data['l']) : null;   // (Low price)
 $previousClose = isset($data['pc']) ? floatval($data['pc']) : null; // (Previous close)
 $change = isset($data['d']) ? floatval($data['d']) : null;     // (Change absolute)
 
+// Try to fetch 52-week high/low from basic financials endpoint
+$week52High = null;
+$week52Low = null;
+
+$metricsUrl = "https://finnhub.io/api/v1/stock/metric?symbol={$ticker}&metric=all&token={$api_key}";
+$metricsResponse = @file_get_contents($metricsUrl, false, $context);
+
+if ($metricsResponse !== false) {
+    $metricsData = json_decode($metricsResponse, true);
+    if ($metricsData && isset($metricsData['metric'])) {
+        $week52High = isset($metricsData['metric']['52WeekHigh']) ? floatval($metricsData['metric']['52WeekHigh']) : null;
+        $week52Low = isset($metricsData['metric']['52WeekLow']) ? floatval($metricsData['metric']['52WeekLow']) : null;
+    }
+}
+
 $output = [
     'symbol' => $ticker,
     'quoteTime'=> $time,
@@ -125,6 +140,8 @@ $output = [
     'low' => $lowPrice,
     'previousClose' => $previousClose,
     'change' => $change,
+    'week52High' => $week52High,
+    'week52Low' => $week52Low,
     'cache' => false
 ];
 

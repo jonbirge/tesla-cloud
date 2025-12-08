@@ -100,7 +100,7 @@ function resolveIconUrl(iconUrl) {
         return trimmed;
     }
 
-    return `https://www.google.com/s2/favicons?domain=${trimmed}&sz=64`;
+    return `https://t0.gstatic.com/faviconV2?client=SOCIAL&type=FAVICON&fallback_opts=TYPE,SIZE,URL&url=https://${trimmed}&size=64`;
 }
 
 // Fetch detailed quote data for a symbol
@@ -144,7 +144,7 @@ function formatPrice(price, isIndex = false, indexInfo = null) {
     if (isIndex && indexInfo && indexInfo.Coefficient) {
         const indexValue = parseFloat(price) * parseFloat(indexInfo.Coefficient);
         const units = (indexInfo.Units || '').toString().trim();
-        return indexValue.toFixed(2) + units;
+        return indexValue.toFixed(0) + units;
     }
     
     return '$' + parseFloat(price).toFixed(2);
@@ -233,12 +233,20 @@ function createMarketCard(symbol, data, isIndex = false) {
     const changeInfo = formatPercentChange(data?.percentChange, isYield);
     const absChange = formatAbsoluteChange(data?.change);
     const openPrice = data && data.open != null ? '$' + parseFloat(data.open).toFixed(2) : '--';
-    const highPrice = data && data.high != null ? '$' + parseFloat(data.high).toFixed(2) : '--';
-    const lowPrice = data && data.low != null ? '$' + parseFloat(data.low).toFixed(2) : '--';
+    
+    // Use 52-week high/low if available, otherwise fall back to daily
+    const has52WeekData = data && data.week52High != null && data.week52Low != null;
+    const highPrice = has52WeekData ? '$' + parseFloat(data.week52High).toFixed(2) : 
+                      (data && data.high != null ? '$' + parseFloat(data.high).toFixed(2) : '--');
+    const lowPrice = has52WeekData ? '$' + parseFloat(data.week52Low).toFixed(2) : 
+                     (data && data.low != null ? '$' + parseFloat(data.low).toFixed(2) : '--');
+    const rangeLabel = has52WeekData ? '52-Week' : 'Day';
     const prevClose = data && data.previousClose != null ? '$' + parseFloat(data.previousClose).toFixed(2) : '--';
     
-    // Calculate range position
-    const rangePosition = calculateRangePosition(data?.price, data?.low, data?.high);
+    // Calculate range position - use appropriate high/low values
+    const rangeLow = has52WeekData ? data.week52Low : data?.low;
+    const rangeHigh = has52WeekData ? data.week52High : data?.high;
+    const rangePosition = calculateRangePosition(data?.price, rangeLow, rangeHigh);
     
     // Build card HTML
     card.innerHTML = `
@@ -267,18 +275,18 @@ function createMarketCard(symbol, data, isIndex = false) {
                 <span class="market-stat-value">${prevClose}</span>
             </div>
             <div class="market-stat">
-                <span class="market-stat-label">Day High</span>
+                <span class="market-stat-label">${rangeLabel} High</span>
                 <span class="market-stat-value">${highPrice}</span>
             </div>
             <div class="market-stat">
-                <span class="market-stat-label">Day Low</span>
+                <span class="market-stat-label">${rangeLabel} Low</span>
                 <span class="market-stat-value">${lowPrice}</span>
             </div>
         </div>
         <div class="market-range-container">
             <div class="market-range-labels">
-                <span>Day Low</span>
-                <span>Day High</span>
+                <span>${rangeLabel} Low</span>
+                <span>${rangeLabel} High</span>
             </div>
             <div class="market-range-bar">
                 <div class="market-range-marker" style="left: ${rangePosition}%;"></div>
