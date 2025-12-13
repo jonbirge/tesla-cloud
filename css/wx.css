@@ -609,3 +609,48 @@ body.dark-mode .notification-icon img {
         display: none;
     }
 }
+
+/* Radar Display */
+.radar-display-container {
+    margin: 20px 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.radar-loading {
+    text-align: center;
+    padding: 20px;
+    color: var(--text-muted);
+    font-style: italic;
+}
+
+#radar-unavailable {
+    text-align: center;
+    padding: 20px;
+    color: var(--text-muted);
+}
+
+#radar-unavailable p {
+    margin: 0;
+}
+
+#radar-content {
+    width: 100%;
+    max-width: 600px;
+}
+
+.radar-info {
+    text-align: center;
+    margin-bottom: 10px;
+    font-weight: 600;
+    color: var(--text-color);
+}
+
+.radar-image {
+    width: 100%;
+    height: auto;
+    border-radius: var(--button-radius);
+    border: 2px solid var(--separator-color);
+    display: block;
+}
