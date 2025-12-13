@@ -188,16 +188,6 @@ function formatPercentChange(change, isYield = false) {
     return { text: `${absChange}%`, className: 'neutral', arrow: '—' };
 }
 
-// Format absolute change
-function formatAbsoluteChange(change) {
-    if (change === null || change === undefined) {
-        return '--';
-    }
-    const value = parseFloat(change);
-    const sign = value >= 0 ? '+' : '';
-    return sign + value.toFixed(2);
-}
-
 // Calculate range position (0-100%)
 function calculateRangePosition(current, low, high) {
     if (current === null || low === null || high === null) {
@@ -252,7 +242,6 @@ function createMarketCard(symbol, data, isIndex = false) {
     const isYield = indexInfo && (indexInfo.Units || '').toString().trim().toUpperCase() === 'YLD';
     const priceDisplay = formatPrice(data?.price, isIndex, indexInfo);
     const changeInfo = formatPercentChange(data?.percentChange, isYield);
-    const absChange = formatAbsoluteChange(data?.change);
     const openPrice = data && data.open != null ? '$' + formatNumericValue(parseFloat(data.open)) : '--';
     const highPrice = data && data.high != null ? '$' + formatNumericValue(parseFloat(data.high)) : '--';
     const lowPrice = data && data.low != null ? '$' + formatNumericValue(parseFloat(data.low)) : '--';
