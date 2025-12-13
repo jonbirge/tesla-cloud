@@ -224,6 +224,9 @@ export async function fetchCityData(lat, long) {
             if (satSection) {
                 satSection.classList.remove('hidden');
             }
+            
+            // Update radar display after we know the location
+            updateRadarDisplay(lat, long);
         } else {
             console.log('No location data available.');
         }
@@ -2301,9 +2304,19 @@ export function updateRadarDisplay(lat, lon) {
     const radarImage = document.getElementById('radar-image');
     const radarStationName = document.getElementById('radar-station-name');
     
-    // Check if we're in the US (only show radar for US locations)
-    if (!inCONUS || !lat || !lon) {
+    // Check if we have valid coordinates
+    if (!lat || !lon) {
         // Hide loading and content, show unavailable message
+        if (radarLoading) radarLoading.style.display = 'none';
+        if (radarContent) radarContent.style.display = 'none';
+        if (radarUnavailable) radarUnavailable.style.display = 'block';
+        return;
+    }
+    
+    // Check if we're in the US (only show radar for US locations)
+    // inCONUS is set in fetchCityData, but we also check country as a fallback
+    if (country && country !== 'US') {
+        // Not in the US, show unavailable message
         if (radarLoading) radarLoading.style.display = 'none';
         if (radarContent) radarContent.style.display = 'none';
         if (radarUnavailable) radarUnavailable.style.display = 'block';
