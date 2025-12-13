@@ -2,7 +2,7 @@
 import { srcUpdate, testMode, debugMode, isTestMode, updateTimeZone, GEONAMES_USERNAME, showNotification, gpsPermissionDenied, setGpsPermissionDenied, setUsingIPLocation } from './common.js';
 import { PositionSimulator } from './location.js';
 import { attemptLogin, leaveSettings, settings, isDriving, setDrivingState, enableLiveNewsUpdates, saveSetting } from './settings.js';
-import { fetchPremiumWeatherData, fetchCityData, SAT_URLS, forecastDataPrem, currentRainAlert, generateForecastDayElements, ensurePrecipitationGraphWidth, currentSatRegion } from './wx.js';
+import { fetchPremiumWeatherData, fetchCityData, SAT_URLS, forecastDataPrem, currentRainAlert, generateForecastDayElements, ensurePrecipitationGraphWidth, currentSatRegion, initializeSatelliteSettings } from './wx.js';
 import { updateNetworkInfo, updatePingChart, startPingTest, getIPBasedLocation } from './net.js';
 import { setupNewsObserver, cleanupNewsObserver, startNewsTimeUpdates, stopNewsTimeUpdates, initializeNewsStorage } from './news.js';
 import { startStockUpdates, stopStockUpdates } from './stock.js';
@@ -1340,6 +1340,9 @@ document.addEventListener('DOMContentLoaded', async function () {
 
     // Initialize radar display
     initializeRadar();
+    
+    // Initialize satellite settings and show satellite section
+    initializeSatelliteSettings();
 
     // Start location services
     startGPSUpdates();

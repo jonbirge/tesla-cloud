@@ -217,12 +217,6 @@ export async function fetchCityData(lat, long) {
                 console.log('Auto-selected satellite region:', currentSatRegion);
                 updateSatelliteRegionDisplay();
             }
-
-            // Always show the satellite section button now that we have multi-region support
-            const satSection = document.getElementById('sat-section');
-            if (satSection) {
-                satSection.classList.remove('hidden');
-            }
         } else {
             console.log('No location data available.');
         }
@@ -261,6 +255,12 @@ export function initializeSatelliteSettings() {
 
     updateSatelliteRegionDisplay();
     updateSatelliteButtonAvailability();
+    
+    // Always show the satellite section button - it should never be hidden
+    const satSection = document.getElementById('sat-section');
+    if (satSection) {
+        satSection.classList.remove('hidden');
+    }
 }
 
 function renderSatelliteRegionOptions() {
