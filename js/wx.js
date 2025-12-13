@@ -2121,7 +2121,8 @@ function updateWeatherAlertIndicator() {
 }
 
 // NOAA Radar Station Data
-// A comprehensive list of NEXRAD radar stations in the continental US
+// A comprehensive list of NEXRAD radar stations across the United States
+// Includes stations in all 50 states including Alaska and Hawaii
 const NOAA_RADAR_STATIONS = [
     // Northeast
     { id: 'KBOX', name: 'Boston, MA', lat: 41.9559, lon: -71.1369 },
@@ -2264,6 +2265,19 @@ const NOAA_RADAR_STATIONS = [
     { id: 'KMUX', name: 'San Francisco, CA', lat: 37.1553, lon: -121.8981 },
     { id: 'KDAX', name: 'Sacramento, CA', lat: 38.5011, lon: -121.6778 },
     { id: 'KBBX', name: 'Beale AFB, CA', lat: 39.4961, lon: -121.6317 },
+    
+    // Alaska
+    { id: 'PAHG', name: 'Anchorage, AK', lat: 60.7261, lon: -151.3514 },
+    { id: 'PAPD', name: 'Fairbanks, AK', lat: 65.0353, lon: -147.4994 },
+    { id: 'PAKC', name: 'King Salmon, AK', lat: 58.6794, lon: -156.6294 },
+    { id: 'PAIH', name: 'Middleton Island, AK', lat: 59.4600, lon: -146.3011 },
+    { id: 'PAEC', name: 'Nome, AK', lat: 64.5114, lon: -165.2950 },
+    
+    // Hawaii
+    { id: 'PHKI', name: 'South Kauai, HI', lat: 21.8939, lon: -159.5524 },
+    { id: 'PHKM', name: 'Kohala, HI', lat: 20.1253, lon: -155.7781 },
+    { id: 'PHMO', name: 'Molokai, HI', lat: 21.1328, lon: -157.1803 },
+    { id: 'PHWA', name: 'South Shore, HI', lat: 19.0950, lon: -155.5689 },
 ];
 
 // Function to calculate distance between two coordinates using Haversine formula
@@ -2313,9 +2327,9 @@ export function updateRadarDisplay(lat, lon) {
         return;
     }
     
-    // Check if we're in the US (only show radar for US locations)
-    // inCONUS is set in fetchCityData, but we also check country as a fallback
-    if (country && country !== 'US') {
+    // Check if we're in the US (radar available for all US including Alaska and Hawaii)
+    // Wait for country to be set by fetchCityData before showing unavailable
+    if (country !== null && country !== 'US') {
         // Not in the US, show unavailable message
         if (radarLoading) radarLoading.style.display = 'none';
         if (radarContent) radarContent.style.display = 'none';
@@ -2343,8 +2357,11 @@ export function updateRadarDisplay(lat, lon) {
     const radarUrl = `https://radar.weather.gov/ridge/standard/${nearestStation.id}_loop.gif`;
     
     if (radarImage) {
-        // Add a timestamp to force refresh and prevent caching
-        const timestamp = new Date().getTime();
+        // Add a timestamp rounded to 5-minute intervals to allow caching
+        // Radar images typically update every 5-10 minutes
+        const now = new Date().getTime();
+        const fiveMinutes = 5 * 60 * 1000;
+        const timestamp = Math.floor(now / fiveMinutes) * fiveMinutes;
         radarImage.src = `${radarUrl}?${timestamp}`;
         
         // Handle image load success
