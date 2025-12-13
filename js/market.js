@@ -274,8 +274,7 @@ function createMarketCard(symbol, data, isIndex = false) {
             <span class="market-price-value">${priceDisplay}</span>
             <div class="market-price-change ${changeInfo.className}">
                 <span class="market-change-arrow">${changeInfo.arrow}</span>
-                <span>${absChange}</span>
-                <span class="market-change-percent">(${changeInfo.text})</span>
+                <span class="market-change-percent">${changeInfo.text}</span>
             </div>
         </div>
         <div class="market-card-stats">
