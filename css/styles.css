@@ -357,6 +357,7 @@ hr {
 
 /* Link Button Lists */
 .button-list {
+    /* works for <ul> or <div> container */
     list-style: none;
     padding: 0;
     margin-top: 0;
@@ -367,7 +368,8 @@ hr {
     max-width: calc(280px * 5 + 16px * 4);
 }
 
-.button-list li {
+.button-list > * {
+    /* reset margin for direct children (anchors or item wrappers) */
     margin: 0;
 }
 
