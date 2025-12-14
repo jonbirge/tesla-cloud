@@ -615,18 +615,18 @@ body.dark-mode .notification-icon img {
     margin: 20px 0;
     display: flex;
     flex-direction: column;
-    align-items: center;
+    align-items: flex-start;
 }
 
 .radar-loading {
-    text-align: center;
+    text-align: left;
     padding: 20px;
     color: var(--text-muted);
     font-style: italic;
 }
 
 #radar-unavailable {
-    text-align: center;
+    text-align: left;
     padding: 20px;
     color: var(--text-muted);
 }
@@ -641,7 +641,7 @@ body.dark-mode .notification-icon img {
 }
 
 .radar-info {
-    text-align: center;
+    text-align: left;
     margin-bottom: 10px;
     font-weight: 600;
     color: var(--text-color);
