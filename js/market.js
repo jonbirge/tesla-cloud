@@ -180,10 +180,11 @@ function formatPercentChange(change, isYield = false) {
     const adjustedChange = isYield ? -change : change;
     const absChange = Math.abs(adjustedChange).toFixed(2);
     
+    // Remove explicit + / - from the text; arrow indicates direction
     if (adjustedChange > 0) {
-        return { text: `+${absChange}%`, className: 'up', arrow: '▲' };
+        return { text: `${absChange}%`, className: 'up', arrow: '▲' };
     } else if (adjustedChange < 0) {
-        return { text: `-${absChange}%`, className: 'down', arrow: '▼' };
+        return { text: `${absChange}%`, className: 'down', arrow: '▼' };
     }
     return { text: `${absChange}%`, className: 'neutral', arrow: '—' };
 }

@@ -63,18 +63,17 @@
 }
 
 .market-price-value {
-    font-size: 28pt;
+    font-size: 24pt;
     font-weight: 700;
     color: var(--button-text);
     font-variant-numeric: tabular-nums;
 }
 
 .market-price-change {
-    display: flex;
     align-items: center;
-    gap: 4px;
-    font-size: 14pt;
-    font-weight: 600;
+    gap: 0px;
+    font-size: 16pt;
+    font-weight: 700;
     font-variant-numeric: tabular-nums;
 }
 
@@ -91,11 +90,8 @@
 }
 
 .market-change-arrow {
-    font-size: 12pt;
-}
-
-.market-change-percent {
-    font-size: 14pt;
+    font-size: 16pt;
+    margin: -5px;
 }
 
 /* Stats Grid */
