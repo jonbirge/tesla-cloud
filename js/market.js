@@ -180,22 +180,13 @@ function formatPercentChange(change, isYield = false) {
     const adjustedChange = isYield ? -change : change;
     const absChange = Math.abs(adjustedChange).toFixed(2);
     
+    // Remove explicit + / - from the text; arrow indicates direction
     if (adjustedChange > 0) {
-        return { text: `+${absChange}%`, className: 'up', arrow: '▲' };
+        return { text: `${absChange}%`, className: 'up', arrow: '▲' };
     } else if (adjustedChange < 0) {
-        return { text: `-${absChange}%`, className: 'down', arrow: '▼' };
+        return { text: `${absChange}%`, className: 'down', arrow: '▼' };
     }
     return { text: `${absChange}%`, className: 'neutral', arrow: '—' };
-}
-
-// Format absolute change
-function formatAbsoluteChange(change) {
-    if (change === null || change === undefined) {
-        return '--';
-    }
-    const value = parseFloat(change);
-    const sign = value >= 0 ? '+' : '';
-    return sign + value.toFixed(2);
 }
 
 // Calculate range position (0-100%)
@@ -252,7 +243,6 @@ function createMarketCard(symbol, data, isIndex = false) {
     const isYield = indexInfo && (indexInfo.Units || '').toString().trim().toUpperCase() === 'YLD';
     const priceDisplay = formatPrice(data?.price, isIndex, indexInfo);
     const changeInfo = formatPercentChange(data?.percentChange, isYield);
-    const absChange = formatAbsoluteChange(data?.change);
     const openPrice = data && data.open != null ? '$' + formatNumericValue(parseFloat(data.open)) : '--';
     const highPrice = data && data.high != null ? '$' + formatNumericValue(parseFloat(data.high)) : '--';
     const lowPrice = data && data.low != null ? '$' + formatNumericValue(parseFloat(data.low)) : '--';
@@ -274,8 +264,7 @@ function createMarketCard(symbol, data, isIndex = false) {
             <span class="market-price-value">${priceDisplay}</span>
             <div class="market-price-change ${changeInfo.className}">
                 <span class="market-change-arrow">${changeInfo.arrow}</span>
-                <span>${absChange}</span>
-                <span class="market-change-percent">(${changeInfo.text})</span>
+                <span class="market-change-percent">${changeInfo.text}</span>
             </div>
         </div>
         <div class="market-card-stats">
