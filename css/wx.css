@@ -1,4 +1,4 @@
-:root {    
+:root {
     --sky-clear-top: #e6f7ff;
     --sky-clear-bottom: #a8d0f0;
     --sky-cloudy-top: #cacaca;
@@ -107,8 +107,13 @@ body.dark-mode {
 
 /* Loading skeleton for forecast panels */
 @keyframes forecastLoading {
-    0% { background-position: -200px 0; }
-    100% { background-position: calc(200px + 100%) 0; }
+    0% {
+        background-position: -200px 0;
+    }
+
+    100% {
+        background-position: calc(200px + 100%) 0;
+    }
 }
 
 .forecast-container.loading .forecast-day {
@@ -292,15 +297,17 @@ body.dark-mode .forecast-day.rain img.forecast-icon {
 }
 
 .weather-alert-description {
-    margin: 0 0 8px 0;
+    margin: 0px 12px 8px 0;
     line-height: 1.35;
     color: var(--button-text);
     font-style: italic;
-    font-size: 16px;
+    font-size: 17px;
+    max-width: 1100px;
 }
 
 .weather-alert-time {
     font-size: 14px;
+    font-weight: 600;
     color: var(--text-color);
 }
 
@@ -510,87 +517,87 @@ body.dark-mode .notification-icon img {
     .weather-switch-container {
         margin: 10px 0;
     }
-    
+
     .weather-switch {
         width: 100%;
         max-width: 320px;
     }
-    
+
     .weather-switch button {
         padding: 10px 16px;
         font-size: 11pt;
     }
-    
+
     .weather-image {
         max-width: 100%;
     }
-    
+
     .forecast-container {
         gap: 12px;
         margin: 12px 0;
         max-width: 95%;
         grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
     }
-    
+
     .forecast-day {
         padding: 12px 14px 16px;
         min-width: 85px;
         max-width: 150px;
         min-height: 165px;
     }
-    
+
     .forecast-date {
         font-size: 12pt;
         margin-bottom: 5px;
     }
-    
+
     .forecast-icon {
         width: 48px;
         height: 48px;
         margin: 5px;
     }
-    
+
     .forecast-temp {
         font-size: 13pt;
         margin: 5px 0;
     }
-    
+
     .forecast-desc {
         font-size: 12pt;
     }
-    
+
     .forecast-popup {
         width: 90%;
         max-height: 70vh;
     }
-    
+
     .hourly-forecast {
         grid-template-columns: repeat(auto-fill, minmax(70px, 1fr));
         gap: 5px;
     }
-    
+
     .hourly-item {
         padding: 5px;
     }
-    
+
     .hourly-time {
         font-size: 10pt;
     }
-    
+
     .hourly-icon {
         width: 28px;
         height: 28px;
     }
-    
+
     .hourly-temp {
         font-size: 10pt;
         margin: 1px 0;
     }
-    
+
     .hourly-desc {
         font-size: 9pt;
     }
-    
+
     .moon-phase-icon {
         width: 14px;
         height: 14px;
@@ -607,5 +614,25 @@ body.dark-mode .notification-icon img {
 
     #prem-forecast-container .forecast-day:nth-of-type(7) {
         display: none;
+    }
+
+    .weather-alert-name {
+        color: #c62828;
+        font-size: 16px;
+    }
+
+    .weather-alert-description {
+        margin: 0px 12px 8px 0;
+        line-height: 1.35;
+        color: var(--button-text);
+        font-style: italic;
+        font-size: 15px;
+        max-width: 1100px;
+    }
+
+    .weather-alert-time {
+        font-size: 13px;
+        font-weight: 600;
+        color: var(--text-color);
     }
 }
