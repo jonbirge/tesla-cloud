@@ -19,7 +19,7 @@
     --status-unavailable: #888888;
     --status-rain: #00a1ff;
     --heading-font-size: 17pt;
-    --heading-font-weight: 500;
+    --heading-font-weight: 600;
     --stock-up: #0fa215;
     --stock-down: #dc3545;
     --stock-neutral: #888888;
@@ -98,7 +98,7 @@ h3 {
     color: var(--button-text);
     font-size: calc(var(--heading-font-size) - 1pt);
     font-weight: calc(var(--heading-font-weight) - 100);
-    margin: 16px 0 7px 0;
+    margin: 6px 0 7px 0;
 }
 
 p {

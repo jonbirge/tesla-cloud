@@ -1,3 +1,9 @@
+# AGENTS.md instructions for /srv/www/jon/Tesla
+
+<INSTRUCTIONS>
+# AGENTS.md instructions for /srv/www/jon/Tesla
+
+<INSTRUCTIONS>
 # Repository Guidelines
 
 ## Project Structure & Module Organization
@@ -27,3 +33,6 @@ Do not commit working credentials—use redacted `.env` entries or the fixtures 
 - Default feed settings: `refresh: 60`, `lifetime: 1095`, `defaultEnabled: false`, and include an `icon` when available; category must match an existing section id.
 - Recently updated sources: added `skynews`, `abcnews`, `dwtop`, `phoronix`; removed `anandtech` (feed retired). Keep replacements similarly wire-style for General and technical/engineering-focused for Technology.
 - El País English feed must use `https://feeds.elpais.com/mrss-s/pages/ep/site/english.elpais.com/portada` (prior `/elpais.com/en/portada` URL returns 404).
+</INSTRUCTIONS>
+
+</INSTRUCTIONS>
