@@ -149,7 +149,9 @@ export async function fetchPremiumWeatherData(lat, long, silentLoad = false) {
 
             if (lat && long) {
                 updateAQI(lat, long);
-                updateRadarDisplay(lat, long);
+                if (settings["show-doppler-radar"] !== false) {
+                    updateRadarDisplay(lat, long);
+                }
             }
 
             // Remove loading state when data is loaded - only if not silent loading
@@ -226,7 +228,9 @@ export async function fetchCityData(lat, long) {
             }
             
             // Update radar display after we know the location
-            updateRadarDisplay(lat, long);
+            if (settings["show-doppler-radar"] !== false) {
+                updateRadarDisplay(lat, long);
+            }
         } else {
             console.log('No location data available.');
         }
@@ -2312,6 +2316,10 @@ function findNearestRadarStation(lat, lon) {
 export function updateRadarDisplay(lat, lon) {
     console.log('updateRadarDisplay()', lat, lon);
     
+    if (settings["show-doppler-radar"] === false) {
+        return;
+    }
+
     const radarLoading = document.getElementById('radar-loading');
     const radarContent = document.getElementById('radar-content');
     const radarUnavailable = document.getElementById('radar-unavailable');

@@ -1,9 +1,8 @@
 // Imports
 import { updateNews, setShareButtonsVisibility, initializeNewsStorage } from './news.js';
 import { updateNetChartAxisColors } from './net.js';
-import { updatePremiumWeatherDisplay } from './wx.js';
+import { updatePremiumWeatherDisplay, forecastDataPrem, lastLat, lastLong, updateRainChartAxisColors, updateRadarDisplay } from './wx.js';
 import { startStockUpdates, stopStockUpdates } from './stock.js';
-import { forecastDataPrem, lastLat, lastLong, updateRainChartAxisColors } from './wx.js';
 
 // Night mode offset in minutes - enter dark mode this many minutes before sunset
 // and exit dark mode this many minutes after sunrise to match Tesla's car behavior
@@ -37,6 +36,7 @@ const defaultSettings = {
     "show-wind-radar": false,
     "show-speed-indicators": true,
     "show-hourly-stripes": true,
+    "show-doppler-radar": true,
     "sat-region": 'us',
     // Stocks
     "show-price-alt": false,
@@ -284,6 +284,20 @@ function updateRadarVisibility() {
     }
 }
 
+// Helper function to show/hide Doppler radar block based on setting
+function updateDopplerRadarVisibility() {
+    const dopplerSection = document.getElementById('doppler-section');
+    const shouldShow = settings["show-doppler-radar"] !== false;
+
+    if (dopplerSection) {
+        dopplerSection.style.display = shouldShow ? '' : 'none';
+    }
+
+    if (shouldShow && lastLat !== null && lastLong !== null) {
+        updateRadarDisplay(lastLat, lastLong);
+    }
+}
+
 // Helper function to show/hide speed indicators based on setting
 function updateSpeedIndicatorVisibility() {
     const speedBox = document.querySelector('.stat-box:has(#speed)');
@@ -480,7 +494,8 @@ async function fetchSettings() {
 
         if (response.ok) {
             // Load settings
-            settings = await response.json();
+            const serverSettings = await response.json();
+            settings = { ...defaultSettings, ...serverSettings };
             console.log('Settings loaded: ', settings);
 
             // Clean up orphaned stock/index subscriptions
@@ -1099,6 +1114,10 @@ function updateSetting(key, value) {
             
         case 'show-wind-radar':
             updateRadarVisibility();
+            break;
+
+        case 'show-doppler-radar':
+            updateDopplerRadarVisibility();
             break;
 
         case 'show-speed-indicators':
