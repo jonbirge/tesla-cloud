@@ -299,20 +299,20 @@ hr {
     color: var(--button-text);
 }
 
-/* Notification dot */
-.section-button.has-notification {
+/* Notification and alert count indicators - shared styles */
+.section-button.has-notification,
+.section-button.has-weather-alert {
     position: relative;
 }
 
-.section-button.has-notification::after {
-    content: attr(data-count);
+.section-button.has-notification::after,
+.section-button.has-weather-alert::after {
     position: absolute;
     top: 50%;
     right: 10px;
     transform: translateY(-50%);
     min-width: 20px;
     height: 26px;
-    background-color: var(--tesla-blue);
     border-radius: 13px;
     display: flex;
     justify-content: center;
@@ -323,36 +323,22 @@ hr {
     padding: 0 9px;
     opacity: 1;
     transition: opacity 0.5s ease;
+}
+
+/* Notification dot - specific styles */
+.section-button.has-notification::after {
+    content: attr(data-count);
+    background-color: var(--tesla-blue);
 }
 
 .section-button.notification-transition::after {
     opacity: 0;
 }
 
-/* Weather alert count indicator */
-.section-button.has-weather-alert {
-    position: relative;
-}
-
+/* Weather alert count indicator - specific styles */
 .section-button.has-weather-alert::after {
     content: attr(data-alert-count);
-    position: absolute;
-    top: 50%;
-    right: 10px;
-    transform: translateY(-50%);
-    min-width: 20px;
-    height: 26px;
     background-color: #8B0000;
-    border-radius: 13px;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    color: white;
-    font-size: 12pt;
-    font-weight: 750;
-    padding: 0 9px;
-    opacity: 1;
-    transition: opacity 0.5s ease;
 }
 
 /* Link Button Lists */
@@ -1029,11 +1015,13 @@ body.dark-mode .option-button:hover:not(.active) {
         height: 32px;
     }
 
-    .section-button.has-notification {
+    .section-button.has-notification,
+    .section-button.has-weather-alert {
         padding-right: 42px !important;
     }
 
-    .section-button.has-notification::after {
+    .section-button.has-notification::after,
+    .section-button.has-weather-alert::after {
         right: 6px;
         min-width: 12px;
         height: 18px;
