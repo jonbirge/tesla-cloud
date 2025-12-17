@@ -149,6 +149,9 @@ export async function fetchPremiumWeatherData(lat, long, silentLoad = false) {
 
             if (lat && long) {
                 updateAQI(lat, long);
+                if (settings["show-doppler-radar"] !== false) {
+                    updateRadarDisplay(lat, long);
+                }
             }
 
             // Remove loading state when data is loaded - only if not silent loading
@@ -222,6 +225,11 @@ export async function fetchCityData(lat, long) {
             const satSection = document.getElementById('sat-section');
             if (satSection) {
                 satSection.classList.remove('hidden');
+            }
+            
+            // Update radar display after we know the location
+            if (settings["show-doppler-radar"] !== false) {
+                updateRadarDisplay(lat, long);
             }
         } else {
             console.log('No location data available.');
@@ -2114,4 +2122,271 @@ function updateWeatherAlertIndicator() {
         weatherButton.removeAttribute('data-alert-count');
         weatherButton.title = '';
     }
+}
+
+// NOAA Radar Station Data
+// A comprehensive list of NEXRAD radar stations across the United States
+// Includes stations in all 50 states including Alaska and Hawaii
+const NOAA_RADAR_STATIONS = [
+    // Northeast
+    { id: 'KBOX', name: 'Boston, MA', lat: 41.9559, lon: -71.1369 },
+    { id: 'KENX', name: 'Albany, NY', lat: 42.5864, lon: -74.0640 },
+    { id: 'KBGM', name: 'Binghamton, NY', lat: 42.1997, lon: -75.9847 },
+    { id: 'KBUF', name: 'Buffalo, NY', lat: 42.9488, lon: -78.7369 },
+    { id: 'KTYX', name: 'Montague, NY', lat: 43.7556, lon: -75.6800 },
+    { id: 'KOKX', name: 'New York, NY', lat: 40.8655, lon: -72.8639 },
+    { id: 'KDIX', name: 'Philadelphia, PA', lat: 39.9469, lon: -74.4108 },
+    { id: 'KCCX', name: 'State College, PA', lat: 40.9231, lon: -78.0039 },
+    { id: 'KPBZ', name: 'Pittsburgh, PA', lat: 40.5317, lon: -80.2180 },
+    { id: 'KCXX', name: 'Burlington, VT', lat: 44.5111, lon: -73.1664 },
+    { id: 'KGYX', name: 'Portland, ME', lat: 43.8913, lon: -70.2565 },
+    { id: 'KCBW', name: 'Houlton, ME', lat: 46.0392, lon: -67.8064 },
+    
+    // Southeast
+    { id: 'KFFC', name: 'Atlanta, GA', lat: 33.3631, lon: -84.5658 },
+    { id: 'KJGX', name: 'Robins AFB, GA', lat: 32.6751, lon: -83.3508 },
+    { id: 'KVAX', name: 'Moody AFB, GA', lat: 30.8903, lon: -83.0017 },
+    { id: 'KMHX', name: 'Morehead City, NC', lat: 34.7759, lon: -76.8762 },
+    { id: 'KRAX', name: 'Raleigh, NC', lat: 35.6655, lon: -78.4897 },
+    { id: 'KLTX', name: 'Wilmington, NC', lat: 33.9892, lon: -78.4292 },
+    { id: 'KFCX', name: 'Roanoke, VA', lat: 37.0242, lon: -80.2736 },
+    { id: 'KAKQ', name: 'Norfolk, VA', lat: 36.9840, lon: -77.0075 },
+    { id: 'KLWX', name: 'Sterling, VA', lat: 38.9753, lon: -77.4778 },
+    { id: 'KRLX', name: 'Charleston, WV', lat: 38.3111, lon: -81.7229 },
+    { id: 'KJAX', name: 'Jacksonville, FL', lat: 30.4847, lon: -81.7019 },
+    { id: 'KBYX', name: 'Key West, FL', lat: 24.5975, lon: -81.7031 },
+    { id: 'KMLB', name: 'Melbourne, FL', lat: 28.1133, lon: -80.6542 },
+    { id: 'KAMX', name: 'Miami, FL', lat: 25.6111, lon: -80.4128 },
+    { id: 'KTBW', name: 'Tampa, FL', lat: 27.7056, lon: -82.4017 },
+    { id: 'KTLH', name: 'Tallahassee, FL', lat: 30.3975, lon: -84.3289 },
+    
+    // Midwest
+    { id: 'KLOT', name: 'Chicago, IL', lat: 41.6044, lon: -88.0847 },
+    { id: 'KILX', name: 'Lincoln, IL', lat: 40.1506, lon: -89.3369 },
+    { id: 'KVWX', name: 'Evansville, IN', lat: 38.2603, lon: -87.7247 },
+    { id: 'KIND', name: 'Indianapolis, IN', lat: 39.7075, lon: -86.2803 },
+    { id: 'KIWX', name: 'Fort Wayne, IN', lat: 41.3586, lon: -85.7000 },
+    { id: 'KDTX', name: 'Detroit, MI', lat: 42.6997, lon: -83.4717 },
+    { id: 'KGRR', name: 'Grand Rapids, MI', lat: 42.8939, lon: -85.5449 },
+    { id: 'KMQT', name: 'Marquette, MI', lat: 46.5311, lon: -87.5486 },
+    { id: 'KARX', name: 'La Crosse, WI', lat: 43.8228, lon: -91.1914 },
+    { id: 'KGRB', name: 'Green Bay, WI', lat: 44.4986, lon: -88.1111 },
+    { id: 'KMKX', name: 'Milwaukee, WI', lat: 42.9678, lon: -88.5506 },
+    { id: 'KDMX', name: 'Des Moines, IA', lat: 41.7311, lon: -93.7229 },
+    { id: 'KDVN', name: 'Davenport, IA', lat: 41.6117, lon: -90.5808 },
+    { id: 'KMPX', name: 'Minneapolis, MN', lat: 44.8489, lon: -93.5653 },
+    { id: 'KDLH', name: 'Duluth, MN', lat: 46.8369, lon: -92.2097 },
+    { id: 'KEAX', name: 'Kansas City, MO', lat: 38.8103, lon: -94.2644 },
+    { id: 'KLSX', name: 'St. Louis, MO', lat: 38.6989, lon: -90.6828 },
+    { id: 'KSGF', name: 'Springfield, MO', lat: 37.2353, lon: -93.4006 },
+    
+    // South Central
+    { id: 'KLZK', name: 'Little Rock, AR', lat: 34.8364, lon: -92.2622 },
+    { id: 'KSRX', name: 'Fort Smith, AR', lat: 35.2906, lon: -94.3619 },
+    { id: 'KPOE', name: 'Fort Polk, LA', lat: 31.1553, lon: -92.9758 },
+    { id: 'KLIX', name: 'New Orleans, LA', lat: 30.3367, lon: -89.8256 },
+    { id: 'KSHV', name: 'Shreveport, LA', lat: 32.4506, lon: -93.8414 },
+    { id: 'KMOB', name: 'Mobile, AL', lat: 30.6794, lon: -88.2397 },
+    { id: 'KBMX', name: 'Birmingham, AL', lat: 33.1722, lon: -86.7697 },
+    { id: 'KHTX', name: 'Huntsville, AL', lat: 34.9306, lon: -86.0833 },
+    { id: 'KMXX', name: 'Montgomery, AL', lat: 32.5367, lon: -85.7897 },
+    { id: 'KOHX', name: 'Nashville, TN', lat: 36.2472, lon: -86.5625 },
+    { id: 'KMRX', name: 'Knoxville, TN', lat: 36.1686, lon: -83.4017 },
+    { id: 'KNQA', name: 'Memphis, TN', lat: 35.3447, lon: -89.8733 },
+    { id: 'KJAN', name: 'Jackson, MS', lat: 32.3181, lon: -90.0803 },
+    { id: 'KDGX', name: 'Brandon, MS', lat: 32.2803, lon: -89.9844 },
+    { id: 'KGWX', name: 'Columbus AFB, MS', lat: 33.8967, lon: -88.3289 },
+    
+    // Texas
+    { id: 'KEWX', name: 'Austin/San Antonio, TX', lat: 29.7039, lon: -98.0286 },
+    { id: 'KGRK', name: 'Fort Hood, TX', lat: 30.7217, lon: -97.3831 },
+    { id: 'KFWS', name: 'Dallas/Fort Worth, TX', lat: 32.5731, lon: -97.3031 },
+    { id: 'KDYX', name: 'Dyess AFB, TX', lat: 32.5386, lon: -99.2542 },
+    { id: 'KMAF', name: 'Midland, TX', lat: 31.9433, lon: -102.1894 },
+    { id: 'KSJT', name: 'San Angelo, TX', lat: 31.3711, lon: -100.4925 },
+    { id: 'KLBB', name: 'Lubbock, TX', lat: 33.6542, lon: -101.8142 },
+    { id: 'KAMA', name: 'Amarillo, TX', lat: 35.2333, lon: -101.7092 },
+    { id: 'KHGX', name: 'Houston, TX', lat: 29.4719, lon: -95.0792 },
+    { id: 'KCRP', name: 'Corpus Christi, TX', lat: 27.7842, lon: -97.5111 },
+    { id: 'KBRO', name: 'Brownsville, TX', lat: 25.9160, lon: -97.4189 },
+    { id: 'KDFX', name: 'Laughlin AFB, TX', lat: 29.2731, lon: -100.2803 },
+    { id: 'KEPZ', name: 'El Paso, TX', lat: 31.8731, lon: -106.6978 },
+    
+    // Plains
+    { id: 'KUDX', name: 'Rapid City, SD', lat: 44.1250, lon: -102.8297 },
+    { id: 'KFSD', name: 'Sioux Falls, SD', lat: 43.5878, lon: -96.7292 },
+    { id: 'KABR', name: 'Aberdeen, SD', lat: 45.4558, lon: -98.4131 },
+    { id: 'KBIS', name: 'Bismarck, ND', lat: 46.7708, lon: -100.7603 },
+    { id: 'KMVX', name: 'Fargo, ND', lat: 47.5278, lon: -97.3256 },
+    { id: 'KUEX', name: 'Grand Island, NE', lat: 40.3208, lon: -98.4417 },
+    { id: 'KLNX', name: 'North Platte, NE', lat: 41.9578, lon: -100.5758 },
+    { id: 'KOAX', name: 'Omaha, NE', lat: 41.3203, lon: -96.3667 },
+    { id: 'KTWX', name: 'Topeka, KS', lat: 38.9969, lon: -96.2325 },
+    { id: 'KICT', name: 'Wichita, KS', lat: 37.6544, lon: -97.4431 },
+    { id: 'KDDC', name: 'Dodge City, KS', lat: 37.7608, lon: -99.9689 },
+    { id: 'KGLD', name: 'Goodland, KS', lat: 39.3667, lon: -101.7003 },
+    { id: 'KTLX', name: 'Oklahoma City, OK', lat: 35.3331, lon: -97.2778 },
+    { id: 'KINX', name: 'Tulsa, OK', lat: 36.1750, lon: -95.5644 },
+    { id: 'KVNX', name: 'Vance AFB, OK', lat: 36.7406, lon: -98.1278 },
+    { id: 'KFDR', name: 'Frederick, OK', lat: 34.3622, lon: -98.9764 },
+    
+    // Mountain West
+    { id: 'KPUX', name: 'Pueblo, CO', lat: 38.4595, lon: -104.1814 },
+    { id: 'KFTG', name: 'Denver, CO', lat: 39.7867, lon: -104.5458 },
+    { id: 'KGJX', name: 'Grand Junction, CO', lat: 39.0619, lon: -108.2137 },
+    { id: 'KABX', name: 'Albuquerque, NM', lat: 35.1497, lon: -106.8239 },
+    { id: 'KHDX', name: 'Holloman AFB, NM', lat: 33.0764, lon: -106.1219 },
+    { id: 'KFSX', name: 'Flagstaff, AZ', lat: 34.5742, lon: -111.1983 },
+    { id: 'KEMX', name: 'Tucson, AZ', lat: 31.8936, lon: -110.6303 },
+    { id: 'KYUX', name: 'Yuma, AZ', lat: 32.4953, lon: -114.6567 },
+    { id: 'KIWA', name: 'Phoenix, AZ', lat: 33.2892, lon: -111.6700 },
+    { id: 'KICX', name: 'Cedar City, UT', lat: 37.5908, lon: -112.8619 },
+    { id: 'KMTX', name: 'Salt Lake City, UT', lat: 41.2628, lon: -112.4500 },
+    { id: 'KLRX', name: 'Elko, NV', lat: 40.7397, lon: -116.8025 },
+    { id: 'KESX', name: 'Las Vegas, NV', lat: 35.7011, lon: -114.8917 },
+    { id: 'KRGX', name: 'Reno, NV', lat: 39.7542, lon: -119.4611 },
+    { id: 'KCBX', name: 'Boise, ID', lat: 43.4906, lon: -116.2356 },
+    { id: 'KSFX', name: 'Pocatello, ID', lat: 43.1056, lon: -112.6864 },
+    { id: 'KMSX', name: 'Missoula, MT', lat: 47.0411, lon: -113.9864 },
+    { id: 'KTFX', name: 'Great Falls, MT', lat: 47.4597, lon: -111.3856 },
+    { id: 'KBLX', name: 'Billings, MT', lat: 45.8539, lon: -108.6067 },
+    { id: 'KGGW', name: 'Glasgow, MT', lat: 48.2064, lon: -106.6253 },
+    { id: 'KRIW', name: 'Riverton, WY', lat: 43.0661, lon: -108.4772 },
+    { id: 'KCYS', name: 'Cheyenne, WY', lat: 41.1519, lon: -104.8061 },
+    
+    // West Coast
+    { id: 'KMAX', name: 'Medford, OR', lat: 42.0811, lon: -122.7172 },
+    { id: 'KPDT', name: 'Pendleton, OR', lat: 45.6906, lon: -118.8528 },
+    { id: 'KRTX', name: 'Portland, OR', lat: 45.7150, lon: -122.9650 },
+    { id: 'KATX', name: 'Seattle, WA', lat: 48.1947, lon: -122.4956 },
+    { id: 'KOTX', name: 'Spokane, WA', lat: 47.6803, lon: -117.6267 },
+    { id: 'KLGX', name: 'Langley Hill, WA', lat: 47.1158, lon: -124.1064 },
+    { id: 'KHNX', name: 'San Joaquin Valley, CA', lat: 36.3142, lon: -119.6317 },
+    { id: 'KVTX', name: 'Los Angeles, CA', lat: 34.4117, lon: -119.1797 },
+    { id: 'KSOX', name: 'San Diego, CA', lat: 33.8178, lon: -117.6361 },
+    { id: 'KNKX', name: 'San Diego (North), CA', lat: 32.9189, lon: -117.0419 },
+    { id: 'KEYX', name: 'Edwards AFB, CA', lat: 35.0978, lon: -117.5608 },
+    { id: 'KMUX', name: 'San Francisco, CA', lat: 37.1553, lon: -121.8981 },
+    { id: 'KDAX', name: 'Sacramento, CA', lat: 38.5011, lon: -121.6778 },
+    { id: 'KBBX', name: 'Beale AFB, CA', lat: 39.4961, lon: -121.6317 },
+    
+    // Alaska
+    { id: 'PAHG', name: 'Anchorage, AK', lat: 60.7261, lon: -151.3514 },
+    { id: 'PAPD', name: 'Fairbanks, AK', lat: 65.0353, lon: -147.4994 },
+    { id: 'PAKC', name: 'King Salmon, AK', lat: 58.6794, lon: -156.6294 },
+    { id: 'PAIH', name: 'Middleton Island, AK', lat: 59.4600, lon: -146.3011 },
+    { id: 'PAEC', name: 'Nome, AK', lat: 64.5114, lon: -165.2950 },
+    
+    // Hawaii
+    { id: 'PHKI', name: 'South Kauai, HI', lat: 21.8939, lon: -159.5524 },
+    { id: 'PHKM', name: 'Kohala, HI', lat: 20.1253, lon: -155.7781 },
+    { id: 'PHMO', name: 'Molokai, HI', lat: 21.1328, lon: -157.1803 },
+    { id: 'PHWA', name: 'South Shore, HI', lat: 19.0950, lon: -155.5689 },
+];
+
+// Function to calculate distance between two coordinates using Haversine formula
+function calculateDistance(lat1, lon1, lat2, lon2) {
+    const R = 6371; // Earth's radius in km
+    const dLat = (lat2 - lat1) * Math.PI / 180;
+    const dLon = (lon2 - lon1) * Math.PI / 180;
+    const a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+              Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+              Math.sin(dLon / 2) * Math.sin(dLon / 2);
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+    return R * c; // Distance in km
+}
+
+// Function to find the nearest radar station
+function findNearestRadarStation(lat, lon) {
+    let nearestStation = null;
+    let minDistance = Infinity;
+    
+    for (const station of NOAA_RADAR_STATIONS) {
+        const distance = calculateDistance(lat, lon, station.lat, station.lon);
+        if (distance < minDistance) {
+            minDistance = distance;
+            nearestStation = station;
+        }
+    }
+    
+    return nearestStation;
+}
+
+// Function to update radar display
+export function updateRadarDisplay(lat, lon) {
+    console.log('updateRadarDisplay()', lat, lon);
+    
+    if (settings["show-doppler-radar"] === false) {
+        return;
+    }
+
+    const radarLoading = document.getElementById('radar-loading');
+    const radarContent = document.getElementById('radar-content');
+    const radarUnavailable = document.getElementById('radar-unavailable');
+    const radarImage = document.getElementById('radar-image');
+    const radarStationName = document.getElementById('radar-station-name');
+    
+    // Check if we have valid coordinates
+    if (!lat || !lon) {
+        // Hide loading and content, show unavailable message
+        if (radarLoading) radarLoading.style.display = 'none';
+        if (radarContent) radarContent.style.display = 'none';
+        if (radarUnavailable) radarUnavailable.style.display = 'block';
+        return;
+    }
+    
+    // Check if we're in the US (radar available for all US including Alaska and Hawaii)
+    // Wait for country to be set by fetchCityData before showing unavailable
+    if (country !== null && country !== 'US') {
+        // Not in the US, show unavailable message
+        if (radarLoading) radarLoading.style.display = 'none';
+        if (radarContent) radarContent.style.display = 'none';
+        if (radarUnavailable) radarUnavailable.style.display = 'block';
+        return;
+    }
+    
+    // Find nearest radar station
+    const nearestStation = findNearestRadarStation(lat, lon);
+    
+    if (!nearestStation) {
+        // No station found, show unavailable message
+        if (radarLoading) radarLoading.style.display = 'none';
+        if (radarContent) radarContent.style.display = 'none';
+        if (radarUnavailable) radarUnavailable.style.display = 'block';
+        return;
+    }
+    
+    // Update station name
+    if (radarStationName) {
+        radarStationName.textContent = `${nearestStation.name} (${nearestStation.id})`;
+    }
+    
+    // Set radar image URL (using the animated loop)
+    const radarUrl = `https://radar.weather.gov/ridge/standard/${nearestStation.id}_loop.gif`;
+    
+    if (radarImage) {
+        // Add a timestamp rounded to 5-minute intervals to allow caching
+        // Radar images typically update every 5-10 minutes
+        const now = new Date().getTime();
+        const fiveMinutes = 5 * 60 * 1000;
+        const timestamp = Math.floor(now / fiveMinutes) * fiveMinutes;
+        radarImage.src = `${radarUrl}?${timestamp}`;
+        
+        // Handle image load success
+        radarImage.onload = function() {
+            if (radarLoading) radarLoading.style.display = 'none';
+            if (radarContent) radarContent.style.display = 'block';
+            if (radarUnavailable) radarUnavailable.style.display = 'none';
+        };
+        
+        // Handle image load error
+        radarImage.onerror = function() {
+            console.error('Failed to load radar image for station:', nearestStation.id);
+            if (radarLoading) radarLoading.style.display = 'none';
+            if (radarContent) radarContent.style.display = 'none';
+            if (radarUnavailable) radarUnavailable.style.display = 'block';
+        };
+    }
+    
+    console.log(`Displaying radar for nearest station: ${nearestStation.name} (${nearestStation.id})`);
 }

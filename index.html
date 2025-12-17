@@ -258,12 +258,21 @@
                     <span id="prem-moon-icon" class="moon-phase-icon"></span>
                 </div>
             </div>
-            <hr>
-            <h2>Links</h2>
-            <div class="button-list">
-                <a href="https://radar.weather.gov/" data-frame><img src="https://www.weather.gov/favicon.ico" loading="lazy">NOAA Radar</a>
-                <a href="https://www.nesdis.noaa.gov/imagery/interactive-maps/the-world-real-time"><img src="https://www.nesdis.noaa.gov/themes/custom/nesdis/img/favicons/favicon_32.svg" loading="lazy">NESDIS Live Globe</a>
-                <a href="https://car.rainviewer.com/" data-frame><img src="https://www.rainviewer.com/favicon.ico?1754506891" loading="lazy">RainViewer</a>
+            <div id="doppler-section">
+                <hr>
+                <h2>Local Radar</h2>
+                <div id="radar-display-container" class="radar-display-container">
+                    <div id="radar-loading" class="radar-loading">Loading radar data...</div>
+                    <div id="radar-content" style="display: none;">
+                        <div class="radar-info">
+                            <span id="radar-station-name">--</span>
+                        </div>
+                        <img id="radar-image" class="radar-image" alt="NOAA Doppler Radar">
+                    </div>
+                    <div id="radar-unavailable" style="display: none;">
+                        <p><em>Radar data not available for this location.</em></p>
+                    </div>
+                </div>
             </div>
         </div>
 
@@ -518,16 +527,26 @@
                     <input type="checkbox" onchange="toggleSettingFrom(this)" checked>
                     <span class="settings-toggle-slider"></span>
                 </div>
+            </div>
 
+            <h2>Weather</h2>
+            <div class="settings-controls">
                 <div class="settings-toggle-item" data-setting="show-hourly-stripes"
                     onclick="this.querySelector('input').click()">
                     <label>Hourly Forecast Stripes</label>
                     <input type="checkbox" onchange="toggleSettingFrom(this)" checked>
                     <span class="settings-toggle-slider"></span>
                 </div>
+
+                <div class="settings-toggle-item" data-setting="show-doppler-radar"
+                    onclick="this.querySelector('input').click()">
+                    <label>Show Doppler Radar</label>
+                    <input type="checkbox" onchange="toggleSettingFrom(this)" checked>
+                    <span class="settings-toggle-slider"></span>
+                </div>
             </div>
 
-            <h2>Satellite Images</h2>
+            <h2>Satellite</h2>
             <div class="settings-controls">
                 <div class="settings-toggle-item" data-setting="satellite-use-location"
                     onclick="this.querySelector('input').click()">
