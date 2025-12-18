@@ -632,6 +632,8 @@ function generateElementForItem(item) {
     const img = document.createElement('img');
     img.src = faviconUrl;
     img.className = 'news-favicon';
+    img.loading = 'lazy';  // Lazy load favicons for better performance
+    img.decoding = 'async'; // Async decode for non-blocking rendering
     img.onerror = function () { this.style.display = 'none'; };
     itemDiv.appendChild(img);
 
@@ -664,6 +666,8 @@ function generateElementForItem(item) {
 
     const shareImg = document.createElement('img');
     shareImg.src = 'assets/share.svg';
+    shareImg.loading = 'lazy';  // Lazy load share icons
+    shareImg.decoding = 'async';
     shareButton.appendChild(shareImg);
 
     itemDiv.appendChild(shareButton);

@@ -13,7 +13,8 @@ import { initMarketSection, stopMarketUpdates } from './market.js';
 
 // Parameters
 const DEFAULT_SECTION = 'navigation';               // Default section to show
-const LATLON_UPDATE_INTERVAL = 2;                   // seconds
+const LATLON_UPDATE_INTERVAL_STATIONARY = 10;       // seconds - when stationary (performance optimization)
+const LATLON_UPDATE_INTERVAL_MOVING = 2;            // seconds - when moving
 const UPDATE_DISTANCE_THRESHOLD = 2500;             // meters
 const UPDATE_TIME_THRESHOLD = 10;                   // minutes
 const UPDATE_TIME_THRESHOLD_RAIN = 1;               // minutes (when rain is predicted)
@@ -25,6 +26,7 @@ const MAX_GPS_RETRIES = 3;                          // Max consecutive GPS failu
 const WIKI_TYPES = ['event','airport','landmark'];  // Types of Wikipedia data to fetch
 const ENABLE_SPEED_DISABLE = false;                 // Set to false to disable speed-based section disabling
 const SPEED_DISABLE_THRESHOLD = 1.5;                // Speed in mph above which disabling occurs
+const STATIONARY_SPEED_THRESHOLD = 1;             // Speed in mph below which vehicle is considered stationary
 
 // Module variables
 let currentSection = null;                          // Track the current section
@@ -515,7 +517,7 @@ async function handlePositionUpdate(position) {
     // Always track driving state (used for features like news forwarding)
     const wasDriving = isDriving;
     const currentlyDriving = speed > SPEED_DISABLE_THRESHOLD;
-    
+
     if (currentlyDriving && !wasDriving) {
         startedDriving();
         setDrivingState(true);
@@ -526,6 +528,9 @@ async function handlePositionUpdate(position) {
         // Update state even if transition handlers weren't called
         setDrivingState(currentlyDriving);
     }
+
+    // Adjust GPS polling interval based on movement (performance optimization)
+    updateGPSPollingInterval();
 
     // Long distance updates (happens rarely)
     if (shouldUpdateLongRangeData()) {
@@ -607,10 +612,27 @@ function throttledUpdateGPS() {
 function startGPSUpdates() {
     if (!gpsIntervalId) {
         if (updateGPS()) { // Call immediately and check if browser supports
-            gpsIntervalId = setInterval(throttledUpdateGPS, 1000 * LATLON_UPDATE_INTERVAL);
-            console.log('GPS updates started');
+            // Start with stationary interval (longer) for better performance
+            const initialInterval = 1000 * LATLON_UPDATE_INTERVAL_STATIONARY;
+            gpsIntervalId = setInterval(throttledUpdateGPS, initialInterval);
+            console.log('GPS updates started with adaptive polling');
         }
     }
+}
+
+// Function to update GPS polling interval based on movement
+function updateGPSPollingInterval() {
+    if (!gpsIntervalId) return;
+
+    // Determine if we're moving or stationary
+    const isMoving = speed !== null && speed > STATIONARY_SPEED_THRESHOLD;
+    const targetInterval = isMoving ? LATLON_UPDATE_INTERVAL_MOVING : LATLON_UPDATE_INTERVAL_STATIONARY;
+    const targetIntervalMs = 1000 * targetInterval;
+
+    // Only restart interval if it needs to change
+    clearInterval(gpsIntervalId);
+    gpsIntervalId = setInterval(throttledUpdateGPS, targetIntervalMs);
+    // console.log(`GPS polling interval adjusted: ${targetInterval}s (${isMoving ? 'moving' : 'stationary'})`);
 }
 
 // Function to stop the GPS updates
