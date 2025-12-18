@@ -11,12 +11,14 @@ const MIN_TICKER_SCROLL_DURATION = 12; // Minimum duration so slow lists do not 
 // Global variables
 let stockUpdateTimer = null;
 let displayAlternateTimer = null;
-let stockDataCache = {}; // Cache object to store stock data by ticker
-let showChange = true; // Flag to show change in stock price
-let availableStocks = []; // List of available stocks from stocks.json
-let availableIndexes = []; // List of available indexes from indexes.json
-let isUpdating = false; // Flag to prevent duplicate update processes
-let pendingTickerWidthFrame = null; // Used to throttle width calculations for the ticker window
+let stockDataCache = {};
+let showChange = true;
+let availableStocks = [];
+let availableIndexes = [];
+let isUpdating = false;
+let pendingTickerWidthFrame = null;
+let lastDomUpdate = 0; // Track last DOM update time
+const MIN_DOM_UPDATE_INTERVAL = 100; // Minimum ms between DOM updates
 
 // Import settings to check visibility setting
 import { settings } from './settings.js';
@@ -397,90 +399,63 @@ function updateDisplayAlternating() {
     }
 }
 
-// Function to fetch stock data for all indicators
-export function fetchStockData() {
-    // Prevent concurrent fetch operations
-    if (isUpdating) {
-        console.log('Stock data fetch already in progress, skipping...');
+// Throttle DOM updates to reduce reflows
+function throttledUpdateStockIndicators() {
+    const now = Date.now();
+    if (now - lastDomUpdate < MIN_DOM_UPDATE_INTERVAL) {
         return;
     }
-    
-    console.log('Fetching financial data...');
-    isUpdating = true;
-    const currentTime = Date.now();
+    lastDomUpdate = now;
+    updateStockIndicatorsContainer();
+}
 
-    // Flag to indicate if US markets are open
-    let usMarketsOpen;
-    // Check if US markets are open (9:30 AM to 4:00 PM ET)
-    const now = new Date();
-    const startOfDay = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 9, 30);
-    const endOfDay = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 16, 0);
-    if (now >= startOfDay && now <= endOfDay) {
-        usMarketsOpen = true;
-    } else {
-        usMarketsOpen = false;
+// Function to fetch stock data for all indicators
+export function fetchStockData() {
+    if (isUpdating) {
+        console.log('Stock update already in progress, skipping...');
+        return;
     }
-    
+
+    isUpdating = true;
     const subscribedTickers = getSubscribedTickers();
-    let pendingFetches = 0;
     
-    // Process each subscribed ticker
-    subscribedTickers.forEach(ticker => {
+    if (subscribedTickers.length === 0) {
+        isUpdating = false;
+        return;
+    }
+
+    // Batch fetch all tickers
+    const fetchPromises = subscribedTickers.map(async ticker => {
         const upperTicker = ticker.toUpperCase();
+        const cached = stockDataCache[upperTicker];
+        const now = Date.now();
         
-        // Check if we have valid cached data
-        if (stockDataCache[upperTicker] && 
-            (((currentTime - stockDataCache[upperTicker].timestamp) < CACHE_AGE_LIMIT) ||
-            !usMarketsOpen)) {
-            // Use cached data - no fetch needed
+        // Use cache if available and fresh
+        if (cached && (now - cached.timestamp < CACHE_AGE_LIMIT)) {
             return;
         }
-        
-        // Cache miss or expired, fetch fresh data
-        // console.log(`Fetching data for ${upperTicker}`);
-        pendingFetches++;
-        
-        fetch(`${STOCK_API_ENDPOINT}${upperTicker}`)
-            .then(response => {
-                if (!response.ok) {
-                    throw new Error(`Network response was not ok for ${upperTicker}`);
-                }
-                return response.json();
-            })
-            .then(data => {
-                // Cache the data with current timestamp
+
+        try {
+            const response = await fetch(`${STOCK_API_ENDPOINT}${ticker}`);
+            if (response.ok) {
+                const data = await response.json();
                 stockDataCache[upperTicker] = {
-                    percentChange: data.percentChange,
-                    price: data.price,
-                    timestamp: Date.now()
+                    ...data,
+                    timestamp: now
                 };
-            })
-            .catch(error => {
-                console.error(`Error fetching stock data for ${upperTicker}:`, error);
-                // Cache null data to show dashes
-                stockDataCache[upperTicker] = {
-                    percentChange: null,
-                    price: null,
-                    timestamp: Date.now()
-                };
-            })
-            .finally(() => {
-                pendingFetches--;
-                // Update display when all fetches are complete or after each individual fetch
-                updateStockIndicatorsContainer();
-                
-                // Reset updating flag when all fetches are complete
-                if (pendingFetches === 0) {
-                    isUpdating = false;
-                }
-            });
+            }
+        } catch (error) {
+            console.error(`Error fetching ${ticker}:`, error);
+        }
     });
-    
-    // If no fetches were needed (all cached), still update display and reset flag
-    if (pendingFetches === 0) {
-        updateStockIndicatorsContainer();
+
+    Promise.all(fetchPromises).then(() => {
+        throttledUpdateStockIndicators();
         isUpdating = false;
-    }
+    }).catch(error => {
+        console.error('Error in batch stock fetch:', error);
+        isUpdating = false;
+    });
 }
 
 export function setShowChange(value) {

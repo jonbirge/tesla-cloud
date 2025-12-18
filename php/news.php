@@ -264,7 +264,7 @@ try {
         $whereClause = 'WHERE ' . implode(' AND ', $whereParts);
     }
     
-    // Query for articles
+    // Query for articles with LIMIT pushed to database
     $sql = "
         SELECT feed_id, url, title, published_date
         FROM news_articles
@@ -273,7 +273,14 @@ try {
         LIMIT :max_stories
     ";
     
-    $stmt = $pdo->prepare($sql);
+    // Use persistent prepared statement cache
+    static $stmtCache = [];
+    $cacheKey = md5($sql);
+    
+    if (!isset($stmtCache[$cacheKey])) {
+        $stmtCache[$cacheKey] = $pdo->prepare($sql);
+    }
+    $stmt = $stmtCache[$cacheKey];
     
     // Bind parameters
     foreach ($params as $key => $value) {
@@ -286,9 +293,20 @@ try {
     
     logMessage("Retrieved " . count($articles) . " articles from database");
     
+    // Pre-allocate array with known size for better memory efficiency
+    $allItems = [];
+    if (count($articles) > 0) {
+        $allItems = array_fill(0, min(count($articles), $numStories), null);
+        $itemIndex = 0;
+    }
+    
     // Apply per-feed limits
     $feedCounts = [];
     foreach ($articles as $article) {
+        if ($itemIndex >= $numStories) {
+            break; // Early exit when we have enough items
+        }
+        
         $feedId = $article['feed_id'];
         $articleId = generateArticleId($feedId, $article['title'] ?? '');
         
@@ -324,19 +342,18 @@ try {
             $newsItem['icon'] = $feedIcons[$feedId];
         }
         
-        $allItems[] = $newsItem;
+        $allItems[$itemIndex++] = $newsItem;
     }
     
-    // Limit to requested number of stories
-    $outputItems = array_slice($allItems, 0, $numStories);
+    // Trim null entries if we didn't fill the array
+    $outputItems = array_filter($allItems);
     
     logMessage("Returning " . count($outputItems) . " articles to client");
     
-    // Store for potential shutdown fallback
     $outputItemsGlobal = $outputItems;
     
-    // Return JSON
-    $jsonOutput = json_encode($outputItems);
+    // Return JSON with optimized encoding
+    $jsonOutput = json_encode($outputItems, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
     if ($jsonOutput === false) {
         error_log('JSON Encode Error: ' . json_last_error_msg());
         $jsonOutput = '[]';

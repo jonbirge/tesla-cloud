@@ -5,7 +5,8 @@ import { formatTime, highlightUpdate, testMode, showNotification } from './commo
 // Constants
 const BASE_URL = 'php/news.php?age=1';
 const RESTDB_URL = 'php/rest_db.php';
-const NEWS_REFRESH_INTERVAL = 5;  // minutes
+const NEWS_REFRESH_INTERVAL = 5;
+const BATCH_MARK_READ_DELAY = 500; // Batch mark-as-read operations
 
 // Variables
 let newsUpdateInterval = null;
@@ -20,6 +21,8 @@ let hasUnreadNewsItems = false;     // Track if there are any unread news items
 let suppressNextResumeUpdate = false; // Skip one resume-triggered refresh after opening a link
 let updatingNews = false;
 let notificationDotTimeoutId = null; // Track pending notification dot updates
+let batchMarkReadTimeout = null;
+let itemsToMarkRead = new Set();
 
 // Export function to ensure user directory exists (used by app.js during startup)
 export async function initializeNewsStorage() {
@@ -277,6 +280,26 @@ async function markNewsSeen(id) {
     } catch (error) {
         console.error(`Error caught marking news item ${id} as seen:`, error);
     }
+}
+
+// Batch mark items as read to reduce API calls
+function batchMarkNewsSeen(id) {
+    itemsToMarkRead.add(id);
+    
+    if (batchMarkReadTimeout) {
+        clearTimeout(batchMarkReadTimeout);
+    }
+    
+    batchMarkReadTimeout = setTimeout(async () => {
+        const ids = Array.from(itemsToMarkRead);
+        itemsToMarkRead.clear();
+        
+        // Mark all items in parallel
+        await Promise.all(ids.map(id => markNewsSeen(id)));
+        
+        // Single UI update after all marks complete
+        updateNewsNotificationDot();
+    }, BATCH_MARK_READ_DELAY);
 }
 
 // Updates the news headlines, rebuilding the list from scratch each time
@@ -677,15 +700,12 @@ function generateElementForItem(item) {
 
 // Function to set up intersection observer for news items
 export function setupNewsObserver() {
-    // Disconnect any existing observer
     if (newsObserver) {
         newsObserver.disconnect();
     }
     
-    // Clear any pending items
     pendingReadItems.clear();
     
-    // Create new intersection observer
     newsObserver = new IntersectionObserver((entries) => {
         entries.forEach(entry => {
             const newsItem = entry.target;
@@ -694,61 +714,38 @@ export function setupNewsObserver() {
 
             if (!id || !timeElement) return;
 
-            // If the item is visible (intersecting)
             if (entry.isIntersecting) {
-                // Only track unread items
                 if (timeElement.classList.contains('news-new-time')) {
-                    // Add to pending set (don't mark as read yet)
                     pendingReadItems.add(id);
-                    // console.log(`News item now visible, added to pending: ${id} (Total pending: ${pendingReadItems.size})`);
                 }
-            }
-            // Item is no longer visible
-            else {
-                // Determine if the item scrolled off the top or bottom of viewport
-                // If rootBounds is available, use it; otherwise fall back to checking if top < 0
+            } else {
                 const scrolledOffTop = entry.rootBounds
                     ? entry.boundingClientRect.top < entry.rootBounds.top
                     : entry.boundingClientRect.top < 0;
 
-                // Only mark as read if it scrolled off the TOP (not the bottom)
                 if (scrolledOffTop && pendingReadItems.has(id) && timeElement.classList.contains('news-new-time')) {
-                    // console.log(`News item scrolled off top, marking as read: ${id}`);
-                    // Mark as seen in ${RESTDB_URL}
-                    markNewsSeen(id).then(() => {
-                        // Remove from pending set
-                        pendingReadItems.delete(id);
-                    }).catch(error => {
-                        console.error('Error marking news as read:', error);
-                    });
+                    // Use batched mark read instead of immediate
+                    batchMarkNewsSeen(id);
+                    pendingReadItems.delete(id);
 
-                    // Add transition class for smooth fade out
                     newsItem.classList.add('news-read');
                     timeElement.classList.add('news-seen-transition');
 
-                    // After transition completes, remove the new-time class
                     setTimeout(() => {
                         timeElement.classList.remove('news-new-time');
                         timeElement.classList.remove('news-seen-transition');
-
-                        // Update notification dot after marking item as read
-                        updateNewsNotificationDot();
-                    }, 1500); // Match this to the CSS transition time
-                }
-                // If scrolled off the bottom, just remove from pending (don't mark as read)
-                else if (!scrolledOffTop && pendingReadItems.has(id)) {
+                    }, 1500);
+                } else if (!scrolledOffTop && pendingReadItems.has(id)) {
                     pendingReadItems.delete(id);
-                    // console.log(`News item scrolled off bottom, removed from pending without marking as read: ${id}`);
                 }
             }
         });
     }, {
-        root: null, // Use viewport as root
-        rootMargin: '0px',
-        threshold: 0.7 // Item must be 70% visible to count as "readPending"
+        root: null,
+        rootMargin: '50px', // Increased margin to reduce observer calls
+        threshold: 0.7
     });
     
-    // Observe all news items
     document.querySelectorAll('.news-item').forEach(item => {
         newsObserver.observe(item);
     });

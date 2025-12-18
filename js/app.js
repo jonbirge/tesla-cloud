@@ -12,21 +12,22 @@ import { initMarketSection, stopMarketUpdates } from './market.js';
 // (none - app.js is the main module)
 
 // Parameters
-const DEFAULT_SECTION = 'navigation';               // Default section to show
-const LATLON_UPDATE_INTERVAL_STATIONARY = 10;       // seconds - when stationary (performance optimization)
-const LATLON_UPDATE_INTERVAL_MOVING = 2;            // seconds - when moving
-const UPDATE_DISTANCE_THRESHOLD = 2500;             // meters
-const UPDATE_TIME_THRESHOLD = 10;                   // minutes
-const UPDATE_TIME_THRESHOLD_RAIN = 1;               // minutes (when rain is predicted)
-const WX_DISTANCE_THRESHOLD = 25000;                // meters
-const WX_TIME_THRESHOLD = 60;                       // minutes
-const MAX_SPEED = 50;                               // Max speed for wind display (mph)
-const MIN_GPS_UPDATE_INTERVAL = 1000;               // ms - minimum time between updates
-const MAX_GPS_RETRIES = 3;                          // Max consecutive GPS failures before giving up
-const WIKI_TYPES = ['event','airport','landmark'];  // Types of Wikipedia data to fetch
-const ENABLE_SPEED_DISABLE = false;                 // Set to false to disable speed-based section disabling
-const SPEED_DISABLE_THRESHOLD = 1.5;                // Speed in mph above which disabling occurs
-const STATIONARY_SPEED_THRESHOLD = 1;             // Speed in mph below which vehicle is considered stationary
+const DEFAULT_SECTION = 'navigation';
+const LATLON_UPDATE_INTERVAL_STATIONARY = 10;
+const LATLON_UPDATE_INTERVAL_MOVING = 2;
+const UPDATE_DISTANCE_THRESHOLD = 2500;
+const UPDATE_TIME_THRESHOLD = 10;
+const UPDATE_TIME_THRESHOLD_RAIN = 1;
+const WX_DISTANCE_THRESHOLD = 25000;
+const WX_TIME_THRESHOLD = 60;
+const MAX_SPEED = 50;
+const MIN_GPS_UPDATE_INTERVAL = 1000;
+const MAX_GPS_RETRIES = 3;
+const WIKI_TYPES = ['event','airport','landmark'];
+const ENABLE_SPEED_DISABLE = false;
+const SPEED_DISABLE_THRESHOLD = 1.5;
+const STATIONARY_SPEED_THRESHOLD = 1;
+const LANDMARK_DEBOUNCE_MS = 2000; // Add debounce for landmark fetches
 
 // Module variables
 let currentSection = null;                          // Track the current section
@@ -141,6 +142,16 @@ async function fetchLandmarkData(lat, long) {
             landmarkDiv.replaceChildren(p);
         }
     }
+}
+
+// Debounced landmark fetch
+function debouncedFetchLandmarkData(lat, long) {
+    if (landmarkFetchTimeout) {
+        clearTimeout(landmarkFetchTimeout);
+    }
+    landmarkFetchTimeout = setTimeout(() => {
+        fetchLandmarkData(lat, long);
+    }, LANDMARK_DEBOUNCE_MS);
 }
 
 // Function to initialize the radar display
@@ -324,11 +335,11 @@ async function updateLocationData(lat, long) {
     // Fire off API requests for external data
     fetchCityData(lat, long);
 
-    // Update Wikipedia data iff the Landmarks section is visible
+    // Update Wikipedia data iff the Landmarks section is visible - with debouncing
     const locationSection = document.getElementById("landmarks");
     if (locationSection.style.display === "block") {
         console.log('Updating Wikipedia data...');
-        fetchLandmarkData(lat, long);
+        debouncedFetchLandmarkData(lat, long);
     }
 }
 
@@ -858,52 +869,49 @@ function updateMobileSectionVisibility() {
     }
 }
 
-// Function to handle scroll events on the right frame
+// Optimize scroll handling with requestAnimationFrame
+let scrollRafId = null;
 function handleScrollScale() {
-    const rightFrame = document.getElementById('rightFrame');
-    const controlContainer = document.querySelector('.control-container');
-    const scrollTopBtn = document.getElementById('scroll-to-top');
-
-    // Check if we're on a mobile screen
-    const isMobile = window.matchMedia("only screen and (max-width: 900px)").matches;
-    const scrollElement = isMobile ? document.documentElement : rightFrame;
-
-    // Update scroll indicators regardless of device type
-    updateScrollIndicators();
-
-    // Show or hide scroll-to-top button on mobile
-    if (scrollTopBtn) {
-        scrollTopBtn.style.display = (isMobile && scrollElement.scrollTop > 100) ? 'block' : 'none';
+    if (scrollRafId) {
+        return;
     }
+    
+    scrollRafId = requestAnimationFrame(() => {
+        scrollRafId = null;
+        
+        const rightFrame = document.getElementById('rightFrame');
+        const controlContainer = document.querySelector('.control-container');
+        const scrollTopBtn = document.getElementById('scroll-to-top');
 
-    // If mobile, maintain a fixed small scale and exit
-    if (isMobile) {
-        if (controlContainer) {
-            controlContainer.style.transformOrigin = 'top right';
+        const isMobile = window.matchMedia("only screen and (max-width: 900px)").matches;
+        const scrollElement = isMobile ? document.documentElement : rightFrame;
+
+        updateScrollIndicators();
+
+        if (scrollTopBtn) {
+            scrollTopBtn.style.display = (isMobile && scrollElement.scrollTop > 100) ? 'block' : 'none';
         }
-        return; // Exit early, let CSS handle the fixed scaling
-    }
 
-    // Desktop behavior continues below
-    // Define the threshold where scaling starts (pixels from top)
-    const scrollThreshold = 60;
-
-    // Get current scroll position
-    const scrollTop = scrollElement.scrollTop;
-
-    if (scrollTop < scrollThreshold) {
-        // Calculate scale factor between 1 and 2 based on scroll position
-        const scaleFactor = 1 + 0.25*((scrollThreshold - scrollTop) / scrollThreshold);
-
-        // Apply transformation with top-right anchoring to keep both top and right positions fixed
-        if (controlContainer) {
-            controlContainer.style.transformOrigin = 'top right';
-            controlContainer.style.transform = `scale(${scaleFactor})`;
+        if (isMobile) {
+            if (controlContainer) {
+                controlContainer.style.transformOrigin = 'top right';
+            }
+            return;
         }
-    } else {
-        // Reset to normal size when scrolled past threshold
-        if (controlContainer) controlContainer.style.transform = 'scale(1)';
-    }
+
+        const scrollThreshold = 60;
+        const scrollTop = scrollElement.scrollTop;
+
+        if (scrollTop < scrollThreshold) {
+            const scaleFactor = 1 + 0.25*((scrollThreshold - scrollTop) / scrollThreshold);
+            if (controlContainer) {
+                controlContainer.style.transformOrigin = 'top right';
+                controlContainer.style.transform = `scale(${scaleFactor})`;
+            }
+        } else {
+            if (controlContainer) controlContainer.style.transform = 'scale(1)';
+        }
+    });
 }
 
 // Function to update the src of an iframe

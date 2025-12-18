@@ -6,6 +6,12 @@
     <title>teslas.cloud</title>
     <link rel="icon" type="image/svg+xml" href="assets/favicon.svg">
 
+    <!-- Add DNS prefetch and preconnect for external resources -->
+    <link rel="dns-prefetch" href="https://api.openweathermap.org">
+    <link rel="dns-prefetch" href="https://secure.geonames.org">
+    <link rel="dns-prefetch" href="https://www.google.com">
+    <link rel="preconnect" href="https://api.openweathermap.org">
+
     <!-- Preconnect to external domains for faster resource loading -->
     <link rel="preconnect" href="https://fonts.googleapis.com" crossorigin>
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -35,6 +41,10 @@
     <noscript>
         <link href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap" rel="stylesheet">
     </noscript>
+
+    <!-- Preload critical CSS and JS -->
+    <link rel="preload" href="css/main.css" as="style">
+    <link rel="preload" href="js/app.js" as="script">
 </head>
 
 <body>

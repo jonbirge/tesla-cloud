@@ -88,6 +88,14 @@ try {
         `created_at` DATETIME DEFAULT CURRENT_TIMESTAMP,
         `updated_at` DATETIME DEFAULT CURRENT_TIMESTAMP
     )");
+    
+    // Add indexes for better query performance
+    try {
+        $pdo->exec("CREATE INDEX IF NOT EXISTS idx_created_at ON key_value(created_at)");
+        $pdo->exec("CREATE INDEX IF NOT EXISTS idx_key_prefix ON key_value(`key`)");
+    } catch (PDOException $e) {
+        // Indexes might already exist, ignore
+    }
 } catch (PDOException $e) {
     http_response_code(500);
     echo json_encode(['error' => 'Database connection failed: ' . $e->getMessage()]);
