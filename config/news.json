@@ -171,14 +171,14 @@
       "icon": "https://news.sky.com"
     },
     {
-      "id": "abcnews",
-      "name": "ABC News",
-      "url": "https://abcnews.go.com/abcnews/topstories",
+      "id": "cbsnews",
+      "name": "CBS News",
+      "url": "https://www.cbsnews.com/latest/rss/main",
       "refresh": 60,
       "lifetime": 1095,
       "category": "general",
       "defaultEnabled": false,
-      "icon": "https://abcnews.go.com"
+      "icon": "https://www.cbsnews.com"
     },
     {
       "id": "dwtop",
