@@ -159,12 +159,13 @@ body.dark-mode {
     display: flex;
     pointer-events: none;
     z-index: 0;
+    gap: 0;
 }
 
 .hourly-segment {
-    flex: 1;
     height: 100%;
     opacity: 0.75;
+    /* Width is set dynamically via inline style */
 }
 
 /* Ensure forecast content is above the hourly segments */

@@ -553,44 +553,68 @@ function createHourlySegments(dailyForecast, completeHourlyData, dayIndex) {
     const startHour = isToday ? now.getHours() : 0;
     const hoursToShow = 24 - startHour;
     
-    // Set consistent background - always use "clear" as baseline
-    const baseCondition = 'clear';
-    
-    // Create segments for remaining hours (or all hours for future days)
+    // Build a list of weather conditions for each hour
+    const hourlyConditions = [];
     for (let h = 0; h < hoursToShow; h++) {
         const hour = startHour + h;
-        const segment = document.createElement('div');
-        segment.className = 'hourly-segment';
         
         // Find the hourly data for this specific hour
-        const hourData = dayHourlyComplete.find(h => {
-            const itemDate = new Date(h.dt * 1000);
+        const hourData = dayHourlyComplete.find(hd => {
+            const itemDate = new Date(hd.dt * 1000);
             return itemDate.getHours() === hour;
         });
 
         if (hourData) {
-            // Apply weather condition class based on hourly data
             const weatherCondition = hourData.weather[0].main.toLowerCase();
-            
-            // Only show stripe if weather condition is different from clear/baseline
-            if (weatherCondition !== baseCondition && weatherCondition !== 'clear') {
-                segment.classList.add(weatherCondition);
-            } else {
-                // Make transparent to show card background
-                segment.style.background = 'transparent';
-            }
+            hourlyConditions.push(weatherCondition);
         } else {
-            // No hourly data - make transparent to show card background
+            // No data for this hour - use 'clear' as default
+            hourlyConditions.push('clear');
+        }
+    }
+
+    // Consolidate consecutive hours with the same weather condition
+    const consolidatedSegments = [];
+    let currentCondition = hourlyConditions[0];
+    let currentCount = 1;
+
+    for (let i = 1; i < hourlyConditions.length; i++) {
+        if (hourlyConditions[i] === currentCondition) {
+            currentCount++;
+        } else {
+            consolidatedSegments.push({ condition: currentCondition, hours: currentCount });
+            currentCondition = hourlyConditions[i];
+            currentCount = 1;
+        }
+    }
+    // Push the last segment
+    consolidatedSegments.push({ condition: currentCondition, hours: currentCount });
+
+    // Create consolidated segments with proportional widths
+    const totalHours = hoursToShow;
+    consolidatedSegments.forEach(seg => {
+        const segment = document.createElement('div');
+        segment.className = 'hourly-segment';
+        
+        // Calculate width as percentage of total hours
+        const widthPercent = (seg.hours / totalHours) * 100;
+        segment.style.flex = `0 0 ${widthPercent}%`;
+        
+        // Apply weather condition class if different from clear
+        if (seg.condition !== 'clear') {
+            segment.classList.add(seg.condition);
+        } else {
+            // Make transparent to show card background
             segment.style.background = 'transparent';
         }
 
         segmentsContainer.appendChild(segment);
-    }
+    });
 
     return segmentsContainer;
 }
 
-// Create complete 24-hour data structure for all 5 days
+// Generate complete 24-hour data structure for all 5 days
 function createComplete24HourData(oneCallData, forecastData) {
 	// console.log('createComplete24HourData()');
 
