@@ -8,13 +8,13 @@
     <link rel="preconnect" href="https://fonts.googleapis.com" crossorigin>
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="css/styles.css">
-    <link rel="stylesheet" href="css/notify.css">
-    <link rel="stylesheet" href="css/news.css">
-    <link rel="stylesheet" href="css/wx.css">
-    <link rel="stylesheet" href="css/timeline.css">
-    <link rel="stylesheet" href="css/settings.css">
-    <link rel="stylesheet" href="css/market.css">
+    <link rel="stylesheet" href="css/styles.css?v=1">
+    <link rel="stylesheet" href="css/notify.css?v=1">
+    <link rel="stylesheet" href="css/news.css?v=1">
+    <link rel="stylesheet" href="css/wx.css?v=1">
+    <link rel="stylesheet" href="css/timeline.css?v=1">
+    <link rel="stylesheet" href="css/settings.css?v=1">
+    <link rel="stylesheet" href="css/market.css?v=1">
 </head>
 
 <body>
@@ -718,7 +718,7 @@
 
     <!-- Load SVG sprite file and inject it into the page -->
     <script async>
-        fetch('assets/icons.svg')
+        fetch('assets/icons.svg?v=1')
             .then(response => response.text())
             .then(data => {
                 document.getElementById('sprites').innerHTML = data;
@@ -727,7 +727,7 @@
 
     <!-- Load JavaScript -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script src="js/app.js?1217" type="module"></script>
+    <script src="js/app.js?v=1217" type="module"></script>
 </body>
 
 </html>
