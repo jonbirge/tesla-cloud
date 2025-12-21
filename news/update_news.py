@@ -20,6 +20,22 @@ import init_db
 import fetch_feeds
 import cleanup_db
 
+DEFAULT_REFRESH_MINUTES = 60
+
+
+def normalize_datetime(value):
+    """Normalize a datetime or ISO string to naive UTC when possible."""
+    if isinstance(value, str):
+        try:
+            value = datetime.fromisoformat(value)
+        except ValueError:
+            return None
+    if isinstance(value, datetime):
+        if value.tzinfo is not None:
+            return value.astimezone(timezone.utc).replace(tzinfo=None)
+        return value
+    return None
+
 
 def get_database_stats(connection, db_type):
     """Return total article count and oldest publish date."""
@@ -41,7 +57,8 @@ def get_database_stats(connection, db_type):
             row = cursor.fetchone()
             total = row[0] if row and row[0] is not None else 0
             oldest = row[1] if row else None
-    except Exception:
+    except Exception as exc:
+        print(f"ERROR: Failed to read database stats: {exc}")
         return {'total': 0, 'oldest': None}
     
     return {'total': total, 'oldest': oldest}
@@ -49,18 +66,11 @@ def get_database_stats(connection, db_type):
 
 def compute_age_days(value):
     """Return age in days (rounded) for a datetime or ISO string."""
-    if not value:
+    value = normalize_datetime(value)
+    if value is None:
         return None
-    if isinstance(value, str):
-        try:
-            value = datetime.fromisoformat(value)
-        except ValueError:
-            return None
-    if isinstance(value, datetime) and value.tzinfo is not None:
-        # Normalize to UTC then drop tzinfo for comparison
-        value = value.astimezone(timezone.utc).replace(tzinfo=None)
     try:
-        delta = datetime.now() - value
+        delta = datetime.now(timezone.utc).replace(tzinfo=None) - value
         days = max(int(round(delta.total_seconds() / 86400)), 0)
         return days
     except Exception:
@@ -71,40 +81,24 @@ def format_last_updated(value):
     """Format last_updated values from either SQLite or MySQL for logging."""
     if not value:
         return "never"
-    if isinstance(value, str):
-        try:
-            value = datetime.fromisoformat(value)
-        except ValueError:
-            return str(value)
-    if isinstance(value, datetime):
-        if value.tzinfo is not None:
-            value = value.astimezone(timezone.utc).replace(tzinfo=None)
-        return value.strftime("%Y-%m-%d %H:%M:%S")
+    normalized = normalize_datetime(value)
+    if normalized is None:
+        return str(value)
+    if isinstance(normalized, datetime):
+        return normalized.strftime("%Y-%m-%d %H:%M:%S")
     return str(value)
 
 
 def parse_last_updated(value):
     """Normalize the last_updated value to a datetime when possible."""
-    if isinstance(value, datetime):
-        if value.tzinfo is not None:
-            return value.astimezone(timezone.utc).replace(tzinfo=None)
-        return value
-    if isinstance(value, str):
-        try:
-            parsed = datetime.fromisoformat(value)
-            if parsed.tzinfo is not None:
-                parsed = parsed.astimezone(timezone.utc).replace(tzinfo=None)
-            return parsed
-        except ValueError:
-            return None
-    return None
+    return normalize_datetime(value)
 
 
 def remove_future_dated_articles(env_vars):
     """Remove articles whose published date is in the future."""
     connection, db_type = get_db_connection(env_vars)
     cursor = connection.cursor()
-    now = datetime.now()
+    now = datetime.now(timezone.utc).replace(tzinfo=None)
     now_value = now if db_type == 'mysql' else now.isoformat(sep=' ')
 
     try:
@@ -200,7 +194,7 @@ def get_feeds_needing_update(connection, db_type, feeds):
         List of feed IDs that need updating
     """
     cursor = connection.cursor()
-    current_time = datetime.now()
+    current_time = datetime.now(timezone.utc).replace(tzinfo=None)
     feeds_to_update = []
 
     print("  Feed update disposition:")
@@ -208,7 +202,7 @@ def get_feeds_needing_update(connection, db_type, feeds):
     for feed in feeds:
         feed_id = feed.get('id')
         feed_name = feed.get('name', feed_id)
-        refresh_minutes = feed.get('refresh', 30)  # Default to 30 minutes
+        refresh_minutes = feed.get('refresh', DEFAULT_REFRESH_MINUTES)
         
         # Get last update time for this feed
         if db_type == 'mysql':
@@ -293,9 +287,11 @@ def main():
     print("\nChecking which feeds need updates...")
     try:
         connection, db_type = get_db_connection(env_vars)
-        before_stats = get_database_stats(connection, db_type)
-        feeds_to_update = get_feeds_needing_update(connection, db_type, feeds)
-        connection.close()
+        try:
+            before_stats = get_database_stats(connection, db_type)
+            feeds_to_update = get_feeds_needing_update(connection, db_type, feeds)
+        finally:
+            connection.close()
         
         if feeds_to_update:
             print(f"✓ {len(feeds_to_update)} feed(s) need updating")
@@ -348,9 +344,11 @@ def main():
     print("\nCollecting database statistics...")
     try:
         connection, db_type = get_db_connection(env_vars)
-        final_stats = get_database_stats(connection, db_type)
-        db_size_mb = get_database_size_mb(env_vars, db_type, connection)
-        connection.close()
+        try:
+            final_stats = get_database_stats(connection, db_type)
+            db_size_mb = get_database_size_mb(env_vars, db_type, connection)
+        finally:
+            connection.close()
         
         total_after = final_stats['total']
         total_before = before_stats.get('total', 0)
