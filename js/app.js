@@ -397,28 +397,21 @@ async function handlePositionUpdate(position) {
     // Update GPS status indicator based on GPS accuracy
     const gpsStatusElement = document.getElementById('gps-status');
     if (gpsStatusElement) {
-        if (lat === null || long === null) {
-            // No GPS - show unavailable state with X
-            gpsStatusElement.classList.remove('poor', 'fair', 'good', 'excellent', 'hidden');
-            gpsStatusElement.classList.add('unavailable');
-            gpsStatusElement.title = 'GPS Unavailable';
+        gpsStatusElement.classList.remove('hidden', 'unavailable', 'poor', 'fair', 'good', 'excellent');
+        
+        // Set class based on accuracy thresholds
+        if (acc >= 50) {
+            gpsStatusElement.classList.add('poor');
+            gpsStatusElement.title = `GPS Accuracy: Poor (${Math.round(acc)}m)`;
+        } else if (acc >= 25) {
+            gpsStatusElement.classList.add('fair');
+            gpsStatusElement.title = `GPS Accuracy: Fair (${Math.round(acc)}m)`;
+        } else if (acc >= 10) {
+            gpsStatusElement.classList.add('good');
+            gpsStatusElement.title = `GPS Accuracy: Good (${Math.round(acc)}m)`;
         } else {
-            gpsStatusElement.classList.remove('hidden', 'unavailable', 'poor', 'fair', 'good', 'excellent');
-            
-            // Set class based on accuracy thresholds
-            if (acc >= 50) {
-                gpsStatusElement.classList.add('poor');
-                gpsStatusElement.title = `GPS Accuracy: Poor (${Math.round(acc)}m)`;
-            } else if (acc >= 25) {
-                gpsStatusElement.classList.add('fair');
-                gpsStatusElement.title = `GPS Accuracy: Fair (${Math.round(acc)}m)`;
-            } else if (acc >= 10) {
-                gpsStatusElement.classList.add('good');
-                gpsStatusElement.title = `GPS Accuracy: Good (${Math.round(acc)}m)`;
-            } else {
-                gpsStatusElement.classList.add('excellent');
-                gpsStatusElement.title = `GPS Accuracy: Excellent (${Math.round(acc)}m)`;
-            }
+            gpsStatusElement.classList.add('excellent');
+            gpsStatusElement.title = `GPS Accuracy: Excellent (${Math.round(acc)}m)`;
         }
     }
 
