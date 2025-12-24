@@ -398,30 +398,27 @@ async function handlePositionUpdate(position) {
     const gpsStatusElement = document.getElementById('gps-status');
     if (gpsStatusElement) {
         if (lat === null || long === null) {
-            // Use CSS variable for unavailable GPS
-            gpsStatusElement.style.color = 'var(--status-unavailable)';
+            // No GPS - show unavailable state with X
+            gpsStatusElement.classList.remove('poor', 'fair', 'good', 'excellent', 'hidden');
+            gpsStatusElement.classList.add('unavailable');
             gpsStatusElement.title = 'GPS Unavailable';
-            gpsStatusElement.classList.remove('hidden'); // Show indicator when GPS is unavailable
         } else {
-            gpsStatusElement.classList.remove('hidden');
+            gpsStatusElement.classList.remove('hidden', 'unavailable', 'poor', 'fair', 'good', 'excellent');
             
-            // Interpolate between yellow and green based on accuracy
-            const maxAccuracy = 50;  // Yellow threshold
-            const minAccuracy = 10;   // Green threshold
-
-            // Clamp accuracy between min and max thresholds
-            const clampedAcc = Math.min(Math.max(acc, minAccuracy), maxAccuracy);
-
-            // Calculate interpolation factor (0 = yellow, 1 = green)
-            const factor = 1 - (clampedAcc - minAccuracy) / (maxAccuracy - minAccuracy);
-
-            if (factor < 0.5) {
-                gpsStatusElement.style.color = 'var(--status-poor)';
+            // Set class based on accuracy thresholds
+            if (acc >= 50) {
+                gpsStatusElement.classList.add('poor');
+                gpsStatusElement.title = `GPS Accuracy: Poor (${Math.round(acc)}m)`;
+            } else if (acc >= 25) {
+                gpsStatusElement.classList.add('fair');
+                gpsStatusElement.title = `GPS Accuracy: Fair (${Math.round(acc)}m)`;
+            } else if (acc >= 10) {
+                gpsStatusElement.classList.add('good');
+                gpsStatusElement.title = `GPS Accuracy: Good (${Math.round(acc)}m)`;
             } else {
-                gpsStatusElement.style.color = 'var(--status-good)';
+                gpsStatusElement.classList.add('excellent');
+                gpsStatusElement.title = `GPS Accuracy: Excellent (${Math.round(acc)}m)`;
             }
-
-            gpsStatusElement.title = `GPS Accuracy: ${Math.round(acc)}m`;
         }
     }
 
@@ -636,13 +633,13 @@ function handleGPSError(error) {
     // Update GPS status indicator to show error state
     const gpsStatusElement = document.getElementById('gps-status');
     if (gpsStatusElement) {
-        gpsStatusElement.style.color = 'var(--status-unavailable)';
+        gpsStatusElement.classList.remove('poor', 'fair', 'good', 'excellent', 'hidden');
+        gpsStatusElement.classList.add('unavailable');
         if (gpsPermissionDenied) {
             gpsStatusElement.title = 'GPS Permission Denied';
         } else {
             gpsStatusElement.title = 'GPS Error: ' + error.message;
         }
-        gpsStatusElement.classList.remove('hidden');
     }
 
     // If GPS was denied by user, update the "GPS Accuracy" display to say "Denied"

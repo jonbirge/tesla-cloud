@@ -492,16 +492,81 @@ body.dark-mode .network-icon {
 }
 
 /* GPS Status Indicator */
-.gps-status.unavailable {
-    color: var(--status-unavailable);
+.gps-icon {
+    height: 16px;
+    filter: invert(0%);
+    transition: filter 0.3s ease;
 }
 
-.gps-status.poor {
-    color: var(--status-poor);
+/* Dark mode: white icon */
+body.dark-mode .gps-icon {
+    filter: invert(70%);
 }
 
-.gps-status.good {
-    color: var(--status-good);
+.gps-status .gps-bar {
+    transition: fill 0.3s ease;
+}
+
+.gps-status.unavailable .gps-bar {
+    fill: var(--status-unavailable);
+}
+
+/* X overlay styling - hidden by default, shown when unavailable */
+.gps-status .gps-x-outline,
+.gps-status .gps-x {
+    display: none;
+}
+
+.gps-status.unavailable .gps-x-outline {
+    display: block;
+}
+
+.gps-status.unavailable .gps-x {
+    display: block;
+}
+
+/* GPS accuracy thresholds:
+   - Excellent (4 bars): < 10m
+   - Good (3 bars): 10-25m
+   - Fair (2 bars): 25-50m
+   - Poor (1 bar): > 50m
+*/
+
+.gps-status.poor .bar-1 {
+    fill: var(--status-poor);
+}
+
+.gps-status.poor .bar-2,
+.gps-status.poor .bar-3,
+.gps-status.poor .bar-4 {
+    fill: var(--status-unavailable);
+}
+
+.gps-status.fair .bar-1,
+.gps-status.fair .bar-2 {
+    fill: var(--status-poor);
+}
+
+.gps-status.fair .bar-3,
+.gps-status.fair .bar-4 {
+    fill: var(--status-unavailable);
+}
+
+.gps-status.good .bar-1,
+.gps-status.good .bar-2,
+.gps-status.good .bar-3 {
+    fill: var(--status-good);
+}
+
+.gps-status.good .bar-4 {
+    fill: var(--status-unavailable);
+}
+
+.gps-status.excellent .bar-1,
+.gps-status.excellent .bar-2,
+.gps-status.excellent .bar-3,
+.gps-status.excellent .bar-4 {
+    fill: var(--status-good);
 }
 
 .gps-status {
