@@ -446,62 +446,96 @@ body.dark-mode .network-icon {
     filter: invert(70%);
 }
 
-.network-status .network-bar {
+/* Shared bar indicator styles for network and GPS */
+.network-status .network-bar,
+.gps-status .gps-bar {
     transition: fill 0.3s ease;
 }
 
-.network-status.unavailable .network-bar {
+/* Unavailable state - gray bars */
+.network-status.unavailable .network-bar,
+.gps-status.unavailable .gps-bar {
     fill: var(--status-unavailable);
 }
 
-.network-status.poor .bar-1 {
+/* Poor state - 1 bar */
+.network-status.poor .bar-1,
+.gps-status.poor .bar-1 {
     fill: var(--status-poor);
 }
 
 .network-status.poor .bar-2,
 .network-status.poor .bar-3,
-.network-status.poor .bar-4 {
+.network-status.poor .bar-4,
+.gps-status.poor .bar-2,
+.gps-status.poor .bar-3,
+.gps-status.poor .bar-4 {
     fill: var(--status-unavailable);
 }
 
+/* Fair state - 2 bars */
 .network-status.fair .bar-1,
-.network-status.fair .bar-2 {
+.network-status.fair .bar-2,
+.gps-status.fair .bar-1,
+.gps-status.fair .bar-2 {
     fill: var(--status-poor);
 }
 
 .network-status.fair .bar-3,
-.network-status.fair .bar-4 {
+.network-status.fair .bar-4,
+.gps-status.fair .bar-3,
+.gps-status.fair .bar-4 {
     fill: var(--status-unavailable);
 }
 
+/* Good state - 3 bars */
 .network-status.good .bar-1,
 .network-status.good .bar-2,
-.network-status.good .bar-3 {
+.network-status.good .bar-3,
+.gps-status.good .bar-1,
+.gps-status.good .bar-2,
+.gps-status.good .bar-3 {
     fill: var(--status-good);
 }
 
-.network-status.good .bar-4 {
+.network-status.good .bar-4,
+.gps-status.good .bar-4 {
     fill: var(--status-unavailable);
 }
 
+/* Excellent state - 4 bars */
 .network-status.excellent .bar-1,
 .network-status.excellent .bar-2,
 .network-status.excellent .bar-3,
-.network-status.excellent .bar-4 {
+.network-status.excellent .bar-4,
+.gps-status.excellent .bar-1,
+.gps-status.excellent .bar-2,
+.gps-status.excellent .bar-3,
+.gps-status.excellent .bar-4 {
     fill: var(--status-good);
 }
 
 /* GPS Status Indicator */
-.gps-status.unavailable {
-    color: var(--status-unavailable);
+.gps-icon {
+    height: 16px;
+    filter: invert(0%);
+    transition: filter 0.3s ease;
 }
 
-.gps-status.poor {
-    color: var(--status-poor);
+/* Dark mode: white icon */
+body.dark-mode .gps-icon {
+    filter: invert(70%);
 }
 
-.gps-status.good {
-    color: var(--status-good);
+/* X overlay styling - hidden by default, shown when unavailable */
+.gps-status .gps-x-outline,
+.gps-status .gps-x {
+    display: none;
+}
+
+.gps-status.unavailable .gps-x-outline,
+.gps-status.unavailable .gps-x {
+    display: block;
 }
 
 .gps-status {

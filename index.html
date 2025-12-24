@@ -694,14 +694,20 @@
             <img src="assets/cloud.svg" alt="Rain Alert" width="24" height="24">
             <span id="rain-timing-text"></span>
         </div>
-        <div id="gps-status" class="status-indicator gps-status unavailable" title="GPS Status">
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24">
-                <circle cx="12" cy="12" r="8" fill="none" stroke="currentColor" stroke-width="2"/>
-                <circle cx="12" cy="12" r="3" fill="currentColor"/>
-            </svg>
-        </div>
         <div id="stock-indicators" style="display: flex;">
             <!-- Stock indicators dynamically generated here -->    
+        </div>
+        <div id="gps-status" class="status-indicator gps-status unavailable" title="GPS Status">
+            <img src="assets/gps.svg" class="gps-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 28 24" width="28px" height="24px">
+                <rect class="gps-bar bar-1" x="2" y="13" width="4" height="6"/>
+                <rect class="gps-bar bar-2" x="8" y="10" width="4" height="9"/>
+                <rect class="gps-bar bar-3" x="14" y="7" width="4" height="12"/>
+                <rect class="gps-bar bar-4" x="20" y="4" width="4" height="15"/>
+                <!-- X overlay for no GPS - 12x12 symmetric multiplication sign with white outline and black fill -->
+                <path class="gps-x-outline" d="M 8 6 L 20 18 M 20 6 L 8 18" stroke="white" stroke-width="3" fill="none"/>
+                <path class="gps-x" d="M 8 6 L 20 18 M 20 6 L 8 18" stroke="black" stroke-width="2" fill="none"/>
+            </svg>
         </div>
         <div id="network-status" class="status-indicator network-status unavailable" title="Network Status">
             <img src="assets/network.svg" class="network-icon">
