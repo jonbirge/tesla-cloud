@@ -682,3 +682,7 @@ body.dark-mode .notification-icon img {
     border: 2px solid var(--separator-color);
     display: block;
 }
+
+body.dark-mode .radar-image {
+    filter: invert(1) hue-rotate(180deg);
+}
