@@ -43,7 +43,7 @@
       "name": "Wall Street Journal",
       "url": "https://feeds.content.dowjones.io/public/rss/RSSWorldNews",
       "refresh": 5,
-      "lifetime": 1095,
+      "lifetime": 3650,
       "category": "general",
       "defaultEnabled": false,
       "icon": "https://wsj.com"
@@ -53,7 +53,7 @@
       "name": "New York Times",
       "url": "https://rss.nytimes.com/services/xml/rss/nyt/HomePage.xml",
       "refresh": 5,
-      "lifetime": 1095,
+      "lifetime": 3650,
       "category": "general",
       "defaultEnabled": true
     },
@@ -62,7 +62,7 @@
       "name": "Washington Post",
       "url": "https://www.washingtonpost.com/arcio/rss/category/politics/",
       "refresh": 60,
-      "lifetime": 1095,
+      "lifetime": 3650,
       "category": "general",
       "defaultEnabled": false
     },
@@ -71,7 +71,7 @@
       "name": "Los Angeles Times",
       "url": "https://www.latimes.com/rss2.0.xml",
       "refresh": 60,
-      "lifetime": 1095,
+      "lifetime": 3650,
       "category": "general",
       "defaultEnabled": false
     },
@@ -80,7 +80,7 @@
       "name": "Boston Globe",
       "url": "https://www.boston.com/tag/local-news/feed",
       "refresh": 60,
-      "lifetime": 1095,
+      "lifetime": 3650,
       "category": "general",
       "defaultEnabled": false
     },
@@ -89,7 +89,7 @@
       "name": "Denver Post",
       "url": "https://www.denverpost.com/feed/",
       "refresh": 60,
-      "lifetime": 1095,
+      "lifetime": 3650,
       "category": "general",
       "defaultEnabled": false
     },
@@ -98,7 +98,7 @@
       "name": "Chicago Tribune",
       "url": "https://www.chicagotribune.com/news/feed/",
       "refresh": 60,
-      "lifetime": 1095,
+      "lifetime": 3650,
       "category": "general",
       "defaultEnabled": false
     },
@@ -107,7 +107,7 @@
       "name": "BBC World News",
       "url": "http://feeds.bbci.co.uk/news/world/rss.xml",
       "refresh": 60,
-      "lifetime": 1095,
+      "lifetime": 3650,
       "category": "general",
       "defaultEnabled": false,
       "icon": "https://www.bbc.com"
@@ -117,7 +117,7 @@
       "name": "The Economist",
       "url": "https://www.economist.com/latest/rss.xml",
       "refresh": 60,
-      "lifetime": 1095,
+      "lifetime": 3650,
       "category": "business",
       "defaultEnabled": false
     },
@@ -126,7 +126,7 @@
       "name": "Le Monde (French)",
       "url": "https://www.lemonde.fr/rss/une.xml",
       "refresh": 60,
-      "lifetime": 1095,
+      "lifetime": 3650,
       "category": "general",
       "defaultEnabled": false
     },
@@ -135,7 +135,7 @@
       "name": "Le Monde (English)",
       "url": "https://www.lemonde.fr/en/rss/une.xml",
       "refresh": 60,
-      "lifetime": 1095,
+      "lifetime": 3650,
       "category": "general",
       "defaultEnabled": false,
       "icon": "https://www.lemonde.fr/en"
@@ -145,7 +145,7 @@
       "name": "El País (Spanish)",
       "url": "https://feeds.elpais.com/mrss-s/pages/ep/site/elpais.com/portada",
       "refresh": 60,
-      "lifetime": 1095,
+      "lifetime": 3650,
       "category": "general",
       "defaultEnabled": false,
       "icon": "https://www.elpais.com"
@@ -155,7 +155,7 @@
       "name": "El País (English)",
       "url": "https://feeds.elpais.com/mrss-s/pages/ep/site/english.elpais.com/portada",
       "refresh": 60,
-      "lifetime": 1095,
+      "lifetime": 3650,
       "category": "general",
       "defaultEnabled": false,
       "icon": "https://english.elpais.com"
@@ -165,7 +165,7 @@
       "name": "Sky News World",
       "url": "https://feeds.skynews.com/feeds/rss/world.xml",
       "refresh": 60,
-      "lifetime": 1095,
+      "lifetime": 3650,
       "category": "general",
       "defaultEnabled": false,
       "icon": "https://news.sky.com"
@@ -175,7 +175,7 @@
       "name": "CBS News",
       "url": "https://www.cbsnews.com/latest/rss/main",
       "refresh": 60,
-      "lifetime": 1095,
+      "lifetime": 3650,
       "category": "general",
       "defaultEnabled": false,
       "icon": "https://www.cbsnews.com"
@@ -185,7 +185,7 @@
       "name": "DW (English)",
       "url": "https://rss.dw.com/xml/rss-en-top",
       "refresh": 60,
-      "lifetime": 1095,
+      "lifetime": 3650,
       "category": "general",
       "defaultEnabled": false,
       "icon": "https://www.dw.com"
@@ -195,7 +195,7 @@
       "name": "Financial Times",
       "url": "https://news.google.com/rss/search?q=when:24h+allinurl:ft.com&hl=en-US&gl=US&ceid=US:en",
       "refresh": 60,
-      "lifetime": 1095,
+      "lifetime": 3650,
       "category": "business",
       "defaultEnabled": false,
       "icon": "https://www.ft.com"
@@ -205,7 +205,7 @@
       "name": "Bloomberg",
       "url": "https://feeds.bloomberg.com/news.rss",
       "refresh": 60,
-      "lifetime": 1095,
+      "lifetime": 3650,
       "category": "business",
       "defaultEnabled": false
     },
@@ -214,7 +214,7 @@
       "name": "The Drive",
       "url": "https://www.thedrive.com/feed",
       "refresh": 60,
-      "lifetime": 1095,
+      "lifetime": 3650,
       "category": "tesla",
       "defaultEnabled": false
     },
@@ -223,7 +223,7 @@
       "name": "TechCrunch",
       "url": "https://techcrunch.com/feed/",
       "refresh": 720,
-      "lifetime": 1095,
+      "lifetime": 3650,
       "category": "technology",
       "defaultEnabled": false
     },
@@ -232,7 +232,7 @@
       "name": "Car and Driver",
       "url": "https://www.caranddriver.com/rss/all.xml/",
       "refresh": 60,
-      "lifetime": 1095,
+      "lifetime": 3650,
       "category": "tesla",
       "defaultEnabled": false
     },
@@ -241,7 +241,7 @@
       "name": "MIT Tech Review",
       "url": "https://www.technologyreview.com/feed/",
       "refresh": 720,
-      "lifetime": 1095,
+      "lifetime": 3650,
       "category": "technology",
       "defaultEnabled": false,
       "icon": "https://www.technologyreview.com"
@@ -251,7 +251,7 @@
       "name": "Ars Technica",
       "url": "https://feeds.arstechnica.com/arstechnica/index",
       "refresh": 720,
-      "lifetime": 1095,
+      "lifetime": 3650,
       "category": "technology",
       "defaultEnabled": false,
       "icon": "https://arstechnica.com"
@@ -261,7 +261,7 @@
       "name": "Engadget",
       "url": "https://www.engadget.com/rss.xml",
       "refresh": 720,
-      "lifetime": 1095,
+      "lifetime": 3650,
       "category": "technology",
       "defaultEnabled": false
     },
@@ -270,7 +270,7 @@
       "name": "The Verge",
       "url": "https://www.theverge.com/rss/index.xml",
       "refresh": 720,
-      "lifetime": 1095,
+      "lifetime": 3650,
       "category": "technology",
       "defaultEnabled": false,
       "icon": "https://www.theverge.com"
@@ -280,7 +280,7 @@
       "name": "IEEE Spectrum",
       "url": "https://news.google.com/rss/search?q=site:spectrum.ieee.org&hl=en-US&gl=US&ceid=US:en",
       "refresh": 720,
-      "lifetime": 1095,
+      "lifetime": 3650,
       "category": "technology",
       "defaultEnabled": false,
       "icon": "https://spectrum.ieee.org"
@@ -290,7 +290,7 @@
       "name": "Bloomberg Tech",
       "url": "https://feeds.bloomberg.com/technology/news.rss",
       "refresh": 720,
-      "lifetime": 1095,
+      "lifetime": 3650,
       "category": "technology",
       "defaultEnabled": false,
       "icon": "https://www.bloomberg.com"
@@ -300,7 +300,7 @@
       "name": "The Register",
       "url": "https://www.theregister.com/headlines.atom",
       "refresh": 720,
-      "lifetime": 1095,
+      "lifetime": 3650,
       "category": "technology",
       "defaultEnabled": false,
       "icon": "https://www.theregister.com"
@@ -310,7 +310,7 @@
       "name": "Phoronix",
       "url": "https://www.phoronix.com/rss.php",
       "refresh": 720,
-      "lifetime": 1095,
+      "lifetime": 3650,
       "category": "technology",
       "defaultEnabled": false,
       "icon": "https://www.phoronix.com"
@@ -320,7 +320,7 @@
       "name": "Hacker News",
       "url": "https://news.ycombinator.com/rss",
       "refresh": 720,
-      "lifetime": 1095,
+      "lifetime": 3650,
       "category": "technology",
       "defaultEnabled": false,
       "icon": "https://news.ycombinator.com"
@@ -330,7 +330,7 @@
       "name": "MacRumors",
       "url": "https://feeds.macrumors.com/MacRumors-Front",
       "refresh": 720,
-      "lifetime": 1095,
+      "lifetime": 3650,
       "category": "technology",
       "defaultEnabled": false,
       "icon": "https://www.macrumors.com"
@@ -340,7 +340,7 @@
       "name": "Android Police",
       "url": "https://news.google.com/rss/search?q=site:androidpolice.com&hl=en-US&gl=US&ceid=US:en",
       "refresh": 720,
-      "lifetime": 1095,
+      "lifetime": 3650,
       "category": "technology",
       "defaultEnabled": false,
       "icon": "https://www.androidpolice.com"
@@ -350,7 +350,7 @@
       "name": "Android Authority",
       "url": "https://www.androidauthority.com/feed/",
       "refresh": 720,
-      "lifetime": 1095,
+      "lifetime": 3650,
       "category": "technology",
       "defaultEnabled": false,
       "icon": "https://www.androidauthority.com"
@@ -360,7 +360,7 @@
       "name": "PC Magazine",
       "url": "https://news.google.com/rss/search?q=site:pcmag.com&hl=en-US&gl=US&ceid=US:en",
       "refresh": 720,
-      "lifetime": 1095,
+      "lifetime": 3650,
       "category": "technology",
       "defaultEnabled": false,
       "icon": "https://www.pcmag.com"
@@ -370,7 +370,7 @@
       "name": "Gear Patrol",
       "url": "https://news.google.com/rss/search?q=site:gearpatrol.com&hl=en-US&gl=US&ceid=US:en",
       "refresh": 360,
-      "lifetime": 1095,
+      "lifetime": 3650,
       "category": "consumption",
       "defaultEnabled": false,
       "icon": "https://www.gearpatrol.com"
@@ -380,7 +380,7 @@
       "name": "Monochrome",
       "url": "https://monochrome-watches.com/feed/",
       "refresh": 360,
-      "lifetime": 1095,
+      "lifetime": 3650,
       "category": "consumption",
       "defaultEnabled": false,
       "icon": "https://monochrome-watches.com"
@@ -390,7 +390,7 @@
       "name": "Esquire",
       "url": "https://news.google.com/rss/search?q=site:esquire.com&hl=en-US&gl=US&ceid=US:en",
       "refresh": 360,
-      "lifetime": 1095,
+      "lifetime": 3650,
       "category": "consumption",
       "defaultEnabled": false,
       "icon": "https://www.esquire.com"
@@ -400,7 +400,7 @@
       "name": "9to5Google",
       "url": "https://9to5google.com/feed/",
       "refresh": 720,
-      "lifetime": 1095,
+      "lifetime": 3650,
       "category": "technology",
       "defaultEnabled": false,
       "icon": "https://9to5google.com"
@@ -410,7 +410,7 @@
       "name": "Not a Tesla App",
       "url": "https://www.notateslaapp.com/rss",
       "refresh": 60,
-      "lifetime": 1095,
+      "lifetime": 3650,
       "category": "tesla",
       "defaultEnabled": true
     },
@@ -419,7 +419,7 @@
       "name": "Teslarati",
       "url": "https://www.teslarati.com/feed/",
       "refresh": 60,
-      "lifetime": 1095,
+      "lifetime": 3650,
       "category": "tesla",
       "defaultEnabled": true
     },
@@ -428,7 +428,7 @@
       "name": "InsideEVs",
       "url": "https://insideevs.com/rss/articles/all/",
       "refresh": 60,
-      "lifetime": 1095,
+      "lifetime": 3650,
       "category": "tesla",
       "defaultEnabled": true
     },
@@ -437,7 +437,7 @@
       "name": "Electrek",
       "url": "https://electrek.co/feed/",
       "refresh": 60,
-      "lifetime": 1095,
+      "lifetime": 3650,
       "category": "tesla",
       "defaultEnabled": false
     },
@@ -446,7 +446,7 @@
       "name": "SpaceNews",
       "url": "https://spacenews.com/feed/",
       "refresh": 60,
-      "lifetime": 1095,
+      "lifetime": 3650,
       "category": "defense",
       "defaultEnabled": false
     },
@@ -455,7 +455,7 @@
       "name": "Defense News",
       "url": "https://www.defensenews.com/arc/outboundfeeds/rss/?outputType=xml",
       "refresh": 60,
-      "lifetime": 1095,
+      "lifetime": 3650,
       "category": "defense",
       "defaultEnabled": false
     },
@@ -464,7 +464,7 @@
       "name": "Aviation Week",
       "url": "https://aviationweek.com/awn/rss-feed-by-content-source",
       "refresh": 60,
-      "lifetime": 1095,
+      "lifetime": 3650,
       "category": "defense",
       "defaultEnabled": false
     },
@@ -473,7 +473,7 @@
       "name": "SF Chronicle",
       "url": "https://news.google.com/rss/search?q=when:24h+allinurl:sfchronicle.com&hl=en-US&gl=US&ceid=US:en",
       "refresh": 60,
-      "lifetime": 1095,
+      "lifetime": 3650,
       "category": "general",
       "defaultEnabled": false,
       "icon": "https://www.sfchronicle.com"
@@ -483,7 +483,7 @@
       "name": "San Jose Mercury",
       "url": "https://news.google.com/rss/search?q=when:24h+allinurl:mercurynews.com&hl=en-US&gl=US&ceid=US:en",
       "refresh": 60,
-      "lifetime": 1095,
+      "lifetime": 3650,
       "category": "general",
       "defaultEnabled": false,
       "icon": "https://www.mercurynews.com"
@@ -493,7 +493,7 @@
       "name": "AP News",
       "url": "https://news.google.com/rss/search?q=when:24h+allinurl:apnews.com&hl=en-US&gl=US&ceid=US:en",
       "refresh": 60,
-      "lifetime": 1095,
+      "lifetime": 3650,
       "category": "general",
       "defaultEnabled": false,
       "icon": "https://apnews.com"
@@ -503,7 +503,7 @@
       "name": "Reuters",
       "url": "https://news.google.com/rss/search?q=when:24h+allinurl:reuters.com&hl=en-US&gl=US&ceid=US:en",
       "refresh": 60,
-      "lifetime": 1095,
+      "lifetime": 3650,
       "category": "general",
       "defaultEnabled": false,
       "icon": "https://www.reuters.com"
