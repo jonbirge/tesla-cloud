@@ -383,16 +383,18 @@ export async function updateNews(clear = false) {
             }
         });
 
-        // All items from server are unread (server filters read items for logged-in users)
+        // Set isUnread based on server's isRead flag (inverted)
         if (loadedItems.length > 0) {
             loadedItems.forEach(item => {
-                item.isUnread = true;
+                // Server sends isRead=true for read items, we need isUnread for client
+                item.isUnread = !item.isRead;
             });
         }
 
         // If anything has made it past all the filters, sort by date
         if (loadedItems.length > 0) {
-            console.log('We have unread items among newly loaded items!');
+            const unreadCount = loadedItems.filter(item => item.isUnread).length;
+            console.log(`Loaded ${loadedItems.length} items (${unreadCount} unread, ${loadedItems.length - unreadCount} read)`);
             loadedItems.sort((a, b) => b.date - a.date);
         }
 
@@ -411,11 +413,14 @@ export async function updateNews(clear = false) {
 
             // Update the visibility of share buttons
             setShareButtonsVisibility();
+            
+            // Scroll to first unread item if any exist
+            scrollToFirstUnreadItem();
         } else {
             newsContainer.replaceChildren();
             const p = document.createElement('p');
             const em = document.createElement('em');
-            em.textContent = 'No unread headlines available';
+            em.textContent = 'No headlines available';
             p.appendChild(em);
             newsContainer.appendChild(p);
             
@@ -894,6 +899,35 @@ export function updateNewsNotificationDot() {
                 notificationDotTimeoutId = null;
             }, 600); // Should match the CSS transition time + small buffer
         }
+    }
+}
+
+// Scroll to the first unread news item if any exist
+function scrollToFirstUnreadItem() {
+    // Find the first unread news item
+    const firstUnreadItem = document.querySelector('.news-item:not(.news-read)');
+    
+    if (firstUnreadItem) {
+        // Use setTimeout to ensure DOM is fully rendered before scrolling
+        setTimeout(() => {
+            const rightFrame = document.getElementById('rightFrame');
+            if (rightFrame) {
+                // Calculate the scroll position to center the first unread item
+                const itemRect = firstUnreadItem.getBoundingClientRect();
+                const containerRect = rightFrame.getBoundingClientRect();
+                const scrollOffset = rightFrame.scrollTop + itemRect.top - containerRect.top - 20; // 20px padding from top
+                
+                // Smooth scroll to the first unread item
+                rightFrame.scrollTo({
+                    top: Math.max(0, scrollOffset),
+                    behavior: 'smooth'
+                });
+                
+                console.log('Scrolled to first unread item');
+            }
+        }, 100); // Small delay to ensure rendering is complete
+    } else {
+        console.log('No unread items to scroll to');
     }
 }
 

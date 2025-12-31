@@ -292,10 +292,8 @@ try {
         $feedId = $article['feed_id'];
         $articleId = generateArticleId($feedId, $article['title'] ?? '');
         
-        // Skip items already read when server-side filtering is enabled
-        if ($readFilterApplied && isset($readArticleIds[$articleId])) {
-            continue;
-        }
+        // Mark if item was already read (but don't skip it)
+        $isRead = $readFilterApplied && isset($readArticleIds[$articleId]);
         
         // Check if we've hit the per-feed limit
         if (!isset($feedCounts[$feedId])) {
@@ -316,7 +314,8 @@ try {
             'title' => $article['title'],
             'link' => $article['url'],
             'date' => $pubDate,
-            'source' => $feedId
+            'source' => $feedId,
+            'isRead' => $isRead
         ];
         
         // Add icon if available
