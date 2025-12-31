@@ -6,6 +6,8 @@ import { formatTime, highlightUpdate, testMode, showNotification } from './commo
 const BASE_URL = 'php/news.php?age=1';
 const RESTDB_URL = 'php/rest_db.php';
 const NEWS_REFRESH_INTERVAL = 5;  // minutes
+const SCROLL_TO_UNREAD_DELAY_MS = 100;  // Delay before scrolling to first unread item
+const SCROLL_TO_UNREAD_TOP_PADDING_PX = 20;  // Padding from top when scrolling to unread item
 
 // Variables
 let newsUpdateInterval = null;
@@ -386,8 +388,9 @@ export async function updateNews(clear = false) {
         // Set isUnread based on server's isRead flag (inverted)
         if (loadedItems.length > 0) {
             loadedItems.forEach(item => {
-                // Server sends isRead=true for read items, we need isUnread for client
-                item.isUnread = !item.isRead;
+                // Server sends isRead=true for read items, isRead=false for unread items
+                // If isRead is undefined (no auth or db unavailable), default to unread
+                item.isUnread = item.isRead !== true;
             });
         }
 
@@ -912,10 +915,10 @@ function scrollToFirstUnreadItem() {
         setTimeout(() => {
             const rightFrame = document.getElementById('rightFrame');
             if (rightFrame) {
-                // Calculate the scroll position to center the first unread item
+                // Calculate the scroll position to place the first unread item near the top
                 const itemRect = firstUnreadItem.getBoundingClientRect();
                 const containerRect = rightFrame.getBoundingClientRect();
-                const scrollOffset = rightFrame.scrollTop + itemRect.top - containerRect.top - 20; // 20px padding from top
+                const scrollOffset = rightFrame.scrollTop + itemRect.top - containerRect.top - SCROLL_TO_UNREAD_TOP_PADDING_PX;
                 
                 // Smooth scroll to the first unread item
                 rightFrame.scrollTo({
@@ -925,7 +928,7 @@ function scrollToFirstUnreadItem() {
                 
                 console.log('Scrolled to first unread item');
             }
-        }, 100); // Small delay to ensure rendering is complete
+        }, SCROLL_TO_UNREAD_DELAY_MS);
     } else {
         console.log('No unread items to scroll to');
     }
