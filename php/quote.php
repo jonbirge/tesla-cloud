@@ -78,11 +78,14 @@ $context = stream_context_create($options);
 // Use file_get_contents with the created context
 $response = @file_get_contents($url, false, $context);
 
-// Get HTTP status code from headers
+// Get HTTP status code from headers using the modern function
 $statusCode = 0;
-if (isset($http_response_header[0])) {
-    preg_match('/\d{3}/', $http_response_header[0], $matches);
-    $statusCode = intval($matches[0]);
+$responseHeaders = http_get_last_response_headers();
+if ($responseHeaders && isset($responseHeaders[0])) {
+    preg_match('/\d{3}/', $responseHeaders[0], $matches);
+    if (!empty($matches[0])) {
+        $statusCode = intval($matches[0]);
+    }
 }
 
 // Check for errors

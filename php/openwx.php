@@ -1,6 +1,6 @@
 <?php
 
-// wx_proxy.php
+// openwx.php
 // This script acts as a proxy for OpenWeatherMap API requests.
 // It reads the API key from a .env file and forwards requests to the OpenWeatherMap API.
 
@@ -22,15 +22,20 @@ if (!isset($_ENV['OPENWX_KEY'])) {
 // Get query parameters
 $queryParams = $_GET;
 
+// Default to Boston, MA weather if no parameters provided
+if (empty($queryParams)) {
+    $queryParams['lat'] = '42.3601';
+    $queryParams['lon'] = '-71.0589';
+}
+
 // Add API key to query parameters
 $queryParams['appid'] = $_ENV['OPENWX_KEY'];
 
 // Get the API endpoint path from the URL path info
 $pathInfo = isset($_SERVER['PATH_INFO']) ? $_SERVER['PATH_INFO'] : '';
 if (empty($pathInfo)) {
-    http_response_code(400);
-    echo json_encode(['error' => 'No API endpoint specified in path']);
-    exit;
+    // Default to One Call API 3.0 endpoint
+    $pathInfo = 'data/3.0/onecall';
 }
 
 // Remove leading slash if present
@@ -58,11 +63,14 @@ $context = stream_context_create($options);
 // Use file_get_contents with the created context
 $response = @file_get_contents($proxiedUrl, false, $context);
 
-// Get HTTP status code from headers
+// Get HTTP status code from headers using the modern function
 $httpCode = 200; // Default success
-if (isset($http_response_header[0])) {
-    preg_match('/\d{3}/', $http_response_header[0], $matches);
-    $httpCode = intval($matches[0]);
+$responseHeaders = http_get_last_response_headers();
+if ($responseHeaders && isset($responseHeaders[0])) {
+    preg_match('/\d{3}/', $responseHeaders[0], $matches);
+    if (!empty($matches[0])) {
+        $httpCode = intval($matches[0]);
+    }
 }
 
 // Set HTTP response code and output the response
