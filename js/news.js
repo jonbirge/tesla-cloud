@@ -6,8 +6,6 @@ import { formatTime, highlightUpdate, testMode, showNotification } from './commo
 const BASE_URL = 'php/news.php?age=1';
 const RESTDB_URL = 'php/rest_db.php';
 const NEWS_REFRESH_INTERVAL = 5;  // minutes
-const SCROLL_TO_UNREAD_DELAY_MS = 100;  // Delay before scrolling to first unread item
-const SCROLL_TO_UNREAD_TOP_PADDING_PX = 20;  // Padding from top when scrolling to unread item
 
 // Variables
 let newsUpdateInterval = null;
@@ -417,9 +415,6 @@ export async function updateNews(clear = false) {
 
             // Update the visibility of share buttons
             setShareButtonsVisibility();
-            
-            // Scroll to first unread item if any exist
-            scrollToFirstUnreadItem();
         } else {
             newsContainer.replaceChildren();
             const p = document.createElement('p');
@@ -903,35 +898,6 @@ export function updateNewsNotificationDot() {
                 notificationDotTimeoutId = null;
             }, 600); // Should match the CSS transition time + small buffer
         }
-    }
-}
-
-// Scroll to the first unread news item if any exist
-function scrollToFirstUnreadItem() {
-    // Find the first unread news item
-    const firstUnreadItem = document.querySelector('.news-item:not(.news-read)');
-    
-    if (firstUnreadItem) {
-        // Use setTimeout to ensure DOM is fully rendered before scrolling
-        setTimeout(() => {
-            const rightFrame = document.getElementById('rightFrame');
-            if (rightFrame) {
-                // Calculate the scroll position to place the first unread item near the top
-                const itemRect = firstUnreadItem.getBoundingClientRect();
-                const containerRect = rightFrame.getBoundingClientRect();
-                const scrollOffset = rightFrame.scrollTop + itemRect.top - containerRect.top - SCROLL_TO_UNREAD_TOP_PADDING_PX;
-                
-                // Smooth scroll to the first unread item
-                rightFrame.scrollTo({
-                    top: Math.max(0, scrollOffset),
-                    behavior: 'smooth'
-                });
-                
-                console.log('Scrolled to first unread item');
-            }
-        }, SCROLL_TO_UNREAD_DELAY_MS);
-    } else {
-        console.log('No unread items to scroll to');
     }
 }
 
