@@ -407,8 +407,8 @@ body.dark-mode .forecast-desc {
     position: absolute;
     right: 10px;
     top: 10px;
-    background: #ff3b30;
-    color: #fff;
+    background: #bf1f16;
+    color: #ffffff;
     border: none;
     width: 30px;
     height: 30px;
@@ -416,14 +416,14 @@ body.dark-mode .forecast-desc {
     cursor: pointer;
     display: flex;
     justify-content: center;
-    font-size: 26px;
+    font-size: 24px;
     font-weight: 700;
     line-height: 1;
     transition: all 0.2s ease;
 }
 
 .forecast-popup-close:hover {
-    background: #d92a23;
+    background: #e91109;
     color: #fff;
 }
 
