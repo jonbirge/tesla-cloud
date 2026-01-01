@@ -394,11 +394,11 @@ export async function updateNews(clear = false) {
             });
         }
 
-        // If anything has made it past all the filters, sort by date
+        // Server handles sorting (unread first, then read, each sorted by date)
+        // Do NOT sort in frontend to preserve backend ordering
         if (loadedItems.length > 0) {
             const unreadCount = loadedItems.filter(item => item.isUnread).length;
             console.log(`Loaded ${loadedItems.length} items (${unreadCount} unread, ${loadedItems.length - unreadCount} read)`);
-            loadedItems.sort((a, b) => b.date - a.date);
         }
 
         // Use only the freshly loaded items for display

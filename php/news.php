@@ -326,6 +326,29 @@ try {
         $allItems[] = $newsItem;
     }
     
+    // Sort items: unread first (by date DESC), then read (by date DESC)
+    // Separate into unread and read arrays
+    $unreadItems = [];
+    $readItems = [];
+    foreach ($allItems as $item) {
+        if ($item['isRead']) {
+            $readItems[] = $item;
+        } else {
+            $unreadItems[] = $item;
+        }
+    }
+    
+    // Sort each group by date (newest first)
+    usort($unreadItems, function($a, $b) {
+        return $b['date'] - $a['date'];
+    });
+    usort($readItems, function($a, $b) {
+        return $b['date'] - $a['date'];
+    });
+    
+    // Combine: unread first, then read
+    $allItems = array_merge($unreadItems, $readItems);
+    
     // Limit to requested number of stories
     $outputItems = array_slice($allItems, 0, $numStories);
     
