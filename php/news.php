@@ -338,13 +338,14 @@ try {
         }
     }
     
+    // Comparison function for sorting by date (newest first)
+    $sortByDateDesc = function($a, $b) {
+        return $b['date'] - $a['date'];
+    };
+    
     // Sort each group by date (newest first)
-    usort($unreadItems, function($a, $b) {
-        return $b['date'] - $a['date'];
-    });
-    usort($readItems, function($a, $b) {
-        return $b['date'] - $a['date'];
-    });
+    usort($unreadItems, $sortByDateDesc);
+    usort($readItems, $sortByDateDesc);
     
     // Combine: unread first, then read
     $allItems = array_merge($unreadItems, $readItems);

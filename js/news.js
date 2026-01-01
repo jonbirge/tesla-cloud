@@ -394,8 +394,9 @@ export async function updateNews(clear = false) {
             });
         }
 
-        // Server handles sorting (unread first, then read, each sorted by date)
-        // Do NOT sort in frontend to preserve backend ordering
+        // Server handles sorting (unread first, then read, each sorted by date DESC)
+        // Frontend sorting removed - was previously: loadedItems.sort((a, b) => b.date - a.date)
+        // Do NOT re-add frontend sorting to preserve backend ordering
         if (loadedItems.length > 0) {
             const unreadCount = loadedItems.filter(item => item.isUnread).length;
             console.log(`Loaded ${loadedItems.length} items (${unreadCount} unread, ${loadedItems.length - unreadCount} read)`);
