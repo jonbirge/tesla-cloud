@@ -383,17 +383,21 @@ export async function updateNews(clear = false) {
             }
         });
 
-        // All items from server are unread (server filters read items for logged-in users)
+        // Set isUnread based on server's isRead flag (inverted)
         if (loadedItems.length > 0) {
             loadedItems.forEach(item => {
-                item.isUnread = true;
+                // Server sends isRead=true for read items, isRead=false for unread items
+                // If isRead is undefined (no auth or db unavailable), default to unread
+                item.isUnread = item.isRead !== true;
             });
         }
 
-        // If anything has made it past all the filters, sort by date
+        // Server handles sorting (unread first, then read, each sorted by date DESC)
+        // Frontend sorting removed - was previously: loadedItems.sort((a, b) => b.date - a.date)
+        // Do NOT re-add frontend sorting to preserve backend ordering
         if (loadedItems.length > 0) {
-            console.log('We have unread items among newly loaded items!');
-            loadedItems.sort((a, b) => b.date - a.date);
+            const unreadCount = loadedItems.filter(item => item.isUnread).length;
+            console.log(`Loaded ${loadedItems.length} items (${unreadCount} unread, ${loadedItems.length - unreadCount} read)`);
         }
 
         // Use only the freshly loaded items for display
@@ -415,7 +419,7 @@ export async function updateNews(clear = false) {
             newsContainer.replaceChildren();
             const p = document.createElement('p');
             const em = document.createElement('em');
-            em.textContent = 'No unread headlines available';
+            em.textContent = 'No headlines available';
             p.appendChild(em);
             newsContainer.appendChild(p);
             

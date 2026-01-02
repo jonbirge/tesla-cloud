@@ -292,10 +292,8 @@ try {
         $feedId = $article['feed_id'];
         $articleId = generateArticleId($feedId, $article['title'] ?? '');
         
-        // Skip items already read when server-side filtering is enabled
-        if ($readFilterApplied && isset($readArticleIds[$articleId])) {
-            continue;
-        }
+        // Mark if item was already read (but don't skip it)
+        $isRead = $readFilterApplied && isset($readArticleIds[$articleId]);
         
         // Check if we've hit the per-feed limit
         if (!isset($feedCounts[$feedId])) {
@@ -316,7 +314,8 @@ try {
             'title' => $article['title'],
             'link' => $article['url'],
             'date' => $pubDate,
-            'source' => $feedId
+            'source' => $feedId,
+            'isRead' => $isRead
         ];
         
         // Add icon if available
@@ -326,6 +325,30 @@ try {
         
         $allItems[] = $newsItem;
     }
+    
+    // Sort items: unread first (by date DESC), then read (by date DESC)
+    // Separate into unread and read arrays
+    $unreadItems = [];
+    $readItems = [];
+    foreach ($allItems as $item) {
+        if ($item['isRead']) {
+            $readItems[] = $item;
+        } else {
+            $unreadItems[] = $item;
+        }
+    }
+    
+    // Comparison function for sorting by date (newest first)
+    $sortByDateDesc = function($a, $b) {
+        return $b['date'] - $a['date'];
+    };
+    
+    // Sort each group by date (newest first)
+    usort($unreadItems, $sortByDateDesc);
+    usort($readItems, $sortByDateDesc);
+    
+    // Combine: unread first, then read
+    $allItems = array_merge($unreadItems, $readItems);
     
     // Limit to requested number of stories
     $outputItems = array_slice($allItems, 0, $numStories);
