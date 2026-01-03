@@ -22,8 +22,38 @@ if (!isset($_ENV['OPENWX_KEY'])) {
 // Get query parameters
 $queryParams = $_GET;
 
+// Check if 'city' parameter is provided
+if (isset($queryParams['city']) && !empty($queryParams['city'])) {
+    $city = urlencode($queryParams['city']);
+    $geoUrl = "http://api.openweathermap.org/geo/1.0/direct?q={$city}&limit=1&appid={$_ENV['OPENWX_KEY']}";
+    
+    // Set up context for Geocoding API request
+    $geoOptions = [
+        'http' => [
+            'method' => 'GET',
+            'header' => 'User-Agent: PHP/' . phpversion(),
+            'ignore_errors' => true
+        ]
+    ];
+    $geoContext = stream_context_create($geoOptions);
+    
+    $geoResponse = @file_get_contents($geoUrl, false, $geoContext);
+    $geoData = json_decode($geoResponse, true);
+
+    if (!empty($geoData) && isset($geoData[0]['lat']) && isset($geoData[0]['lon'])) {
+        $queryParams['lat'] = $geoData[0]['lat'];
+        $queryParams['lon'] = $geoData[0]['lon'];
+        // Remove 'city' from parameters to avoid passing it to One Call API
+        unset($queryParams['city']);
+    } else {
+        http_response_code(404);
+        echo json_encode(['error' => 'City not found']);
+        exit;
+    }
+}
+
 // Default to Boston, MA weather if no parameters provided
-if (empty($queryParams)) {
+if (empty($queryParams['lat']) || empty($queryParams['lon'])) {
     $queryParams['lat'] = '42.3601';
     $queryParams['lon'] = '-71.0589';
 }
