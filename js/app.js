@@ -246,8 +246,8 @@ function updateWindage(vehicleSpeed, vehicleHeading, windSpeed, windDirection) {
     // Calculate headwind and crosswind components and display on radar
     let headWind = null;
     let crossWind = null;
-    if (vehicleHeading && windDirection) {  // Threshold for meaningful motion    
-        const windAngle = windDirection - vehicleHeading; // car frame
+    if (vehicleHeading !== null && vehicleHeading !== undefined && windDirection !== null && windDirection !== undefined) {  // Threshold for meaningful motion    
+        const windAngle = (windDirection + 180) - vehicleHeading; // car frame
         const windAngleRad = (90 - windAngle) * Math.PI / 180;
 
         // Wind vector components in global frame
@@ -390,7 +390,7 @@ async function handlePositionUpdate(position) {
     alt = position.coords.altitude;
     acc = position.coords.accuracy;
     speed = position.coords.speed / 0.44704; // Convert m/s to mph
-    if (position.coords.heading) {
+    if (position.coords.heading !== null && position.coords.heading !== undefined && !isNaN(position.coords.heading)) {
         lastKnownHeading = position.coords.heading;
     }
 
@@ -419,7 +419,7 @@ async function handlePositionUpdate(position) {
     const navigationSection = document.getElementById("navigation");
     if (navigationSection.style.display === "block") {
         // Update heading displays
-        if (lastKnownHeading) {
+        if (lastKnownHeading !== null && lastKnownHeading !== undefined) {
             document.getElementById('heading').innerText = Math.round(lastKnownHeading) + '°';
             if (forecastDataPrem && forecastDataPrem.current) {
                 const windSpeedMPH = Math.min((forecastDataPrem.current.wind_speed * 2.237), MAX_SPEED);
