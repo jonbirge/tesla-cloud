@@ -581,7 +581,7 @@ function getAffectedSections(changedSettings) {
 }
 
 // Function to update the current section display based on setting changes
-async function updateCurrentSectionDisplay(changedSettings) {
+async function updateCurrentSectionDisplay(changedSettings, oldSettings) {
     if (!currentSection) {
         return;
     }
@@ -634,9 +634,11 @@ async function updateCurrentSectionDisplay(changedSettings) {
             
         case 'news':
             // News section - update news feed
-            // Determine if any feed was dropped (turned off)
+            // Determine if any feed was actually dropped (changed from true to false)
             const isDrop = Array.from(changedSettings).some(key => {
-                return key.startsWith('rss-') && settings[key] === false;
+                return key.startsWith('rss-') && 
+                       oldSettings[key] === true && 
+                       settings[key] === false;
             });
             updateNews(isDrop);
             break;
@@ -703,7 +705,7 @@ async function checkForSettingsUpdates() {
                 
                 // Update current section display if affected by changes
                 if (changedSettings.size > 0) {
-                    await updateCurrentSectionDisplay(changedSettings);
+                    await updateCurrentSectionDisplay(changedSettings, oldSettings);
                 }
                 
                 isUpdatingSettings = false;
