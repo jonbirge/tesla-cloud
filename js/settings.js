@@ -3,6 +3,7 @@ import { updateNews, setShareButtonsVisibility, initializeNewsStorage } from './
 import { updateNetChartAxisColors } from './net.js';
 import { updatePremiumWeatherDisplay, forecastDataPrem, lastLat, lastLong, updateRainChartAxisColors, updateRadarDisplay, initializeSatelliteSettings, SAT_URLS, currentSatRegion } from './wx.js';
 import { startStockUpdates, stopStockUpdates, fetchStockData } from './stock.js';
+import { refreshMarketData } from './market.js';
 import { currentSection } from './app.js';
 
 // Night mode offset in minutes - enter dark mode this many minutes before sunset
@@ -628,8 +629,8 @@ async function updateCurrentSectionDisplay(changedSettings, oldSettings) {
             break;
             
         case 'market':
-            // Market section - fetch fresh stock data
-            fetchStockData();
+            // Market section - refresh market data display
+            refreshMarketData();
             break;
             
         case 'news':
