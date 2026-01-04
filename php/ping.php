@@ -77,22 +77,6 @@ if ($dbHost && $dbName && $dbUser) {
         
         $dbConnection = new PDO($dsn, $dbUser, $dbPass, $options);
         
-        // Check if the ping_data table exists, create it if not
-        $tableCheck = $dbConnection->query("SHOW TABLES LIKE 'ping_data'");
-        if ($tableCheck->rowCount() == 0) {
-            $sql = "CREATE TABLE ping_data (
-                id INT AUTO_INCREMENT PRIMARY KEY,
-                user_id VARCHAR(255) NOT NULL,
-                latitude DOUBLE NULL,
-                longitude DOUBLE NULL,
-                altitude DOUBLE NULL,
-                ip_address VARCHAR(45) NULL,
-                timestamp DATETIME DEFAULT CURRENT_TIMESTAMP
-            )";
-            $dbConnection->exec($sql);
-            logMessage("Created ping_data table");
-        }
-        
         // Get data from POST request
         $userId = $_POST['user_id'] ?? 'anonymous';
         $latitude = isset($_POST['latitude']) ? (double)$_POST['latitude'] : null;

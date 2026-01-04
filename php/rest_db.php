@@ -79,15 +79,6 @@ try {
     }
 
     $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-
-    // Create table if it doesn't exist
-    $pdo->exec("CREATE TABLE IF NOT EXISTS key_value (
-        `key` VARCHAR(255) NOT NULL PRIMARY KEY,
-        `value` TEXT NULL,
-        `life_time` FLOAT DEFAULT 30,
-        `created_at` DATETIME DEFAULT CURRENT_TIMESTAMP,
-        `updated_at` DATETIME DEFAULT CURRENT_TIMESTAMP
-    )");
 } catch (PDOException $e) {
     http_response_code(500);
     echo json_encode(['error' => 'Database connection failed: ' . $e->getMessage()]);
