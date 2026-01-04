@@ -27,7 +27,7 @@
     {
         "StockName": "Exxon Mobil",
         "Symbol": "XOM",
-        "icon": "https://logo.clearbit.com/mobil.com?size=64"
+        "icon": "https://www.google.com/s2/favicons?domain=exxonmobil.com&sz=64"
     },
     {
         "StockName": "General Electric",
@@ -47,7 +47,7 @@
     {
         "StockName": "Lockheed Martin",
         "Symbol": "LMT",
-        "icon": "https://logo.clearbit.com/lockheedmartin.com?size=64"
+        "icon": "https://www.google.com/s2/favicons?domain=lockheedmartin.com&sz=64"
     },
     {
         "StockName": "Microsoft",
