@@ -1,8 +1,10 @@
 // Imports
 import { updateNews, setShareButtonsVisibility, initializeNewsStorage } from './news.js';
 import { updateNetChartAxisColors } from './net.js';
-import { updatePremiumWeatherDisplay, forecastDataPrem, lastLat, lastLong, updateRainChartAxisColors, updateRadarDisplay } from './wx.js';
-import { startStockUpdates, stopStockUpdates } from './stock.js';
+import { updatePremiumWeatherDisplay, forecastDataPrem, lastLat, lastLong, updateRainChartAxisColors, updateRadarDisplay, initializeSatelliteSettings, SAT_URLS, currentSatRegion } from './wx.js';
+import { startStockUpdates, stopStockUpdates, fetchStockData } from './stock.js';
+import { refreshMarketData } from './market.js';
+import { currentSection } from './app.js';
 
 // Night mode offset in minutes - enter dark mode this many minutes before sunset
 // and exit dark mode this many minutes after sunrise to match Tesla's car behavior
@@ -542,6 +544,108 @@ async function updateLastKnownTimestamp() {
     }
 }
 
+// Function to determine which sections are affected by setting changes
+function getAffectedSections(changedSettings) {
+    const affectedSections = new Set();
+    
+    for (const key of changedSettings) {
+        // Dashboard section (navigation) - affected by units and time format
+        if (key === 'imperial-units' || key === '24-hour-time' || key === 'show-speed-indicators') {
+            affectedSections.add('navigation');
+        }
+        
+        // Weather section - affected by units and display settings
+        if (key === 'imperial-units' || key === '24-hour-time' || 
+            key === 'show-hourly-stripes' || key === 'show-wind-radar' || 
+            key === 'show-doppler-radar') {
+            affectedSections.add('weather');
+        }
+        
+        // Satellite section - affected by region setting
+        if (key === 'sat-region' || key === 'satellite-use-location') {
+            affectedSections.add('satellite');
+        }
+        
+        // Market section - affected by stock/index subscriptions
+        if (key === 'subscribed-stocks' || key === 'subscribed-indexes' || 
+            key === 'show-stock-indicator' || key === 'show-price-alt') {
+            affectedSections.add('market');
+        }
+        
+        // News section - affected by RSS feed selections
+        if (key.startsWith('rss-')) {
+            affectedSections.add('news');
+        }
+    }
+    
+    return affectedSections;
+}
+
+// Function to update the current section display based on setting changes
+async function updateCurrentSectionDisplay(changedSettings, oldSettings) {
+    if (!currentSection) {
+        return;
+    }
+    
+    // Check if any changed settings affect the current section
+    const affectedSections = getAffectedSections(changedSettings);
+    
+    if (!affectedSections.has(currentSection)) {
+        console.log(`Current section "${currentSection}" not affected by setting changes`);
+        return;
+    }
+    
+    console.log(`Updating "${currentSection}" section display due to setting changes:`, Array.from(changedSettings));
+    
+    // Trigger appropriate update based on section
+    switch (currentSection) {
+        case 'navigation':
+            // Dashboard section - updates are handled by updateSetting() for display values
+            console.log('Dashboard display updates handled by updateSetting()');
+            break;
+            
+        case 'weather':
+            // Weather section - update the weather display
+            updatePremiumWeatherDisplay();
+            break;
+            
+        case 'satellite':
+            // Satellite section - reinitialize satellite settings and reload image
+            initializeSatelliteSettings();
+            // Also reload the satellite image with the new region
+            const weatherImage = document.getElementById('weather-image');
+            if (weatherImage) {
+                const regionUrls = SAT_URLS[currentSatRegion];
+                if (regionUrls) {
+                    if (regionUrls.latest) {
+                        weatherImage.src = regionUrls.latest;
+                    } else if (regionUrls.latest_ir) {
+                        weatherImage.src = regionUrls.latest_ir;
+                    } else if (regionUrls.loop) {
+                        weatherImage.src = regionUrls.loop;
+                    }
+                }
+            }
+            break;
+            
+        case 'market':
+            // Market section - refresh market data display
+            refreshMarketData();
+            break;
+            
+        case 'news':
+            // News section - update news feed
+            // Determine if any feed was actually dropped (changed from true to false)
+            const isDrop = Array.from(changedSettings).some(key => {
+                return key.startsWith('rss-') && 
+                       oldSettings[key] === true && 
+                       settings[key] === false;
+            });
+            updateNews(isDrop);
+            break;
+    }
+}
+
 // Function to check if settings have been updated on the server
 async function checkForSettingsUpdates() {
     if (!hashedUser || !isLoggedIn || isUpdatingSettings) {
@@ -567,8 +671,43 @@ async function checkForSettingsUpdates() {
                 // Prevent concurrent updates
                 isUpdatingSettings = true;
                 
+                // Save old settings to detect changes
+                const oldSettings = { ...settings };
+                
                 // Reload settings
                 await fetchSettings();
+                
+                // Detect which settings changed
+                const changedSettings = new Set();
+                for (const key in settings) {
+                    const oldValue = oldSettings[key];
+                    const newValue = settings[key];
+                    
+                    // Handle array comparison
+                    if (Array.isArray(oldValue) && Array.isArray(newValue)) {
+                        // Compare arrays by converting to JSON strings (use copies to avoid mutation)
+                        if (JSON.stringify([...oldValue].sort()) !== JSON.stringify([...newValue].sort())) {
+                            changedSettings.add(key);
+                        }
+                    } else if (Array.isArray(oldValue) || Array.isArray(newValue)) {
+                        // One is an array and the other is not - this is a change
+                        changedSettings.add(key);
+                    } else if (oldValue !== newValue) {
+                        changedSettings.add(key);
+                    }
+                }
+                
+                // Check for removed settings
+                for (const key in oldSettings) {
+                    if (!(key in settings)) {
+                        changedSettings.add(key);
+                    }
+                }
+                
+                // Update current section display if affected by changes
+                if (changedSettings.size > 0) {
+                    await updateCurrentSectionDisplay(changedSettings, oldSettings);
+                }
                 
                 isUpdatingSettings = false;
             }
