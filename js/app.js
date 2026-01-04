@@ -9,7 +9,7 @@ import { startStockUpdates, stopStockUpdates } from './stock.js';
 import { initMarketSection, stopMarketUpdates } from './market.js';
 
 // Exports
-// (none - app.js is the main module)
+export { currentSection };
 
 // Parameters
 const DEFAULT_SECTION = 'navigation';               // Default section to show
