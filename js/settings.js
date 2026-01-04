@@ -634,15 +634,11 @@ async function updateCurrentSectionDisplay(changedSettings) {
             
         case 'news':
             // News section - update news feed
-            // Check if any RSS feeds changed
-            const rssChanged = Array.from(changedSettings).some(key => key.startsWith('rss-'));
-            if (rssChanged) {
-                // Determine if any feed was dropped
-                const isDrop = Array.from(changedSettings).some(key => {
-                    return key.startsWith('rss-') && settings[key] === false;
-                });
-                updateNews(isDrop);
-            }
+            // Determine if any feed was dropped (turned off)
+            const isDrop = Array.from(changedSettings).some(key => {
+                return key.startsWith('rss-') && settings[key] === false;
+            });
+            updateNews(isDrop);
             break;
     }
 }
@@ -690,6 +686,9 @@ async function checkForSettingsUpdates() {
                         if (JSON.stringify([...oldValue].sort()) !== JSON.stringify([...newValue].sort())) {
                             changedSettings.add(key);
                         }
+                    } else if (Array.isArray(oldValue) || Array.isArray(newValue)) {
+                        // One is an array and the other is not - this is a change
+                        changedSettings.add(key);
                     } else if (oldValue !== newValue) {
                         changedSettings.add(key);
                     }
