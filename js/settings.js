@@ -689,11 +689,18 @@ async function checkForSettingsUpdates() {
                     
                     // Handle array comparison
                     if (Array.isArray(oldValue) && Array.isArray(newValue)) {
-                        // Compare arrays by converting to JSON strings
-                        if (JSON.stringify(oldValue.sort()) !== JSON.stringify(newValue.sort())) {
+                        // Compare arrays by converting to JSON strings (use copies to avoid mutation)
+                        if (JSON.stringify([...oldValue].sort()) !== JSON.stringify([...newValue].sort())) {
                             changedSettings.add(key);
                         }
                     } else if (oldValue !== newValue) {
+                        changedSettings.add(key);
+                    }
+                }
+                
+                // Check for removed settings
+                for (const key in oldSettings) {
+                    if (!(key in settings)) {
                         changedSettings.add(key);
                     }
                 }
