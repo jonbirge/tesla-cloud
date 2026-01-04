@@ -1,4 +1,48 @@
-# News Backend Scripts
+# Utility Scripts
+
+This directory contains Python scripts for managing the Tesla Cloud application backend.
+
+## Database Setup
+
+### `setup_tables.py` - Database Table Initialization
+
+Creates all required database tables for the Tesla Cloud application. This script should be run once during initial setup or after a database reset.
+
+**Tables Created:**
+- `user_settings` - User preference storage (from settings.php)
+- `user_ids` - User account tracking (from settings.php)
+- `login_hist` - Login history (from settings.php)
+- `ping_data` - Location ping data (from ping.php)
+- `key_value` - Generic key-value store (from rest_db.php)
+- `news_articles` - News feed articles (from news.php)
+- `feed_updates` - Feed update timestamps (from news.php)
+
+**Usage:**
+```bash
+# Run from the utils directory or project root
+python3 utils/setup_tables.py
+```
+
+**MySQL Configuration:**
+If your `.env` file contains MySQL credentials with `SQL_HOST` set, the script will create tables in MySQL:
+```json
+{
+  "SQL_HOST": "mysql.example.com",
+  "SQL_USER": "username",
+  "SQL_PASS": "password",
+  "SQL_DB_NAME": "tesla_cloud"
+}
+```
+
+**SQLite Configuration:**
+If no MySQL configuration is present, the script will create tables in multiple SQLite database files for development:
+- `/tmp/restdb.sqlite` - Used by rest_db.php
+- `/tmp/teslacloud_settings.db` - Used by settings.php
+- `utils/news_articles.db` - Used by news.php and Python utilities
+
+**Note:** The PHP files no longer automatically create tables. You must run this script before using the application.
+
+## News Backend Scripts
 
 This directory contains Python scripts for fetching and managing news articles in the backend database.
 
@@ -33,9 +77,11 @@ python3 update_news.py
 */5 * * * * cd /path/to/tesla-cloud && python3 news/update_news.py >> /var/log/news_update.log 2>&1
 ```
 
-### `init_db.py` - Database Initialization
+### `init_db.py` - News Database Initialization (Deprecated)
 
-Creates the required database tables:
+**Note:** This script has been superseded by `setup_tables.py` which creates all database tables including news tables. You can still use `init_db.py` if you only need to create the news-specific tables.
+
+Creates the news-related database tables:
 - `news_articles` - Stores feed articles (feed_id, url, title, published_date)
 - `feed_updates` - Tracks last update times for each feed
 
