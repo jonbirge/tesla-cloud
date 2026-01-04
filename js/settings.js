@@ -1,7 +1,7 @@
 // Imports
 import { updateNews, setShareButtonsVisibility, initializeNewsStorage } from './news.js';
 import { updateNetChartAxisColors } from './net.js';
-import { updatePremiumWeatherDisplay, forecastDataPrem, lastLat, lastLong, updateRainChartAxisColors, updateRadarDisplay, initializeSatelliteSettings } from './wx.js';
+import { updatePremiumWeatherDisplay, forecastDataPrem, lastLat, lastLong, updateRainChartAxisColors, updateRadarDisplay, initializeSatelliteSettings, SAT_URLS, currentSatRegion } from './wx.js';
 import { startStockUpdates, stopStockUpdates, fetchStockData } from './stock.js';
 import { currentSection } from './app.js';
 
@@ -612,8 +612,22 @@ async function updateCurrentSectionDisplay(changedSettings) {
             break;
             
         case 'satellite':
-            // Satellite section - reinitialize satellite settings
+            // Satellite section - reinitialize satellite settings and reload image
             initializeSatelliteSettings();
+            // Also reload the satellite image with the new region
+            const weatherImage = document.getElementById('weather-image');
+            if (weatherImage) {
+                const regionUrls = SAT_URLS[currentSatRegion];
+                if (regionUrls) {
+                    if (regionUrls.latest) {
+                        weatherImage.src = regionUrls.latest;
+                    } else if (regionUrls.latest_ir) {
+                        weatherImage.src = regionUrls.latest_ir;
+                    } else if (regionUrls.loop) {
+                        weatherImage.src = regionUrls.loop;
+                    }
+                }
+            }
             break;
             
         case 'market':
