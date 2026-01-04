@@ -582,25 +582,22 @@ function getAffectedSections(changedSettings) {
 
 // Function to update the current section display based on setting changes
 async function updateCurrentSectionDisplay(changedSettings) {
-    // Get the current section from app.js
-    const section = currentSection;
-    
-    if (!section) {
+    if (!currentSection) {
         return;
     }
     
     // Check if any changed settings affect the current section
     const affectedSections = getAffectedSections(changedSettings);
     
-    if (!affectedSections.has(section)) {
-        console.log(`Current section "${section}" not affected by setting changes`);
+    if (!affectedSections.has(currentSection)) {
+        console.log(`Current section "${currentSection}" not affected by setting changes`);
         return;
     }
     
-    console.log(`Updating "${section}" section display due to setting changes:`, Array.from(changedSettings));
+    console.log(`Updating "${currentSection}" section display due to setting changes:`, Array.from(changedSettings));
     
     // Trigger appropriate update based on section
-    switch (section) {
+    switch (currentSection) {
         case 'navigation':
             // Dashboard section - updates are handled by updateSetting() for display values
             console.log('Dashboard display updates handled by updateSetting()');
