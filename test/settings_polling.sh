@@ -12,6 +12,11 @@ ROOT_DIR="$(cd "$(dirname "$0")/.." && pwd)"
 PHP_SERVER_PID=""
 STARTED_SERVER=false
 
+# Ensure database tables exist
+if [ -f "$ROOT_DIR/utils/setup_tables.py" ]; then
+    python3 "$ROOT_DIR/utils/setup_tables.py" > /dev/null 2>&1
+fi
+
 echo "🔍 Testing Settings Live Update Functionality..."
 
 # =============================================================================

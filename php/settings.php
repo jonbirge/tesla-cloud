@@ -61,31 +61,6 @@ if (!$dbHost || !$dbName || !$dbUser) {
     $dbConnection = new PDO("sqlite:$sqliteDb");
     $dbConnection->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
     
-    // Create tables for SQLite
-    $dbConnection->exec("CREATE TABLE IF NOT EXISTS user_settings (
-        user_id TEXT NOT NULL,
-        setting_key TEXT NOT NULL,
-        setting_value TEXT,
-        updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-        PRIMARY KEY (user_id, setting_key)
-    )");
-    
-    $dbConnection->exec("CREATE TABLE IF NOT EXISTS user_ids (
-        user_id TEXT PRIMARY KEY,
-        initial_login DATETIME DEFAULT CURRENT_TIMESTAMP,
-        last_login DATETIME DEFAULT CURRENT_TIMESTAMP,
-        last_ip TEXT,
-        login_count INTEGER DEFAULT 0,
-        auto_created INTEGER DEFAULT 0
-    )");
-    
-    $dbConnection->exec("CREATE TABLE IF NOT EXISTS login_hist (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        user_id TEXT NOT NULL,
-        login_time DATETIME DEFAULT CURRENT_TIMESTAMP,
-        ip_address TEXT NOT NULL
-    )");
-    
     logMessage("Using SQLite database for development", "INFO");
 } else {
     // Connect to MySQL
@@ -98,46 +73,6 @@ if (!$dbHost || !$dbName || !$dbUser) {
         ];
         
         $dbConnection = new PDO($dsn, $dbUser, $dbPass, $options);
-        
-        // Check if the required table exists, create it if not
-        $tableCheck = $dbConnection->query("SHOW TABLES LIKE 'user_settings'");
-        if ($tableCheck->rowCount() == 0) {
-            $sql = "CREATE TABLE user_settings (
-                user_id VARCHAR(255) NOT NULL,
-                setting_key VARCHAR({$maxKeyLength}) NOT NULL,
-                setting_value TEXT,
-                updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-                PRIMARY KEY (user_id, setting_key)
-            )";
-            $dbConnection->exec($sql);
-        }
-        
-        // Check if user_ids table exists, create it if not
-        $userIdsTableCheck = $dbConnection->query("SHOW TABLES LIKE 'user_ids'");
-        if ($userIdsTableCheck->rowCount() == 0) {
-            $sql = "CREATE TABLE user_ids (
-                user_id VARCHAR(255) NOT NULL,
-                initial_login TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                last_login TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                last_ip VARCHAR(45),
-                login_count INT DEFAULT 0,
-                auto_created TINYINT DEFAULT 0,
-                PRIMARY KEY (user_id)
-            )";
-            $dbConnection->exec($sql);
-        }
-        
-        // Check if login_hist table exists, create it if not
-        $loginHistTableCheck = $dbConnection->query("SHOW TABLES LIKE 'login_hist'");
-        if ($loginHistTableCheck->rowCount() == 0) {
-            $sql = "CREATE TABLE login_hist (
-                id INT AUTO_INCREMENT PRIMARY KEY,
-                user_id VARCHAR(255) NOT NULL,
-                login_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                ip_address VARCHAR(45) NOT NULL
-            )";
-            $dbConnection->exec($sql);
-        }
     } catch (PDOException $e) {
         $errorMessage = "Database connection failed: " . $e->getMessage();
         logMessage($errorMessage, "ERROR");

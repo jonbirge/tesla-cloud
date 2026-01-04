@@ -20,6 +20,11 @@ mkdir -p ${TEMP_DIR}
 # Ensure clean SQLite database for test runs
 rm -f "$DB_FILE"
 
+# Create tables using the setup script
+if [ -f "$ROOT_DIR/utils/setup_tables.py" ]; then
+    python3 "$ROOT_DIR/utils/setup_tables.py" > /dev/null 2>&1
+fi
+
 echo "🔍 Running RestDB API Tests..."
 
 # =============================================================================
