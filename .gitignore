@@ -9,3 +9,6 @@ __pycache__/
 .managed*
 .claude
 GEMINI.md
+vendor/
+composer.lock
+tmp/
