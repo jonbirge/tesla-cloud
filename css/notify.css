@@ -107,6 +107,12 @@
     color: var(--notification-text-alt);
 }
 
+@media only screen and (max-width: 900px) {
+    .notification-message {
+        font-size: 12pt;
+    }
+}
+
 /* Loading Spinner */
 .loading-container {
     display: flex;
