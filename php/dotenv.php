@@ -80,10 +80,15 @@ class DotEnv {
 
         // If neither file nor env vars loaded, and file path doesn't look like default,
         // throw exception for backward compatibility
-        if (!$fileLoaded && !$envVarsFound && $this->filePath !== '.env') {
+        if (!$fileLoaded && !$envVarsFound && $this->filePath !== self::DEFAULT_ENV_FILE) {
             throw new RuntimeException("Could not read from environment file: $this->filePath");
         }
     }
+
+    /**
+     * Default environment file path constant.
+     */
+    private const DEFAULT_ENV_FILE = '.env';
 
     /**
      * Get the value of a specific environment variable.

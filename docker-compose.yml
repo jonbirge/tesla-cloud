@@ -14,7 +14,7 @@ services:
       SQL_PORT: 3306
       SQL_DB_NAME: teslacloud
       SQL_USER: teslacloud
-      SQL_PASS: ${MYSQL_PASSWORD:-changeme}
+      SQL_PASS: ${MYSQL_PASSWORD:?Please set MYSQL_PASSWORD in .env file}
       
       # API Keys (set these in .env file or environment)
       OPENWX_KEY: ${OPENWX_KEY:-}
@@ -49,10 +49,10 @@ services:
     container_name: tesla-cloud-db
     restart: unless-stopped
     environment:
-      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-rootpassword}
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:?Please set MYSQL_ROOT_PASSWORD in .env file}
       MYSQL_DATABASE: teslacloud
       MYSQL_USER: teslacloud
-      MYSQL_PASSWORD: ${MYSQL_PASSWORD:-changeme}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD:?Please set MYSQL_PASSWORD in .env file}
     volumes:
       - mysql-data:/var/lib/mysql
       - ./init-db.sql:/docker-entrypoint-initdb.d/init-db.sql
@@ -82,7 +82,8 @@ services:
     ports:
       - "80:80"
       - "443:443"
-      - "8080:8080"  # Traefik dashboard (optional, consider disabling in production)
+      # WARNING: Port 8080 exposes Traefik dashboard. Remove in production or secure properly!
+      - "8080:8080"
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock:ro
       - traefik-certs:/letsencrypt
@@ -95,7 +96,8 @@ services:
       - "traefik.http.routers.dashboard.entrypoints=websecure"
       - "traefik.http.routers.dashboard.tls.certresolver=letsencrypt"
       - "traefik.http.routers.dashboard.middlewares=auth"
-      - "traefik.http.middlewares.auth.basicauth.users=${TRAEFIK_AUTH:-admin:$$apr1$$8EVjn/nj$$GiLUZqcbueTFeD23SuB6x0}"
+      # WARNING: Change this default password immediately! Generate with: htpasswd -nb admin yourpassword
+      - "traefik.http.middlewares.auth.basicauth.users=${TRAEFIK_AUTH:?Please set TRAEFIK_AUTH in .env file}"
 
 networks:
   tesla-cloud-net:
