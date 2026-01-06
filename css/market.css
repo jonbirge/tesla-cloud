@@ -42,14 +42,14 @@
 }
 
 .market-card-name {
-    font-size: 15pt;
+    font-size: var(--font-base);
     font-weight: 600;
     color: var(--button-text);
     line-height: 1.2;
 }
 
 .market-card-symbol {
-    font-size: 11pt;
+    font-size: var(--font-xs);
     color: var(--text-color);
     font-weight: 500;
 }
@@ -72,7 +72,7 @@
 .market-price-change {
     align-items: center;
     gap: 0px;
-    font-size: 16pt;
+    font-size: var(--font-md);
     font-weight: 700;
     font-variant-numeric: tabular-nums;
 }
@@ -90,7 +90,7 @@
 }
 
 .market-change-arrow {
-    font-size: 16pt;
+    font-size: var(--font-md);
     margin: -5px;
 }
 
@@ -109,7 +109,7 @@
 }
 
 .market-stat-label {
-    font-size: 9pt;
+    font-size: var(--font-xs);
     color: var(--text-color);
     text-transform: uppercase;
     font-weight: 500;
@@ -117,7 +117,7 @@
 }
 
 .market-stat-value {
-    font-size: 13pt;
+    font-size: var(--font-sm);
     font-weight: 600;
     color: var(--button-text);
     font-variant-numeric: tabular-nums;
@@ -132,7 +132,7 @@
 .market-range-labels {
     display: flex;
     justify-content: space-between;
-    font-size: 9pt;
+    font-size: var(--font-xs);
     color: var(--text-color);
     margin-bottom: 4px;
 }
@@ -160,7 +160,7 @@
 .market-range-values {
     display: flex;
     justify-content: space-between;
-    font-size: 11pt;
+    font-size: var(--font-xs);
     font-weight: 600;
     color: var(--button-text);
     margin-top: 6px;
@@ -189,7 +189,7 @@
 
 /* Quote Time */
 .market-quote-time {
-    font-size: 9pt;
+    font-size: var(--font-xs);
     color: var(--text-color);
     text-align: right;
     margin-top: 8px;

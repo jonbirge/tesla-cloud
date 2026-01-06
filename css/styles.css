@@ -18,7 +18,16 @@
     --status-good: #0fa215;
     --status-unavailable: #888888;
     --status-rain: #00a1ff;
-    --heading-font-size: 17pt;
+
+    /* Harmonized font scale */
+    --font-xs: 11pt;   /* small labels, secondary text */
+    --font-sm: 12pt;   /* timestamps, descriptions */
+    --font-base: 14pt; /* body text, inputs, options */
+    --font-md: 16pt;   /* buttons, default body */
+    --font-lg: 17pt;   /* headings, emphasis */
+    --font-xl: 19pt;   /* large headings, section buttons */
+
+    --heading-font-size: var(--font-lg);
     --heading-font-weight: 600;
     --stock-up: #0fa215;
     --stock-down: #dc3545;
@@ -69,7 +78,7 @@ body.dark-mode {
 body {
     background-color: var(--bg-color);
     color: var(--text-color);
-    font-size: 16pt;
+    font-size: var(--font-md);
     padding: 0;
     text-align: left;
 }
@@ -82,7 +91,7 @@ a {
 
 h1 {
     color: var(--button-text);
-    font-size: 19pt;
+    font-size: var(--font-xl);
     margin: 0 0 15px 0;
     font-weight: 250;
 }
@@ -248,7 +257,7 @@ hr {
     border-radius: var(--button-radius);
     font-weight: 600;
     background-color: var(--bg-color);
-    font-size: 19pt;
+    font-size: var(--font-xl);
     padding: 13px 20px;
     border: none;
     cursor: pointer;
@@ -271,7 +280,7 @@ hr {
     color: var(--button-text);
     background-color: var(--button-bg);
     border-radius: var(--button-radius);
-    font-size: 16pt;
+    font-size: var(--font-md);
     font-weight: 600;
     padding: 16px 20px;
     border: none;
@@ -318,7 +327,7 @@ hr {
     justify-content: center;
     align-items: center;
     color: white;
-    font-size: 12pt;
+    font-size: var(--font-sm);
     font-weight: 750;
     padding: 0 9px;
     opacity: 1;
@@ -553,7 +562,7 @@ body.dark-mode .gps-icon {
 
 .rain-status #rain-timing-text {
     color: var(--weather-warning-color);
-    font-size: 11pt;
+    font-size: var(--font-xs);
     font-weight: 800;
     white-space: nowrap;
 }
@@ -573,7 +582,7 @@ body.dark-mode .gps-icon {
 /* Stock Status Indicator */
 .stock-status {
     width: auto;
-    font-size: 11pt;
+    font-size: var(--font-xs);
     font-weight: 600;
     transition: color 0.3s ease;
     font-variant-numeric: tabular-nums;
@@ -758,14 +767,14 @@ body.dark-mode .gps-icon {
 }
 
 .stat-unit {
-    font-size: 17pt;
+    font-size: var(--font-lg);
     font-weight: 700;
     margin-left: 3px;
 }
 
 .stat-label {
     color: var(--text-color);
-    font-size: 13pt;
+    font-size: var(--font-sm);
     font-weight: 500;
     margin-top: -3px;
     display: block;
@@ -825,7 +834,7 @@ body.dark-mode .gps-icon {
 }
 
 .modal-content {
-    font-size: 14pt;
+    font-size: var(--font-base);
     background-color: var(--bg-color);
     border-radius: var(--button-radius);
     padding: 25px;
@@ -841,7 +850,7 @@ body.dark-mode .gps-icon {
 
 .login-form label {
     font-weight: 500;
-    font-size: 14pt;
+    font-size: var(--font-base);
     width: 80px;
     margin-right: 15px;
     margin-bottom: 10px;
@@ -850,7 +859,7 @@ body.dark-mode .gps-icon {
 }
 
 .login-form input {
-    font-size: 16px;
+    font-size: var(--font-md);
     width: calc(100% - 90px);
     padding: 12px 15px;
     border: 2px solid var(--separator-color);
@@ -871,7 +880,7 @@ body.dark-mode .gps-icon {
     padding: 12px 25px;
     border: none;
     border-radius: 8px;
-    font-size: 16px;
+    font-size: var(--font-md);
     font-weight: 600;
     cursor: pointer;
     transition: background-color 0.3s;
@@ -890,7 +899,7 @@ body.dark-mode .gps-icon {
 .error-message {
     color: var(--tesla-red);
     margin-bottom: 20px;
-    font-size: 14px;
+    font-size: var(--font-base);
     min-height: 20px;
 }
 
@@ -915,7 +924,7 @@ body.dark-mode .gps-icon {
     border: none;
     padding: 8px 14px;
     color: var(--text-color);
-    font-size: 14pt;
+    font-size: var(--font-base);
     font-weight: 600;
     cursor: pointer;
     transition: background-color 0.3s, color 0.3s;
@@ -948,7 +957,7 @@ body.dark-mode .option-button:hover:not(.active) {
     min-width: 64px;
     width: 100%;
     text-transform: uppercase;
-    font-size: 12pt;
+    font-size: var(--font-sm);
 }
 
 /* Disable region selector when using location mode */
