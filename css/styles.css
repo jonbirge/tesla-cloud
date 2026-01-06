@@ -960,13 +960,21 @@ body.dark-mode .option-button:hover:not(.active) {
 /* Mobile Landscape Mode */
 @media only screen and (max-width: 900px) {
     :root {
-        --heading-font-size: 14pt;
+        /* Harmonized mobile font scale */
+        --font-xs: 9pt;    /* labels, timestamps, badges */
+        --font-sm: 10pt;   /* secondary content, symbols */
+        --font-base: 11pt; /* body text, toggle labels */
+        --font-md: 12pt;   /* emphasized text, news titles */
+        --font-lg: 13pt;   /* section buttons, card names */
+        --font-xl: 14pt;   /* main headings */
+
+        --heading-font-size: var(--font-xl);
         --heading-font-weight: 500;
         --button-radius: 9px;
     }
-    
+
     body {
-        font-size: 12pt;
+        font-size: var(--font-base);
     }
 
     p {
@@ -980,7 +988,7 @@ body.dark-mode .option-button:hover:not(.active) {
 
     .logout-button {
         border-radius: var(--button-radius);
-        font-size: 12pt;
+        font-size: var(--font-md);
         font-weight: 600;
         padding: 7px 20px;
         border: none;
@@ -1043,7 +1051,7 @@ body.dark-mode .option-button:hover:not(.active) {
     }
     
     .section-button {
-        font-size: 13pt;
+        font-size: var(--font-lg);
         padding: 0px 9px;
         white-space: nowrap;
         height: 32px;
@@ -1060,7 +1068,7 @@ body.dark-mode .option-button:hover:not(.active) {
         min-width: 12px;
         height: 18px;
         border-radius: 9px;
-        font-size: 8pt;
+        font-size: var(--font-xs);
         padding: 0 5px;
     }
 
@@ -1130,7 +1138,7 @@ body.dark-mode .option-button:hover:not(.active) {
     }
     
     .stat-label {
-        font-size: 12pt;
+        font-size: var(--font-base);
     }
     
     /* Teslawaze container adjustment */
@@ -1148,12 +1156,12 @@ body.dark-mode .option-button:hover:not(.active) {
     .button-list a {
         padding: 15px 5px;
         height: 30px;
-        font-size: 12pt;
+        font-size: var(--font-md);
     }
     
     /* Option Switch adjustments for mobile */
     .option-button {
-        font-size: 9pt;
+        font-size: var(--font-sm);
         padding: 5px 8px;
     }
 
@@ -1163,13 +1171,13 @@ body.dark-mode .option-button:hover:not(.active) {
 
     /* Settings section headers */
     h2 {
-        font-size: 12pt;
+        font-size: var(--font-lg);
         margin-top: 18px;
         margin-bottom: 3px;
     }
 
     h3 {
-        font-size: 11pt;
+        font-size: var(--font-md);
         margin-top: 7px;
         margin-bottom: 7px;
     }
@@ -1180,7 +1188,7 @@ body.dark-mode .option-button:hover:not(.active) {
     }
 
     .satellite-region-selector .option-button {
-        font-size: 8pt;
+        font-size: var(--font-xs);
         min-width: 26px;
         padding: 4px 2px;
     }

@@ -105,11 +105,11 @@ body.dark-mode .share-icon img {
     }
 
     .news-source {
-        font-size: 10pt;
+        font-size: var(--font-sm);
     }
 
     .news-time {
-        font-size: 10pt;
+        font-size: var(--font-sm);
     }
 
     .news-favicon {
@@ -119,7 +119,7 @@ body.dark-mode .share-icon img {
     }
 
     .news-title {
-        font-size: 12pt;
+        font-size: var(--font-md);
         font-weight: 600;
         margin-right: 40px;
     }

@@ -170,7 +170,7 @@ body.dark-mode .settings-text-item input[type="text"]:disabled {
     
     .settings-toggle-item {
         padding: 8px 10px;
-        font-size: 11pt;
+        font-size: var(--font-base);
     }
     
     .settings-toggle-item span.settings-toggle-slider {
@@ -195,7 +195,7 @@ body.dark-mode .settings-text-item input[type="text"]:disabled {
         width: 200px;
         height: 16px;
         padding: 6px 12px;
-        font-size: 10pt; 
+        font-size: var(--font-sm);
     }
 
     /* News sources grid */
@@ -204,7 +204,7 @@ body.dark-mode .settings-text-item input[type="text"]:disabled {
     }
 
     .news-toggle-item {
-        font-size: 10pt;
+        font-size: var(--font-sm);
         padding: 5px 6px 5px 28px;
         margin-top: 5px;
     }

@@ -186,9 +186,9 @@
         height: 24px;
     }
     
-    .temp-indicator, 
+    .temp-indicator,
     .hour-label {
-        font-size: 9pt;  /* Reduced from 10pt */
+        font-size: var(--font-xs);
     }
     
     /* Hide every other hour label to prevent overlap */
@@ -203,7 +203,7 @@
     
     .legend-item {
         margin: 0 5px;
-        font-size: 9pt;  /* Reduced from 10pt */
+        font-size: var(--font-xs);
     }
     
     .legend-color {
