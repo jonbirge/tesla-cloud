@@ -1026,6 +1026,10 @@ function hasPrecipitationInForecast() {
 
 // Helper function to determine precipitation type based on current weather conditions
 function determinePrecipitationType() {
+    // Temperature thresholds for precipitation type determination (in Fahrenheit)
+    const FREEZING_TEMP = 32; // Below this is likely snow
+    const MIXED_PRECIP_TEMP = 35; // Between freezing and this could be mixed/sleet
+    
     // Check if we have current weather data
     if (!forecastDataPrem || !forecastDataPrem.current) {
         return 'precipitation'; // Default to generic term
@@ -1045,12 +1049,12 @@ function determinePrecipitationType() {
     }
     
     // If no specific weather type, use temperature as a guide
-    // Below freezing (32°F) is likely snow, above is likely rain
+    // Below freezing is likely snow, above is likely rain
     if (temp !== undefined && temp !== null) {
-        if (temp < 32) {
+        if (temp < FREEZING_TEMP) {
             return 'snow';
-        } else if (temp < 35) {
-            // Between 32-35°F could be sleet/freezing rain, use generic term
+        } else if (temp < MIXED_PRECIP_TEMP) {
+            // Between freezing and mixed temp could be sleet/freezing rain, use generic term
             return 'precipitation';
         } else {
             return 'rain';
@@ -1059,6 +1063,11 @@ function determinePrecipitationType() {
     
     // If we can't determine the type, use generic term
     return 'precipitation';
+}
+
+// Helper function to capitalize first letter of a string
+function capitalizeFirst(str) {
+    return str.charAt(0).toUpperCase() + str.slice(1);
 }
 
 // Check for imminent rain (next 10 minutes) and alert user if so
@@ -1122,11 +1131,11 @@ function checkImminentRain(minutelyData) {
         // Create the notification message
         let message;
         if (rainStartIndex === 0) {
-            message = `${precipType.charAt(0).toUpperCase() + precipType.slice(1)} detected now! (${maxPrecip.toFixed(1)} mm/hr)`;
+            message = `${capitalizeFirst(precipType)} detected now! (${maxPrecip.toFixed(1)} mm/hr)`;
         } else if (rainStartIndex > 0) {
             const minuteTime = new Date(next15MinData[rainStartIndex].dt * 1000);
             const minutesUntilRain = Math.round((minuteTime - currentTime) / (60 * 1000));
-            message = `${precipType.charAt(0).toUpperCase() + precipType.slice(1)} expected in ${minutesUntilRain} minute${minutesUntilRain > 1 ? 's' : ''} (${maxPrecip.toFixed(1)} mm/hr)`;
+            message = `${capitalizeFirst(precipType)} expected in ${minutesUntilRain} minute${minutesUntilRain > 1 ? 's' : ''} (${maxPrecip.toFixed(1)} mm/hr)`;
         }
 
         // Show the notification
