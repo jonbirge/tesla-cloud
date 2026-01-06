@@ -22,11 +22,11 @@
 .news-source {
     font-weight: 675;
     margin-right: 10px;
-    font-size: 11.5pt;
+    font-size: var(--font-xs);
 }
 
 .news-time {
-    font-size: 12.5pt;
+    font-size: var(--font-sm);
     margin-left: 5px;
     font-weight: 500;
     transition: color 0.3s ease, font-weight 0.3s ease;
@@ -52,7 +52,7 @@
     margin-top: 0px;
     padding-bottom: 5px;
     margin-right: 55px;
-    font-size: 17pt;
+    font-size: var(--font-lg);
     font-weight: 500;
 }
 
@@ -100,16 +100,16 @@ body.dark-mode .share-icon img {
     }
     
     .news-item {
-        padding: 5px 5px 8px 48px;
+        padding: 3px 3px 1px 48px;
         margin-bottom: 7px;
     }
 
     .news-source {
-        font-size: 10pt;
+        font-size: var(--font-sm);
     }
 
     .news-time {
-        font-size: 10pt;
+        font-size: var(--font-sm);
     }
 
     .news-favicon {
@@ -119,7 +119,7 @@ body.dark-mode .share-icon img {
     }
 
     .news-title {
-        font-size: 12pt;
+        font-size: var(--font-md);
         font-weight: 600;
         margin-right: 40px;
     }

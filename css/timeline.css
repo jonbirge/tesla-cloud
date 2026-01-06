@@ -103,7 +103,7 @@
     transform: translateX(-50%);
     color: var(--text-color);
     bottom: 10px;
-    font-size: 14pt;
+    font-size: var(--font-base);
 }
 
 /* Hour labels */
@@ -121,7 +121,7 @@
     text-align: center;
     transform: translateX(-50%);
     color: var(--text-color);
-    font-size: 13pt;
+    font-size: var(--font-sm);
 }
 
 /* Weather legend */
@@ -134,7 +134,7 @@
 .legend-item {
     display: flex;
     margin: 0 10px;
-    font-size: 14pt;
+    font-size: var(--font-base);
     font-weight: 500;
 }
 
@@ -186,9 +186,9 @@
         height: 24px;
     }
     
-    .temp-indicator, 
+    .temp-indicator,
     .hour-label {
-        font-size: 9pt;  /* Reduced from 10pt */
+        font-size: var(--font-xs);
     }
     
     /* Hide every other hour label to prevent overlap */
@@ -203,7 +203,7 @@
     
     .legend-item {
         margin: 0 5px;
-        font-size: 9pt;  /* Reduced from 10pt */
+        font-size: var(--font-xs);
     }
     
     .legend-color {

@@ -8,5 +8,4 @@ TODO
 __pycache__/
 .managed*
 .claude
-CLAUDE.md
 GEMINI.md
