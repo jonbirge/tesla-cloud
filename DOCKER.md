@@ -33,10 +33,17 @@ The Docker deployment consists of three services:
 
 3. **Edit `.env` file** with your configuration:
    - Set `DOMAIN` to your actual domain name
-   - Change `MYSQL_ROOT_PASSWORD` and `MYSQL_PASSWORD` to secure values
+   - Set `MYSQL_ROOT_PASSWORD` and `MYSQL_PASSWORD` to secure, unique values
    - Add API keys (optional): `OPENWX_KEY`, `BREVO_KEY`, `FINNHUB_KEY`
    - Update `ACME_EMAIL` for Let's Encrypt notifications
-   - Generate and set `TRAEFIK_AUTH` for Traefik dashboard access
+   - Generate and set `TRAEFIK_AUTH` for Traefik dashboard access:
+     ```bash
+     htpasswd -nb admin your_secure_password
+     ```
+   - **Important**: In the `.env` file, escape dollar signs with double `$$`:
+     ```
+     TRAEFIK_AUTH=admin:$$apr1$$xyz...
+     ```
 
 4. **Build the Docker image**:
    ```bash
