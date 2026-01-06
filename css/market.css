@@ -203,7 +203,6 @@
 /* Mobile Adjustments */
 @media only screen and (max-width: 900px) {
     .market-grid {
-        grid-template-columns: 1fr;
         gap: 12px;
     }
 
@@ -225,7 +224,7 @@
     }
 
     .market-price-value {
-        font-size: 22pt;
+        font-size: 18pt;
     }
 
     .market-price-change {
