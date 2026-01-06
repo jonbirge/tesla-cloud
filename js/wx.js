@@ -1036,7 +1036,7 @@ function determinePrecipitationType() {
     }
     
     const current = forecastDataPrem.current;
-    const temp = current.temp; // Temperature in Fahrenheit (API uses imperial units)
+    const temp = current.temp; // Temperature in Fahrenheit (API fetched with units=imperial)
     
     // Check if current weather indicates the precipitation type
     if (current.weather && current.weather.length > 0) {
@@ -1067,6 +1067,7 @@ function determinePrecipitationType() {
 
 // Helper function to capitalize first letter of a string
 function capitalizeFirst(str) {
+    if (!str) return str; // Handle empty strings and null/undefined
     return str.charAt(0).toUpperCase() + str.slice(1);
 }
 
