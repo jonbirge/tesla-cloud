@@ -1,0 +1,110 @@
+version: '3.8'
+
+services:
+  # Tesla Cloud Web Application
+  tesla-cloud:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile
+    container_name: tesla-cloud
+    restart: unless-stopped
+    environment:
+      # Database configuration
+      SQL_HOST: db
+      SQL_PORT: 3306
+      SQL_DB_NAME: teslacloud
+      SQL_USER: teslacloud
+      SQL_PASS: ${MYSQL_PASSWORD:?Please set MYSQL_PASSWORD in .env file}
+      
+      # API Keys (set these in .env file or environment)
+      OPENWX_KEY: ${OPENWX_KEY:-}
+      BREVO_KEY: ${BREVO_KEY:-}
+      FINNHUB_KEY: ${FINNHUB_KEY:-}
+    volumes:
+      - ../tmp:/var/www/html/tmp
+    networks:
+      - tesla-cloud-net
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.tesla-cloud.rule=Host(`${DOMAIN:-localhost}`)"
+      - "traefik.http.routers.tesla-cloud.entrypoints=websecure"
+      - "traefik.http.routers.tesla-cloud.tls.certresolver=letsencrypt"
+      - "traefik.http.services.tesla-cloud.loadbalancer.server.port=8080"
+      - "traefik.http.routers.tesla-cloud-http.rule=Host(`${DOMAIN:-localhost}`)"
+      - "traefik.http.routers.tesla-cloud-http.entrypoints=web"
+      - "traefik.http.routers.tesla-cloud-http.middlewares=redirect-to-https"
+      - "traefik.http.middlewares.redirect-to-https.redirectscheme.scheme=https"
+    depends_on:
+      - db
+      - traefik
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/"]
+      interval: 30s
+      timeout: 3s
+      retries: 3
+
+  # MySQL Database Server
+  db:
+    image: mysql:8.0
+    container_name: tesla-cloud-db
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:?Please set MYSQL_ROOT_PASSWORD in .env file}
+      MYSQL_DATABASE: teslacloud
+      MYSQL_USER: teslacloud
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD:?Please set MYSQL_PASSWORD in .env file}
+    volumes:
+      - mysql-data:/var/lib/mysql
+      - ./init-db.sql:/docker-entrypoint-initdb.d/init-db.sql
+    networks:
+      - tesla-cloud-net
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Traefik Reverse Proxy
+  traefik:
+    image: traefik:v2.10
+    container_name: tesla-cloud-traefik
+    restart: unless-stopped
+    command:
+      - "--api.dashboard=true"
+      - "--providers.docker=true"
+      - "--providers.docker.exposedbydefault=false"
+      - "--entrypoints.web.address=:80"
+      - "--entrypoints.websecure.address=:443"
+      - "--certificatesresolvers.letsencrypt.acme.httpchallenge=true"
+      - "--certificatesresolvers.letsencrypt.acme.httpchallenge.entrypoint=web"
+      - "--certificatesresolvers.letsencrypt.acme.email=${ACME_EMAIL:-admin@example.com}"
+      - "--certificatesresolvers.letsencrypt.acme.storage=/letsencrypt/acme.json"
+    ports:
+      - "80:80"
+      - "443:443"
+      # WARNING: Port 8080 exposes Traefik dashboard. Remove in production or secure properly!
+      - "8080:8080"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - traefik-certs:/letsencrypt
+    networks:
+      - tesla-cloud-net
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.dashboard.rule=Host(`traefik.${DOMAIN:-localhost}`)"
+      - "traefik.http.routers.dashboard.service=api@internal"
+      - "traefik.http.routers.dashboard.entrypoints=websecure"
+      - "traefik.http.routers.dashboard.tls.certresolver=letsencrypt"
+      - "traefik.http.routers.dashboard.middlewares=auth"
+      # WARNING: Change this default password immediately! Generate with: htpasswd -nb admin yourpassword
+      - "traefik.http.middlewares.auth.basicauth.users=${TRAEFIK_AUTH:?Please set TRAEFIK_AUTH in .env file}"
+
+networks:
+  tesla-cloud-net:
+    driver: bridge
+
+volumes:
+  mysql-data:
+    driver: local
+  traefik-certs:
+    driver: local
