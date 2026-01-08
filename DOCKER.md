@@ -23,7 +23,7 @@ The Docker deployment consists of three services:
 1. **Clone the repository**:
    ```bash
    git clone https://github.com/jonbirge/tesla-cloud.git
-   cd tesla-cloud
+   cd tesla-cloud/docker
    ```
 
 2. **Create environment configuration**:
@@ -51,7 +51,7 @@ The Docker deployment consists of three services:
    ```
    Or without Make:
    ```bash
-   docker build -t tesla-cloud:latest .
+   docker build -f Dockerfile -t tesla-cloud:latest ..
    ```
 
 5. **Start the application**:
@@ -60,7 +60,7 @@ The Docker deployment consists of three services:
    ```
    Or without Make:
    ```bash
-   docker-compose up -d
+   docker compose up -d
    ```
 
 6. **Access the application**:
@@ -159,13 +159,13 @@ make logs-db
 make logs-traefik
 
 # Follow logs in real-time
-docker-compose logs -f tesla-cloud
+docker compose logs -f tesla-cloud
 ```
 
 Check service health:
 ```bash
 make status
-docker-compose ps
+docker compose ps
 ```
 
 ## Development
@@ -173,10 +173,11 @@ docker-compose ps
 For local development without Docker:
 
 1. **Install PHP 8.2+** with required extensions
-2. **Start development server**:
+2. **Start development server** (from repository root):
    ```bash
-   make dev
-   # Or: php -S localhost:8000
+   cd ..
+   php -S localhost:8000
+   # Or from docker directory: make dev
    ```
 3. **Run tests**:
    ```bash
@@ -188,17 +189,17 @@ For local development without Docker:
 ### Access MySQL shell
 ```bash
 make db-shell
-# Or: docker-compose exec db mysql -u teslacloud -p teslacloud
+# Or: docker compose exec db mysql -u teslacloud -p teslacloud
 ```
 
 ### Backup database
 ```bash
-docker-compose exec db mysqldump -u teslacloud -p teslacloud > backup-$(date +%Y%m%d).sql
+docker compose exec db mysqldump -u teslacloud -p teslacloud > backup-$(date +%Y%m%d).sql
 ```
 
 ### Restore database
 ```bash
-docker-compose exec -T db mysql -u teslacloud -p teslacloud < backup.sql
+docker compose exec -T db mysql -u teslacloud -p teslacloud < backup.sql
 ```
 
 ### Reset database

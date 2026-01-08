@@ -14,6 +14,7 @@ Tesla Cloud can be deployed using Docker containers with nginx, PHP-FPM, MySQL, 
 
 Quick start:
 ```bash
+cd docker
 cp .env.docker.example .env
 # Edit .env with your configuration
 make build

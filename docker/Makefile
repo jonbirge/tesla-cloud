@@ -12,7 +12,7 @@ help: ## Show this help message
 
 build: ## Build the Docker image
 	@echo "Building Tesla Cloud Docker image..."
-	docker build -t $(IMAGE_NAME):$(IMAGE_TAG) .
+	docker build -f Dockerfile -t $(IMAGE_NAME):$(IMAGE_TAG) ..
 	@echo "✓ Build complete: $(IMAGE_NAME):$(IMAGE_TAG)"
 
 up: ## Start the application stack
@@ -51,14 +51,14 @@ rebuild: clean build ## Clean and rebuild the image
 test: ## Run tests on the application
 	@echo "Running Tesla Cloud tests..."
 	@echo "Note: Start the development server first with 'make dev'"
-	cd test && DOTENV_PATH="$$(pwd)/../php/dotenv.php" bash dotenv.sh
-	cd test && bash restdb.sh
+	cd ../test && DOTENV_PATH="$$(pwd)/../php/dotenv.php" bash dotenv.sh
+	cd ../test && bash restdb.sh
 	@echo "✓ Tests complete"
 
 dev: ## Start local development server (PHP built-in)
 	@echo "Starting development server on http://localhost:8000"
 	@echo "Press Ctrl+C to stop"
-	php -S localhost:8000
+	cd .. && php -S localhost:8000
 
 shell: ## Open a shell in the running tesla-cloud container
 	docker-compose -f $(COMPOSE_FILE) exec tesla-cloud /bin/bash

@@ -4,8 +4,8 @@ services:
   # Tesla Cloud Web Application
   tesla-cloud:
     build:
-      context: .
-      dockerfile: Dockerfile
+      context: ..
+      dockerfile: docker/Dockerfile
     container_name: tesla-cloud
     restart: unless-stopped
     environment:
@@ -21,7 +21,7 @@ services:
       BREVO_KEY: ${BREVO_KEY:-}
       FINNHUB_KEY: ${FINNHUB_KEY:-}
     volumes:
-      - ./tmp:/var/www/html/tmp
+      - ../tmp:/var/www/html/tmp
     networks:
       - tesla-cloud-net
     labels:
