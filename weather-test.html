@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Weather Display Test</title>
+    <link rel="stylesheet" href="/css/wx.css">
+    <link rel="stylesheet" href="/css/styles.css">
+    <style>
+        body {
+            padding: 20px;
+            font-family: Arial, sans-serif;
+        }
+        .test-container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        h1 {
+            margin-bottom: 30px;
+        }
+    </style>
+</head>
+<body>
+    <div class="test-container">
+        <h1>Weather Forecast Display Test</h1>
+        <h2>Extended Forecast</h2>
+        <div class="forecast-container" id="prem-forecast-container">
+            <!-- Day 1 -->
+            <div class="forecast-day clear">
+                <div class="forecast-date">MON<br>Jan 13</div>
+                <img class="forecast-icon" src="https://openweathermap.org/img/wn/01d@2x.png" alt="Clear sky">
+                <div class="forecast-temp">32°/45°</div>
+                <div class="forecast-desc">Clear</div>
+            </div>
+            <!-- Day 2 -->
+            <div class="forecast-day clouds">
+                <div class="forecast-date">TUE<br>Jan 14</div>
+                <img class="forecast-icon" src="https://openweathermap.org/img/wn/04d@2x.png" alt="Cloudy">
+                <div class="forecast-temp">35°/48°</div>
+                <div class="forecast-desc">Cloudy</div>
+            </div>
+            <!-- Day 3 - Selected to show no blue highlight -->
+            <div class="forecast-day selected rain">
+                <div class="forecast-date">WED<br>Jan 15</div>
+                <img class="forecast-icon" src="https://openweathermap.org/img/wn/10d@2x.png" alt="Rain">
+                <div class="forecast-temp">38°/50°</div>
+                <div class="forecast-desc">Light Rain</div>
+            </div>
+            <!-- Day 4 -->
+            <div class="forecast-day snow">
+                <div class="forecast-date">THU<br>Jan 16</div>
+                <img class="forecast-icon" src="https://openweathermap.org/img/wn/13d@2x.png" alt="Snow">
+                <div class="forecast-temp">28°/35°</div>
+                <div class="forecast-desc">Snow</div>
+            </div>
+            <!-- Day 5 -->
+            <div class="forecast-day clear">
+                <div class="forecast-date">FRI<br>Jan 17</div>
+                <img class="forecast-icon" src="https://openweathermap.org/img/wn/02d@2x.png" alt="Partly Cloudy">
+                <div class="forecast-temp">30°/42°</div>
+                <div class="forecast-desc">Partly Cloudy</div>
+            </div>
+        </div>
+        
+        <div style="margin-top: 40px;">
+            <h3>Changes Made:</h3>
+            <ul>
+                <li>✅ Removed blue highlight (box-shadow) from selected day - Day 3 (WED) is selected but shows only shadow without blue glow</li>
+                <li>✅ Increased temperature font size from 14pt to 15pt (one point size larger)</li>
+                <li>✅ Increased weather description font size from 12pt to 13pt (one point size larger)</li>
+            </ul>
+        </div>
+    </div>
+</body>
+</html>
