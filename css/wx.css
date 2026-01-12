@@ -222,16 +222,12 @@ body.dark-mode {
     transition: all 0.3s ease;
     z-index: 1000;
     box-shadow:
-        0 18px 32px rgba(0, 0, 0, 0.35),
-        0 0 0 4px rgba(0, 119, 255, 0.9),
-        0 0 26px rgba(0, 119, 255, 0.55);
+        0 18px 32px rgba(0, 0, 0, 0.35);
 }
 
 body.dark-mode .forecast-day.selected {
     box-shadow:
-        0 20px 36px rgba(0, 0, 0, 0.65),
-        0 0 0 4px rgba(0, 136, 255, 0.95),
-        0 0 32px rgba(0, 119, 255, 0.85);
+        0 20px 36px rgba(0, 0, 0, 0.65);
 }
 
 #minutely-precip-container {
@@ -344,7 +340,7 @@ body.dark-mode .forecast-date {
 }
 
 .forecast-temp {
-    font-size: var(--font-base);
+    font-size: 15pt;
     font-weight: 750;
     color: var(--button-text);
     text-shadow: 0 0 8px rgba(255, 255, 255, 0.8), 0 0 16px rgba(255, 255, 255, 0.6);
@@ -356,7 +352,7 @@ body.dark-mode .forecast-temp {
 
 .forecast-desc {
     font-family: "Inter", sans-serif;
-    font-size: var(--font-sm);
+    font-size: 13pt;
     font-style: italic;
     color: var(--button-text);
     text-shadow: 0 0 8px rgba(255, 255, 255, 0.8), 0 0 16px rgba(255, 255, 255, 0.6);
@@ -559,12 +555,12 @@ body.dark-mode .notification-icon img {
     }
 
     .forecast-temp {
-        font-size: var(--font-md);
+        font-size: 17pt;
         margin: 5px 0;
     }
 
     .forecast-desc {
-        font-size: var(--font-base);
+        font-size: 15pt;
     }
 
     .forecast-popup {
