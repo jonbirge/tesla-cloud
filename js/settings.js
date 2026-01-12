@@ -10,6 +10,9 @@ import { currentSection } from './app.js';
 // and exit dark mode this many minutes after sunrise to match Tesla's car behavior
 const NIGHT_MODE_OFFSET_MINUTES = 8;
 
+// Dark mode check interval in minutes
+const DARK_MODE_CHECK_INTERVAL_MINUTES = 2;
+
 // Global variables
 let isDriving = false;          // The vehicle is not parked
 let isLoggedIn = false;         // User is logged in
@@ -23,6 +26,7 @@ let live_news_updates = false;  // Flag to control whether news updates should b
 let lastKnownUpdate = null;     // Timestamp of last known settings update
 let settingsPollingInterval = null; // Interval ID for settings polling
 let isUpdatingSettings = false; // Flag to prevent concurrent updates
+let darkModeCheckInterval = null; // Interval ID for dark mode checks
 
 // Export settings object so it's accessible to other modules
 export { settings, currentUser, isLoggedIn, hashedUser, isDriving, live_news_updates };
@@ -735,6 +739,29 @@ export function stopSettingsPolling() {
         console.log('Stopping settings polling');
         clearInterval(settingsPollingInterval);
         settingsPollingInterval = null;
+    }
+}
+
+// Function to start periodic dark mode checks
+export function startDarkModeChecks() {
+    // Stop any existing interval
+    stopDarkModeChecks();
+    
+    console.log(`Starting dark mode checks every ${DARK_MODE_CHECK_INTERVAL_MINUTES} minutes`);
+    // Check immediately
+    autoDarkMode();
+    // Then check every 2 minutes
+    darkModeCheckInterval = setInterval(() => {
+        autoDarkMode();
+    }, DARK_MODE_CHECK_INTERVAL_MINUTES * 60 * 1000);
+}
+
+// Function to stop periodic dark mode checks
+export function stopDarkModeChecks() {
+    if (darkModeCheckInterval) {
+        console.log('Stopping dark mode checks');
+        clearInterval(darkModeCheckInterval);
+        darkModeCheckInterval = null;
     }
 }
 

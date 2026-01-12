@@ -1,7 +1,7 @@
 // Imports
 import { srcUpdate, testMode, debugMode, isTestMode, updateTimeZone, GEONAMES_USERNAME, showNotification, gpsPermissionDenied, setGpsPermissionDenied, setUsingIPLocation } from './common.js';
 import { PositionSimulator } from './location.js';
-import { attemptLogin, leaveSettings, settings, isDriving, setDrivingState, enableLiveNewsUpdates, saveSetting } from './settings.js';
+import { attemptLogin, leaveSettings, settings, isDriving, setDrivingState, enableLiveNewsUpdates, saveSetting, startDarkModeChecks, stopDarkModeChecks, autoDarkMode } from './settings.js';
 import { fetchPremiumWeatherData, fetchCityData, SAT_URLS, forecastDataPrem, currentRainAlert, generateForecastDayElements, ensurePrecipitationGraphWidth, currentSatRegion } from './wx.js';
 import { updateNetworkInfo, updatePingChart, startPingTest, getIPBasedLocation } from './net.js';
 import { setupNewsObserver, cleanupNewsObserver, startNewsTimeUpdates, stopNewsTimeUpdates, initializeNewsStorage } from './news.js';
@@ -1274,6 +1274,7 @@ document.addEventListener('visibilitychange', () => {
         pauseNewsUpdates();
         pausePingTest();
         stopStockUpdates();
+        stopDarkModeChecks();
     } else {
         startGPSUpdates();
         // Only resume news updates if not currently viewing the news section
@@ -1282,6 +1283,9 @@ document.addEventListener('visibilitychange', () => {
         }
         resumePingTest();
         startStockUpdates();
+        // Check dark mode when app returns to foreground
+        autoDarkMode();
+        startDarkModeChecks();
     }
 });
 
@@ -1336,6 +1340,9 @@ document.addEventListener('DOMContentLoaded', async function () {
 
     // Begin network sensing
     startPingTest();
+
+    // Start periodic dark mode checks
+    startDarkModeChecks();
 
     // Get version from php/vers.php asyncly
     updateVersion();
