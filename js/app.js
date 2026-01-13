@@ -805,8 +805,8 @@ function updateScrollIndicators() {
 function updateMobileSectionVisibility() {
     const isMobile = window.matchMedia("only screen and (max-width: 900px)").matches;
     
-    // Sections to hide on mobile: Dashboard (navigation), Travel, Media, Reference
-    const mobileSections = ['navigation', 'travel', 'media', 'reference'];
+    // Sections to hide on mobile: Dashboard (navigation), Media, Reference
+    const mobileSections = ['navigation', 'media', 'reference'];
     
     mobileSections.forEach(sectionId => {
         const button = document.querySelector(`.section-button[onclick="showSection('${sectionId}')"]`);
