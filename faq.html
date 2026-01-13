@@ -87,6 +87,9 @@
             </ul>
             <li>Dashboard lets you monitor road conditions while still navigating using the car's system</li>
             <li>Use the Network section to monitor connectivity during a trip</li>
+            <li>The rain indicator (top-right) alerts you when precipitation is expected within 15 minutes</li>
+            <li>Configure your Market stocks to keep an eye on your portfolio while reading news</li>
+            <li>Many settings can be changed more easily on your phone and will sync to your car within seconds</li>
         </ul>
     </div>
 
@@ -120,7 +123,7 @@
             <li><strong>Crosswind</strong> Wind speed perpendicular to your direction of travel</li>
             <li><strong>Speed (Optional)</strong> GPS-derived speed of the car. Should be exactly what is shown in your dashboard, but can be a good sanity check that your speedometer is properly calibrated. Some car companies fudge the speedometer a little bit to avoid liability.</li>
             <li><strong>Vertical rate (Optional)</strong> The speed at which you're climbing or descending. Ok, this is just for fun. We have no idea how this could ever be truly useful in a car.</li>
-            <li><strong>Embedded TeslaWaze:</strong> Real-time traffic and road hazards</li>
+            <li><strong>Embedded Maps:</strong> Choose between TeslaWaze (real-time traffic and road hazards), ABRP (A Better Route Planner for EVs), or RainMap (precipitation radar)</li>
         </ul>
     </div>
 
@@ -129,9 +132,15 @@
         Knowing wind conditions can help you understand their impact on your vehicle's range and handling. Headwinds can reduce efficiency, while crosswinds may affect stability as well as range. For example, if you've got a significant headwind, you probably won't get the range you're initially being told by the car, because the car doesn't take forecast winds into account, only observed average efficiency.
     </div>
 
-    <div class="question">What is TeslaWaze and how do I use it?</div>
+    <div class="question">What map options are available in the Dashboard?</div>
     <div class="answer">
-        TeslaWaze is a service developed by some brilliant unknown engineer that taps into Waze and allows information about traffic and speedtraps to be displayed within a browser. It's a nice complement to your Tesla's built-in navigation. It was NOT developed by us, and we're just embedding it in the app.
+        The Dashboard offers three embedded map options that you can switch between:
+        <ul>
+            <li><strong>TeslaWaze (Default):</strong> A service that taps into Waze data to display real-time traffic, road hazards, and speed traps within a browser. It's a nice complement to your Tesla's built-in navigation. Not developed by us, we're just embedding it.</li>
+            <li><strong>ABRP (A Better Route Planner):</strong> Specialized route planning for electric vehicles, helping you plan trips with charging stops optimized for your vehicle.</li>
+            <li><strong>RainMap:</strong> Live precipitation radar showing current and predicted rainfall in your area.</li>
+        </ul>
+        You can switch between these options using the toggle buttons above the map display.
     </div>
 
     <div class="question">Why does the GPS data show "--" or seem inaccurate?</div>
@@ -166,6 +175,35 @@
         Articles are greyed out to indicate they've been read, and will be removed the next time news is updated. Articles are marked as read when you click on them to view the full content, forward them, or scroll past them in the feed.
     </div>
     
+    <h2>Market Section</h2>
+    
+    <div class="question">What does the Market section show?</div>
+    <div class="answer">
+        The Market section provides real-time financial market data including:
+        <ul>
+            <li><strong>Market Indexes:</strong> Major stock market indexes like S&P 500, Dow Jones, NASDAQ, and others</li>
+            <li><strong>Individual Stocks:</strong> Price tracking for stocks you select</li>
+            <li><strong>Price Information:</strong> Current price, daily change amount, and percentage change</li>
+            <li><strong>Visual Indicators:</strong> Color-coded cards showing gains (green) and losses (red) at a glance</li>
+        </ul>
+        You can customize which indexes and stocks appear in the Settings section.
+    </div>
+
+    <div class="question">How do I add or remove stocks and indexes?</div>
+    <div class="answer">
+        After logging in, navigate to Settings and scroll to the "Financial Data" section. There you'll find:
+        <ul>
+            <li><strong>Indexes:</strong> Toggle switches for major market indexes (S&P 500, Dow, NASDAQ, Russell 2000, etc.)</li>
+            <li><strong>Stocks:</strong> Add individual stocks by their ticker symbol</li>
+        </ul>
+        Your selections will be saved to your user profile and appear in the Market section.
+    </div>
+
+    <div class="question">What is the Live Stock Ticker in the News section?</div>
+    <div class="answer">
+        When enabled in Settings, a scrolling stock ticker appears at the top of the News section showing real-time prices for your selected stocks and indexes. You can configure it to show either just the price or both price and change percentage. This allows you to monitor markets while reading news articles.
+    </div>
+    
     <h2>Weather Section</h2>
     
     <div class="question">What weather information is available?</div>
@@ -173,10 +211,19 @@
         The Weather section provides:
         <ul>
             <li><strong>Current Conditions:</strong> Temperature, humidity, wind speed and direction</li>
+            <li><strong>Air Quality Index (AQI):</strong> Current air quality with color-coded indicator (green=good, yellow=moderate, orange=unhealthy for sensitive groups, red=unhealthy)</li>
             <li><strong>Extended Forecast:</strong> 7-day outlook with highs and lows</li>
             <li><strong>Precipitation Predictions:</strong> When rain or snow is predicted in your area within the next hour, a graph will appear showing the amount expected per minute over the next hour.</li>
             <li><strong>Weather Alerts:</strong> Severe weather warnings for your area</li>
+            <li><strong>Doppler Radar:</strong> Local NOAA radar imagery showing precipitation in your area (when available)</li>
+            <li><strong>Sunrise/Sunset Times:</strong> Daily solar event times</li>
+            <li><strong>Moon Phase:</strong> Current lunar phase with icon</li>
         </ul>
+    </div>
+
+    <div class="question">What is the rain indicator at the top of the screen?</div>
+    <div class="answer">
+        When rain is expected within the next 15 minutes based on weather data, a rain indicator appears in the status bar at the top of the window (near the GPS and network indicators). It shows a cloud icon and timing information, alerting you to upcoming precipitation without needing to check the weather section. This is particularly useful when you're in other sections of the app.
     </div>
 
     <h2>Satellite Section</h2>
@@ -201,6 +248,43 @@
     <div class="question">What does this section do?</div>
     <div class="answer">
         The Landmarks section provides nearby points of interest from Wikipedia. You can leave it open while you drive and it will continuously update as you move. Is it useful? We're not sure, it's an experiment.
+    </div>
+    
+    <h2>Media Section</h2>
+    
+    <div class="question">What entertainment options are in the Media section?</div>
+    <div class="answer">
+        The Media section provides quick access to popular streaming and entertainment services, organized by category:
+        <ul>
+            <li><strong>TV & Music:</strong> Streaming video services like YouTube TV, Netflix alternatives, HBO Max, Disney+, Paramount+, and music services like SiriusXM</li>
+            <li><strong>News:</strong> Direct links to major news websites including New York Times, Wall Street Journal, BBC, Bloomberg, CNN, Reuters, and more</li>
+            <li><strong>Tesla:</strong> Tesla-focused news sources like Teslarati, InsideEVs, and Not a Tesla App</li>
+        </ul>
+        These links are optimized for the Tesla browser and provide entertainment while parked at charging stations or for passengers during trips.
+    </div>
+
+    <div class="question">Can I watch streaming video in my Tesla?</div>
+    <div class="answer">
+        Tesla's browser supports many streaming services, though performance varies by service and network connection. Some services may have restrictions based on whether the vehicle is in Park. The Media section provides convenient access to compatible streaming platforms. Note that some streaming services may detect location mismatches if your car's network routes through a distant VPN server.
+    </div>
+
+    <h2>Toys Section</h2>
+    
+    <div class="question">What's in the Toys section?</div>
+    <div class="answer">
+        The Toys section offers fun and entertaining diversions, perfect for charging stops or passenger entertainment:
+        <ul>
+            <li><strong>Games:</strong> Access to online game platforms like Poki Games, Neal.fun, and classic retro game emulators</li>
+            <li><strong>Interactive Experiences:</strong> Creative tools like Mandelbrot fractals, Patatap music maker, WeaveSilk drawing, and Incredibox music creation</li>
+            <li><strong>Exploration:</strong> Virtual experiences like Radio Garden (listen to radio stations worldwide), Window Swap (view windows from around the world), and EarthCam</li>
+            <li><strong>Multiplayer:</strong> AirConsole for phone-controller gaming in your vehicle</li>
+            <li><strong>Retro Games (Beta):</strong> Classic game emulator sites - these may not all work perfectly on the Tesla browser, so feedback is welcome</li>
+        </ul>
+    </div>
+
+    <div class="question">Why are retro games marked as "Beta"?</div>
+    <div class="answer">
+        Retro game emulator sites may not all work perfectly on the Tesla browser due to compatibility issues with JavaScript emulators, touch controls, or browser limitations. These are included experimentally, and we welcome feedback at <code>feedback@teslas.cloud</code> about which ones work well and which don't.
     </div>
     
     <h2>Network Section</h2>
@@ -236,11 +320,14 @@
     
     <div class="question">What tools are in the Reference section?</div>
     <div class="answer">
-        Like many of the other sections, this is just a set of links to external website that we thought might be useful while you're parked at a charger, or for your passenger to use while you're driving. The Reference section offers productivity and informational tools, including:
+        The Reference section provides quick access to useful websites and tools while parked at a charger or for passengers during a trip, organized by category:
         <ul>
-            <li><strong>AI Assistants:</strong> Access to ChatGPT and other AI tools</li>
-            <li><strong>Password Manager:</strong> Secure access to your password vault</li>
-            <li><strong>Learning Resources:</strong> Educational websites and courses</li>
+            <li><strong>Mapping Tools:</strong> TeslaWaze, ABRP, OpenStreetMap, Google Maps, Google Earth, and aviation maps</li>
+            <li><strong>Destination Information:</strong> PlugShare for EV charging locations, travel sites like Yelp, TripAdvisor, Lonely Planet, Fodor's, AllTrails for hiking, Roadtrippers for road trip planning, AAA, hotel booking sites, and FlightAware</li>
+            <li><strong>AI Assistants:</strong> Access to ChatGPT, Google Gemini, Perplexity AI, Microsoft Copilot, Anthropic Claude, and xAI Grok</li>
+            <li><strong>Productivity:</strong> Email services (Outlook, Gmail, iCloud Mail, Proton Mail), calendar apps, and cloud storage (Google Drive, iCloud Drive, Microsoft Office)</li>
+            <li><strong>Learning Resources:</strong> Educational websites including Wikipedia, Britannica, TED talks, Khan Academy, online course platforms like Coursera, Udemy, edX, MIT OpenCourseWare, and more</li>
+            <li><strong>Password Managers:</strong> Secure access to 1Password, Bitwarden, Buttercup, KeePassXC, and LastPass</li>
         </ul>
     </div>
 
@@ -278,12 +365,23 @@
         We follow a privacy-first approach and store minimal data, none of which can be associated with you personally unless you choose to use an e-mail address that reveals your identity. The only data stored on our servers is:
         <ul>
             <li>Encrypted user ID (only if you create one)</li>
-            <li>Settings preferences associated with your ID</li>
+            <li>Settings preferences associated with your ID (including news feeds, market/stock selections, display preferences)</li>
             <li>Email address (if you provide one for news forwarding)</li>
-            <li>Location of ping requests</li>>
+            <li>Location of ping requests</li>
         </ul>
     </div>
     
+    <div class="question">What do the status indicators at the top-right show?</div>
+    <div class="answer">
+        The status bar in the top-right corner provides at-a-glance information:
+        <ul>
+            <li><strong>Rain Indicator:</strong> Appears when rain is expected within 15 minutes, showing a cloud icon and timing</li>
+            <li><strong>Stock Ticker:</strong> Scrolling display of your selected stocks and indexes (when enabled)</li>
+            <li><strong>GPS Status:</strong> Signal strength indicator with bars (0-4) showing GPS reception quality</li>
+            <li><strong>Network Status:</strong> Color-coded connection quality (green=excellent, yellow=good, orange=poor, gray=no connection) based on actual latency, not just signal strength</li>
+        </ul>
+    </div>
+
     <h2>Troubleshooting</h2>
     
     <div class="question">The GPS/location features aren't working. What should I do?</div>
