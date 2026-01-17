@@ -9,6 +9,7 @@ const SAT_URLS = {
     us: {
         latest: 'https://cdn.star.nesdis.noaa.gov/GOES19/ABI/CONUS/GEOCOLOR/1250x750.jpg',
         loop: 'https://cdn.star.nesdis.noaa.gov/GOES19/GLM/CONUS/EXTENT3/GOES19-CONUS-EXTENT3-625x375.gif',
+        loop_video: 'https://cdn.star.nesdis.noaa.gov/GOES19/GLM/CONUS/EXTENT3/GOES19-CONUS-EXTENT3-625x375.mp4',
         latest_ir: 'https://cdn.star.nesdis.noaa.gov/GOES19/ABI/CONUS/15/1250x750.jpg',
     },
     can: {
@@ -2084,6 +2085,7 @@ window.switchWeatherImage = function (type) {
 	// console.log('switchWeatherImage()');
 
     const weatherImage = document.getElementById('weather-image');
+    let weatherVideo = document.getElementById('weather-video');
     const regionUrls = SAT_URLS[currentSatRegion];
 
     // Check if the image type is available for this region
@@ -2092,12 +2094,68 @@ window.switchWeatherImage = function (type) {
         return;
     }
 
-    weatherImage.style.opacity = '0';
+    // Check if we should use video (loop type with video URL available)
+    const useVideo = type === 'loop' && regionUrls.loop_video;
 
-    setTimeout(() => {
-        weatherImage.src = regionUrls[type];
-        weatherImage.style.opacity = '1';
-    }, 300);
+    if (useVideo) {
+        // Create video element if it doesn't exist
+        if (!weatherVideo) {
+            weatherVideo = document.createElement('video');
+            weatherVideo.id = 'weather-video';
+            weatherVideo.className = 'weather-image';
+            weatherVideo.autoplay = true;
+            weatherVideo.loop = true;
+            weatherVideo.muted = true;
+            weatherVideo.playsInline = true;
+            weatherVideo.setAttribute('muted', ''); // Also set as attribute for autoplay policy
+            weatherImage.parentNode.insertBefore(weatherVideo, weatherImage.nextSibling);
+
+            // Add error handler to fall back to GIF if video fails (e.g., codec not supported)
+            weatherVideo.addEventListener('error', function() {
+                console.warn('Video playback failed, falling back to GIF');
+                weatherVideo.style.display = 'none';
+                weatherImage.style.display = '';
+                weatherImage.src = SAT_URLS[currentSatRegion].loop;
+                weatherImage.style.opacity = '1';
+            });
+        }
+
+        // Fade out image, fade in video
+        weatherImage.style.opacity = '0';
+        weatherVideo.style.opacity = '0';
+
+        setTimeout(() => {
+            weatherImage.style.display = 'none';
+            weatherVideo.src = regionUrls.loop_video;
+            weatherVideo.style.display = '';
+            weatherVideo.style.opacity = '1';
+            weatherVideo.play().catch(() => {
+                // Play failed (autoplay blocked or codec issue), fall back to GIF
+                console.warn('Video play() failed, falling back to GIF');
+                weatherVideo.style.display = 'none';
+                weatherImage.style.display = '';
+                weatherImage.src = SAT_URLS[currentSatRegion].loop;
+                weatherImage.style.opacity = '1';
+            });
+        }, 300);
+    } else {
+        // Hide video if it exists, show image
+        if (weatherVideo) {
+            weatherVideo.style.opacity = '0';
+            setTimeout(() => {
+                weatherVideo.style.display = 'none';
+                weatherVideo.pause();
+            }, 300);
+        }
+
+        weatherImage.style.opacity = '0';
+
+        setTimeout(() => {
+            weatherImage.style.display = '';
+            weatherImage.src = regionUrls[type];
+            weatherImage.style.opacity = '1';
+        }, 300);
+    }
 
     // Update buttons and slider position
     const weatherSwitch = document.querySelector('.weather-switch');
