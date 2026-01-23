@@ -537,7 +537,7 @@ body.dark-mode .notification-icon img {
     }
 
     .forecast-day {
-        padding: 12px 14px 16px;
+        padding: 12px 14px;
         min-width: 85px;
         max-width: 150px;
         min-height: 165px;
@@ -555,12 +555,12 @@ body.dark-mode .notification-icon img {
     }
 
     .forecast-temp {
-        font-size: 17pt;
+        font-size: 15pt;
         margin: 5px 0;
     }
 
     .forecast-desc {
-        font-size: 15pt;
+        font-size: 13pt;
     }
 
     .forecast-popup {
