@@ -77,3 +77,7 @@ Many features require external API keys configured in `.env`. Without them:
 - News feeds may be empty
 
 Focus on core functionality and UI/UX rather than external API integration during development.
+
+## Git Workflow
+
+- **Never commit changes on your own.** Wait for explicit instructions from the user before committing to the repository.

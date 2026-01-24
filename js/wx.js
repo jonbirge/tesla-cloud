@@ -549,9 +549,9 @@ function createHourlySegments(dailyForecast, completeHourlyData, dayIndex) {
     const segmentsContainer = document.createElement('div');
     segmentsContainer.className = 'hourly-segments';
     
-    // Get starting hour - if today, start from current hour, otherwise start from 0
-    const startHour = isToday ? now.getHours() : 0;
-    const hoursToShow = 24 - startHour;
+    // Always show full 24 hours for all days
+    const startHour = 0;
+    const hoursToShow = 24;
     
     // Build a list of weather conditions for each hour
     const hourlyConditions = [];
@@ -615,7 +615,7 @@ function createHourlySegments(dailyForecast, completeHourlyData, dayIndex) {
     if (isToday) {
         const nowMarker = document.createElement('div');
         nowMarker.className = 'hourly-segments-now-marker';
-        const nowPercent = (now.getMinutes() / 60) / hoursToShow * 100;
+        const nowPercent = (now.getHours() + now.getMinutes() / 60) / 24 * 100;
         nowMarker.style.left = `${nowPercent}%`;
         segmentsContainer.appendChild(nowMarker);
     }
