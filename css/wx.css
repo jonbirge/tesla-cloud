@@ -555,12 +555,13 @@ body.dark-mode .notification-icon img {
     }
 
     .forecast-temp {
-        font-size: 15pt;
+        font-size: 14pt;
         margin: 5px 0;
     }
 
     .forecast-desc {
-        font-size: 13pt;
+        font-size: 12pt;
+        margin: 0;
     }
 
     .forecast-popup {
