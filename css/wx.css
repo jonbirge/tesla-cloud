@@ -168,6 +168,17 @@ body.dark-mode {
     /* Width is set dynamically via inline style */
 }
 
+/* Current time marker on forecast day panel */
+.hourly-segments-now-marker {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    width: 3px;
+    background-color: orange;
+    z-index: 1;
+    pointer-events: none;
+}
+
 /* Ensure forecast content is above the hourly segments */
 .forecast-date,
 .forecast-icon,

@@ -611,6 +611,15 @@ function createHourlySegments(dailyForecast, completeHourlyData, dayIndex) {
         segmentsContainer.appendChild(segment);
     });
 
+    // Add current time marker for today
+    if (isToday) {
+        const nowMarker = document.createElement('div');
+        nowMarker.className = 'hourly-segments-now-marker';
+        const nowPercent = (now.getMinutes() / 60) / hoursToShow * 100;
+        nowMarker.style.left = `${nowPercent}%`;
+        segmentsContainer.appendChild(nowMarker);
+    }
+
     return segmentsContainer;
 }
 
