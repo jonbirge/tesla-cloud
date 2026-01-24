@@ -642,11 +642,6 @@ function createComplete24HourData(oneCallData, forecastData) {
         for (let hour = 0; hour < 24; hour++) {
             const hourTimestamp = dayStart + (hour * 3600);
             
-            // Skip past hours for today
-            if (dayIndex === 0 && hourTimestamp < nowTimestamp) {
-                continue;
-            }
-            
             let hourlyDataPoint = null;
             
             // Days 1-2: Use OneCall hourly data (high resolution)
@@ -1812,6 +1807,17 @@ window.showPremiumPrecipGraph = function(dayIndex) {
             iconsDiv.appendChild(iconDiv);
         });
         timelineContainer.appendChild(iconsDiv);
+
+        // Add current time marker for today
+        const now = new Date();
+        const isToday = now.toDateString() === selectedDate.toDateString();
+        if (isToday) {
+            const nowMarker = document.createElement('div');
+            nowMarker.className = 'timeline-now-marker';
+            const nowPercent = (now.getHours() + now.getMinutes() / 60) / 24 * 100;
+            nowMarker.style.left = `${nowPercent}%`;
+            timelineContainer.appendChild(nowMarker);
+        }
 
         // Add temperature indicators (every 3 hours for consistency)
         const tempDiv = document.createElement('div');

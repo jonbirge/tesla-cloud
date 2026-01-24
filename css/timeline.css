@@ -58,6 +58,18 @@
     filter: brightness(1.1);
 }
 
+/* Current time marker */
+.timeline-now-marker {
+    position: absolute;
+    top: 0;
+    width: 3px;
+    height: 80px;
+    background-color: orange;
+    z-index: 15;
+    transform: translateX(-50%);
+    pointer-events: none;
+}
+
 /* Weather icons */
 .weather-icons {
     position: absolute;
@@ -177,6 +189,10 @@
         height: 60px;
     }
     
+    .timeline-now-marker {
+        height: 60px;
+    }
+
     .weather-change-icon {
         top: 30px;
     }
