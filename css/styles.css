@@ -823,6 +823,28 @@ body.dark-mode #teslawaze {
     filter: brightness(0.7);
 }
 
+.waze-reload-btn {
+    display: none;
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    z-index: 10;
+    background-color: var(--tesla-blue);
+    color: white;
+    border: none;
+    border-radius: var(--button-radius);
+    padding: 6px 14px;
+    font-size: var(--font-sm);
+    font-weight: 600;
+    cursor: pointer;
+    opacity: 0.85;
+    transition: opacity 0.2s;
+}
+
+.waze-reload-btn:hover {
+    opacity: 1;
+}
+
 /* Modal Login Dialog */
 .modal {
     display: none;

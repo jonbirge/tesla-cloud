@@ -916,6 +916,8 @@ window.updateMapFrame = function () {
     }
     iframe.style.display = '';
     if (testModeMsg) testModeMsg.style.display = 'none';
+    const reloadBtn = document.getElementById('waze-reload-btn');
+    if (reloadBtn) reloadBtn.style.display = settings["map-choice"] === 'waze' ? '' : 'none';
 }
 
 // Function to load an external URL in a new tab or frame
