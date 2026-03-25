@@ -1,5 +1,5 @@
 // Imports
-import { srcUpdate, testMode, debugMode, isTestMode, updateTimeZone, GEONAMES_USERNAME, showNotification, gpsPermissionDenied, setGpsPermissionDenied, setUsingIPLocation } from './common.js';
+import { testMode, debugMode, isTestMode, updateTimeZone, GEONAMES_USERNAME, showNotification, gpsPermissionDenied, setGpsPermissionDenied, setUsingIPLocation } from './common.js';
 import { PositionSimulator } from './location.js';
 import { attemptLogin, leaveSettings, settings, isDriving, setDrivingState, enableLiveNewsUpdates, saveSetting, startDarkModeChecks, stopDarkModeChecks, autoDarkMode } from './settings.js';
 import { fetchPremiumWeatherData, fetchCityData, SAT_URLS, forecastDataPrem, currentRainAlert, generateForecastDayElements, ensurePrecipitationGraphWidth, currentSatRegion } from './wx.js';
@@ -49,6 +49,7 @@ let gpsFailureCount = 0;                            // Count consecutive GPS fai
 let networkInfoUpdated = false;                     // Track if network info has been updated
 let lastMapLat = null;                              // Last latitude used for Waze map frame
 let lastMapLong = null;                             // Last longitude used for Waze map frame
+let lastMapUrl = null;                              // Last URL set on the map iframe
 let previousAlt = null;                             // Previous altitude for vertical rate calculation
 let previousAltTime = null;                         // Timestamp of previous altitude measurement
 const positionSimulator = new PositionSimulator();  // TODO: only create if needed
@@ -888,34 +889,48 @@ function handleScrollScale() {
 // Function to determine if the Waze map iframe should be refreshed
 function shouldRefreshWazeMap() {
     if (lat === null || long === null) return false;
-    if (lastMapLat === null || lastMapLong === null) return true;
+    if (lastMapLat === null || lastMapLong === null) return true;  // Always do initial GPS load
+    if (!settings["waze-distance-refresh"]) return false;  // Distance-based refresh disabled
     const distance = calculateDistance(lat, long, lastMapLat, lastMapLong);
     return distance >= MAP_REFRESH_DISTANCE;
 }
 
-// Function to update the src of an iframe
-window.updateMapFrame = function () {
-    // Normal mode - ensure iframe is visible and test mode message is hidden
+// Function to update the src of the map iframe
+// force=true forces a reload even if the URL hasn't changed (used by the reload button)
+window.updateMapFrame = function (force = false) {
     const teslaWazeContainer = document.querySelector('.teslawaze-container');
     const iframe = teslaWazeContainer.querySelector('iframe');
     let testModeMsg = teslaWazeContainer.querySelector('.test-mode-message');
+
+    // Build the target URL based on map choice
+    let newUrl;
     if (settings["map-choice"] === 'waze') {
-        let wazeUrl;
         if (lat !== null && long !== null) {
-            wazeUrl = `https://embed.waze.com/iframe?zoom=13&lat=${lat}&lon=${long}`;
+            // Round to 4 decimal places (~11m) to prevent GPS jitter from
+            // producing a different URL string on every reading
+            newUrl = `https://embed.waze.com/iframe?zoom=13&lat=${lat.toFixed(4)}&lon=${long.toFixed(4)}`;
             lastMapLat = lat;
             lastMapLong = long;
         } else {
-            wazeUrl = 'https://embed.waze.com/iframe?zoom=4&lat=39.5&lon=-98.35';
+            newUrl = 'https://embed.waze.com/iframe?zoom=4&lat=39.5&lon=-98.35';
         }
-        srcUpdate("teslawaze", wazeUrl);
     } else if (settings["map-choice"] === 'rainmap') {
-        srcUpdate("teslawaze", "https://car.rainviewer.com/");
+        newUrl = "https://car.rainviewer.com/";
     } else {
-        srcUpdate("teslawaze", "https://abetterrouteplanner.com/");
+        newUrl = "https://abetterrouteplanner.com/";
     }
+
+    // Only set iframe src when the URL actually changed (or forced)
+    if (force || newUrl !== lastMapUrl) {
+        console.log('Updating map frame:', newUrl, force ? '(forced)' : '');
+        lastMapUrl = newUrl;
+        iframe.src = newUrl;
+    }
+
     iframe.style.display = '';
     if (testModeMsg) testModeMsg.style.display = 'none';
+    const reloadBtn = document.getElementById('waze-reload-btn');
+    if (reloadBtn) reloadBtn.style.display = settings["map-choice"] === 'waze' ? '' : 'none';
 }
 
 // Function to load an external URL in a new tab or frame
