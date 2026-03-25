@@ -987,6 +987,7 @@ window.shareNews = async function (title, link, source, id) {
 
     // E-mail address with which to share, aborting if none is set
     if (settings["forwarding-email"] === '') {
+        console.warn('shareNews: No forwarding email configured, aborting share');
         return;
     }
     const to = settings["forwarding-email"];
@@ -1003,17 +1004,41 @@ window.shareNews = async function (title, link, source, id) {
     const subject = `[teslas.cloud] ${title}`;
 
     // Communicate with the forwarding server
+    console.log(`shareNews: Sending to ${to} — subject: ${subject}`);
     try {
         const response = await fetch('php/share.php', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ to, html, subject })
         });
-        // Note: No additional notifications shown after backend response per user feedback
-        // to simplify the experience since users can't act on the result anyway
+
+        let data;
+        const contentType = response.headers.get('content-type') || '';
+        const responseText = await response.text();
+        if (contentType.includes('application/json')) {
+            try {
+                data = JSON.parse(responseText);
+            } catch (parseErr) {
+                console.error('shareNews: Failed to parse JSON response:', parseErr, 'Raw:', responseText);
+                data = null;
+            }
+        } else {
+            console.warn('shareNews: Non-JSON response (content-type:', contentType, ') Body:', responseText);
+            data = null;
+        }
+
+        if (!response.ok) {
+            const errorMsg = data?.error || `HTTP ${response.status} ${response.statusText}`;
+            console.error('shareNews: Server returned error:', errorMsg, data ? data : responseText);
+            showNotification('Share failed: ' + errorMsg, 'error');
+        } else if (data?.success) {
+            console.log('shareNews: Success — messageId:', data.messageId);
+        } else {
+            console.warn('shareNews: Unexpected response:', data ?? responseText);
+        }
     } catch (err) {
-        // Note: No error notifications shown after backend response per user feedback
-        console.error('Error sharing article:', err);
+        console.error('shareNews: Network/fetch error:', err);
+        showNotification('Share failed: network error', 'error');
     }
 }
 
