@@ -23,6 +23,7 @@ const MAX_SPEED = 50;                               // Max speed for wind displa
 const MIN_GPS_UPDATE_INTERVAL = 1000;               // ms - minimum time between updates
 const MAX_GPS_RETRIES = 3;                          // Max consecutive GPS failures before giving up
 const WIKI_TYPES = ['event','airport','landmark'];  // Types of Wikipedia data to fetch
+const MAP_REFRESH_DISTANCE = 3219;                   // meters (~2 miles) - Waze map refresh threshold
 const ENABLE_SPEED_DISABLE = false;                 // Set to false to disable speed-based section disabling
 const SPEED_DISABLE_THRESHOLD = 1.5;                // Speed in mph above which disabling occurs
 
@@ -46,6 +47,8 @@ let gpsIntervalId = null;
 let lastGPSUpdate = 0;
 let gpsFailureCount = 0;                            // Count consecutive GPS failures
 let networkInfoUpdated = false;                     // Track if network info has been updated
+let lastMapLat = null;                              // Last latitude used for Waze map frame
+let lastMapLong = null;                             // Last longitude used for Waze map frame
 let previousAlt = null;                             // Previous altitude for vertical rate calculation
 let previousAltTime = null;                         // Timestamp of previous altitude measurement
 const positionSimulator = new PositionSimulator();  // TODO: only create if needed
@@ -533,6 +536,14 @@ async function handlePositionUpdate(position) {
         lastUpdateLong = long;
         lastUpdate = Date.now();
     }
+
+    // Refresh Waze map iframe if visible and moved enough (~2 miles)
+    if (settings["map-choice"] === 'waze' && shouldRefreshWazeMap()) {
+        const navigationSection = document.getElementById("navigation");
+        if (navigationSection.style.display === "block") {
+            updateMapFrame();
+        }
+    }
 }
 
 // Function called when user starts driving
@@ -874,6 +885,14 @@ function handleScrollScale() {
     }
 }
 
+// Function to determine if the Waze map iframe should be refreshed
+function shouldRefreshWazeMap() {
+    if (lat === null || long === null) return false;
+    if (lastMapLat === null || lastMapLong === null) return true;
+    const distance = calculateDistance(lat, long, lastMapLat, lastMapLong);
+    return distance >= MAP_REFRESH_DISTANCE;
+}
+
 // Function to update the src of an iframe
 window.updateMapFrame = function () {
     // Normal mode - ensure iframe is visible and test mode message is hidden
@@ -881,7 +900,15 @@ window.updateMapFrame = function () {
     const iframe = teslaWazeContainer.querySelector('iframe');
     let testModeMsg = teslaWazeContainer.querySelector('.test-mode-message');
     if (settings["map-choice"] === 'waze') {
-        srcUpdate("teslawaze", "https://teslawaze.azurewebsites.net/");
+        let wazeUrl;
+        if (lat !== null && long !== null) {
+            wazeUrl = `https://embed.waze.com/iframe?zoom=13&lat=${lat}&lon=${long}`;
+            lastMapLat = lat;
+            lastMapLong = long;
+        } else {
+            wazeUrl = 'https://embed.waze.com/iframe?zoom=4&lat=39.5&lon=-98.35';
+        }
+        srcUpdate("teslawaze", wazeUrl);
     } else if (settings["map-choice"] === 'rainmap') {
         srcUpdate("teslawaze", "https://car.rainviewer.com/");
     } else {
