@@ -819,6 +819,10 @@ body.dark-mode .gps-icon {
     border: none;
 }
 
+body.dark-mode #teslawaze {
+    filter: brightness(0.7);
+}
+
 /* Modal Login Dialog */
 .modal {
     display: none;
