@@ -399,3 +399,38 @@ export function debugLog(message) {
     }
     // Do nothing when debug mode is off
 }
+
+// Helper function to format numeric values with smart decimal handling
+// If the integer part has more than 3 digits, truncate decimals; otherwise keep 2 decimals
+export function formatNumericValue(value) {
+    if (value === null || value === undefined || isNaN(value)) {
+        return '--';
+    }
+
+    const numValue = parseFloat(value);
+    const integerPart = Math.floor(Math.abs(numValue));
+    const digitCount = integerPart.toString().length;
+
+    // If more than 3 digits before decimal, show as integer
+    if (digitCount > 3) {
+        return Math.round(numValue).toString();
+    }
+
+    // Otherwise show with 2 decimal places
+    return numValue.toFixed(2);
+}
+
+// Update Chart.js axis colors based on current CSS theme variables
+export function updateChartAxisColors(chart) {
+    if (!chart) return;
+    const computedStyle = getComputedStyle(document.body);
+    const axisColor = computedStyle.getPropertyValue('--text-color').trim();
+    const gridColor = computedStyle.getPropertyValue('--separator-color').trim();
+    chart.options.scales.x.ticks.color = axisColor;
+    chart.options.scales.y.ticks.color = axisColor;
+    chart.options.scales.x.grid.color = gridColor;
+    chart.options.scales.y.grid.color = gridColor;
+    chart.options.scales.y.title.color = axisColor;
+    chart.options.scales.x.title.color = axisColor;
+    chart.update();
+}

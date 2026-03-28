@@ -18,7 +18,6 @@ $version = isset($gitInfo['commit']) ? $gitInfo['commit'] : 'unknown';
 // Settings
 $logFile = '/tmp/rss_php_' . $version . '.log';
 $maxStories = 5000;
-$maxSingleSource = 0;
 $diagnostics = [];
 $forceSqliteOverride = false; // Set to true to skip MySQL and always use SQLite
 
@@ -286,25 +285,12 @@ try {
     
     logMessage("Retrieved " . count($articles) . " articles from database");
     
-    // Apply per-feed limits
-    $feedCounts = [];
     foreach ($articles as $article) {
         $feedId = $article['feed_id'];
         $articleId = generateArticleId($feedId, $article['title'] ?? '');
         
         // Mark if item was already read (but don't skip it)
         $isRead = $readFilterApplied && isset($readArticleIds[$articleId]);
-        
-        // Check if we've hit the per-feed limit
-        if (!isset($feedCounts[$feedId])) {
-            $feedCounts[$feedId] = 0;
-        }
-        
-        if ($maxSingleSource > 0 && $feedCounts[$feedId] >= $maxSingleSource) {
-            continue;
-        }
-        
-        $feedCounts[$feedId]++;
         
         // Convert to frontend format
         $pubDate = strtotime($article['published_date']);
@@ -379,7 +365,7 @@ ob_end_flush();
 // Function to write timestamped log messages to the end of the log file
 function logMessage($message) {
     global $logFile;
-    file_put_contents($logFile, date('[Y-m-d H:i:s] ') . $message . "\n", FILE_APPEND);
+    file_put_contents($logFile, date('[Y-m-d H:i:s] ') . $message . "\n", FILE_APPEND | LOCK_EX);
 }
 
 // Add a diagnostic line for operators to review from the stats endpoint
