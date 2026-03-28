@@ -543,6 +543,9 @@ async function handlePositionUpdate(position) {
         const navigationSection = document.getElementById("navigation");
         if (navigationSection.style.display === "block") {
             updateMapFrame();
+            // Record that we loaded the map at this position
+            lastMapLat = lat;
+            lastMapLong = long;
         }
     }
 }
@@ -588,7 +591,6 @@ function updateGPS() {
             return false;
         }
     } else { // GPS testing mode
-        console.log('TEST MODE (gps): Using simulated GPS position');
         handlePositionUpdate(positionSimulator.getPosition());
     }
     return true;
@@ -889,10 +891,17 @@ function handleScrollScale() {
 // Function to determine if the Waze map iframe should be refreshed
 function shouldRefreshWazeMap() {
     if (lat === null || long === null) return false;
-    if (lastMapLat === null || lastMapLong === null) return true;  // Always do initial GPS load
+    if (lastMapLat === null || lastMapLong === null) {
+        console.log('Waze refresh: initial GPS load (no previous map position)');
+        return true;
+    }
     if (!settings["waze-distance-refresh"]) return false;  // Distance-based refresh disabled
     const distance = calculateDistance(lat, long, lastMapLat, lastMapLong);
-    return distance >= MAP_REFRESH_DISTANCE;
+    if (distance >= MAP_REFRESH_DISTANCE) {
+        console.log(`Waze refresh: distance threshold reached (${Math.round(distance)}m >= ${MAP_REFRESH_DISTANCE}m)`);
+        return true;
+    }
+    return false;
 }
 
 // Function to update the src of the map iframe
@@ -909,8 +918,6 @@ window.updateMapFrame = function (force = false) {
             // Round to 4 decimal places (~11m) to prevent GPS jitter from
             // producing a different URL string on every reading
             newUrl = `https://embed.waze.com/iframe?zoom=13&lat=${lat.toFixed(4)}&lon=${long.toFixed(4)}`;
-            lastMapLat = lat;
-            lastMapLong = long;
         } else {
             newUrl = 'https://embed.waze.com/iframe?zoom=4&lat=39.5&lon=-98.35';
         }
@@ -922,7 +929,7 @@ window.updateMapFrame = function (force = false) {
 
     // Only set iframe src when the URL actually changed (or forced)
     if (force || newUrl !== lastMapUrl) {
-        console.log('Updating map frame:', newUrl, force ? '(forced)' : '');
+        console.log('updateMapFrame: setting src to', newUrl, force ? '(forced)' : '', '\n  caller:', new Error().stack.split('\n')[2]?.trim());
         lastMapUrl = newUrl;
         iframe.src = newUrl;
     }
