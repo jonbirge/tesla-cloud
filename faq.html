@@ -116,14 +116,15 @@
     <div class="answer">
         A few bits of data not otherwise available from the car's built-in interface:
         <ul>
-            <li><strong>Relative Wind Indicator (Optional):</strong> A circular radar display showing wind direction relative to your vehicle's heading</li>
+            <li><strong>Relative Wind Indicator:</strong> A circular radar display showing wind direction relative to your vehicle's heading. Can be toggled on/off in Settings.</li>
             <li><strong>Altitude Display:</strong> Elevation above sea level</li>
             <li><strong>Vehicle Heading:</strong> Compass direction in degrees</li>
-            <li><strong>Headwind/Tailwind</strong> Wind speed in your direction of travel</li>
-            <li><strong>Crosswind</strong> Wind speed perpendicular to your direction of travel</li>
-            <li><strong>Speed (Optional)</strong> GPS-derived speed of the car. Should be exactly what is shown in your dashboard, but can be a good sanity check that your speedometer is properly calibrated. Some car companies fudge the speedometer a little bit to avoid liability.</li>
-            <li><strong>Vertical rate (Optional)</strong> The speed at which you're climbing or descending. Ok, this is just for fun. We have no idea how this could ever be truly useful in a car.</li>
-            <li><strong>Embedded Maps:</strong> Choose between TeslaWaze (real-time traffic and road hazards), ABRP (A Better Route Planner for EVs), or RainMap (precipitation radar)</li>
+            <li><strong>Headwind/Tailwind:</strong> Wind speed in your direction of travel</li>
+            <li><strong>Crosswind:</strong> Wind speed perpendicular to your direction of travel</li>
+            <li><strong>Speed:</strong> GPS-derived speed of the car. Should be exactly what is shown in your dashboard, but can be a good sanity check that your speedometer is properly calibrated. Some car companies fudge the speedometer a little bit to avoid liability. Can be toggled on/off in Settings.</li>
+            <li><strong>Vertical Rate:</strong> The speed at which you're climbing or descending. Ok, this is just for fun. We have no idea how this could ever be truly useful in a car. Can be toggled on/off in Settings.</li>
+            <li><strong>GPS Accuracy:</strong> Shows the accuracy of your current GPS fix in meters</li>
+            <li><strong>Embedded Maps:</strong> Choose between Waze (real-time traffic and road hazards), ABRP (A Better Route Planner for EVs), or RainMap (precipitation radar)</li>
         </ul>
     </div>
 
@@ -136,11 +137,11 @@
     <div class="answer">
         The Dashboard offers three embedded map options that you can switch between:
         <ul>
-            <li><strong>TeslaWaze (Default):</strong> A service that taps into Waze data to display real-time traffic, road hazards, and speed traps within a browser. It's a nice complement to your Tesla's built-in navigation. Not developed by us, we're just embedding it.</li>
+            <li><strong>Waze (Default):</strong> An embedded Waze live map that displays real-time traffic, road hazards, and speed traps. The map automatically recenters on your current GPS position every two miles. You can disable auto-refresh in Settings, and there's also a manual Reload button if needed. It's a nice complement to your Tesla's built-in navigation.</li>
             <li><strong>ABRP (A Better Route Planner):</strong> Specialized route planning for electric vehicles, helping you plan trips with charging stops optimized for your vehicle.</li>
             <li><strong>RainMap:</strong> Live precipitation radar showing current and predicted rainfall in your area.</li>
         </ul>
-        You can switch between these options using the toggle buttons above the map display.
+        You can switch between these options using the toggle buttons above the map display, or in Settings under "Dashboard Map."
     </div>
 
     <div class="question">Why does the GPS data show "--" or seem inaccurate?</div>
@@ -167,7 +168,7 @@
 
     <div class="question">How does news sharing work?</div>
     <div class="answer">
-        When logged in, you can forward interesting articles to yourself for later reading via email. Click the share button on any article, and it will be sent to your configured email address. This feature requires you to have email forwarding enabled in your user settings.
+        When logged in, you can forward interesting articles to yourself for later reading via email. Click the share button on any article, and it will be sent to your configured email address. This feature requires you to enable "News Forwarding" and provide an email address in Settings. There's also an "Always Forward When Driving" option that automatically sends all new articles to your email while you're in motion, so you can catch up on them later.
     </div>
 
     <div class="question">Why are some articles grey?</div>
@@ -181,12 +182,12 @@
     <div class="answer">
         The Market section provides real-time financial market data including:
         <ul>
-            <li><strong>Market Indexes:</strong> Major stock market indexes like S&P 500, Dow Jones, NASDAQ, and others</li>
+            <li><strong>Market Indexes:</strong> S&P 500, Dow Jones, NASDAQ 100, Russell 2000, Ten-Year Treasury, Two-Year Treasury, DAX, Hang Seng, Nikkei 225, MSCI EAFE, FTSE China 50, and Bitcoin</li>
             <li><strong>Individual Stocks:</strong> Price tracking for stocks you select</li>
             <li><strong>Price Information:</strong> Current price, daily change amount, and percentage change</li>
             <li><strong>Visual Indicators:</strong> Color-coded cards showing gains (green) and losses (red) at a glance</li>
         </ul>
-        You can customize which indexes and stocks appear in the Settings section.
+        You can customize which indexes and stocks appear in the Settings section under "Financial Data."
     </div>
 
     <div class="question">How do I add or remove stocks and indexes?</div>
@@ -201,7 +202,7 @@
 
     <div class="question">What is the Live Stock Ticker in the News section?</div>
     <div class="answer">
-        When enabled in Settings, a scrolling stock ticker appears at the top of the News section showing real-time prices for your selected stocks and indexes. You can configure it to show either just the price or both price and change percentage. This allows you to monitor markets while reading news articles.
+        When enabled in Settings ("Live Stock Ticker"), a scrolling stock ticker appears at the top of the News section showing real-time prices for your selected stocks and indexes. You can toggle "Ticker Shows Price and Change" to switch between showing just the ticker symbol or including the price and change percentage. This allows you to monitor markets while reading news articles.
     </div>
     
     <h2>Weather Section</h2>
@@ -213,9 +214,10 @@
             <li><strong>Current Conditions:</strong> Temperature, humidity, wind speed and direction</li>
             <li><strong>Air Quality Index (AQI):</strong> Current air quality with color-coded indicator (green=good, yellow=moderate, orange=unhealthy for sensitive groups, red=unhealthy)</li>
             <li><strong>Extended Forecast:</strong> 7-day outlook with highs and lows</li>
+            <li><strong>Hourly Forecast Stripes:</strong> A visual stripe display showing hourly temperature trends. Can be toggled on/off in Settings.</li>
             <li><strong>Precipitation Predictions:</strong> When rain or snow is predicted in your area within the next hour, a graph will appear showing the amount expected per minute over the next hour.</li>
             <li><strong>Weather Alerts:</strong> Severe weather warnings for your area</li>
-            <li><strong>Doppler Radar:</strong> Local NOAA radar imagery showing precipitation in your area (when available)</li>
+            <li><strong>Doppler Radar:</strong> Local NOAA radar imagery showing precipitation in your area (when available). Can be toggled on/off in Settings.</li>
             <li><strong>Sunrise/Sunset Times:</strong> Daily solar event times</li>
             <li><strong>Moon Phase:</strong> Current lunar phase with icon</li>
         </ul>
@@ -230,12 +232,12 @@
 
     <div class="question">What does the Satellite section show?</div>
     <div class="answer">
-        The Satellite section provides a live satellite map for the continent in which you're located. With some satellite providers we are able to also show an animation of the satelite imagery over the past few hours, which can be useful for tracking large weather systems.
+        The Satellite section provides a live satellite map for the continent in which you're located. With some satellite providers we are able to also show an animation of the satellite imagery over the past few hours, which can be useful for tracking large weather systems.
     </div>
 
     <div class="question">Why isn't it showing the right location for me?</div>
     <div class="answer">
-        We try to show the right satellite imagery based on your GPS location, but sometimes the mapping between GPS coordinates and satellite source isn't perfect. As you might image, this is a hard one for us to adequately test! If you're seeing the wrong area, you can set it manually in Settings by turning off the automatic location and selecting one of the regions.
+        We try to show the right satellite imagery based on your GPS location, but sometimes the mapping between GPS coordinates and satellite source isn't perfect. As you might imagine, this is a hard one for us to adequately test! If you're seeing the wrong area, you can set it manually in Settings by turning off "Use Current Location" and selecting one of the available regions.
     </div>
 
     <div class="question">Why don't you have Australia, southern South America, or Africa?</div>
@@ -256,11 +258,11 @@
     <div class="answer">
         The Media section provides quick access to popular streaming and entertainment services, organized by category:
         <ul>
-            <li><strong>TV & Music:</strong> Streaming video services like YouTube TV, Netflix alternatives, HBO Max, Disney+, Paramount+, and music services like SiriusXM</li>
+            <li><strong>TV & Music:</strong> YouTube TV, Fubo TV, Sling TV, Prime Video, HBO Max, Apple TV+, Starz, Peacock, CBS All Access, ESPN, Disney+, Paramount+, MGM+, Discovery+, AMC, MLB.tv, and SiriusXM</li>
             <li><strong>News:</strong> Direct links to major news websites including New York Times, Wall Street Journal, BBC, Bloomberg, CNN, Reuters, and more</li>
             <li><strong>Tesla:</strong> Tesla-focused news sources like Teslarati, InsideEVs, and Not a Tesla App</li>
         </ul>
-        These links are optimized for the Tesla browser and provide entertainment while parked at charging stations or for passengers during trips.
+        These links are optimized for the Tesla browser and provide entertainment while parked at charging stations or for passengers during trips. Note that the Media section is disabled while driving.
     </div>
 
     <div class="question">Can I watch streaming video in my Tesla?</div>
@@ -322,11 +324,11 @@
     <div class="answer">
         The Reference section provides quick access to useful websites and tools while parked at a charger or for passengers during a trip, organized by category:
         <ul>
-            <li><strong>Mapping Tools:</strong> TeslaWaze, ABRP, OpenStreetMap, Google Maps, Google Earth, and aviation maps</li>
+            <li><strong>Mapping Tools:</strong> Waze, ABRP, OpenStreetMap, Google Maps, Google Earth, and aviation maps</li>
             <li><strong>Destination Information:</strong> PlugShare for EV charging locations, travel sites like Yelp, TripAdvisor, Lonely Planet, Fodor's, AllTrails for hiking, Roadtrippers for road trip planning, AAA, hotel booking sites, and FlightAware</li>
             <li><strong>AI Assistants:</strong> Access to ChatGPT, Google Gemini, Perplexity AI, Microsoft Copilot, Anthropic Claude, and xAI Grok</li>
             <li><strong>Productivity:</strong> Email services (Outlook, Gmail, iCloud Mail, Proton Mail), calendar apps, and cloud storage (Google Drive, iCloud Drive, Microsoft Office)</li>
-            <li><strong>Learning Resources:</strong> Educational websites including Wikipedia, Britannica, TED talks, Khan Academy, online course platforms like Coursera, Udemy, edX, MIT OpenCourseWare, and more</li>
+            <li><strong>Learning Resources:</strong> Educational websites including Wikipedia, Britannica, Rotten Tomatoes, HowStuffWorks, TED, Khan Academy, Coursera, Udemy, Codecademy, edX, MIT OpenCourseWare, FutureLearn, Skillshare, Udacity, and Internet Archive</li>
             <li><strong>Password Managers:</strong> Secure access to 1Password, Bitwarden, Buttercup, KeePassXC, and LastPass</li>
         </ul>
     </div>
@@ -338,6 +340,49 @@
     
     <h2>Settings</h2>
     
+    <div class="question">What settings are available?</div>
+    <div class="answer">
+        The Settings section (visible after logging in) lets you customize the app. Here's a summary of all available options:
+        <ul>
+            <li><strong>General:</strong>
+                <ul>
+                    <li>Auto Dark Mode &mdash; automatically switches to dark mode at sunset and back at sunrise</li>
+                    <li>Dark Mode &mdash; manual dark/light mode toggle (disables auto dark mode)</li>
+                    <li>24-hour Time &mdash; switch between 12-hour and 24-hour time format</li>
+                    <li>Units &mdash; toggle between English (imperial) and Metric units</li>
+                    <li>Dashboard Map &mdash; choose between Waze, ABRP, or RainMap</li>
+                    <li>Auto-Refresh Map &mdash; automatically recenter the Waze map every two miles of driving</li>
+                    <li>Relative Wind Indicator &mdash; show/hide the circular wind radar on the Dashboard</li>
+                    <li>Speed and Vertical Rate Indicators &mdash; show/hide the speed and vertical rate displays on the Dashboard</li>
+                </ul>
+            </li>
+            <li><strong>Weather:</strong>
+                <ul>
+                    <li>Hourly Forecast Stripes &mdash; show/hide the hourly temperature visualization</li>
+                    <li>Show Doppler Radar &mdash; show/hide NOAA radar imagery</li>
+                </ul>
+            </li>
+            <li><strong>Satellite:</strong>
+                <ul>
+                    <li>Use Current Location &mdash; automatically select satellite region based on GPS</li>
+                    <li>Region &mdash; manually choose a satellite imagery region when automatic selection is off</li>
+                </ul>
+            </li>
+            <li><strong>News:</strong>
+                <ul>
+                    <li>Show Unread News Count &mdash; display a badge on the News tab with unread article count</li>
+                    <li>Enable News Forwarding &mdash; allow sharing articles via email</li>
+                    <li>Always Forward When Driving &mdash; automatically email all new articles while driving</li>
+                    <li>Email &mdash; destination address for forwarded articles</li>
+                    <li>Live Stock Ticker &mdash; show a scrolling ticker in the News section</li>
+                    <li>Ticker Shows Price and Change &mdash; include price/change data in the ticker (vs. just symbols)</li>
+                </ul>
+            </li>
+            <li><strong>News Feeds:</strong> Enable/disable individual news sources across categories including General, Business, Technology, Defense, Tesla/Automotive, and Consumption</li>
+            <li><strong>Financial Data:</strong> Subscribe to market indexes and individual stocks</li>
+        </ul>
+    </div>
+
     <div class="question">Do I need to create an account to use teslas.cloud?</div>
     <div class="answer">
         No account is required for basic functionality. However, creating a user ID provides a couple useful things:
@@ -371,13 +416,24 @@
         </ul>
     </div>
     
+    <div class="question">What is Auto Dark Mode?</div>
+    <div class="answer">
+        When enabled (it's on by default), Auto Dark Mode automatically switches the app to dark mode at sunset and back to light mode at sunrise, based on your GPS location. It kicks in a few minutes before sunset and switches back a few minutes after sunrise. If you manually toggle Dark Mode on or off, Auto Dark Mode is automatically disabled so your preference is respected.
+    </div>
+
+    <div class="question">Why are some sections disabled while driving?</div>
+    <div class="answer">
+        The Media, Reference, and Toys sections are disabled while the vehicle is in motion. These sections contain links to external websites that aren't safe to browse while driving. The Dashboard, News, Market, Weather, Satellite, Landmarks, and Network sections remain available at all times.
+    </div>
+
     <div class="question">What do the status indicators at the top-right show?</div>
     <div class="answer">
         The status bar in the top-right corner provides at-a-glance information:
         <ul>
             <li><strong>Rain Indicator:</strong> Appears when rain is expected within 15 minutes, showing a cloud icon and timing</li>
-            <li><strong>Stock Ticker:</strong> Scrolling display of your selected stocks and indexes (when enabled)</li>
-            <li><strong>GPS Status:</strong> Signal strength indicator with bars (0-4) showing GPS reception quality</li>
+            <li><strong>Stock Ticker:</strong> Scrolling display of your selected stocks and indexes (when enabled in Settings)</li>
+            <li><strong>Unread News Count:</strong> A badge on the News tab showing how many unread articles are available (can be toggled in Settings)</li>
+            <li><strong>GPS Status:</strong> Color-coded indicator showing GPS reception quality (green=excellent, blue=good, yellow=fair, red=poor)</li>
             <li><strong>Network Status:</strong> Color-coded connection quality (green=excellent, yellow=good, orange=poor, gray=no connection) based on actual latency, not just signal strength</li>
         </ul>
     </div>

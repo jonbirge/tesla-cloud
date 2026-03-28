@@ -174,6 +174,7 @@
                         <button class="option-button" data-value="rainmap" onclick="toggleOptionSetting(this)">RainMap</button>
                     </div>
                 </div>
+                <button id="waze-reload-btn" class="waze-reload-btn" onclick="updateMapFrame(true)" title="Reload map at current location">&#x21bb; Reload</button>
                 <iframe id="teslawaze" src="" allow="geolocation" loading="lazy"></iframe>
             </div>
         </div>
@@ -294,7 +295,7 @@
         <div id="reference" class="section">
             <h2>Mapping Tools</h2>
             <div class="button-list">
-                <a href="https://teslawaze.azurewebsites.net"><img src="https://www.waze.com/favicon.ico" loading="lazy">TeslaWaze</a>
+                <a href="https://www.waze.com/live-map"><img src="https://www.waze.com/favicon.ico" loading="lazy">Waze</a>
                 <a href="https://abetterrouteplanner.com"><img src="https://abetterrouteplanner.com/favicon.ico" loading="lazy">ABRP</a>
                 <a href="https://www.openstreetmap.org"><img src="https://www.openstreetmap.org/favicon.ico" loading="lazy">OpenStreetMap</a>
                 <a href="https://maps.google.com"><img src="https://www.google.com/images/branding/product/ico/maps15_bnuw3a_32dp.ico" loading="lazy">Google Maps</a>
@@ -422,7 +423,7 @@
             </div>
             <hr>
             <h2>Network Latency</h2>
-            <canvas id="pingChart" width="600" height="260">
+            <canvas id="pingChart" width="600" height="260"></canvas>
             <hr>
             <h2>Testing</h2>
             <div class="button-list">
@@ -458,7 +459,7 @@
             <div class="button-list">
                 <a href="https://www.gamestalgia.net/"><img src="https://www.gamestalgia.net/favicon.ico" loading="lazy">Gamestalgia</a>
                 <a href="https://gam.onl/"><img src="https://gam.onl/favicon.ico" loading="lazy">GAM.ONL</a>
-                <a href="https://www.retrogames.onl/"><img src="https://www.retrogames.onl/favicon.ico" loading="lazy">retrogames.oln</a>
+                <a href="https://www.retrogames.onl/"><img src="https://www.retrogames.onl/favicon.ico" loading="lazy">retrogames.onl</a>
             </div>
         </div>
 
@@ -506,6 +507,13 @@
                         <button class="option-button" data-value="rainmap"
                             onclick="toggleOptionSetting(this)">RainMap</button>
                     </div>
+                </div>
+
+                <div class="settings-toggle-item" data-setting="waze-distance-refresh"
+                    onclick="this.querySelector('input').click()">
+                    <label>Auto-Refresh Map</label>
+                    <input type="checkbox" onchange="toggleSettingFrom(this)" checked>
+                    <span class="settings-toggle-slider"></span>
                 </div>
             
                 <div class="settings-toggle-item" data-setting="show-wind-radar"
@@ -615,7 +623,7 @@
         </div>
 
         <div id="about" class="section">
-            <div id="announcement" class="announcement" style:"display: none;">
+            <div id="announcement" class="announcement" style="display: none;">
             <h2>Announcements</h2>
             <p id="note"></p>
             </div>
@@ -637,8 +645,7 @@
 
             <h2>Acknowledgements</h2>
             
-            <p>Thanks to whomever made the fantastic "TeslaWaze" site, one of the embedded options in the
-                dashboard. Thank you, as well, to the friendly folks on <a
+            <p>Thank you to the friendly folks on <a
                     href="https://www.teslaownersonline.com/">Tesla Owners Online</a>, who gave considerable
                 helpful feedback and support on early versions.</p>
 

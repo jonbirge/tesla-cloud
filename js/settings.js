@@ -26,6 +26,7 @@ let live_news_updates = false;  // Flag to control whether news updates should b
 let lastKnownUpdate = null;     // Timestamp of last known settings update
 let settingsPollingInterval = null; // Interval ID for settings polling
 let isUpdatingSettings = false; // Flag to prevent concurrent updates
+let lastAppliedMapChoice = null; // Track last map choice applied to avoid spurious iframe reloads
 let darkModeCheckInterval = null; // Interval ID for dark mode checks
 
 // Export settings object so it's accessible to other modules
@@ -39,6 +40,7 @@ const defaultSettings = {
     "24-hour-time": false,
     "imperial-units": true,
     "map-choice": 'waze',
+    "waze-distance-refresh": true,
     "show-wind-radar": false,
     "show-speed-indicators": true,
     "show-hourly-stripes": true,
@@ -1269,7 +1271,10 @@ function updateSetting(key, value) {
             break;
             
         case 'map-choice':
-            updateMapFrame();
+            if (value !== lastAppliedMapChoice) {
+                lastAppliedMapChoice = value;
+                updateMapFrame();
+            }
             break;
             
         case 'news-forwarding':

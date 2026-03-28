@@ -37,7 +37,7 @@ if (isset($queryParams['city']) && !empty($queryParams['city'])) {
     ];
     $geoContext = stream_context_create($geoOptions);
     
-    $geoResponse = @file_get_contents($geoUrl, false, $geoContext);
+    $geoResponse = file_get_contents($geoUrl, false, $geoContext);
     $geoData = json_decode($geoResponse, true);
 
     if (!empty($geoData) && isset($geoData[0]['lat']) && isset($geoData[0]['lon'])) {
@@ -91,11 +91,11 @@ $options = [
 $context = stream_context_create($options);
 
 // Use file_get_contents with the created context
-$response = @file_get_contents($proxiedUrl, false, $context);
+$response = file_get_contents($proxiedUrl, false, $context);
 
 // Get HTTP status code from headers using the modern function
 $httpCode = 200; // Default success
-$responseHeaders = http_get_last_response_headers();
+$responseHeaders = $http_response_header ?? [];
 if ($responseHeaders && isset($responseHeaders[0])) {
     preg_match('/\d{3}/', $responseHeaders[0], $matches);
     if (!empty($matches[0])) {

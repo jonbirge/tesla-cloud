@@ -1,5 +1,5 @@
 // Imports
-import { srcUpdate, testMode, debugMode, isTestMode, updateTimeZone, GEONAMES_USERNAME, showNotification, gpsPermissionDenied, setGpsPermissionDenied, setUsingIPLocation } from './common.js';
+import { testMode, debugMode, isTestMode, updateTimeZone, GEONAMES_USERNAME, showNotification, gpsPermissionDenied, setGpsPermissionDenied, setUsingIPLocation } from './common.js';
 import { PositionSimulator } from './location.js';
 import { attemptLogin, leaveSettings, settings, isDriving, setDrivingState, enableLiveNewsUpdates, saveSetting, startDarkModeChecks, stopDarkModeChecks, autoDarkMode } from './settings.js';
 import { fetchPremiumWeatherData, fetchCityData, SAT_URLS, forecastDataPrem, currentRainAlert, generateForecastDayElements, ensurePrecipitationGraphWidth, currentSatRegion } from './wx.js';
@@ -23,6 +23,7 @@ const MAX_SPEED = 50;                               // Max speed for wind displa
 const MIN_GPS_UPDATE_INTERVAL = 1000;               // ms - minimum time between updates
 const MAX_GPS_RETRIES = 3;                          // Max consecutive GPS failures before giving up
 const WIKI_TYPES = ['event','airport','landmark'];  // Types of Wikipedia data to fetch
+const MAP_REFRESH_DISTANCE = 3219;                   // meters (~2 miles) - Waze map refresh threshold
 const ENABLE_SPEED_DISABLE = false;                 // Set to false to disable speed-based section disabling
 const SPEED_DISABLE_THRESHOLD = 1.5;                // Speed in mph above which disabling occurs
 
@@ -46,6 +47,9 @@ let gpsIntervalId = null;
 let lastGPSUpdate = 0;
 let gpsFailureCount = 0;                            // Count consecutive GPS failures
 let networkInfoUpdated = false;                     // Track if network info has been updated
+let lastMapLat = null;                              // Last latitude used for Waze map frame
+let lastMapLong = null;                             // Last longitude used for Waze map frame
+let lastMapUrl = null;                              // Last URL set on the map iframe
 let previousAlt = null;                             // Previous altitude for vertical rate calculation
 let previousAltTime = null;                         // Timestamp of previous altitude measurement
 const positionSimulator = new PositionSimulator();  // TODO: only create if needed
@@ -533,6 +537,17 @@ async function handlePositionUpdate(position) {
         lastUpdateLong = long;
         lastUpdate = Date.now();
     }
+
+    // Refresh Waze map iframe if visible and moved enough (~2 miles)
+    if (settings["map-choice"] === 'waze' && shouldRefreshWazeMap()) {
+        const navigationSection = document.getElementById("navigation");
+        if (navigationSection.style.display === "block") {
+            updateMapFrame();
+            // Record that we loaded the map at this position
+            lastMapLat = lat;
+            lastMapLong = long;
+        }
+    }
 }
 
 // Function called when user starts driving
@@ -576,7 +591,6 @@ function updateGPS() {
             return false;
         }
     } else { // GPS testing mode
-        console.log('TEST MODE (gps): Using simulated GPS position');
         handlePositionUpdate(positionSimulator.getPosition());
     }
     return true;
@@ -874,21 +888,56 @@ function handleScrollScale() {
     }
 }
 
-// Function to update the src of an iframe
-window.updateMapFrame = function () {
-    // Normal mode - ensure iframe is visible and test mode message is hidden
+// Function to determine if the Waze map iframe should be refreshed
+function shouldRefreshWazeMap() {
+    if (lat === null || long === null) return false;
+    if (lastMapLat === null || lastMapLong === null) {
+        console.log('Waze refresh: initial GPS load (no previous map position)');
+        return true;
+    }
+    if (!settings["waze-distance-refresh"]) return false;  // Distance-based refresh disabled
+    const distance = calculateDistance(lat, long, lastMapLat, lastMapLong);
+    if (distance >= MAP_REFRESH_DISTANCE) {
+        console.log(`Waze refresh: distance threshold reached (${Math.round(distance)}m >= ${MAP_REFRESH_DISTANCE}m)`);
+        return true;
+    }
+    return false;
+}
+
+// Function to update the src of the map iframe
+// force=true forces a reload even if the URL hasn't changed (used by the reload button)
+window.updateMapFrame = function (force = false) {
     const teslaWazeContainer = document.querySelector('.teslawaze-container');
     const iframe = teslaWazeContainer.querySelector('iframe');
     let testModeMsg = teslaWazeContainer.querySelector('.test-mode-message');
+
+    // Build the target URL based on map choice
+    let newUrl;
     if (settings["map-choice"] === 'waze') {
-        srcUpdate("teslawaze", "https://teslawaze.azurewebsites.net/");
+        if (lat !== null && long !== null) {
+            // Round to 4 decimal places (~11m) to prevent GPS jitter from
+            // producing a different URL string on every reading
+            newUrl = `https://embed.waze.com/iframe?zoom=13&lat=${lat.toFixed(4)}&lon=${long.toFixed(4)}`;
+        } else {
+            newUrl = 'https://embed.waze.com/iframe?zoom=4&lat=39.5&lon=-98.35';
+        }
     } else if (settings["map-choice"] === 'rainmap') {
-        srcUpdate("teslawaze", "https://car.rainviewer.com/");
+        newUrl = "https://car.rainviewer.com/";
     } else {
-        srcUpdate("teslawaze", "https://abetterrouteplanner.com/");
+        newUrl = "https://abetterrouteplanner.com/";
     }
+
+    // Only set iframe src when the URL actually changed (or forced)
+    if (force || newUrl !== lastMapUrl) {
+        console.log('updateMapFrame: setting src to', newUrl, force ? '(forced)' : '', '\n  caller:', new Error().stack.split('\n')[2]?.trim());
+        lastMapUrl = newUrl;
+        iframe.src = newUrl;
+    }
+
     iframe.style.display = '';
     if (testModeMsg) testModeMsg.style.display = 'none';
+    const reloadBtn = document.getElementById('waze-reload-btn');
+    if (reloadBtn) reloadBtn.style.display = settings["map-choice"] === 'waze' ? '' : 'none';
 }
 
 // Function to load an external URL in a new tab or frame

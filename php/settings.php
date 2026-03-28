@@ -1,6 +1,7 @@
 <?php
 
 require_once 'dotenv.php';
+require_once 'util.php';
 
 // Settings management API
 // Provides a simple RESTful key-value store for user settings
@@ -8,7 +9,7 @@ require_once 'dotenv.php';
 header('Content-Type: application/json');
 
 // Enable error reporting for debugging
-ini_set('display_errors', 1);
+ini_set('display_errors', 0);
 error_reporting(E_ALL);
 
 // Define log file path
@@ -39,19 +40,6 @@ $dbHost = $_ENV['SQL_HOST'] ?? null;
 $dbUser = $_ENV['SQL_USER'] ?? null;
 $dbPass = $_ENV['SQL_PASS'] ?? null;
 $dbPort = $_ENV['SQL_PORT'] ?? '3306';
-
-// Function to get client IP address accounting for proxies
-function getClientIP() {
-    if (!empty($_SERVER['HTTP_X_FORWARDED_FOR'])) {
-        // If the site is behind a proxy, get the real client IP
-        $ip = explode(',', $_SERVER['HTTP_X_FORWARDED_FOR'])[0];
-    } elseif (!empty($_SERVER['HTTP_CLIENT_IP'])) {
-        $ip = $_SERVER['HTTP_CLIENT_IP'];
-    } else {
-        $ip = $_SERVER['REMOTE_ADDR'];
-    }
-    return filter_var($ip, FILTER_VALIDATE_IP) ? $ip : 'unknown';
-}
 
 // Establish database connection
 // Use SQLite for development if MySQL not configured

@@ -1,6 +1,7 @@
 <?php
 
 require_once 'dotenv.php';
+require_once 'util.php';
 
 // Define log file path
 $logFile = '/tmp/ping_php.log';
@@ -18,22 +19,10 @@ if ($requestMethod === 'HEAD') {
 
 // For GET requests, return server time and client IP as JSON
 if ($requestMethod === 'GET') {
-    // Get client IP address - handle X-Forwarded-For with multiple IPs
-    $clientIP = $_SERVER['REMOTE_ADDR'];
-    if (isset($_SERVER['HTTP_X_FORWARDED_FOR'])) {
-        // X-Forwarded-For can contain multiple IPs (client, proxy1, proxy2, ...)
-        // The first IP is typically the original client
-        $forwardedIPs = explode(',', $_SERVER['HTTP_X_FORWARDED_FOR']);
-        $firstIP = trim($forwardedIPs[0]);
-        if (filter_var($firstIP, FILTER_VALIDATE_IP)) {
-            $clientIP = $firstIP;
-        }
-    }
-    
     header('Content-Type: application/json');
     echo json_encode([
         'time' => date('Y-m-d H:i:s'),
-        'ip' => $clientIP
+        'ip' => getClientIP()
     ]);
     exit;
 }
@@ -53,17 +42,7 @@ $dbUser = $_ENV['SQL_USER'] ?? null;
 $dbPass = $_ENV['SQL_PASS'] ?? null;
 $dbPort = $_ENV['SQL_PORT'] ?? '3306';
 
-// Get client IP address - handle X-Forwarded-For with multiple IPs
-$clientIP = $_SERVER['REMOTE_ADDR'];
-if (isset($_SERVER['HTTP_X_FORWARDED_FOR'])) {
-    // X-Forwarded-For can contain multiple IPs (client, proxy1, proxy2, ...)
-    // The first IP is typically the original client
-    $forwardedIPs = explode(',', $_SERVER['HTTP_X_FORWARDED_FOR']);
-    $firstIP = trim($forwardedIPs[0]);
-    if (filter_var($firstIP, FILTER_VALIDATE_IP)) {
-        $clientIP = $firstIP;
-    }
-}
+$clientIP = getClientIP();
 
 // Establish database connection
 if ($dbHost && $dbName && $dbUser) {
