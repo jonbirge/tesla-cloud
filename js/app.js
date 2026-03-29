@@ -14,7 +14,7 @@ export { currentSection };
 // Parameters
 const DEFAULT_SECTION = 'navigation';               // Default section to show
 const LATLON_UPDATE_INTERVAL = 2;                   // seconds
-const UPDATE_DISTANCE_THRESHOLD = 2500;             // meters
+const UPDATE_DISTANCE_THRESHOLD = 805;              // meters (~0.5 miles)
 const UPDATE_TIME_THRESHOLD = 10;                   // minutes
 const UPDATE_TIME_THRESHOLD_RAIN = 1;               // minutes (when rain is predicted)
 const WX_DISTANCE_THRESHOLD = 25000;                // meters
