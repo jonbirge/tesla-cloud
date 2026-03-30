@@ -23,7 +23,7 @@ const MAX_SPEED = 50;                               // Max speed for wind displa
 const MIN_GPS_UPDATE_INTERVAL = 1000;               // ms - minimum time between updates
 const MAX_GPS_RETRIES = 3;                          // Max consecutive GPS failures before giving up
 const WIKI_TYPES = ['event','airport','landmark'];  // Types of Wikipedia data to fetch
-const MAP_REFRESH_DISTANCE = 3219;                   // meters (~2 miles) - Waze map refresh threshold
+const MAP_REFRESH_DISTANCE = 805;                    // meters (~0.5 miles) - Waze map refresh threshold
 const ENABLE_SPEED_DISABLE = false;                 // Set to false to disable speed-based section disabling
 const SPEED_DISABLE_THRESHOLD = 1.5;                // Speed in mph above which disabling occurs
 
