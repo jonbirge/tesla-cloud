@@ -176,6 +176,11 @@
                 </div>
                 <button id="waze-reload-btn" class="waze-reload-btn" onclick="updateMapFrame(true)" title="Reload map at current location">&#x21bb; Reload</button>
                 <iframe id="teslawaze" src="" allow="geolocation" loading="lazy"></iframe>
+                <div id="car-position-indicator" class="car-position-indicator" aria-hidden="true">
+                    <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M12 2 L4 22 L12 17 L20 22 Z" />
+                    </svg>
+                </div>
             </div>
         </div>
 
