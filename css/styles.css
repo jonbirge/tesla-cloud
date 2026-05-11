@@ -845,6 +845,54 @@ body.dark-mode #teslawaze {
     opacity: 1;
 }
 
+/* Car position indicator overlay (sits on top of the Waze iframe) */
+.car-position-indicator {
+    display: none;
+    position: absolute;
+    width: 32px;
+    height: 32px;
+    margin-left: -16px;
+    margin-top: -16px;
+    pointer-events: none;
+    z-index: 9;
+    will-change: left, top, transform;
+    filter: drop-shadow(0 1px 3px rgba(0, 0, 0, 0.55));
+}
+
+.car-position-indicator svg {
+    width: 100%;
+    height: 100%;
+    display: block;
+}
+
+.car-position-indicator path {
+    fill: var(--tesla-blue, #1976d2);
+    stroke: #ffffff;
+    stroke-width: 1.6;
+    stroke-linejoin: round;
+}
+
+.car-position-indicator.no-heading path {
+    fill: #888;
+}
+
+/* Map selector floats over the top of the iframe */
+#in-map-toggle {
+    position: absolute;
+    top: 8px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 10;
+    padding: 4px;
+    background-color: var(--bg-color);
+    border-radius: var(--button-radius);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.35);
+}
+
+#in-map-toggle .option-switch {
+    background-color: var(--button-highlight);
+}
+
 /* Modal Login Dialog */
 .modal {
     display: none;

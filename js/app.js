@@ -548,6 +548,74 @@ async function handlePositionUpdate(position) {
             lastMapLong = long;
         }
     }
+
+    updateCarPositionIndicator();
+}
+
+// Must match the zoom parameter used in updateMapFrame()'s Waze embed URL.
+const WAZE_EMBED_ZOOM = 13;
+
+function updateCarPositionIndicator() {
+    const indicator = document.getElementById('car-position-indicator');
+    if (!indicator) return;
+
+    if (settings["map-choice"] !== 'waze' ||
+        lat === null || long === null ||
+        lastMapLat === null || lastMapLong === null) {
+        indicator.style.display = 'none';
+        return;
+    }
+
+    const iframe = document.getElementById('teslawaze');
+    if (!iframe) {
+        indicator.style.display = 'none';
+        return;
+    }
+    const iframeW = iframe.offsetWidth;
+    const iframeH = iframe.offsetHeight;
+    if (iframeW <= 0 || iframeH <= 0) {
+        indicator.style.display = 'none';
+        return;
+    }
+
+    // Web Mercator meters/pixel at the embed's zoom level and the map's
+    // current center latitude.
+    const metersPerPixel = 156543.03392 *
+        Math.cos(lastMapLat * Math.PI / 180) /
+        Math.pow(2, WAZE_EMBED_ZOOM);
+
+    const dxMeters = (long - lastMapLong) * 111320 *
+        Math.cos(lastMapLat * Math.PI / 180);
+    const dyMeters = (lat - lastMapLat) * 110540;
+
+    // Screen y grows downward; positive latitude is up on the map.
+    const dxPx = dxMeters / metersPerPixel;
+    const dyPx = -dyMeters / metersPerPixel;
+
+    const indicatorHalf = 16;
+    const leftPx = iframe.offsetLeft + iframeW / 2 + dxPx;
+    const topPx = iframe.offsetTop + iframeH / 2 + dyPx;
+    if (leftPx < iframe.offsetLeft - indicatorHalf ||
+        leftPx > iframe.offsetLeft + iframeW + indicatorHalf ||
+        topPx < iframe.offsetTop - indicatorHalf ||
+        topPx > iframe.offsetTop + iframeH + indicatorHalf) {
+        indicator.style.display = 'none';
+        return;
+    }
+
+    indicator.style.left = leftPx + 'px';
+    indicator.style.top = topPx + 'px';
+
+    if (lastKnownHeading !== null && lastKnownHeading !== undefined &&
+        !isNaN(lastKnownHeading)) {
+        indicator.style.transform = `rotate(${lastKnownHeading}deg)`;
+        indicator.classList.remove('no-heading');
+    } else {
+        indicator.style.transform = 'rotate(0deg)';
+        indicator.classList.add('no-heading');
+    }
+
+    indicator.style.display = 'block';
 }
 
 // Function called when user starts driving
@@ -938,6 +1006,10 @@ window.updateMapFrame = function (force = false) {
     if (testModeMsg) testModeMsg.style.display = 'none';
     const reloadBtn = document.getElementById('waze-reload-btn');
     if (reloadBtn) reloadBtn.style.display = settings["map-choice"] === 'waze' ? '' : 'none';
+
+    // The map center just changed (or we switched away from Waze), so refresh
+    // the overlay. Defer to next frame so the iframe layout settles first.
+    requestAnimationFrame(() => updateCarPositionIndicator());
 }
 
 // Function to load an external URL in a new tab or frame
@@ -1418,6 +1490,7 @@ document.addEventListener('DOMContentLoaded', async function () {
     window.addEventListener('resize', () => {
         updateScrollIndicators();
         updateMobileSectionVisibility();
+        updateCarPositionIndicator();
     });
 
     // Update mobile section visibility on page load
