@@ -876,23 +876,6 @@ body.dark-mode #teslawaze {
     fill: #888;
 }
 
-/* Map selector floats over the top of the iframe */
-#in-map-toggle {
-    position: absolute;
-    top: 8px;
-    left: 50%;
-    transform: translateX(-50%);
-    z-index: 10;
-    padding: 4px;
-    background-color: var(--bg-color);
-    border-radius: var(--button-radius);
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.35);
-}
-
-#in-map-toggle .option-switch {
-    background-color: var(--button-highlight);
-}
-
 /* Modal Login Dialog */
 .modal {
     display: none;
