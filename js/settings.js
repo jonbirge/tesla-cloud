@@ -1,17 +1,13 @@
 // Imports
 import { updateNews, setShareButtonsVisibility, initializeNewsStorage } from './news.js';
 import { updateNetChartAxisColors } from './net.js';
-import { updatePremiumWeatherDisplay, forecastDataPrem, lastLat, lastLong, updateRainChartAxisColors, updateRadarDisplay, initializeSatelliteSettings, SAT_URLS, currentSatRegion } from './wx.js';
+import { updatePremiumWeatherDisplay, lastLat, lastLong, updateRainChartAxisColors, updateRadarDisplay, initializeSatelliteSettings, SAT_URLS, currentSatRegion } from './wx.js';
 import { startStockUpdates, stopStockUpdates, fetchStockData } from './stock.js';
 import { refreshMarketData } from './market.js';
 import { currentSection } from './app.js';
 
-// Night mode offset in minutes - enter dark mode this many minutes before sunset
-// and exit dark mode this many minutes after sunrise to match Tesla's car behavior
-const NIGHT_MODE_OFFSET_MINUTES = 8;
-
-// Dark mode check interval in minutes
-const DARK_MODE_CHECK_INTERVAL_MINUTES = 2;
+// Media query for detecting browser dark mode preference
+const darkModeMediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
 
 // Global variables
 let isDriving = false;          // The vehicle is not parked
@@ -27,7 +23,6 @@ let lastKnownUpdate = null;     // Timestamp of last known settings update
 let settingsPollingInterval = null; // Interval ID for settings polling
 let isUpdatingSettings = false; // Flag to prevent concurrent updates
 let lastAppliedMapChoice = null; // Track last map choice applied to avoid spurious iframe reloads
-let darkModeCheckInterval = null; // Interval ID for dark mode checks
 
 // Export settings object so it's accessible to other modules
 export { settings, currentUser, isLoggedIn, hashedUser, isDriving, live_news_updates };
@@ -87,46 +82,17 @@ export function leaveSettings() {
 }
 
 // Check for auto dark mode setting and implement it if enabled
-export function autoDarkMode(lat, long) {
-    // If lat/long not provided, use last known from wx.js
-    if (lat == null || long == null) {
-        if (lastLat != null && lastLong != null) {
-            lat = lastLat;
-            long = lastLong;
-        } else {
-            console.log('autoDarkMode: No coordinates available.');
-            return;
-        }
-    }
-
-    // Prefer daily[0] sunrise/sunset; fall back to current.* if available
-    const sunriseSec = forecastDataPrem?.daily?.[0]?.sunrise ?? forecastDataPrem?.current?.sunrise;
-    const sunsetSec  = forecastDataPrem?.daily?.[0]?.sunset  ?? forecastDataPrem?.current?.sunset;
-
-    if (!sunriseSec || !sunsetSec) {
-        console.log('Auto dark mode: No sunrise/sunset data available.');
-        return;
-    }
-
+export function autoDarkMode() {
     if (settings && settings['auto-dark-mode']) {
-        const now = Date.now();
-        const sunriseTime = sunriseSec * 1000;
-        const sunsetTime = sunsetSec * 1000;
-
-        // Apply offset: enter dark mode before sunset, exit after sunrise
-        const offsetMs = NIGHT_MODE_OFFSET_MINUTES * 60 * 1000;
-        const adjustedSunsetTime = sunsetTime - offsetMs;  // Enter dark mode early
-        const adjustedSunriseTime = sunriseTime + offsetMs; // Exit dark mode late
-
-        const shouldBeDark = (now >= adjustedSunsetTime || now < adjustedSunriseTime);
+        const shouldBeDark = darkModeMediaQuery.matches;
 
         // Only update if different to avoid redundant work
         if (shouldBeDark !== !!settings['dark-mode']) {
-            console.log(shouldBeDark ? 'Applying dark mode based on sunset...' : 'Applying light mode based on sunrise...');
+            console.log(shouldBeDark ? 'Applying dark mode based on browser preference...' : 'Applying light mode based on browser preference...');
             updateSetting('dark-mode', shouldBeDark);
         }
     } else {
-        console.log('Auto dark mode disabled or coordinates not available.');
+        console.log('Auto dark mode disabled.');
     }
 }
 
@@ -746,25 +712,20 @@ export function stopSettingsPolling() {
 
 // Function to start periodic dark mode checks
 export function startDarkModeChecks() {
-    // Stop any existing interval
+    // Stop any existing listener
     stopDarkModeChecks();
     
-    console.log(`Starting dark mode checks every ${DARK_MODE_CHECK_INTERVAL_MINUTES} minutes`);
+    console.log('Starting dark mode listener for browser preference changes');
     // Check immediately
     autoDarkMode();
-    // Then check every 2 minutes
-    darkModeCheckInterval = setInterval(() => {
-        autoDarkMode();
-    }, DARK_MODE_CHECK_INTERVAL_MINUTES * 60 * 1000);
+    // Listen for browser theme changes
+    darkModeMediaQuery.addEventListener('change', autoDarkMode);
 }
 
 // Function to stop periodic dark mode checks
 export function stopDarkModeChecks() {
-    if (darkModeCheckInterval) {
-        console.log('Stopping dark mode checks');
-        clearInterval(darkModeCheckInterval);
-        darkModeCheckInterval = null;
-    }
+    console.log('Stopping dark mode listener');
+    darkModeMediaQuery.removeEventListener('change', autoDarkMode);
 }
 
 // Function to clean up orphaned stock and index subscriptions
