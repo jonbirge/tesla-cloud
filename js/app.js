@@ -555,13 +555,22 @@ async function handlePositionUpdate(position) {
 // Must match the zoom parameter used in updateMapFrame()'s Waze embed URL.
 const WAZE_EMBED_ZOOM = 13;
 
+// Manual correction offsets (in pixels) for the car icon on the Waze embed.
+// The icon appears to render high and to the right by roughly one icon width.
+const WAZE_ICON_OFFSET_X = -32;                     // pixels – shift left to compensate
+const WAZE_ICON_OFFSET_Y = 32;                      // pixels – shift down to compensate
+
+// Track whether the user has interacted (zoom/scroll) with the Waze embed
+let wazeUserInteracted = false;
+
 function updateCarPositionIndicator() {
     const indicator = document.getElementById('car-position-indicator');
     if (!indicator) return;
 
     if (settings["map-choice"] !== 'waze' ||
         lat === null || long === null ||
-        lastMapLat === null || lastMapLong === null) {
+        lastMapLat === null || lastMapLong === null ||
+        wazeUserInteracted) {
         indicator.style.display = 'none';
         return;
     }
@@ -593,8 +602,8 @@ function updateCarPositionIndicator() {
     const dyPx = -dyMeters / metersPerPixel;
 
     const indicatorHalf = 16;
-    const leftPx = iframe.offsetLeft + iframeW / 2 + dxPx;
-    const topPx = iframe.offsetTop + iframeH / 2 + dyPx;
+    const leftPx = iframe.offsetLeft + iframeW / 2 + dxPx + WAZE_ICON_OFFSET_X;
+    const topPx = iframe.offsetTop + iframeH / 2 + dyPx + WAZE_ICON_OFFSET_Y;
     if (leftPx < iframe.offsetLeft - indicatorHalf ||
         leftPx > iframe.offsetLeft + iframeW + indicatorHalf ||
         topPx < iframe.offsetTop - indicatorHalf ||
@@ -1000,6 +1009,8 @@ window.updateMapFrame = function (force = false) {
         console.log('updateMapFrame: setting src to', newUrl, force ? '(forced)' : '', '\n  caller:', new Error().stack.split('\n')[2]?.trim());
         lastMapUrl = newUrl;
         iframe.src = newUrl;
+        // Reset user interaction flag since the map is being refreshed
+        wazeUserInteracted = false;
     }
 
     iframe.style.display = '';
@@ -1495,6 +1506,24 @@ document.addEventListener('DOMContentLoaded', async function () {
 
     // Update mobile section visibility on page load
     updateMobileSectionVisibility();
+
+    // Detect user interaction with the Waze iframe (zoom/scroll) to hide the
+    // car position indicator until the next automatic map refresh.
+    const wazeIframe = document.getElementById('teslawaze');
+    if (wazeIframe) {
+        // mousedown and wheel fire on the iframe element before focus moves
+        wazeIframe.addEventListener('mousedown', () => { wazeUserInteracted = true; updateCarPositionIndicator(); });
+        wazeIframe.addEventListener('wheel', () => { wazeUserInteracted = true; updateCarPositionIndicator(); });
+        wazeIframe.addEventListener('touchstart', () => { wazeUserInteracted = true; updateCarPositionIndicator(); });
+    }
+    // When the iframe takes focus (e.g. pointer interaction we couldn't capture),
+    // treat it as a user interaction as well.
+    window.addEventListener('blur', () => {
+        if (document.activeElement && document.activeElement.id === 'teslawaze') {
+            wazeUserInteracted = true;
+            updateCarPositionIndicator();
+        }
+    });
 
     // Scroll-to-top button
     const scrollTopBtn = document.getElementById('scroll-to-top');
