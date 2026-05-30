@@ -160,7 +160,7 @@ export async function fetchPremiumWeatherData(lat, long, silentLoad = false) {
             }
 
             // Update auto-dark mode if enabled
-            autoDarkMode(lat, long);
+            autoDarkMode();
         })
         .catch(error => {
             console.error('Error fetching forecast data: ', error);
