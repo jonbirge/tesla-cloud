@@ -543,9 +543,12 @@ async function handlePositionUpdate(position) {
         const navigationSection = document.getElementById("navigation");
         if (navigationSection.style.display === "block") {
             updateMapFrame();
-            // Record that we loaded the map at this position
-            lastMapLat = lat;
-            lastMapLong = long;
+            // Record that we loaded the map at this position.
+            // Use the same 4-decimal rounding as the Waze embed URL so the
+            // displacement calculation in updateCarPositionIndicator() is
+            // relative to the actual map centre rather than the raw GPS fix.
+            lastMapLat = parseFloat(lat.toFixed(4));
+            lastMapLong = parseFloat(long.toFixed(4));
         }
     }
 
@@ -556,8 +559,8 @@ async function handlePositionUpdate(position) {
 const WAZE_EMBED_ZOOM = 13;
 
 // Manual correction offsets (in pixels) for the car icon on the Waze embed.
-// The icon appears to render high and to the right by roughly one icon width.
-const WAZE_ICON_OFFSET_X = -32;                     // pixels – shift left to compensate
+// The icon appears to render high by roughly one icon height; no horizontal offset needed.
+const WAZE_ICON_OFFSET_X = 0;                       // pixels – no horizontal correction needed
 const WAZE_ICON_OFFSET_Y = 32;                      // pixels – shift down to compensate
 
 // Track whether the user has interacted (zoom/scroll) with the Waze embed
