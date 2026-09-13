@@ -895,7 +895,7 @@ function updateScrollIndicators() {
 
     if (!topFade || !bottomFade) return;
 
-    const isMobile = window.matchMedia("only screen and (max-width: 900px)").matches;
+    const isMobile = isMobileLayout();
     const scrollElement = isMobile ? document.documentElement : rightFrame;
 
     if (!scrollElement) return;
@@ -925,8 +925,7 @@ function isSectionHidden(sectionId) {
         return false;
     }
 
-    const isMobile = window.matchMedia("only screen and (max-width: 900px)").matches;
-    if (isMobile && MOBILE_HIDDEN_SECTIONS.includes(sectionId)) {
+    if (isMobileLayout() && MOBILE_HIDDEN_SECTIONS.includes(sectionId)) {
         return true;
     }
 
@@ -971,7 +970,7 @@ function handleScrollScale() {
     const scrollTopBtn = document.getElementById('scroll-to-top');
 
     // Check if we're on a mobile screen
-    const isMobile = window.matchMedia("only screen and (max-width: 900px)").matches;
+    const isMobile = isMobileLayout();
     const scrollElement = isMobile ? document.documentElement : rightFrame;
 
     // Update scroll indicators regardless of device type
@@ -1097,7 +1096,7 @@ window.loadExternalUrl = function (url, inFrame = false) {
     externalSite.appendChild(iframe);
     
     // Add close button for mobile devices
-    if (window.innerWidth <= 900) {
+    if (isMobileLayout()) {
         const closeButton = document.createElement('button');
         closeButton.innerHTML = '✕ Close';
         closeButton.style.cssText = `
@@ -1222,7 +1221,14 @@ window.showSection = function (sectionId) {
     if (sectionId === 'debug') {
         const debugOutput = document.getElementById('debug-output');
         if (debugOutput && !debugOutput.textContent) {
-            debugOutput.textContent = 'Debug mode active. Debug information will appear here.';
+            debugOutput.textContent = [
+                'Debug mode active. Debug information will appear here.',
+                '',
+                `viewport: ${window.innerWidth}x${window.innerHeight} CSS px`,
+                `devicePixelRatio: ${window.devicePixelRatio}`,
+                `mobile layout: ${isMobileLayout()}`,
+                `userAgent: ${navigator.userAgent}`
+            ].join('\n');
         }
     }
 
@@ -1573,8 +1579,7 @@ document.addEventListener('DOMContentLoaded', async function () {
     const scrollTopBtn = document.getElementById('scroll-to-top');
     if (scrollTopBtn) {
         scrollTopBtn.addEventListener('click', () => {
-            const isMobile = window.matchMedia("only screen and (max-width: 900px)").matches;
-            if (isMobile) {
+            if (isMobileLayout()) {
                 window.scrollTo({ top: 0, behavior: 'smooth' });
             } else {
                 document.getElementById('rightFrame').scrollTo({ top: 0, behavior: 'smooth' });

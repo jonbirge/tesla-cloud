@@ -55,7 +55,7 @@ curl -s http://localhost:8000/php/vers.php
 ### CSS Architecture
 - `css/styles.css` - Main styles with CSS variables for theming (light/dark mode)
 - Feature-specific stylesheets: `wx.css`, `news.css`, `market.css`, `settings.css`, `timeline.css`, `notify.css`
-- Mobile breakpoint: `@media only screen and (max-width: 900px)`
+- Mobile breakpoint: `@media only screen and (max-width: 900px)`, additionally gated on `html.mobile-device` (set by `js/device.js`) so the Tesla browser never gets the phone layout — its 2026.26 update raised the in-car devicePixelRatio to 1.53, pushing the car's reported CSS width under the breakpoint. Use `isMobileLayout()` in JS rather than testing width directly.
 - Font scale variables: `--font-xs` (11pt) through `--font-xl` (19pt)
 
 ### Configuration

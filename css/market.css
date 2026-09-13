@@ -202,40 +202,42 @@
 
 /* Mobile Adjustments */
 @media only screen and (max-width: 900px) {
-    .market-grid {
-        gap: 12px;
-    }
+    :where(html.mobile-device) {
+        .market-grid {
+            gap: 12px;
+        }
 
-    .market-card {
-        padding: 14px;
-    }
+        .market-card {
+            padding: 14px;
+        }
 
-    .market-card-icon {
-        width: 28px;
-        height: 28px;
-    }
+        .market-card-icon {
+            width: 28px;
+            height: 28px;
+        }
 
-    .market-card-name {
-        font-size: var(--font-lg);
-    }
+        .market-card-name {
+            font-size: var(--font-lg);
+        }
 
-    .market-card-symbol {
-        font-size: var(--font-sm);
-    }
+        .market-card-symbol {
+            font-size: var(--font-sm);
+        }
 
-    .market-price-value {
-        font-size: 18pt;
-    }
+        .market-price-value {
+            font-size: 18pt;
+        }
 
-    .market-price-change {
-        font-size: var(--font-md);
-    }
+        .market-price-change {
+            font-size: var(--font-md);
+        }
 
-    .market-stat-label {
-        font-size: var(--font-xs);
-    }
+        .market-stat-label {
+            font-size: var(--font-xs);
+        }
 
-    .market-stat-value {
-        font-size: var(--font-base);
+        .market-stat-value {
+            font-size: var(--font-base);
+        }
     }
 }
