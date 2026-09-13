@@ -1223,12 +1223,21 @@ window.showSection = function (sectionId) {
     if (sectionId === 'debug') {
         const debugOutput = document.getElementById('debug-output');
         if (debugOutput && !debugOutput.textContent) {
+            let override = null;
+            try {
+                override = localStorage.getItem('layout-override');
+            } catch (e) {
+                override = 'unreadable';
+            }
             debugOutput.textContent = [
                 'Debug mode active. Debug information will appear here.',
                 '',
+                `screen: ${screen.width}x${screen.height} CSS px (short edge ${Math.min(screen.width, screen.height)})`,
                 `viewport: ${window.innerWidth}x${window.innerHeight} CSS px`,
                 `devicePixelRatio: ${window.devicePixelRatio}`,
                 `mobile layout: ${isMobileLayout()}`,
+                `layout override: ${override || 'auto'}`,
+                `userAgentData.mobile: ${navigator.userAgentData ? navigator.userAgentData.mobile : 'unsupported'}`,
                 `userAgent: ${navigator.userAgent}`
             ].join('\n');
         }

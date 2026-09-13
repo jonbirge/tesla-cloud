@@ -205,10 +205,10 @@ hr {
     cursor: pointer;
 }
 
-@media only screen and (min-width: 901px) {
-    .scroll-to-top {
-        display: none !important;
-    }
+/* Scroll-to-top is a mobile affordance; the width this used to key off is no
+   longer a reliable proxy for one (see js/device.js). */
+html:not(.mobile-device) .scroll-to-top {
+    display: none !important;
 }
 
 .section {
