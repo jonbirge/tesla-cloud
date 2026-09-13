@@ -1046,8 +1046,10 @@ window.updateMapFrame = function (force = false) {
         }
     } else if (settings["map-choice"] === 'rainmap') {
         newUrl = "https://car.rainviewer.com/";
-    } else {
+    } else if (settings["map-choice"] === 'abrp') {
         newUrl = "https://abetterrouteplanner.com/";
+    } else {
+        newUrl = "https://teslanav.com/";
     }
 
     // Only set iframe src when the URL actually changed (or forced)
