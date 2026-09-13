@@ -34,7 +34,7 @@ const defaultSettings = {
     "auto-dark-mode": true,
     "24-hour-time": false,
     "imperial-units": true,
-    "map-choice": 'waze',
+    "map-choice": 'teslanav',
     "waze-distance-refresh": true,
     "show-wind-radar": false,
     "show-speed-indicators": true,

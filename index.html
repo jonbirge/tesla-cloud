@@ -170,7 +170,8 @@
             <div class="teslawaze-container">
                 <div id="in-map-toggle" class="settings-toggle-item option-switch-container" data-setting="map-choice">
                     <div class="option-switch">
-                        <button class="option-button active" data-value="waze" onclick="toggleOptionSetting(this)">Waze</button>
+                        <button class="option-button active" data-value="teslanav" onclick="toggleOptionSetting(this)">TeslaNav</button>
+                        <button class="option-button" data-value="waze" onclick="toggleOptionSetting(this)">Waze</button>
                         <button class="option-button" data-value="abrp" onclick="toggleOptionSetting(this)">ABRP</button>
                         <button class="option-button" data-value="rainmap" onclick="toggleOptionSetting(this)">RainMap</button>
                     </div>
@@ -301,6 +302,7 @@
         <div id="reference" class="section">
             <h2>Mapping Tools</h2>
             <div class="button-list">
+                <a href="https://teslanav.com"><img src="https://teslanav.com/favicon.ico" loading="lazy">TeslaNav</a>
                 <a href="https://www.waze.com/live-map"><img src="https://www.waze.com/favicon.ico" loading="lazy">Waze</a>
                 <a href="https://abetterrouteplanner.com"><img src="https://abetterrouteplanner.com/favicon.ico" loading="lazy">ABRP</a>
                 <a href="https://www.openstreetmap.org"><img src="https://www.openstreetmap.org/favicon.ico" loading="lazy">OpenStreetMap</a>
@@ -492,7 +494,9 @@
                 <div class="settings-toggle-item option-switch-container" data-setting="map-choice">
                     <label>Dashboard Map</label>
                     <div class="option-switch">
-                        <button class="option-button active" data-value="waze"
+                        <button class="option-button active" data-value="teslanav"
+                            onclick="toggleOptionSetting(this)">TeslaNav</button>
+                        <button class="option-button" data-value="waze"
                             onclick="toggleOptionSetting(this)">Waze</button>
                         <button class="option-button" data-value="abrp"
                             onclick="toggleOptionSetting(this)">ABRP</button>
