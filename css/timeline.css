@@ -180,50 +180,52 @@
 
 /* Mobile Landscape Mode */
 @media only screen and (max-width: 900px) {
-    .timeline-container {
-        height: 100px;
-        margin-bottom: 35px;
-    }
+    :where(html.mobile-device) {
+        .timeline-container {
+            height: 100px;
+            margin-bottom: 35px;
+        }
     
-    .timeline-weather-row {
-        height: 60px;
-    }
+        .timeline-weather-row {
+            height: 60px;
+        }
     
-    .timeline-now-marker {
-        height: 60px;
-    }
+        .timeline-now-marker {
+            height: 60px;
+        }
 
-    .weather-change-icon {
-        top: 30px;
-    }
+        .weather-change-icon {
+            top: 30px;
+        }
     
-    .weather-change-icon img {
-        width: 24px;
-        height: 24px;
-    }
+        .weather-change-icon img {
+            width: 24px;
+            height: 24px;
+        }
     
-    .temp-indicator,
-    .hour-label {
-        font-size: var(--font-xs);
-    }
+        .temp-indicator,
+        .hour-label {
+            font-size: var(--font-xs);
+        }
     
-    /* Hide every other hour label to prevent overlap */
-    .hour-label:nth-child(even) {
-        display: none;
-    }
+        /* Hide every other hour label to prevent overlap */
+        .hour-label:nth-child(even) {
+            display: none;
+        }
     
-    .weather-legend {
-        gap: 5px;
-        margin-top: 10px;
-    }
+        .weather-legend {
+            gap: 5px;
+            margin-top: 10px;
+        }
     
-    .legend-item {
-        margin: 0 5px;
-        font-size: var(--font-xs);
-    }
+        .legend-item {
+            margin: 0 5px;
+            font-size: var(--font-xs);
+        }
     
-    .legend-color {
-        width: 16px;
-        height: 16px;
+        .legend-color {
+            width: 16px;
+            height: 16px;
+        }
     }
 }

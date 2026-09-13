@@ -23,8 +23,10 @@
 }
 
 @media only screen and (max-width: 900px) {
-    .announcement p .note-date {
-        min-width: 90px;
+    :where(html.mobile-device) {
+        .announcement p .note-date {
+            min-width: 90px;
+        }
     }
 }
 
@@ -108,8 +110,10 @@
 }
 
 @media only screen and (max-width: 900px) {
-    .notification-message {
-        font-size: 12pt;
+    :where(html.mobile-device) {
+        .notification-message {
+            font-size: 12pt;
+        }
     }
 }
 

@@ -163,55 +163,57 @@ body.dark-mode .settings-text-item input[type="text"]:disabled {
 }
 
 @media only screen and (max-width: 900px) {
-    /* Settings adjustments */
-    .settings-controls {
-        grid-template-columns: repeat(auto-fill, 300px);
-    }
+    :where(html.mobile-device) {
+        /* Settings adjustments */
+        .settings-controls {
+            grid-template-columns: repeat(auto-fill, 300px);
+        }
     
-    .settings-toggle-item {
-        padding: 8px 10px;
-        font-size: var(--font-base);
-    }
+        .settings-toggle-item {
+            padding: 8px 10px;
+            font-size: var(--font-base);
+        }
     
-    .settings-toggle-item span.settings-toggle-slider {
-        width: 42px;
-        height: 22px;
-        left: 0px;
-    }
+        .settings-toggle-item span.settings-toggle-slider {
+            width: 42px;
+            height: 22px;
+            left: 0px;
+        }
 
-    .settings-toggle-slider:before {
-        height: 16px;
-        width: 16px;
-        left: 3px;
-        bottom: 3px;
-    }
+        .settings-toggle-slider:before {
+            height: 16px;
+            width: 16px;
+            left: 3px;
+            bottom: 3px;
+        }
 
-    input:checked + .settings-toggle-slider:before {
-        transform: translateX(20px);
-    }
+        input:checked + .settings-toggle-slider:before {
+            transform: translateX(20px);
+        }
     
-    /* Text input fields in settings */
-    .settings-text-item input[type="text"] {
-        width: 200px;
-        height: 16px;
-        padding: 6px 12px;
-        font-size: var(--font-sm);
-    }
+        /* Text input fields in settings */
+        .settings-text-item input[type="text"] {
+            width: 200px;
+            height: 16px;
+            padding: 6px 12px;
+            font-size: var(--font-sm);
+        }
 
-    /* News sources grid */
-    .news-source-grid {
-        grid-template-columns: repeat(auto-fill, 200px);
-    }
+        /* News sources grid */
+        .news-source-grid {
+            grid-template-columns: repeat(auto-fill, 200px);
+        }
 
-    .news-toggle-item {
-        font-size: var(--font-sm);
-        padding: 5px 6px 5px 28px;
-        margin-top: 5px;
-    }
+        .news-toggle-item {
+            font-size: var(--font-sm);
+            padding: 5px 6px 5px 28px;
+            margin-top: 5px;
+        }
 
-    .news-source-favicon {
-        width: 16px;
-        height: 16px;
-        left: 6px;
+        .news-source-favicon {
+            width: 16px;
+            height: 16px;
+            left: 6px;
+        }
     }
 }

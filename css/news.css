@@ -95,39 +95,41 @@ body.dark-mode .share-icon img {
 
 /* Mobile adjustments for news-related elements */
 @media only screen and (max-width: 900px) {
-    .news-headlines {
-        margin: 14px 0;
-    }
+    :where(html.mobile-device) {
+        .news-headlines {
+            margin: 14px 0;
+        }
     
-    .news-item {
-        padding: 3px 3px 1px 48px;
-        margin-bottom: 7px;
-    }
+        .news-item {
+            padding: 3px 3px 1px 48px;
+            margin-bottom: 7px;
+        }
 
-    .news-source {
-        font-size: var(--font-sm);
-    }
+        .news-source {
+            font-size: var(--font-sm);
+        }
 
-    .news-time {
-        font-size: var(--font-sm);
-    }
+        .news-time {
+            font-size: var(--font-sm);
+        }
 
-    .news-favicon {
-        width: 24px;
-        height: 24px;
-        left: 11px;
-    }
+        .news-favicon {
+            width: 24px;
+            height: 24px;
+            left: 11px;
+        }
 
-    .news-title {
-        font-size: var(--font-md);
-        font-weight: 600;
-        margin-right: 40px;
-    }
+        .news-title {
+            font-size: var(--font-md);
+            font-weight: 600;
+            margin-right: 40px;
+        }
 
-    .share-icon {
-        transform: scale(75%) translateY(-65%);
-        right: 0px;
-        width: 42px;
-        height: 42px;
+        .share-icon {
+            transform: scale(75%) translateY(-65%);
+            right: 0px;
+            width: 42px;
+            height: 42px;
+        }
     }
 }

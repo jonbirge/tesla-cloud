@@ -961,7 +961,7 @@ function createToggleItem(type, symbol, labelText, iconUrl) {
     img.onerror = function () { 
         this.onerror = null;
         this.src = 'assets/stock-default.svg';
-        if (this.dataset.usesFaviconService === 'true' && !window.matchMedia('(max-width: 900px)').matches) {
+        if (this.dataset.usesFaviconService === 'true' && !isMobileLayout()) {
             this.style.display = 'none';
         } else {
             this.style.removeProperty('display');
@@ -1182,10 +1182,10 @@ function createNewsToggleItem(source) {
     const img = document.createElement('img');
     img.src = faviconUrl;
     img.className = 'news-source-favicon';
-    img.onerror = function () { 
+    img.onerror = function () {
         // Only hide on error if not on mobile (CSS will handle mobile suppression)
-        if (!window.matchMedia('(max-width: 900px)').matches) {
-            this.style.display = 'none'; 
+        if (!isMobileLayout()) {
+            this.style.display = 'none';
         }
     };
     itemDiv.appendChild(img);
