@@ -120,7 +120,7 @@ h3 {
     color: var(--button-text);
     font-size: calc(var(--heading-font-size) - 1pt);
     font-weight: calc(var(--heading-font-weight) - 100);
-    margin: 6px 0 7px 0;
+    margin: 16px 0 7px 0;
 }
 
 p {
@@ -1258,7 +1258,7 @@ body.dark-mode .option-button:hover:not(.active) {
 
         h3 {
             font-size: var(--font-md);
-            margin-top: 7px;
+            margin-top: 15px;
             margin-bottom: 7px;
         }
 
