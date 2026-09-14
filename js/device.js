@@ -29,7 +29,14 @@
 // device px and holds still across it: the car's panel is near 1200 device px
 // on its short edge, while the retina displays that share the car's CSS
 // dimensions (a 13" MacBook Air is 1280x800 CSS px at ratio 2) sit at 1600 and
-// up, and the common 1080p laptop at 125% sits at 1080.
+// up, and the common 1080p laptop at 125% sits at 1080. A 1920x1200 desktop
+// monitor run at 125% does land in the car's band, so a UA naming Windows,
+// macOS or ChromeOS refuses the shrink outright - a desktop at 125% asked for
+// that size. That test only ever refuses, so a car whose UA stops matching
+// falls back to the panel test rather than being taken for a laptop.
+//
+// A car still on the old firmware reports ratio 1.0 and is left alone by the
+// same rule that leaves an ordinary monitor alone: there is nothing to undo.
 //
 // ?layout=desktop / ?layout=mobile forces the choice and is remembered on this
 // device; ?layout=auto clears it. ?scale=<0.5-1> does the same for UI scale and
@@ -56,6 +63,13 @@
 
     function isTeslaUA() {
         return /Tesla\//i.test(ua) || /TESLA_AUTO/i.test(ua);
+    }
+
+    // A UA that names a desktop OS is not a car. Used only to refuse scaling,
+    // never to grant it, so a car that stops matching this simply falls back to
+    // the panel test rather than being mistaken for a laptop.
+    function isDesktopOS() {
+        return /Windows NT|Macintosh|CrOS/i.test(ua);
     }
 
     function readOverride() {
@@ -122,31 +136,44 @@
     // True when devicePixelRatio reflects a page zoom applied over ordinary
     // pixels rather than a genuinely dense display, i.e. when the UI is bigger
     // than the design intends and shrinking it puts things back.
-    function hasInflatedDensity(mobile) {
+    function inflationReason(mobile) {
         if (mobile) {
-            return false; // a phone's density is real, and it has its own scale
+            return null; // a phone's density is real, and it has its own scale
         }
         if (ratio() <= 1.05) {
-            return false; // nothing to undo
+            // An older car, still on the firmware that reported 1.0, is here.
+            return null; // nothing to undo
         }
         if (isTeslaUA()) {
-            return true;
+            return 'tesla-ua';
+        }
+        if (isDesktopOS()) {
+            // A desktop at 125% chose that size; its panel can still land in
+            // the band below, so this has to be refused before the panel test.
+            return null;
         }
         const shortEdge = Math.min(screen.width || 0, screen.height || 0);
         const panelShortEdge = Math.round(shortEdge * ratio());
-        return panelShortEdge >= CAR_PANEL_MIN_SHORT
-            && panelShortEdge <= CAR_PANEL_MAX_SHORT;
+        if (panelShortEdge >= CAR_PANEL_MIN_SHORT
+            && panelShortEdge <= CAR_PANEL_MAX_SHORT) {
+            return 'car-panel';
+        }
+        return null;
     }
 
     function computeScale(mobile) {
         const override = readScaleOverride();
         if (override !== null) {
-            return override;
+            return { scale: override, reason: 'override' };
         }
-        if (!hasInflatedDensity(mobile)) {
-            return 1;
+        const reason = inflationReason(mobile);
+        if (reason === null) {
+            return { scale: 1, reason: 'none' };
         }
-        return Math.min(1, Math.max(MIN_UI_SCALE, 1 / ratio()));
+        return {
+            scale: Math.min(1, Math.max(MIN_UI_SCALE, 1 / ratio())),
+            reason: reason
+        };
     }
 
     const mobile = isMobileDevice();
@@ -156,9 +183,9 @@
 
     // Scaling is opt-in per device: without the class no zoom declaration
     // applies at all, so a browser that never inflated anything is untouched.
-    const scale = computeScale(mobile);
-    if (scale !== 1) {
-        document.documentElement.style.setProperty('--ui-scale', String(scale));
+    const scaling = computeScale(mobile);
+    if (scaling.scale !== 1) {
+        document.documentElement.style.setProperty('--ui-scale', String(scaling.scale));
         document.documentElement.classList.add('ui-scaled');
     }
 
@@ -171,6 +198,13 @@
 
     // The factor the UI is being shrunk by; 1 when nothing is being undone.
     window.uiScale = function () {
-        return scale;
+        return scaling.scale;
+    };
+
+    // Why that factor was chosen: 'tesla-ua', 'car-panel', 'override' or
+    // 'none'. Surfaced in the debug section, since this can only be confirmed
+    // from the car.
+    window.uiScaleReason = function () {
+        return scaling.reason;
     };
 })();
