@@ -911,22 +911,13 @@ function updateScrollIndicators() {
     bottomFade.style.opacity = canScrollDown ? '1' : '0';
 }
 
-// Sections that are never shown on mobile devices, regardless of the
-// user's section-visibility setting.
-const MOBILE_HIDDEN_SECTIONS = ['navigation'];
-
 // Determine whether a section is currently hidden based on the user's
 // section-visibility preference. Settings and Help are never hidden
-// regardless of stored preference. Some sections (e.g. Dashboard) are
-// always hidden on mobile regardless of the user's preference.
+// regardless of stored preference.
 function isSectionHidden(sectionId) {
     const sectionInfo = SECTION_LIST.find(section => section.id === sectionId);
     if (sectionInfo && !sectionInfo.hideable) {
         return false;
-    }
-
-    if (isMobileLayout() && MOBILE_HIDDEN_SECTIONS.includes(sectionId)) {
-        return true;
     }
 
     const hiddenSections = (settings && Array.isArray(settings['hidden-sections'])) ? settings['hidden-sections'] : [];
