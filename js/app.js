@@ -1239,7 +1239,7 @@ window.showSection = function (sectionId) {
                 `panel short edge: ${panelShortEdge} device px`,
                 `viewport: ${window.innerWidth}x${window.innerHeight} CSS px`,
                 `devicePixelRatio: ${window.devicePixelRatio}`,
-                `UI scale: ${uiScale()}`,
+                `UI scale: ${uiScale()} (${uiScaleReason()})`,
                 `mobile layout: ${isMobileLayout()}`,
                 `layout override: ${override || 'auto'}`,
                 `UI scale override: ${scaleOverride || 'auto'}`,
