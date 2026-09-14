@@ -60,11 +60,12 @@
     {
       "id": "wapo",
       "name": "Washington Post",
-      "url": "https://www.washingtonpost.com/arcio/rss/category/politics/",
+      "url": "https://news.google.com/rss/search?q=when:24h+allinurl:washingtonpost.com&hl=en-US&gl=US&ceid=US:en",
       "refresh": 60,
       "lifetime": 3650,
       "category": "general",
-      "defaultEnabled": false
+      "defaultEnabled": false,
+      "icon": "https://www.washingtonpost.com"
     },
     {
       "id": "latimes",

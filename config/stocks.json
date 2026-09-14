@@ -20,9 +20,24 @@
         "icon": "assets/berkshire-globe.svg"
     },
     {
+        "StockName": "Boeing",
+        "Symbol": "BA",
+        "icon": "https://www.google.com/s2/favicons?domain=boeing.com&sz=64"
+    },
+    {
         "StockName": "Caterpillar",
         "Symbol": "CAT",
         "icon": "https://www.google.com/s2/favicons?domain=cat.com&sz=64"
+    },
+    {
+        "StockName": "Coca-Cola",
+        "Symbol": "KO",
+        "icon": "https://www.google.com/s2/favicons?domain=coca-colacompany.com&sz=64"
+    },
+    {
+        "StockName": "Disney",
+        "Symbol": "DIS",
+        "icon": "https://www.google.com/s2/favicons?domain=disney.com&sz=64"
     },
     {
         "StockName": "Exxon Mobil",
@@ -30,9 +45,19 @@
         "icon": "https://www.google.com/s2/favicons?domain=exxonmobil.com&sz=64"
     },
     {
+        "StockName": "Ford",
+        "Symbol": "F",
+        "icon": "https://www.google.com/s2/favicons?domain=ford.com&sz=64"
+    },
+    {
         "StockName": "General Electric",
         "Symbol": "GE",
         "icon": "https://www.google.com/s2/favicons?domain=ge.com&sz=64"
+    },
+    {
+        "StockName": "Intel",
+        "Symbol": "INTC",
+        "icon": "https://www.google.com/s2/favicons?domain=intel.com&sz=64"
     },
     {
         "StockName": "JPMorgan Chase",
@@ -50,9 +75,24 @@
         "icon": "https://www.google.com/s2/favicons?domain=lockheedmartin.com&sz=64"
     },
     {
+        "StockName": "Meta",
+        "Symbol": "META",
+        "icon": "https://www.google.com/s2/favicons?domain=meta.com&sz=64"
+    },
+    {
         "StockName": "Microsoft",
         "Symbol": "MSFT",
         "icon": "https://www.google.com/s2/favicons?domain=microsoft.com&sz=64"
+    },
+    {
+        "StockName": "Netflix",
+        "Symbol": "NFLX",
+        "icon": "https://www.google.com/s2/favicons?domain=netflix.com&sz=64"
+    },
+    {
+        "StockName": "Northrop Grumman",
+        "Symbol": "NOC",
+        "icon": "https://www.google.com/s2/favicons?domain=northropgrumman.com&sz=64"
     },
     {
         "StockName": "NVIDIA",
@@ -65,6 +105,11 @@
         "icon": "https://www.google.com/s2/favicons?domain=pg.com&sz=64"
     },
     {
+        "StockName": "RTX",
+        "Symbol": "RTX",
+        "icon": "https://www.google.com/s2/favicons?domain=rtx.com&sz=64"
+    },
+    {
         "StockName": "SpaceX",
         "Symbol": "SPCX",
         "icon": "https://www.google.com/s2/favicons?domain=spacex.com&sz=64"
@@ -73,6 +118,16 @@
         "StockName": "Tesla",
         "Symbol": "TSLA",
         "icon": "https://www.google.com/s2/favicons?domain=tesla.com&sz=64"
+    },
+    {
+        "StockName": "UnitedHealth Group",
+        "Symbol": "UNH",
+        "icon": "https://www.google.com/s2/favicons?domain=unitedhealthgroup.com&sz=64"
+    },
+    {
+        "StockName": "Visa",
+        "Symbol": "V",
+        "icon": "https://www.google.com/s2/favicons?domain=visa.com&sz=64"
     },
     {
         "StockName": "Walmart",
