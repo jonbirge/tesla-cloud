@@ -386,7 +386,7 @@ body.dark-mode .forecast-desc {
     max-width: 90%;
     width: 90%;
     max-width: 1200px;
-    max-height: 80vh;
+    max-height: calc(80vh / var(--ui-scale));
     overflow-y: auto;
     box-shadow: 5px 5px 15px rgba(0, 0, 0, 0.5);
 }
@@ -576,7 +576,7 @@ body.dark-mode .notification-icon img {
 
         .forecast-popup {
             width: 90%;
-            max-height: 70vh;
+            max-height: calc(70vh / var(--ui-scale));
         }
 
         .hourly-forecast {
