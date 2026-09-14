@@ -1222,19 +1222,27 @@ window.showSection = function (sectionId) {
         const debugOutput = document.getElementById('debug-output');
         if (debugOutput && !debugOutput.textContent) {
             let override = null;
+            let scaleOverride = null;
             try {
                 override = localStorage.getItem('layout-override');
+                scaleOverride = localStorage.getItem('ui-scale-override');
             } catch (e) {
                 override = 'unreadable';
+                scaleOverride = 'unreadable';
             }
+            const shortEdge = Math.min(screen.width, screen.height);
+            const panelShortEdge = Math.round(shortEdge * window.devicePixelRatio);
             debugOutput.textContent = [
                 'Debug mode active. Debug information will appear here.',
                 '',
-                `screen: ${screen.width}x${screen.height} CSS px (short edge ${Math.min(screen.width, screen.height)})`,
+                `screen: ${screen.width}x${screen.height} CSS px (short edge ${shortEdge})`,
+                `panel short edge: ${panelShortEdge} device px`,
                 `viewport: ${window.innerWidth}x${window.innerHeight} CSS px`,
                 `devicePixelRatio: ${window.devicePixelRatio}`,
+                `UI scale: ${uiScale()}`,
                 `mobile layout: ${isMobileLayout()}`,
                 `layout override: ${override || 'auto'}`,
+                `UI scale override: ${scaleOverride || 'auto'}`,
                 `userAgentData.mobile: ${navigator.userAgentData ? navigator.userAgentData.mobile : 'unsupported'}`,
                 `userAgent: ${navigator.userAgent}`
             ].join('\n');

@@ -39,6 +39,19 @@
     --notification-text: #333333;
     --notification-text-alt: #333333;
     --indicator-container-bg: rgba(239, 239, 239, 0.8);
+
+    /* Factor the UI is shrunk by to undo an inflated device pixel ratio; set
+       on the root element by js/device.js, 1 everywhere it isn't inflated. */
+    --ui-scale: 1;
+}
+
+/* Undo the in-car browser's page zoom. Scaling the root rather than the font
+   scale brings padding, icons and touch targets back with the type, and it
+   leaves embedded iframes at the viewport and pixel ratio they had before.
+   Percentages resolve against a containing block that scales with it, but
+   viewport units do not, so any vh/vw length must be divided by --ui-scale. */
+html.ui-scaled {
+    zoom: var(--ui-scale);
 }
 
 body.dark-mode {
@@ -136,7 +149,7 @@ hr {
 /* Layout */
 .frame-container {
     display: flex;
-    height: 100vh;
+    height: calc(100vh / var(--ui-scale));
     width: 100%;
     position: absolute;
     top: 0;
@@ -806,7 +819,7 @@ body.dark-mode .gps-icon {
 
 /* Waze frame */
 .teslawaze-container {
-    height: calc(100vh - 370px);
+    height: calc(100vh / var(--ui-scale) - 370px);
     min-height: 280px;
     margin-bottom: 0;
     position: relative;
@@ -1210,7 +1223,7 @@ body.dark-mode .option-button:hover:not(.active) {
     
         /* Teslawaze container adjustment */
         .teslawaze-container {
-            height: calc(100vh - 300px);
+            height: calc(100vh / var(--ui-scale) - 300px);
             min-height: 200px;
         }
     

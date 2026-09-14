@@ -56,6 +56,7 @@ curl -s http://localhost:8000/php/vers.php
 - `css/styles.css` - Main styles with CSS variables for theming (light/dark mode)
 - Feature-specific stylesheets: `wx.css`, `news.css`, `market.css`, `settings.css`, `timeline.css`, `notify.css`
 - Mobile breakpoint: `@media only screen and (max-width: 900px)`, additionally gated on `html.mobile-device` (set by `js/device.js`) so the Tesla browser never gets the phone layout — its 2026.26 update raised the in-car devicePixelRatio to 1.53, pushing the car's reported CSS width under the breakpoint. Use `isMobileLayout()` in JS rather than testing width directly.
+- UI scale: that same 1.53 ratio is a browser-wide page zoom, so the car renders everything ~53% oversized. `js/device.js` undoes it by putting `--ui-scale` (1/devicePixelRatio) and the class `ui-scaled` on `<html>`, and `html.ui-scaled { zoom: var(--ui-scale) }` shrinks the whole design back. Displays whose density is genuine (phones, retina laptops) are left alone, and without the class no zoom declaration applies at all. `?scale=<0.5-1>` forces a factor per device and `?scale=auto` clears it, mirroring `?layout=`. **Viewport units do not scale with `zoom`**, so write every `vh`/`vw` length as `calc(100vh / var(--ui-scale))`. Percentages, `position: fixed` offsets and embedded iframes need no adjustment.
 - Font scale variables: `--font-xs` (11pt) through `--font-xl` (19pt)
 
 ### Configuration
