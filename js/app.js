@@ -1046,8 +1046,6 @@ window.updateMapFrame = function (force = false) {
         }
     } else if (settings["map-choice"] === 'rainmap') {
         newUrl = "https://car.rainviewer.com/";
-    } else if (settings["map-choice"] === 'abrp') {
-        newUrl = "https://abetterrouteplanner.com/";
     } else {
         newUrl = "https://teslanav.com/";
     }
