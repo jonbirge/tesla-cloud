@@ -126,7 +126,6 @@ body.dark-mode .settings-text-item input[type="text"]:disabled {
     padding: 7px;
     z-index: 10;
     background-color: transparent;
-    opacity: 0.8;
 }
 
 #in-map-toggle .option-switch {

@@ -60,7 +60,7 @@
     {
       "id": "wapo",
       "name": "Washington Post",
-      "url": "https://news.google.com/rss/search?q=when:24h+allinurl:washingtonpost.com&hl=en-US&gl=US&ceid=US:en",
+      "url": "https://news.google.com/rss/search?q=when:24h+site:washingtonpost.com&hl=en-US&gl=US&ceid=US:en",
       "refresh": 60,
       "lifetime": 3650,
       "category": "general",
@@ -194,7 +194,7 @@
     {
       "id": "ft",
       "name": "Financial Times",
-      "url": "https://news.google.com/rss/search?q=when:24h+allinurl:ft.com&hl=en-US&gl=US&ceid=US:en",
+      "url": "https://news.google.com/rss/search?q=when:24h+site:ft.com&hl=en-US&gl=US&ceid=US:en",
       "refresh": 60,
       "lifetime": 3650,
       "category": "business",
@@ -472,7 +472,7 @@
     {
       "id": "sfchronicle",
       "name": "SF Chronicle",
-      "url": "https://news.google.com/rss/search?q=when:24h+allinurl:sfchronicle.com&hl=en-US&gl=US&ceid=US:en",
+      "url": "https://news.google.com/rss/search?q=when:24h+site:sfchronicle.com&hl=en-US&gl=US&ceid=US:en",
       "refresh": 60,
       "lifetime": 3650,
       "category": "general",
@@ -482,7 +482,7 @@
     {
       "id": "mercurynews",
       "name": "San Jose Mercury",
-      "url": "https://news.google.com/rss/search?q=when:24h+allinurl:mercurynews.com&hl=en-US&gl=US&ceid=US:en",
+      "url": "https://news.google.com/rss/search?q=when:24h+site:mercurynews.com&hl=en-US&gl=US&ceid=US:en",
       "refresh": 60,
       "lifetime": 3650,
       "category": "general",
@@ -492,7 +492,7 @@
     {
       "id": "ap",
       "name": "AP News",
-      "url": "https://news.google.com/rss/search?q=when:24h+allinurl:apnews.com&hl=en-US&gl=US&ceid=US:en",
+      "url": "https://news.google.com/rss/search?q=when:24h+site:apnews.com&hl=en-US&gl=US&ceid=US:en",
       "refresh": 60,
       "lifetime": 3650,
       "category": "general",
@@ -502,7 +502,7 @@
     {
       "id": "reuters",
       "name": "Reuters",
-      "url": "https://news.google.com/rss/search?q=when:24h+allinurl:reuters.com&hl=en-US&gl=US&ceid=US:en",
+      "url": "https://news.google.com/rss/search?q=when:24h+site:reuters.com&hl=en-US&gl=US&ceid=US:en",
       "refresh": 60,
       "lifetime": 3650,
       "category": "general",
